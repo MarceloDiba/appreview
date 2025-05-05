@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { angry, meh, smile } from 'lucide-react';
+import { Angry, Meh, Smile } from 'lucide-react';
 
 interface ReviewMetrics {
   positive: number;
@@ -38,7 +38,7 @@ const BusinessMetrics = ({ metrics }: BusinessMetricsProps) => {
           <CardTitle className="text-sm font-medium text-gray-500">
             <div className="flex items-center">
               <span className="text-review-positive mr-2">
-                <smile className="h-4 w-4"/>
+                <Smile className="h-4 w-4"/>
               </span>
               Positivas
             </div>
@@ -47,7 +47,7 @@ const BusinessMetrics = ({ metrics }: BusinessMetricsProps) => {
         <CardContent>
           <div className="text-2xl font-bold">{metrics.positive}</div>
           <div className="mt-2">
-            <Progress value={positivePercentage} className="h-2 bg-gray-100" indicatorClassName="bg-review-positive" />
+            <Progress value={positivePercentage} className="h-2 bg-gray-100" />
             <div className="text-xs text-gray-500 mt-1">{positivePercentage}%</div>
           </div>
         </CardContent>
@@ -58,7 +58,7 @@ const BusinessMetrics = ({ metrics }: BusinessMetricsProps) => {
           <CardTitle className="text-sm font-medium text-gray-500">
             <div className="flex items-center">
               <span className="text-review-neutral mr-2">
-                <meh className="h-4 w-4"/>
+                <Meh className="h-4 w-4"/>
               </span>
               Neutras
             </div>
@@ -67,7 +67,7 @@ const BusinessMetrics = ({ metrics }: BusinessMetricsProps) => {
         <CardContent>
           <div className="text-2xl font-bold">{metrics.neutral}</div>
           <div className="mt-2">
-            <Progress value={neutralPercentage} className="h-2 bg-gray-100" indicatorClassName="bg-review-neutral" />
+            <Progress value={neutralPercentage} className="h-2 bg-gray-100" />
             <div className="text-xs text-gray-500 mt-1">{neutralPercentage}%</div>
           </div>
         </CardContent>
@@ -78,7 +78,7 @@ const BusinessMetrics = ({ metrics }: BusinessMetricsProps) => {
           <CardTitle className="text-sm font-medium text-gray-500">
             <div className="flex items-center">
               <span className="text-review-negative mr-2">
-                <angry className="h-4 w-4"/>
+                <Angry className="h-4 w-4"/>
               </span>
               Negativas
             </div>
@@ -87,7 +87,7 @@ const BusinessMetrics = ({ metrics }: BusinessMetricsProps) => {
         <CardContent>
           <div className="text-2xl font-bold">{metrics.negative}</div>
           <div className="mt-2">
-            <Progress value={negativePercentage} className="h-2 bg-gray-100" indicatorClassName="bg-review-negative" />
+            <Progress value={negativePercentage} className="h-2 bg-gray-100" />
             <div className="text-xs text-gray-500 mt-1">{negativePercentage}%</div>
           </div>
         </CardContent>

@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { angry, meh, smile } from 'lucide-react';
+import { Angry, Meh, Smile } from 'lucide-react';
 
 type EmojiOption = 'negative' | 'neutral' | 'positive';
 
@@ -66,7 +66,7 @@ const EmojiRating = ({
           onClick={() => handleRating('negative')}
         >
           <div className="emoji-icon text-review-negative">
-            {angry && <angry className="h-16 w-16" />}
+            <Angry className="h-16 w-16" />
           </div>
           <span className="emoji-label">Ruim</span>
         </div>
@@ -76,7 +76,7 @@ const EmojiRating = ({
           onClick={() => handleRating('neutral')}
         >
           <div className="emoji-icon text-review-neutral">
-            {meh && <meh className="h-16 w-16" />}
+            <Meh className="h-16 w-16" />
           </div>
           <span className="emoji-label">Regular</span>
         </div>
@@ -86,7 +86,7 @@ const EmojiRating = ({
           onClick={() => handleRating('positive')}
         >
           <div className="emoji-icon text-review-positive">
-            {smile && <smile className="h-16 w-16" />}
+            <Smile className="h-16 w-16" />
           </div>
           <span className="emoji-label">Bom</span>
         </div>

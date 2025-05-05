@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -19,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { angry, meh, smile } from 'lucide-react';
+import { Angry, Meh, Smile } from 'lucide-react';
 
 interface Review {
   id: string;
@@ -96,11 +95,11 @@ const ReviewsList = ({ reviews }: ReviewsListProps) => {
   const ratingIcon = (rating: string) => {
     switch (rating) {
       case 'positive':
-        return <smile className="h-5 w-5 text-review-positive" />;
+        return <Smile className="h-5 w-5 text-review-positive" />;
       case 'neutral':
-        return <meh className="h-5 w-5 text-review-neutral" />;
+        return <Meh className="h-5 w-5 text-review-neutral" />;
       case 'negative':
-        return <angry className="h-5 w-5 text-review-negative" />;
+        return <Angry className="h-5 w-5 text-review-negative" />;
       default:
         return null;
     }
