@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,6 +17,14 @@ interface NavbarProps {
 
 const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  
+  // Function to check if a path is active
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
+  };
 
   return (
     <nav className="bg-white border-b border-gray-200 fixed w-full z-10">
@@ -39,16 +47,16 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
             <div className="flex items-center space-x-4">
               {userRole === 'admin' && (
                 <>
-                  <Link to="/admin" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  <Link to="/admin" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/admin') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}>
                     Dashboard
                   </Link>
-                  <Link to="/admin/users" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  <Link to="/admin/users" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/admin/users') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}>
                     Usuários
                   </Link>
-                  <Link to="/admin/plans" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  <Link to="/admin/plans" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/admin/plans') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}>
                     Planos
                   </Link>
-                  <Link to="/admin/analytics" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  <Link to="/admin/analytics" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/admin/analytics') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}>
                     Estatísticas
                   </Link>
                 </>
@@ -56,17 +64,31 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
               
               {userRole === 'business' && (
                 <>
-                  <Link to="/dashboard" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  <Link to="/dashboard" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/dashboard') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}>
                     Dashboard
                   </Link>
-                  <Link to="/reviews" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  <Link to="/reviews" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/reviews') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}>
                     Avaliações
                   </Link>
-                  <Link to="/qrcodes" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  <Link to="/qrcodes" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/qrcodes') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}>
                     QR Codes
                   </Link>
-                  <Link to="/settings" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  <Link to="/settings" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/settings') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}>
                     Configurações
+                  </Link>
+                </>
+              )}
+              
+              {userRole === 'none' && (
+                <>
+                  <Link to="/demo" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/demo') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}>
+                    Demo
+                  </Link>
+                  <Link to="/#features" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                    Recursos
+                  </Link>
+                  <Link to="/#pricing" className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                    Preços
                   </Link>
                 </>
               )}
@@ -135,28 +157,28 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
               <>
                 <Link 
                   to="/admin" 
-                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/admin') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link 
                   to="/admin/users" 
-                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/admin/users') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Usuários
                 </Link>
                 <Link 
                   to="/admin/plans" 
-                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/admin/plans') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Planos
                 </Link>
                 <Link 
                   to="/admin/analytics" 
-                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/admin/analytics') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Estatísticas
@@ -168,37 +190,65 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
               <>
                 <Link 
                   to="/dashboard" 
-                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/dashboard') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link 
                   to="/reviews" 
-                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/reviews') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Avaliações
                 </Link>
                 <Link 
                   to="/qrcodes" 
-                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/qrcodes') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   QR Codes
                 </Link>
                 <Link 
                   to="/settings" 
-                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/settings') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Configurações
+                </Link>
+                <Link 
+                  to="/profile" 
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/profile') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Minha Conta
                 </Link>
               </>
             )}
             
             {userRole === 'none' && (
               <>
+                <Link 
+                  to="/demo" 
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/demo') ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Demo
+                </Link>
+                <Link 
+                  to="/#features" 
+                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Recursos
+                </Link>
+                <Link 
+                  to="/#pricing" 
+                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Preços
+                </Link>
                 <Link 
                   to="/login" 
                   className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"

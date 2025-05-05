@@ -45,8 +45,8 @@ const EmojiRating = ({
         const externalUrl = googleReviewUrl || tripAdvisorUrl;
         if (externalUrl) {
           toast.success('Redirecionando para site de avaliação externo...');
+          // Open in new tab and navigate to thank-you page in current tab
           window.open(externalUrl, '_blank');
-          // Navigate to thank-you page if external site opens in a new tab
           navigate('/thank-you');
         } else {
           // Fallback if no external URL is provided

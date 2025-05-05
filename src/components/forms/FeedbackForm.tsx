@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 interface FeedbackFormProps {
   businessName: string;
@@ -27,7 +28,6 @@ const FeedbackForm = ({
   rating 
 }: FeedbackFormProps) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -56,10 +56,7 @@ const FeedbackForm = ({
     // For now, we'll just simulate a successful submission
     setTimeout(() => {
       setIsSubmitting(false);
-      toast({
-        title: 'Feedback enviado',
-        description: 'Obrigado pelo seu feedback!',
-      });
+      toast.success('Feedback enviado com sucesso!');
       navigate('/thank-you');
     }, 1000);
   };
