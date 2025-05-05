@@ -10,6 +10,9 @@ import Admin from "./pages/Admin";
 import Review from "./pages/Review";
 import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ThankYou from "./pages/ThankYou";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +28,9 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/review/:businessId" element={<Review />} />
           <Route path="/feedback/:businessId" element={<Feedback />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/thank-you" element={<ThankYou />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

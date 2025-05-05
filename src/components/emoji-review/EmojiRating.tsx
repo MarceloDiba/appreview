@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Angry, Meh, Smile } from 'lucide-react';
+import { Frown, Meh, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 
 type EmojiOption = 'negative' | 'neutral' | 'positive';
@@ -46,8 +46,8 @@ const EmojiRating = ({
         if (externalUrl) {
           toast.success('Redirecionando para site de avaliação externo...');
           window.open(externalUrl, '_blank');
-          // Navigate back to prevent users from being stuck if external site opens in a new tab
-          window.history.back();
+          // Navigate to thank-you page if external site opens in a new tab
+          navigate('/thank-you');
         } else {
           // Fallback if no external URL is provided
           navigate(`/feedback/${businessId}`, { 
@@ -80,7 +80,7 @@ const EmojiRating = ({
           aria-label="Avaliação negativa"
         >
           <div className="emoji-icon text-review-negative">
-            <Angry className="h-12 w-12 md:h-16 md:w-16" />
+            <Frown className="h-12 w-12 md:h-16 md:w-16" />
           </div>
           <span className="emoji-label">Ruim</span>
         </div>

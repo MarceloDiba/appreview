@@ -84,10 +84,16 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Minha Conta</DropdownMenuItem>
-                  <DropdownMenuItem>Configurações</DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile">Minha Conta</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">Configurações</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Sair</DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/">Sair</Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -187,6 +193,25 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Configurações
+                </Link>
+              </>
+            )}
+            
+            {userRole === 'none' && (
+              <>
+                <Link 
+                  to="/login" 
+                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Entrar
+                </Link>
+                <Link 
+                  to="/signup" 
+                  className="text-gray-600 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Cadastre-se
                 </Link>
               </>
             )}
