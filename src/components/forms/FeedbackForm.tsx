@@ -15,16 +15,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FeedbackFormProps {
   businessName: string;
   businessId: string;
+  userId?: string;
   rating: 'negative' | 'neutral' | 'positive';
 }
 
 const FeedbackForm = ({ 
   businessName, 
-  businessId, 
+  businessId,
+  userId,
   rating 
 }: FeedbackFormProps) => {
   const navigate = useNavigate();
@@ -32,9 +35,9 @@ const FeedbackForm = ({
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    visitDate: '',
+    visitDate: new Date().toISOString().substring(0, 10), // Set today as default
     comment: '',
-    internalRating: '1',
+    internalRating: rating === 'negative' ? '1' : rating === 'neutral' ? '3' : '5',
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,17 +51,56 @@ const FeedbackForm = ({
     setFormData(prev => ({ ...prev, internalRating: value }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Here you would typically send the data to your backend
-    // For now, we'll just simulate a successful submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Determine the actual user_id if not provided
+      let targetUserId = userId;
+      
+      if (!targetUserId) {
+        // Try to get user_id from the qr_codes table
+        const { data: qrData, error: qrError } = await supabase
+          .from('qr_codes')
+          .select('user_id')
+          .eq('id', businessId)
+          .single();
+          
+        if (qrError && qrError.code !== 'PGRST116') {
+          console.error('Error fetching QR code info:', qrError);
+        } else if (qrData) {
+          targetUserId = qrData.user_id;
+        } else {
+          // Fallback to businessId as user_id
+          targetUserId = businessId;
+        }
+      }
+      
+      // Insert the feedback into the internal_feedback table
+      const { error } = await supabase
+        .from('internal_feedback')
+        .insert([
+          {
+            user_id: targetUserId,
+            customer_name: formData.name,
+            customer_email: formData.email,
+            rating: parseInt(formData.internalRating),
+            feedback_text: formData.comment,
+          }
+        ]);
+        
+      if (error) {
+        throw error;
+      }
+      
       toast.success('Feedback enviado com sucesso!');
       navigate('/thank-you');
-    }, 1000);
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast.error('Ocorreu um erro ao enviar o feedback. Tente novamente.');
+      setIsSubmitting(false);
+    }
   };
   
   return (

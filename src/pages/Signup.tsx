@@ -1,14 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { signUp, user } = useAuth();
   const [formData, setFormData] = useState({
     businessName: '',
     name: '',
@@ -18,12 +20,19 @@ const Signup = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    // Redirect if already logged in
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
@@ -33,12 +42,35 @@ const Signup = () => {
     
     setIsSubmitting(true);
     
-    // Simular cadastro bem-sucedido
-    setTimeout(() => {
+    try {
+      const { error } = await signUp(
+        formData.email, 
+        formData.password, 
+        formData.businessName,
+        formData.name
+      );
+      
+      if (error) {
+        console.error('Signup error:', error);
+        
+        if (error.message.includes('email already registered')) {
+          toast.error('Este email já está registrado. Tente fazer login.');
+        } else {
+          toast.error(`Erro ao fazer cadastro: ${error.message}`);
+        }
+      } else {
+        toast.success('Cadastro realizado com sucesso!');
+        toast.info('Confirme seu email para acessar sua conta.', {
+          duration: 5000
+        });
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Unexpected error during signup:', error);
+      toast.error('Ocorreu um erro ao fazer cadastro. Tente novamente.');
+    } finally {
       setIsSubmitting(false);
-      toast.success('Cadastro realizado com sucesso!');
-      navigate('/dashboard');
-    }, 1000);
+    }
   };
 
   return (

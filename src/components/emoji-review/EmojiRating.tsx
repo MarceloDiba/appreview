@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Frown, Meh, Smile } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 type EmojiOption = 'negative' | 'neutral' | 'positive';
 
@@ -25,41 +26,69 @@ const EmojiRating = ({
   const [selectedRating, setSelectedRating] = useState<EmojiOption | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const handleRating = (rating: EmojiOption) => {
+  const handleRating = async (rating: EmojiOption) => {
     setSelectedRating(rating);
     setIsSubmitting(true);
     
-    // Add a small delay to show the selection effect before navigating
-    setTimeout(() => {
-      if (rating === 'negative') {
-        // If negative, redirect to internal feedback form
-        navigate(`/feedback/${businessId}`, { 
-          state: { 
-            rating,
-            businessName 
-          } 
-        });
-      } else {
-        // If positive or neutral, redirect to external site
-        // Prefer Google Reviews if available, otherwise TripAdvisor
-        const externalUrl = googleReviewUrl || tripAdvisorUrl;
-        if (externalUrl) {
-          toast.success('Redirecionando para site de avaliação externo...');
-          // Open in new tab and navigate to thank-you page in current tab
-          window.open(externalUrl, '_blank');
-          navigate('/thank-you');
-        } else {
-          // Fallback if no external URL is provided
+    try {
+      // Fetch the actual user_id from platform_links using the businessId
+      const { data: linkData, error: linkError } = await supabase
+        .from('qr_codes')
+        .select('user_id')
+        .eq('id', businessId)
+        .single();
+        
+      if (linkError && linkError.code !== 'PGRST116') {
+        console.error('Error fetching business info:', linkError);
+        // Fallback to using businessId directly as user_id if not found
+      }
+      
+      const userId = linkData?.user_id || businessId;
+      
+      // Track the click/scan in database by incrementing the times_scanned counter
+      await supabase
+        .from('qr_codes')
+        .update({ times_scanned: supabase.rpc('increment', { x: 1 }) })
+        .eq('id', businessId);
+        
+      // Add a small delay to show the selection effect before navigating
+      setTimeout(() => {
+        if (rating === 'negative') {
+          // If negative, redirect to internal feedback form
           navigate(`/feedback/${businessId}`, { 
             state: { 
               rating,
-              businessName 
+              businessName,
+              userId
             } 
           });
+        } else {
+          // If positive or neutral, redirect to external site
+          // Prefer Google Reviews if available, otherwise TripAdvisor
+          const externalUrl = googleReviewUrl || tripAdvisorUrl;
+          if (externalUrl) {
+            toast.success('Redirecionando para site de avaliação externo...');
+            // Open in new tab and navigate to thank-you page in current tab
+            window.open(externalUrl, '_blank');
+            navigate('/thank-you');
+          } else {
+            // Fallback if no external URL is provided
+            navigate(`/feedback/${businessId}`, { 
+              state: { 
+                rating,
+                businessName,
+                userId
+              } 
+            });
+          }
         }
-      }
+        setIsSubmitting(false);
+      }, 300);
+    } catch (error) {
+      console.error('Error handling rating:', error);
       setIsSubmitting(false);
-    }, 300);
+      toast.error('Ocorreu um erro ao processar sua avaliação. Tente novamente.');
+    }
   };
   
   return (

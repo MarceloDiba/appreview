@@ -1,11 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 interface QRCodeGeneratorProps {
   businessId: string;
@@ -14,23 +18,67 @@ interface QRCodeGeneratorProps {
 
 const QRCodeGenerator = ({ businessId, baseUrl }: QRCodeGeneratorProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [qrValue, setQrValue] = useState(`${baseUrl}/review/${businessId}`);
   const [qrImage, setQrImage] = useState<string | null>(null);
   const [qrName, setQrName] = useState('Avaliação Padrão');
-  const [savedQRCodes, setSavedQRCodes] = useState<Array<{name: string, url: string, image: string}>>([]);
+  const [savedQRCodes, setSavedQRCodes] = useState<Array<{id: string, name: string, url: string, image: string}>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingQRs, setIsLoadingQRs] = useState(true);
+  
+  // Fetch saved QR codes on component mount
+  useEffect(() => {
+    if (user) {
+      fetchSavedQRCodes();
+    }
+  }, [user]);
+  
+  const fetchSavedQRCodes = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('qr_codes')
+        .select('*')
+        .eq('user_id', user.id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        // Generate QR image URLs for each saved QR code
+        const qrCodesWithImages = data.map(qr => ({
+          id: qr.id,
+          name: qr.name,
+          url: qr.redirect_url,
+          image: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qr.redirect_url)}`
+        }));
+        
+        setSavedQRCodes(qrCodesWithImages);
+      }
+    } catch (error) {
+      console.error('Error fetching QR codes:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar seus QR Codes",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingQRs(false);
+    }
+  };
   
   const generateQRCode = async () => {
     setIsLoading(true);
     
     try {
-      // In a real app, you would use a QR code generation library or API
-      // For now, we'll just use a placeholder image
-      const dummyQRImage = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrValue)}`;
+      // Use a real QR code generation API
+      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrValue)}`;
       
       // Simulate loading time for QR code generation
       setTimeout(() => {
-        setQrImage(dummyQRImage);
+        setQrImage(qrImageUrl);
         setIsLoading(false);
       }, 1000);
     } catch (error) {
@@ -43,30 +91,88 @@ const QRCodeGenerator = ({ businessId, baseUrl }: QRCodeGeneratorProps) => {
     }
   };
   
-  const saveQRCode = () => {
-    if (!qrImage) return;
+  const saveQRCode = async () => {
+    if (!qrImage || !user) return;
     
-    const newQRCode = {
-      name: qrName,
-      url: qrValue,
-      image: qrImage
-    };
-    
-    setSavedQRCodes([...savedQRCodes, newQRCode]);
-    
-    toast({
-      title: "QR Code salvo",
-      description: `QR Code "${qrName}" foi salvo com sucesso.`,
-    });
+    try {
+      // Generate a unique slug for the QR code
+      const slug = uuidv4().substring(0, 8);
+      
+      // Save QR code to the database
+      const { data, error } = await supabase
+        .from('qr_codes')
+        .insert([
+          {
+            user_id: user.id,
+            name: qrName,
+            slug: slug,
+            redirect_url: qrValue,
+          }
+        ])
+        .select()
+        .single();
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Add new QR code to the list
+      const newQRCode = {
+        id: data.id,
+        name: qrName,
+        url: qrValue,
+        image: qrImage
+      };
+      
+      setSavedQRCodes([...savedQRCodes, newQRCode]);
+      
+      toast({
+        title: "QR Code salvo",
+        description: `QR Code "${qrName}" foi salvo com sucesso.`,
+      });
+    } catch (error) {
+      console.error('Error saving QR code:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar o QR Code",
+        variant: "destructive",
+      });
+    }
   };
   
-  const downloadQRCode = () => {
-    if (!qrImage) return;
-    
+  const deleteQRCode = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('qr_codes')
+        .delete()
+        .eq('id', id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Remove QR code from the list
+      setSavedQRCodes(savedQRCodes.filter(qr => qr.id !== id));
+      
+      toast({
+        title: "QR Code removido",
+        description: "QR Code foi removido com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error deleting QR code:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover o QR Code",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const downloadQRCode = (qrImageUrl: string, name: string) => {
     // Create a temporary link to download the QR code image
     const a = document.createElement('a');
-    a.href = qrImage;
-    a.download = `qrcode-${qrName.toLowerCase().replace(/\s+/g, '-')}.png`;
+    a.href = qrImageUrl;
+    a.download = `qrcode-${name.toLowerCase().replace(/\s+/g, '-')}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -134,7 +240,7 @@ const QRCodeGenerator = ({ businessId, baseUrl }: QRCodeGeneratorProps) => {
           
           {qrImage && (
             <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={downloadQRCode}>
+              <Button variant="outline" onClick={() => downloadQRCode(qrImage, qrName)}>
                 Baixar
               </Button>
               <Button onClick={saveQRCode}>
@@ -154,15 +260,19 @@ const QRCodeGenerator = ({ businessId, baseUrl }: QRCodeGeneratorProps) => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {savedQRCodes.length === 0 ? (
+            {isLoadingQRs ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
+              </div>
+            ) : savedQRCodes.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <p>Você ainda não tem QR Codes salvos.</p>
                 <p className="text-sm mt-2">Vá para a aba "Gerar QR Code" para criar um.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {savedQRCodes.map((qrCode, index) => (
-                  <Card key={index} className="overflow-hidden">
+                {savedQRCodes.map((qrCode) => (
+                  <Card key={qrCode.id} className="overflow-hidden">
                     <div className="p-4 flex flex-col items-center">
                       <img src={qrCode.image} alt={qrCode.name} width={150} height={150} />
                       <h3 className="font-medium mt-2">{qrCode.name}</h3>
@@ -172,21 +282,12 @@ const QRCodeGenerator = ({ businessId, baseUrl }: QRCodeGeneratorProps) => {
                     </div>
                     <CardFooter className="bg-gray-50 px-4 py-2 flex justify-between">
                       <Button variant="ghost" size="sm" className="text-gray-500" onClick={() => {
-                        const a = document.createElement('a');
-                        a.href = qrCode.image;
-                        a.download = `qrcode-${qrCode.name.toLowerCase().replace(/\s+/g, '-')}.png`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
+                        downloadQRCode(qrCode.image, qrCode.name);
                       }}>
                         Baixar
                       </Button>
                       <Button variant="ghost" size="sm" className="text-red-500" onClick={() => {
-                        setSavedQRCodes(savedQRCodes.filter((_, i) => i !== index));
-                        toast({
-                          title: "QR Code removido",
-                          description: `QR Code "${qrCode.name}" foi removido.`,
-                        });
+                        deleteQRCode(qrCode.id);
                       }}>
                         Excluir
                       </Button>

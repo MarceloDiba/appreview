@@ -1,28 +1,64 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { signIn, user } = useAuth();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Redirect if already logged in
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.email || !formData.password) {
+      toast.error('Por favor, preencha todos os campos');
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    // Simular login bem-sucedido
-    setTimeout(() => {
+    try {
+      const { error } = await signIn(formData.email, formData.password);
+      
+      if (error) {
+        console.error('Login error:', error);
+        
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error('Email ou senha incorretos');
+        } else {
+          toast.error(`Erro ao fazer login: ${error.message}`);
+        }
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Unexpected error during login:', error);
+      toast.error('Ocorreu um erro ao fazer login. Tente novamente.');
+    } finally {
       setIsSubmitting(false);
-      toast.success('Login realizado com sucesso!');
-      navigate('/dashboard');
-    }, 1000);
+    }
   };
 
   return (
@@ -38,22 +74,29 @@ const Login = () => {
             <Label htmlFor="email">E-mail</Label>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Senha</Label>
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                Esqueceu a senha?
+              </Link>
+            </div>
             <Input
               id="password"
+              name="password"
               type="password"
               placeholder="Sua senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleChange}
               required
             />
           </div>
