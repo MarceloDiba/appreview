@@ -21,7 +21,7 @@ const Review = () => {
         // First try to find the QR code by ID
         const { data: qrData, error: qrError } = await supabase
           .from('qr_codes')
-          .select('id, name, user_id')
+          .select('id, name, user_id, times_scanned')
           .eq('id', businessId)
           .single();
           
@@ -81,13 +81,19 @@ const Review = () => {
         
         // Track the page view by incrementing the times_scanned counter in qr_codes table
         if (qrData) {
-          const { error: updateError } = await supabase
-            .from('qr_codes')
-            .update({ times_scanned: supabase.rpc('increment') })
-            .eq('id', businessId);
+          try {
+            const currentCount = qrData.times_scanned || 0;
             
-          if (updateError) {
-            console.error('Error updating scan count:', updateError);
+            const { error: updateError } = await supabase
+              .from('qr_codes')
+              .update({ times_scanned: currentCount + 1 })
+              .eq('id', businessId);
+              
+            if (updateError) {
+              console.error('Error updating scan count:', updateError);
+            }
+          } catch (error) {
+            console.error('Error incrementing counter:', error);
           }
         }
       } catch (error) {

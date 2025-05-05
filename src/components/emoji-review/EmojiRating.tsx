@@ -46,13 +46,27 @@ const EmojiRating = ({
       const userId = linkData?.user_id || businessId;
       
       // Track the click/scan in database by incrementing the times_scanned counter
-      const { error: updateError } = await supabase
-        .from('qr_codes')
-        .update({ times_scanned: supabase.rpc('increment') })
-        .eq('id', businessId);
+      try {
+        // First get the current count
+        const { data: qrData } = await supabase
+          .from('qr_codes')
+          .select('times_scanned')
+          .eq('id', businessId)
+          .single();
+          
+        const currentCount = qrData?.times_scanned || 0;
         
-      if (updateError) {
-        console.error('Error updating scan count:', updateError);
+        // Then update with incremented value
+        const { error: updateError } = await supabase
+          .from('qr_codes')
+          .update({ times_scanned: currentCount + 1 })
+          .eq('id', businessId);
+          
+        if (updateError) {
+          console.error('Error updating scan count:', updateError);
+        }
+      } catch (error) {
+        console.error('Error incrementing counter:', error);
       }
         
       // Add a small delay to show the selection effect before navigating
