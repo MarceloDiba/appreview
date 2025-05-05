@@ -81,10 +81,14 @@ const Review = () => {
         
         // Track the page view by incrementing the times_scanned counter in qr_codes table
         if (qrData) {
-          await supabase
+          const { error: updateError } = await supabase
             .from('qr_codes')
             .update({ times_scanned: supabase.rpc('increment') })
             .eq('id', businessId);
+            
+          if (updateError) {
+            console.error('Error updating scan count:', updateError);
+          }
         }
       } catch (error) {
         console.error('Error loading business data:', error);
