@@ -83,7 +83,7 @@ const Review = () => {
         if (qrData) {
           await supabase
             .from('qr_codes')
-            .update({ times_scanned: supabase.rpc('increment', { x: 1 }) })
+            .update({ times_scanned: supabase.rpc('increment') })
             .eq('id', businessId);
         }
       } catch (error) {
