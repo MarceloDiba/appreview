@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-interface GoogleReview {
+export interface GoogleReview {
   review_id: string;
   author_name: string;
   author_image?: string;
@@ -14,7 +14,7 @@ interface GoogleReview {
   time: string;
 }
 
-interface PlaceInfo {
+export interface PlaceInfo {
   id: string;
   place_id: string;
   place_name: string;

@@ -4,15 +4,7 @@ import { RefreshCw, ExternalLink, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CardDescription, CardTitle } from '@/components/ui/card';
 import { createGoogleMapsUrl } from '@/utils/googlePlaceUtils';
-
-interface PlaceInfo {
-  id: string;
-  place_id: string;
-  place_name: string;
-  average_rating: number;
-  total_reviews: number;
-  last_fetch_time: string;
-}
+import { PlaceInfo } from '@/hooks/useGoogleReviews';
 
 interface ReviewsHeaderProps {
   placeInfo: PlaceInfo | null;

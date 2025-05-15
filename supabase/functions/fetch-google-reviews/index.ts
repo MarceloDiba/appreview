@@ -19,7 +19,7 @@ serve(async (req) => {
 
   try {
     // Get the place_id from the request
-    const { place_id, user_id } = await req.json();
+    const { place_id, user_id, force_refresh } = await req.json();
     
     if (!place_id) {
       return new Response(
@@ -38,8 +38,8 @@ serve(async (req) => {
       .eq('user_id', user_id)
       .maybeSingle();
       
-    // If we already have data that's less than 12 hours old, return the cached data
-    if (placeInfo?.last_fetch_time) {
+    // If we already have data that's less than 12 hours old and not forcing a refresh, return the cached data
+    if (placeInfo?.last_fetch_time && !force_refresh) {
       const lastFetch = new Date(placeInfo.last_fetch_time);
       const now = new Date();
       const hoursSinceLastFetch = (now.getTime() - lastFetch.getTime()) / (1000 * 60 * 60);
@@ -56,10 +56,20 @@ serve(async (req) => {
         if (error) {
           console.error('Error fetching cached reviews:', error);
         } else {
+          // Transform the reviews to match the expected format
+          const transformedReviews = reviews?.map(review => ({
+            review_id: review.review_id,
+            author_name: review.author_name,
+            author_image: review.author_image,
+            rating: review.rating,
+            text: review.text,
+            time: review.time
+          })) || [];
+          
           return new Response(
             JSON.stringify({ 
               place_info: placeInfo, 
-              reviews: reviews || [],
+              reviews: transformedReviews,
               cached: true 
             }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -139,11 +149,21 @@ serve(async (req) => {
       }
     }
     
+    // Transform the reviews to match the expected format
+    const transformedReviews = reviewsToInsert.map(review => ({
+      review_id: review.review_id,
+      author_name: review.author_name,
+      author_image: review.author_image,
+      rating: review.rating,
+      text: review.text,
+      time: review.time
+    }));
+    
     // Return the place info and reviews
     return new Response(
       JSON.stringify({
         place_info: upsertedPlaceInfo,
-        reviews: reviewsToInsert,
+        reviews: transformedReviews,
         cached: false
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

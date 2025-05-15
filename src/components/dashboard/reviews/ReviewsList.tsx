@@ -1,15 +1,7 @@
 
 import React from 'react';
 import ReviewCard from './ReviewCard';
-
-interface GoogleReview {
-  id: string;
-  author_name: string;
-  author_image?: string;
-  rating: number;
-  text: string;
-  time: string;
-}
+import { GoogleReview } from '@/hooks/useGoogleReviews';
 
 interface ReviewsListProps {
   reviews: GoogleReview[];
@@ -29,7 +21,7 @@ const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate }) => {
     <div className="space-y-4">
       {reviews.map((review) => (
         <ReviewCard 
-          key={review.id} 
+          key={review.review_id} 
           review={review} 
           formatDate={formatDate} 
         />

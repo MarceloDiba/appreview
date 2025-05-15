@@ -2,16 +2,10 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { GoogleReview } from '@/hooks/useGoogleReviews';
 
 interface ReviewCardProps {
-  review: {
-    id: string;
-    author_name: string;
-    author_image?: string;
-    rating: number;
-    text: string;
-    time: string;
-  };
+  review: GoogleReview;
   formatDate: (dateString: string) => string;
 }
 

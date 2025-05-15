@@ -5,10 +5,13 @@ import { PlatformLink } from '@/components/settings/PlatformLink';
 import { toast } from 'sonner';
 import { extractPlaceIdFromUrl, isValidPlaceId } from '@/utils/googlePlaceUtils';
 
+export type ValidationStatus = 'pending' | 'valid' | 'invalid';
+
 export interface ExternalLinkWithMeta extends PlatformLink {
-  validation_status?: 'pending' | 'valid' | 'invalid';
+  validation_status?: ValidationStatus;
   business_name?: string;
   error_message?: string;
+  place_id?: string;
 }
 
 export const useExternalLinks = (userId: string | undefined) => {
@@ -43,7 +46,7 @@ export const useExternalLinks = (userId: string | undefined) => {
           platform: link.display_name || link.platform,
           url: link.url,
           place_id: (link as any).place_id || '',
-          validation_status: (link as any).place_id ? 'valid' : 'pending',
+          validation_status: (link as any).place_id ? ('valid' as ValidationStatus) : ('pending' as ValidationStatus),
           business_name: (link as any).business_name || undefined,
         }));
         
@@ -64,7 +67,7 @@ export const useExternalLinks = (userId: string | undefined) => {
       const updatedLinks = [...externalLinks];
       updatedLinks[index] = {
         ...updatedLinks[index],
-        validation_status: 'invalid',
+        validation_status: 'invalid' as ValidationStatus,
         error_message: 'ID do local inválido ou não reconhecido'
       };
       setExternalLinks(updatedLinks);
@@ -85,7 +88,7 @@ export const useExternalLinks = (userId: string | undefined) => {
       if (data && data.place_info) {
         updatedLinks[index] = {
           ...updatedLinks[index], 
-          validation_status: 'valid',
+          validation_status: 'valid' as ValidationStatus,
           business_name: data.place_info.place_name,
           error_message: undefined
         };
@@ -93,7 +96,7 @@ export const useExternalLinks = (userId: string | undefined) => {
       } else {
         updatedLinks[index] = {
           ...updatedLinks[index],
-          validation_status: 'invalid',
+          validation_status: 'invalid' as ValidationStatus,
           error_message: 'Não foi possível verificar o local'
         };
         toast.error('Erro ao validar o ID do local do Google.');
@@ -106,7 +109,7 @@ export const useExternalLinks = (userId: string | undefined) => {
       const updatedLinks = [...externalLinks];
       updatedLinks[index] = {
         ...updatedLinks[index],
-        validation_status: 'invalid',
+        validation_status: 'invalid' as ValidationStatus,
         error_message: error instanceof Error ? error.message : 'Erro ao validar o ID do local'
       };
       setExternalLinks(updatedLinks);
@@ -137,7 +140,7 @@ export const useExternalLinks = (userId: string | undefined) => {
       updatedLinks[index] = { 
         ...updatedLinks[index], 
         place_id: placeId,
-        validation_status: 'pending'
+        validation_status: 'pending' as ValidationStatus
       };
       setExternalLinks(updatedLinks);
       
@@ -272,10 +275,52 @@ export const useExternalLinks = (userId: string | undefined) => {
     isLoading,
     isValidating,
     error,
-    handleExternalLinkChange,
-    handleAddExternalLink,
-    handleDeleteExternalLink,
-    validateExternalLink,
+    handleExternalLinkChange: (index: number, key: string, value: string) => {
+      const updatedLinks = [...externalLinks];
+      updatedLinks[index] = { ...updatedLinks[index], [key]: value };
+      
+      // If this is a Google URL, try to extract and validate the place_id
+      if (key === 'url' && updatedLinks[index].platform === 'Google Reviews') {
+        processGooglePlaceId(value, index);
+      }
+      
+      setExternalLinks(updatedLinks);
+    },
+    handleAddExternalLink: (newLink: PlatformLink) => {
+      if (!newLink.platform || !newLink.url) {
+        toast.error('Preencha todos os campos');
+        return;
+      }
+      
+      const linkToAdd: ExternalLinkWithMeta = { 
+        ...newLink,
+        validation_status: 'pending'
+      };
+      
+      // If this is a Google URL, try to extract the place_id
+      if (linkToAdd.platform === 'Google Reviews') {
+        processGooglePlaceId(linkToAdd.url, externalLinks.length);
+      }
+      
+      setExternalLinks([...externalLinks, linkToAdd]);
+      toast.success('Link adicionado com sucesso!');
+    },
+    handleDeleteExternalLink: (index: number) => {
+      const updatedLinks = [...externalLinks];
+      updatedLinks.splice(index, 1);
+      setExternalLinks(updatedLinks);
+      toast.success('Link removido com sucesso!');
+    },
+    validateExternalLink: async (index: number) => {
+      const link = externalLinks[index];
+      
+      if (link.platform === 'Google Reviews' && link.url) {
+        const placeId = await processGooglePlaceId(link.url, index);
+        return placeId !== null;
+      }
+      
+      return true; // For other platforms, no validation needed
+    },
     saveExternalLinks,
     refreshGooglePlaceData,
     refreshLinks: loadExternalLinks
