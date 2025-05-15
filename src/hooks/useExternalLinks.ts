@@ -12,9 +12,14 @@ export const useExternalLinks = (userId: string | undefined) => {
     { platform: 'Instagram', url: 'https://instagram.com/example' },
     { platform: 'Facebook', url: 'https://facebook.com/example' },
   ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadExternalLinks = async () => {
     if (!userId) return;
+    
+    setIsLoading(true);
+    setError(null);
     
     try {
       const { data: links, error } = await supabase
@@ -37,7 +42,26 @@ export const useExternalLinks = (userId: string | undefined) => {
         setExternalLinks(formattedLinks);
       }
     } catch (error) {
-      console.error('Error loading external links:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error loading external links';
+      console.error('Error loading external links:', errorMessage);
+      setError(errorMessage);
+      toast.error('Erro ao carregar links externos. Por favor, tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const processGooglePlaceId = (url: string): string | null => {
+    try {
+      const placeId = extractPlaceIdFromUrl(url);
+      if (placeId) {
+        toast.success('Google Place ID detectado com sucesso!');
+      }
+      return placeId || null;
+    } catch (error) {
+      console.error('Error extracting Place ID:', error);
+      toast.error('Erro ao extrair o Google Place ID.');
+      return null;
     }
   };
 
@@ -47,14 +71,8 @@ export const useExternalLinks = (userId: string | undefined) => {
     
     // If this is a Google URL, try to extract the place_id
     if (key === 'url' && updatedLinks[index].platform === 'Google Reviews') {
-      const placeId = extractPlaceIdFromUrl(value);
-      if (placeId) {
-        updatedLinks[index].place_id = placeId;
-        toast.success('Google Place ID detectado com sucesso!');
-      } else {
-        // Clear the place_id if we couldn't extract it
-        updatedLinks[index].place_id = '';
-      }
+      const placeId = processGooglePlaceId(value);
+      updatedLinks[index].place_id = placeId || '';
     }
     
     setExternalLinks(updatedLinks);
@@ -70,11 +88,8 @@ export const useExternalLinks = (userId: string | undefined) => {
     
     // If this is a Google URL, try to extract the place_id
     if (linkToAdd.platform === 'Google Reviews') {
-      const placeId = extractPlaceIdFromUrl(linkToAdd.url);
-      if (placeId) {
-        linkToAdd.place_id = placeId;
-        toast.success('Google Place ID detectado com sucesso!');
-      }
+      const placeId = processGooglePlaceId(linkToAdd.url);
+      linkToAdd.place_id = placeId || '';
     }
     
     setExternalLinks([...externalLinks, linkToAdd]);
@@ -89,12 +104,15 @@ export const useExternalLinks = (userId: string | undefined) => {
   };
 
   const saveExternalLinks = async () => {
-    try {
-      if (!userId) {
-        toast.error('Usuário não autenticado');
-        return;
-      }
+    if (!userId) {
+      toast.error('Usuário não autenticado');
+      return;
+    }
 
+    setIsLoading(true);
+    setError(null);
+    
+    try {
       // First delete all existing links
       const { error: deleteError } = await supabase
         .from('platform_links')
@@ -124,8 +142,12 @@ export const useExternalLinks = (userId: string | undefined) => {
       
       toast.success('Links externos atualizados com sucesso!');
     } catch (error) {
-      console.error('Error saving external links:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error saving external links';
+      console.error('Error saving external links:', errorMessage);
+      setError(errorMessage);
       toast.error('Erro ao salvar links externos. Por favor, tente novamente.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -137,9 +159,12 @@ export const useExternalLinks = (userId: string | undefined) => {
 
   return {
     externalLinks,
+    isLoading,
+    error,
     handleExternalLinkChange,
     handleAddExternalLink,
     handleDeleteExternalLink,
     saveExternalLinks,
+    refreshLinks: loadExternalLinks
   };
 };

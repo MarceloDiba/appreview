@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ExternalLink, PlusCircle, Trash2 } from 'lucide-react';
+import { ExternalLink, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
 import { PlatformLink } from './PlatformLink';
+import { cn } from '@/lib/utils';
 
 interface ExternalLinksSettingsProps {
   externalLinks: PlatformLink[];
@@ -13,6 +14,9 @@ interface ExternalLinksSettingsProps {
   onDeleteExternalLink: (index: number) => void;
   onAddExternalLink: (link: PlatformLink) => void;
   onSaveExternalLinks: () => void;
+  isLoading?: boolean;
+  error?: string | null;
+  refreshLinks?: () => void;
 }
 
 const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
@@ -20,7 +24,10 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
   onExternalLinkChange,
   onDeleteExternalLink,
   onAddExternalLink,
-  onSaveExternalLinks
+  onSaveExternalLinks,
+  isLoading = false,
+  error = null,
+  refreshLinks
 }) => {
   const [newLink, setNewLink] = useState<PlatformLink>({ platform: '', url: '' });
 
@@ -34,12 +41,33 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Links Externos</CardTitle>
-        <CardDescription>
-          Gerencie links para suas plataformas externas de avaliação e redes sociais.
-        </CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Links Externos</CardTitle>
+            <CardDescription>
+              Gerencie links para suas plataformas externas de avaliação e redes sociais.
+            </CardDescription>
+          </div>
+          {refreshLinks && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={refreshLinks}
+              disabled={isLoading}
+            >
+              <RefreshCw className={cn("h-4 w-4 mr-1", isLoading && "animate-spin")} />
+              Atualizar
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {error && (
+          <div className="p-4 bg-red-50 text-red-700 rounded-md border border-red-200 mb-4">
+            {error}
+          </div>
+        )}
+        
         <div className="space-y-4">
           {externalLinks.map((link, index) => (
             <div key={index} className="flex items-center justify-between border p-3 rounded-md">
@@ -117,7 +145,9 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={onSaveExternalLinks}>Salvar Links</Button>
+        <Button onClick={onSaveExternalLinks} disabled={isLoading}>
+          {isLoading ? 'Salvando...' : 'Salvar Links'}
+        </Button>
       </CardFooter>
     </Card>
   );
