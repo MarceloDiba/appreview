@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,38 @@ const Settings = () => {
   
   const [newLink, setNewLink] = useState({ platform: '', url: '' });
   const { user } = useUser();
+
+  // Load external links from database when component mounts
+  useEffect(() => {
+    if (user) {
+      loadExternalLinks();
+    }
+  }, [user]);
+
+  const loadExternalLinks = async () => {
+    try {
+      const { data: links, error } = await supabase
+        .from('platform_links')
+        .select('*')
+        .eq('user_id', user?.id);
+        
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      if (links && links.length > 0) {
+        const formattedLinks = links.map(link => ({
+          platform: link.display_name || link.platform,
+          url: link.url,
+          place_id: link.place_id || ''
+        }));
+        
+        setExternalLinks(formattedLinks);
+      }
+    } catch (error) {
+      console.error('Error loading external links:', error);
+    }
+  };
   
   const handleBusinessInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -91,7 +123,7 @@ const Settings = () => {
       return;
     }
     
-    const linkToAdd = { ...newLink };
+    const linkToAdd: { platform: string; url: string; place_id?: string } = { ...newLink };
     
     // If this is a Google URL, try to extract the place_id
     if (linkToAdd.platform === 'Google Reviews') {
@@ -116,11 +148,16 @@ const Settings = () => {
   
   const saveExternalLinks = async () => {
     try {
+      if (!user?.id) {
+        toast.error('Usuário não autenticado');
+        return;
+      }
+
       // First delete all existing links
       const { error: deleteError } = await supabase
         .from('platform_links')
         .delete()
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
         
       if (deleteError) {
         throw new Error(deleteError.message);
@@ -128,11 +165,11 @@ const Settings = () => {
       
       // Then insert all links
       const linksToInsert = externalLinks.map(link => ({
-        user_id: user?.id,
+        user_id: user.id,
         platform: link.platform.toLowerCase(),
         url: link.url,
         display_name: link.platform,
-        place_id: link.place_id
+        place_id: link.place_id || null
       }));
       
       const { error: insertError } = await supabase
@@ -149,6 +186,7 @@ const Settings = () => {
       toast.error('Erro ao salvar links externos. Por favor, tente novamente.');
     }
   };
+  
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -170,6 +208,7 @@ const Settings = () => {
               <TabsTrigger value="external-links">Links Externos</TabsTrigger>
               <TabsTrigger value="notifications">Notificações</TabsTrigger>
             </TabsList>
+            
             
             <TabsContent value="business">
               <Card>

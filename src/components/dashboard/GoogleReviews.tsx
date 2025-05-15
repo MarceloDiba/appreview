@@ -45,7 +45,7 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId }) => {
       // First, get the Google Place ID from platform_links
       const { data: platformLinks, error: linksError } = await supabase
         .from('platform_links')
-        .select('place_id, url')
+        .select('url')
         .eq('user_id', userId)
         .eq('platform', 'google reviews')
         .maybeSingle();
@@ -54,8 +54,17 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId }) => {
         throw new Error('Erro ao buscar informações do Google Reviews');
       }
       
-      if (!platformLinks || !platformLinks.place_id) {
-        setError('Nenhum ID do Google Places configurado. Por favor, adicione um link válido do Google Reviews nas configurações.');
+      if (!platformLinks) {
+        setError('Nenhum link do Google Reviews configurado. Por favor, adicione um link válido do Google Reviews nas configurações.');
+        setLoading(false);
+        return;
+      }
+      
+      // Extract place_id from URL
+      const place_id = platformLinks.url ? extractPlaceIdFromUrl(platformLinks.url) : null;
+      
+      if (!place_id) {
+        setError('Nenhum ID do Google Places detectado no URL configurado. Por favor, verifique se o URL do Google Reviews é válido.');
         setLoading(false);
         return;
       }
@@ -63,7 +72,7 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId }) => {
       // Call the Edge Function to fetch reviews
       const { data, error: fetchError } = await supabase.functions.invoke('fetch-google-reviews', {
         body: {
-          place_id: platformLinks.place_id,
+          place_id: place_id,
           user_id: userId,
           force_refresh: forceRefresh
         }
@@ -88,6 +97,37 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId }) => {
       setLoading(false);
       setRefreshing(false);
     }
+  };
+  
+  // Add the missing function to extract place ID
+  const extractPlaceIdFromUrl = (url: string): string | null => {
+    if (!url) return null;
+    
+    // Try to match place_id parameter in URL
+    const placeIdMatch = url.match(/[?&]place_id=([^&]+)/);
+    if (placeIdMatch && placeIdMatch[1]) {
+      return placeIdMatch[1];
+    }
+    
+    // Try to match place ID in a maps.google.com URL format
+    const mapsUrlMatch = url.match(/maps\/(place)\/[^/]+\/([^/]+)/);
+    if (mapsUrlMatch && mapsUrlMatch[2]) {
+      return mapsUrlMatch[2];
+    }
+    
+    // Try to match CID parameter
+    const cidMatch = url.match(/[?&]cid=(\d+)/);
+    if (cidMatch && cidMatch[1]) {
+      return cidMatch[1];
+    }
+    
+    // Try to match g.page URLs
+    const gPageMatch = url.match(/g\.page\/([^/?]+)/i);
+    if (gPageMatch && gPageMatch[1]) {
+      return gPageMatch[1];
+    }
+    
+    return null;
   };
   
   useEffect(() => {
