@@ -10,6 +10,7 @@ import ReviewSettings from '@/components/settings/ReviewSettings';
 import ExternalLinksSettings from '@/components/settings/ExternalLinksSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import { useExternalLinks } from '@/hooks/useExternalLinks';
+import GoogleReviews from '@/components/dashboard/GoogleReviews';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -35,10 +36,15 @@ const Settings = () => {
   const { user } = useUser();
   const { 
     externalLinks, 
+    isLoading,
+    isValidating,
     handleExternalLinkChange, 
     handleAddExternalLink, 
-    handleDeleteExternalLink, 
-    saveExternalLinks 
+    handleDeleteExternalLink,
+    refreshGooglePlaceData,
+    saveExternalLinks,
+    refreshLinks,
+    error 
   } = useExternalLinks(user?.id);
   
   const handleBusinessInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -79,6 +85,7 @@ const Settings = () => {
               <TabsTrigger value="reviews">Avaliações</TabsTrigger>
               <TabsTrigger value="external-links">Links Externos</TabsTrigger>
               <TabsTrigger value="notifications">Notificações</TabsTrigger>
+              <TabsTrigger value="google-reviews">Google Reviews</TabsTrigger>
             </TabsList>
             
             <TabsContent value="business">
@@ -105,11 +112,20 @@ const Settings = () => {
                 onDeleteExternalLink={handleDeleteExternalLink}
                 onAddExternalLink={handleAddExternalLink}
                 onSaveExternalLinks={saveExternalLinks}
+                onRefreshPlaceData={refreshGooglePlaceData}
+                isLoading={isLoading}
+                isValidating={isValidating}
+                error={error}
+                refreshLinks={refreshLinks}
               />
             </TabsContent>
             
             <TabsContent value="notifications">
               <NotificationSettings />
+            </TabsContent>
+
+            <TabsContent value="google-reviews">
+              {user && <GoogleReviews userId={user.id} />}
             </TabsContent>
           </Tabs>
         </div>

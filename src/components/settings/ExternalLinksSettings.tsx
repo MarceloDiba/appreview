@@ -4,17 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ExternalLink, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
+import { ExternalLink, PlusCircle, Trash2, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
 import { PlatformLink } from './PlatformLink';
 import { cn } from '@/lib/utils';
+import { ExternalLinkWithMeta } from '@/hooks/useExternalLinks';
 
 interface ExternalLinksSettingsProps {
-  externalLinks: PlatformLink[];
+  externalLinks: ExternalLinkWithMeta[];
   onExternalLinkChange: (index: number, key: string, value: string) => void;
   onDeleteExternalLink: (index: number) => void;
   onAddExternalLink: (link: PlatformLink) => void;
   onSaveExternalLinks: () => void;
+  onRefreshPlaceData?: (index: number) => void;
   isLoading?: boolean;
+  isValidating?: boolean;
   error?: string | null;
   refreshLinks?: () => void;
 }
@@ -25,7 +28,9 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
   onDeleteExternalLink,
   onAddExternalLink,
   onSaveExternalLinks,
+  onRefreshPlaceData,
   isLoading = false,
+  isValidating = false,
   error = null,
   refreshLinks
 }) => {
@@ -36,6 +41,35 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
       onAddExternalLink(newLink);
       setNewLink({ platform: '', url: '' });
     }
+  };
+
+  const renderValidationStatus = (link: ExternalLinkWithMeta) => {
+    if (link.platform !== 'Google Reviews') return null;
+    
+    if (link.validation_status === 'valid') {
+      return (
+        <div className="flex items-center text-green-600">
+          <CheckCircle className="h-4 w-4 mr-1" />
+          <span className="text-xs">Verificado: {link.business_name}</span>
+        </div>
+      );
+    } else if (link.validation_status === 'invalid') {
+      return (
+        <div className="flex items-center text-amber-600">
+          <AlertCircle className="h-4 w-4 mr-1" />
+          <span className="text-xs">{link.error_message || 'Não verificado'}</span>
+        </div>
+      );
+    } else if (link.validation_status === 'pending' && link.place_id) {
+      return (
+        <div className="flex items-center text-blue-600">
+          <RefreshCw className={cn("h-4 w-4 mr-1", isValidating && "animate-spin")} />
+          <span className="text-xs">Verificando...</span>
+        </div>
+      );
+    }
+    
+    return null;
   };
 
   return (
@@ -81,21 +115,33 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
                     className="w-full text-sm p-1 border rounded"
                     placeholder="https://"
                   />
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-2 text-blue-600 hover:underline"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
+                  {link.url && (
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-2 text-blue-600 hover:underline"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
-                {link.platform === 'Google Reviews' && (
-                  <div className="text-xs text-gray-500">
-                    {link.place_id ? (
-                      <span className="text-green-600">Place ID: {link.place_id}</span>
-                    ) : (
-                      <span className="text-amber-600">Nenhum Place ID detectado. Verifique o URL.</span>
+                
+                {renderValidationStatus(link)}
+                
+                {link.platform === 'Google Reviews' && link.place_id && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    <span>Place ID: {link.place_id}</span>
+                    {onRefreshPlaceData && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 p-1 ml-1"
+                        onClick={() => onRefreshPlaceData(index)}
+                        disabled={isValidating}
+                      >
+                        <RefreshCw className={cn("h-3 w-3", isValidating && "animate-spin")} />
+                      </Button>
                     )}
                   </div>
                 )}

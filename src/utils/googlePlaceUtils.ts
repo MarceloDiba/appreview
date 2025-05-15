@@ -35,6 +35,12 @@ export const extractPlaceIdFromUrl = (url: string): string | null => {
       return gPageMatch[1];
     }
 
+    // Try to match g.page/r short URLs
+    const gPageReviewMatch = url.match(/g\.page\/r\/([^/?]+)/i);
+    if (gPageReviewMatch && gPageReviewMatch[1]) {
+      return gPageReviewMatch[1];
+    }
+
     // Try to match simpler google.com/maps URLs with a @location format
     const locationMatch = url.match(/google\.com\/maps\/@([-\d.]+),([-\d.]+)/i);
     if (locationMatch) {
@@ -72,6 +78,30 @@ export const isValidPlaceId = (placeId: string): boolean => {
   
   // Google Place IDs typically start with "ChI" and are alphanumeric
   // This is a basic validation, not comprehensive
-  const placeIdRegex = /^(ChI[a-zA-Z0-9_-]+|[a-zA-Z0-9]{20,})$/;
+  const placeIdRegex = /^(ChI[a-zA-Z0-9_-]+|[a-zA-Z0-9]{20,}|[A-Za-z0-9-]{10,})$/;
   return placeIdRegex.test(placeId);
+};
+
+/**
+ * Format a Google Places API error message to be user-friendly
+ * 
+ * @param error Error message or object
+ * @returns User-friendly error message
+ */
+export const formatGooglePlacesError = (error: any): string => {
+  if (typeof error === 'string') {
+    if (error.includes('ZERO_RESULTS')) {
+      return 'Não foi possível encontrar o local. Verifique o URL e tente novamente.';
+    } else if (error.includes('OVER_QUERY_LIMIT')) {
+      return 'Limite de consultas excedido. Tente novamente mais tarde.';
+    } else if (error.includes('REQUEST_DENIED')) {
+      return 'Acesso negado. Verifique as configurações da API do Google.';
+    } else if (error.includes('INVALID_REQUEST')) {
+      return 'Solicitação inválida. Verifique o URL e tente novamente.';
+    } else {
+      return `Erro ao processar a solicitação: ${error}`;
+    }
+  }
+  
+  return 'Ocorreu um erro ao processar a solicitação do Google Places.';
 };

@@ -1,11 +1,12 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { extractPlaceIdFromUrl } from '@/utils/googlePlaceUtils';
+import { formatDistanceToNow, format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
-export interface GoogleReview {
-  id: string;
+interface GoogleReview {
+  review_id: string;
   author_name: string;
   author_image?: string;
   rating: number;
@@ -13,7 +14,7 @@ export interface GoogleReview {
   time: string;
 }
 
-export interface PlaceInfo {
+interface PlaceInfo {
   id: string;
   place_id: string;
   place_name: string;
@@ -29,91 +30,106 @@ export const useGoogleReviews = (userId: string) => {
   const [placeInfo, setPlaceInfo] = useState<PlaceInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchGoogleReviews = async (forceRefresh = false) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // First, get the Google Place ID from platform_links
-      const { data: platformLinks, error: linksError } = await supabase
-        .from('platform_links')
-        .select('url')
-        .eq('user_id', userId)
-        .eq('platform', 'google reviews')
-        .maybeSingle();
-        
-      if (linksError) {
-        throw new Error('Erro ao buscar informações do Google Reviews');
-      }
-      
-      if (!platformLinks) {
-        setError('Nenhum link do Google Reviews configurado. Por favor, adicione um link válido do Google Reviews nas configurações.');
-        setLoading(false);
-        return;
-      }
-      
-      // Extract place_id from URL
-      const place_id = platformLinks.url ? extractPlaceIdFromUrl(platformLinks.url) : null;
-      
-      if (!place_id) {
-        setError('Nenhum ID do Google Places detectado no URL configurado. Por favor, verifique se o URL do Google Reviews é válido.');
-        setLoading(false);
-        return;
-      }
-      
-      // Call the Edge Function to fetch reviews
-      const { data, error: fetchError } = await supabase.functions.invoke('fetch-google-reviews', {
-        body: {
-          place_id: place_id,
-          user_id: userId,
-          force_refresh: forceRefresh
-        }
-      });
-      
-      if (fetchError) {
-        throw new Error(`Erro ao buscar avaliações: ${fetchError.message}`);
-      }
-      
-      setPlaceInfo(data.place_info);
-      setReviews(data.reviews || []);
-      
-      // Show toast if we fetched fresh data
-      if (!data.cached) {
-        toast.success('Avaliações do Google atualizadas com sucesso!');
-      }
-    } catch (err) {
-      console.error('Error fetching Google reviews:', err);
-      setError(err instanceof Error ? err.message : 'Erro ao buscar avaliações do Google');
-      toast.error('Erro ao buscar avaliações do Google');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    fetchGoogleReviews(true);
-  };
-
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string): string => {
     try {
       const date = new Date(dateString);
-      return new Intl.DateTimeFormat('pt-BR', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }).format(date);
+      return format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
     } catch (e) {
       return dateString;
     }
   };
 
-  useEffect(() => {
-    if (userId) {
-      fetchGoogleReviews();
+  const formatRelativeTime = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
+    } catch (e) {
+      return dateString;
+    }
+  };
+
+  const fetchGoogleReviews = useCallback(async (placeId: string, forceRefresh = false) => {
+    setRefreshing(true);
+    setError(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-google-reviews', {
+        body: { place_id: placeId, user_id: userId, force_refresh: forceRefresh }
+      });
+      
+      if (error) throw new Error(error.message);
+      
+      if (data?.place_info) {
+        setPlaceInfo(data.place_info);
+        setReviews(data.reviews || []);
+      } else {
+        throw new Error('No data returned from Google Places API');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error fetching Google reviews';
+      console.error('Error fetching Google reviews:', errorMessage);
+      setError(errorMessage);
+      toast.error('Erro ao carregar avaliações do Google. Por favor, tente novamente mais tarde.');
+    } finally {
+      setRefreshing(false);
     }
   }, [userId]);
+
+  const loadGoogleReviews = useCallback(async () => {
+    if (!userId) {
+      setError('Usuário não autenticado');
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // First, check if the user has configured a Google Review link
+      const { data: links, error: linksError } = await supabase
+        .from('platform_links')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('platform', 'google reviews');
+        
+      if (linksError) throw new Error(linksError.message);
+      
+      if (!links || links.length === 0) {
+        setError('Você ainda não configurou um link do Google Reviews. Vá para a aba "Links Externos" para configurar.');
+        return;
+      }
+      
+      const googleLink = links[0];
+      if (!googleLink.place_id) {
+        setError('Link do Google configurado, mas sem Place ID válido. Atualize seu link nas configurações.');
+        return;
+      }
+      
+      // If we have a place_id, load reviews
+      await fetchGoogleReviews(googleLink.place_id);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error loading Google reviews';
+      console.error('Error loading Google reviews:', errorMessage);
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, fetchGoogleReviews]);
+
+  const handleRefresh = async () => {
+    if (!placeInfo?.place_id) {
+      toast.error('Nenhum Place ID configurado para atualizar');
+      return;
+    }
+    
+    await fetchGoogleReviews(placeInfo.place_id, true);
+    toast.success('Avaliações atualizadas com sucesso!');
+  };
+
+  useEffect(() => {
+    loadGoogleReviews();
+  }, [loadGoogleReviews]);
 
   return {
     loading,
@@ -122,6 +138,7 @@ export const useGoogleReviews = (userId: string) => {
     placeInfo,
     error,
     handleRefresh,
-    formatDate
+    formatDate,
+    formatRelativeTime
   };
 };
