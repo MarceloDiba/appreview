@@ -14,6 +14,12 @@ import { extractPlaceIdFromUrl } from '@/utils/googlePlaceUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/components/providers/UserProvider';
 
+interface PlatformLink {
+  platform: string;
+  url: string;
+  place_id?: string;
+}
+
 const Settings = () => {
   const navigate = useNavigate();
   const [businessInfo, setBusinessInfo] = useState({
@@ -35,9 +41,7 @@ const Settings = () => {
     followUpEmail: false,
   });
 
-  const [externalLinks, setExternalLinks] = useState<
-    { platform: string; url: string; place_id?: string }[]
-  >([
+  const [externalLinks, setExternalLinks] = useState<PlatformLink[]>([
     { platform: 'Google Reviews', url: 'https://g.page/r/example-review-link', place_id: '' },
     { platform: 'TripAdvisor', url: 'https://tripadvisor.com/example-review' },
     { platform: 'Instagram', url: 'https://instagram.com/example' },
@@ -69,7 +73,7 @@ const Settings = () => {
         const formattedLinks = links.map(link => ({
           platform: link.display_name || link.platform,
           url: link.url,
-          place_id: link.place_id || ''
+          place_id: link.place_id || '' // Safely handle potentially missing place_id
         }));
         
         setExternalLinks(formattedLinks);
@@ -123,7 +127,7 @@ const Settings = () => {
       return;
     }
     
-    const linkToAdd: { platform: string; url: string; place_id?: string } = { ...newLink };
+    const linkToAdd: PlatformLink = { ...newLink };
     
     // If this is a Google URL, try to extract the place_id
     if (linkToAdd.platform === 'Google Reviews') {
@@ -169,7 +173,7 @@ const Settings = () => {
         platform: link.platform.toLowerCase(),
         url: link.url,
         display_name: link.platform,
-        place_id: link.place_id || null
+        place_id: link.place_id || null // Ensure place_id is included in insert
       }));
       
       const { error: insertError } = await supabase
