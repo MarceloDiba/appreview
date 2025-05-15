@@ -73,7 +73,8 @@ const Settings = () => {
         const formattedLinks = links.map(link => ({
           platform: link.display_name || link.platform,
           url: link.url,
-          place_id: link.place_id || '' // Safely handle potentially missing place_id
+          // Using type assertion to tell TypeScript that place_id might exist on the object
+          place_id: (link as any).place_id || ''
         }));
         
         setExternalLinks(formattedLinks);
@@ -101,7 +102,7 @@ const Settings = () => {
     // In a real app, this would save to the database
     toast.success('Configurações de avaliação atualizadas!');
   };
-
+  
   const handleExternalLinkChange = (index: number, key: string, value: string) => {
     const updatedLinks = [...externalLinks];
     updatedLinks[index] = { ...updatedLinks[index], [key]: value };
