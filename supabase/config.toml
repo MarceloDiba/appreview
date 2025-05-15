@@ -1,5 +1,6 @@
 
+# Reference: https://supabase.com/docs/guides/functions/deploy
 project_id = "pczzswkydhdgxesvyfed"
 
-[functions.increment]
-verify_jwt = false
+[functions.fetch-google-reviews]
+verify_jwt = true

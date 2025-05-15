@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -11,6 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { ExternalLink, PlusCircle, Trash2 } from 'lucide-react';
+import { extractPlaceIdFromUrl } from '@/utils/googlePlaceUtils';
+import { supabase } from '@/integrations/supabase/client';
+import { useUser } from '@/components/providers/UserProvider';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -32,15 +34,18 @@ const Settings = () => {
     rememberCustomer: true,
     followUpEmail: false,
   });
-  
-  const [externalLinks, setExternalLinks] = useState([
-    { platform: 'Google Reviews', url: 'https://g.page/r/example-review-link' },
+
+  const [externalLinks, setExternalLinks] = useState<
+    { platform: string; url: string; place_id?: string }[]
+  >([
+    { platform: 'Google Reviews', url: 'https://g.page/r/example-review-link', place_id: '' },
     { platform: 'TripAdvisor', url: 'https://tripadvisor.com/example-review' },
     { platform: 'Instagram', url: 'https://instagram.com/example' },
     { platform: 'Facebook', url: 'https://facebook.com/example' },
   ]);
   
   const [newLink, setNewLink] = useState({ platform: '', url: '' });
+  const { user } = useUser();
   
   const handleBusinessInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -60,6 +65,25 @@ const Settings = () => {
     // In a real app, this would save to the database
     toast.success('Configurações de avaliação atualizadas!');
   };
+
+  const handleExternalLinkChange = (index: number, key: string, value: string) => {
+    const updatedLinks = [...externalLinks];
+    updatedLinks[index] = { ...updatedLinks[index], [key]: value };
+    
+    // If this is a Google URL, try to extract the place_id
+    if (key === 'url' && updatedLinks[index].platform === 'Google Reviews') {
+      const placeId = extractPlaceIdFromUrl(value);
+      if (placeId) {
+        updatedLinks[index].place_id = placeId;
+        toast.success('Google Place ID detectado com sucesso!');
+      } else {
+        // Clear the place_id if we couldn't extract it
+        updatedLinks[index].place_id = '';
+      }
+    }
+    
+    setExternalLinks(updatedLinks);
+  };
   
   const handleAddExternalLink = () => {
     if (!newLink.platform || !newLink.url) {
@@ -67,7 +91,18 @@ const Settings = () => {
       return;
     }
     
-    setExternalLinks([...externalLinks, newLink]);
+    const linkToAdd = { ...newLink };
+    
+    // If this is a Google URL, try to extract the place_id
+    if (linkToAdd.platform === 'Google Reviews') {
+      const placeId = extractPlaceIdFromUrl(linkToAdd.url);
+      if (placeId) {
+        linkToAdd.place_id = placeId;
+        toast.success('Google Place ID detectado com sucesso!');
+      }
+    }
+    
+    setExternalLinks([...externalLinks, linkToAdd]);
     setNewLink({ platform: '', url: '' });
     toast.success('Link adicionado com sucesso!');
   };
@@ -77,6 +112,42 @@ const Settings = () => {
     updatedLinks.splice(index, 1);
     setExternalLinks(updatedLinks);
     toast.success('Link removido com sucesso!');
+  };
+  
+  const saveExternalLinks = async () => {
+    try {
+      // First delete all existing links
+      const { error: deleteError } = await supabase
+        .from('platform_links')
+        .delete()
+        .eq('user_id', user?.id);
+        
+      if (deleteError) {
+        throw new Error(deleteError.message);
+      }
+      
+      // Then insert all links
+      const linksToInsert = externalLinks.map(link => ({
+        user_id: user?.id,
+        platform: link.platform.toLowerCase(),
+        url: link.url,
+        display_name: link.platform,
+        place_id: link.place_id
+      }));
+      
+      const { error: insertError } = await supabase
+        .from('platform_links')
+        .insert(linksToInsert);
+        
+      if (insertError) {
+        throw new Error(insertError.message);
+      }
+      
+      toast.success('Links externos atualizados com sucesso!');
+    } catch (error) {
+      console.error('Error saving external links:', error);
+      toast.error('Erro ao salvar links externos. Por favor, tente novamente.');
+    }
   };
   
   return (
@@ -299,17 +370,34 @@ const Settings = () => {
                   <div className="space-y-4">
                     {externalLinks.map((link, index) => (
                       <div key={index} className="flex items-center justify-between border p-3 rounded-md">
-                        <div className="flex items-center">
-                          <span className="font-medium">{link.platform}:</span>
-                          <a 
-                            href={link.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="ml-2 text-sm text-blue-600 hover:underline flex items-center"
-                          >
-                            {link.url}
-                            <ExternalLink className="h-3 w-3 ml-1" />
-                          </a>
+                        <div className="flex flex-col gap-1 flex-grow pr-2">
+                          <div className="font-medium">{link.platform}</div>
+                          <div className="flex items-center">
+                            <input
+                              type="text"
+                              value={link.url}
+                              onChange={(e) => handleExternalLinkChange(index, 'url', e.target.value)}
+                              className="w-full text-sm p-1 border rounded"
+                              placeholder="https://"
+                            />
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-2 text-blue-600 hover:underline"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
+                          {link.platform === 'Google Reviews' && (
+                            <div className="text-xs text-gray-500">
+                              {link.place_id ? (
+                                <span className="text-green-600">Place ID: {link.place_id}</span>
+                              ) : (
+                                <span className="text-amber-600">Nenhum Place ID detectado. Verifique o URL.</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <Button 
                           variant="ghost" 
@@ -355,6 +443,9 @@ const Settings = () => {
                     </Button>
                   </div>
                 </CardContent>
+                <CardFooter>
+                  <Button onClick={saveExternalLinks}>Salvar Links</Button>
+                </CardFooter>
               </Card>
             </TabsContent>
             

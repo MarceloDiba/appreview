@@ -1,12 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import ReviewsList from '@/components/dashboard/ReviewsList';
+import GoogleReviews from '@/components/dashboard/GoogleReviews';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { AlertCircle, ImportIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 // Mock data for demonstration
 const reviews = [
@@ -58,6 +59,19 @@ const reviews = [
 const Reviews = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Get the current user's ID
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    
+    fetchUser();
+  }, []);
   
   const refreshReviews = () => {
     setIsRefreshing(true);
@@ -97,6 +111,11 @@ const Reviews = () => {
               </Button>
             </div>
           </header>
+
+          {/* New Google Reviews section */}
+          <div className="mb-8">
+            {userId && <GoogleReviews userId={userId} />}
+          </div>
           
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
@@ -144,22 +163,22 @@ const Reviews = () => {
                           />
                         </div>
                         Google Reviews API
-                        <span className="ml-2 text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">
-                          Pendente
+                        <span className="ml-2 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                          Conectado
                         </span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-col gap-2">
                         <p className="text-sm text-gray-500">
-                          Conecte-se à API do Google Places para importar automaticamente avaliações.
+                          Importações automáticas de avaliações do Google Reviews através da API do Google Places.
                         </p>
                         <Button 
                           variant="outline"
-                          onClick={() => toast.info('Funcionalidade em desenvolvimento!')}
+                          onClick={() => window.location.href = '/settings'}
                           className="mt-2"
                         >
-                          Conectar Google API
+                          Configurar URLs do Google
                         </Button>
                       </div>
                     </CardContent>
@@ -203,8 +222,8 @@ const Reviews = () => {
                   <div>
                     <h4 className="text-sm font-medium text-blue-700">API de avaliações</h4>
                     <p className="text-sm text-blue-600 mt-1">
-                      Conecte-se às plataformas de avaliação mais populares para importar automaticamente avaliações para o seu dashboard.
-                      Configure as integrações nas Configurações do seu perfil.
+                      A integração com o Google Places API está ativa. As avaliações são automaticamente atualizadas a cada 12 horas.
+                      Você pode forçar uma atualização manualmente clicando no botão "Atualizar" na seção de Avaliações do Google.
                     </p>
                   </div>
                 </div>
