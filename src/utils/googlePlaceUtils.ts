@@ -7,51 +7,41 @@
  */
 export const extractPlaceIdFromUrl = (url: string): string | null => {
   if (!url || typeof url !== 'string') return null;
-  
+
   try {
-    // Try to match place_id parameter in URL
-    const placeIdMatch = url.match(/[?&]place_id=([^&]+)/);
+    // 1. placeid=...
+    const placeIdMatch = url.match(/[?&]placeid=([^&]+)/i);
     if (placeIdMatch && placeIdMatch[1]) {
       return placeIdMatch[1];
     }
-    
-    // Try to match place ID in a maps.google.com URL format
-    const mapsUrlMatch = url.match(/maps\/(place)\/[^/]+\/([^/]+)/);
-    if (mapsUrlMatch && mapsUrlMatch[2]) {
-      return mapsUrlMatch[2];
+
+    // 2. place_id=...
+    const altPlaceIdMatch = url.match(/[?&]place_id=([^&]+)/i);
+    if (altPlaceIdMatch && altPlaceIdMatch[1]) {
+      return altPlaceIdMatch[1];
     }
-    
-    // Try to match CID parameter (sometimes used as an alternative to place_id)
-    const cidMatch = url.match(/[?&]cid=(\d+)/);
+
+    // 3. cid=...
+    const cidMatch = url.match(/[?&]cid=([^&]+)/i);
     if (cidMatch && cidMatch[1]) {
-      // Note: This is not actually a place_id, but a CID, which can be used similarly
-      return cidMatch[1];
+      return `cid:${cidMatch[1]}`;
     }
-    
-    // Try to match g.page URLs
-    const gPageMatch = url.match(/g\.page\/([^/?]+)/i);
+
+    // 4. g.page/...
+    const gPageMatch = url.match(/g\.page\/([^/?#]+)/i);
     if (gPageMatch && gPageMatch[1]) {
-      // This isn't a direct place_id but a shortcode that would need to be resolved
-      return gPageMatch[1];
+      return `gpage:${gPageMatch[1]}`;
     }
 
-    // Try to match g.page/r short URLs
-    const gPageReviewMatch = url.match(/g\.page\/r\/([^/?]+)/i);
-    if (gPageReviewMatch && gPageReviewMatch[1]) {
-      return gPageReviewMatch[1];
+    // 5. g.page/r/...
+    const gPageRMatch = url.match(/g\.page\/r\/([^/?#]+)/i);
+    if (gPageRMatch && gPageRMatch[1]) {
+      return `gpage-r:${gPageRMatch[1]}`;
     }
 
-    // Try to match simpler google.com/maps URLs with a @location format
-    const locationMatch = url.match(/google\.com\/maps\/@([-\d.]+),([-\d.]+)/i);
-    if (locationMatch) {
-      // This contains latitude and longitude, not a place_id
-      // Could be used for reverse geocoding but we return null for now
-      return null;
-    }
-    
     return null;
   } catch (error) {
-    console.error("Error parsing Google Maps URL:", error);
+    console.error("Erro ao extrair identificador do link do Google:", error);
     return null;
   }
 };

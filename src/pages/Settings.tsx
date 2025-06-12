@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { useUser } from '@/components/providers/UserProvider';
+import { useAuth } from '@/context/AuthContext';
 import BusinessInfoSettings from '@/components/settings/BusinessInfoSettings';
 import ReviewSettings from '@/components/settings/ReviewSettings';
 import ExternalLinksSettings from '@/components/settings/ExternalLinksSettings';
@@ -14,6 +14,7 @@ import GoogleReviews from '@/components/dashboard/GoogleReviews';
 
 const Settings = () => {
   const navigate = useNavigate();
+
   const [businessInfo, setBusinessInfo] = useState({
     name: 'Restaurante Exemplo',
     address: 'Rua das Flores, 123',
@@ -24,7 +25,7 @@ const Settings = () => {
     description: 'Restaurante especializado em comida tradicional brasileira. Ambiente aconchegante e familiar.',
     websiteUrl: 'https://restauranteexemplo.com.br',
   });
-  
+
   const [reviewSettings, setReviewSettings] = useState({
     allowNegativeReviews: true,
     autoRedirectPositive: true,
@@ -33,43 +34,52 @@ const Settings = () => {
     followUpEmail: false,
   });
 
-  const { user } = useUser();
-  const { 
-    externalLinks, 
-    isLoading,
-    isValidating,
-    handleExternalLinkChange, 
-    handleAddExternalLink, 
-    handleDeleteExternalLink,
-    refreshGooglePlaceData,
-    saveExternalLinks,
-    refreshLinks,
-    error 
-  } = useExternalLinks(user?.id);
-  
+
+const { user, loading } = useAuth();
+
+
+// Garante que o hook receba "undefined" até o user estar pronto
+const userId = user?.id;
+
+const {
+  externalLinks,
+  isLoading,
+  isValidating,
+  handleExternalLinkChange,
+  handleAddExternalLink,
+  handleDeleteExternalLink,
+  refreshGooglePlaceData,
+  saveExternalLinks,
+  refreshLinks,
+  error,
+} = useExternalLinks(userId); // ✅ sempre chamado, mas com userId indefinido no início
+
+if (loading || !userId) {
+  return <p className="p-4">Carregando utilizador...</p>;
+}
+
+
   const handleBusinessInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setBusinessInfo(prev => ({ ...prev, [name]: value }));
   };
-  
+
   const handleReviewSettingsChange = (key: string, value: boolean) => {
     setReviewSettings(prev => ({ ...prev, [key]: value }));
   };
-  
+
   const handleSaveBusinessInfo = () => {
-    // In a real app, this would save to the database
     toast.success('Informações atualizadas com sucesso!');
   };
-  
+
   const handleSaveReviewSettings = () => {
-    // In a real app, this would save to the database
     toast.success('Configurações de avaliação atualizadas!');
   };
-  
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar userRole="business" businessName={businessInfo.name} />
-      
+
       <main className="flex-1 pt-20 px-4 pb-8">
         <div className="container mx-auto max-w-6xl">
           <header className="mb-8">
@@ -78,7 +88,7 @@ const Settings = () => {
               Gerencie as configurações do seu negócio e personalize sua experiência.
             </p>
           </header>
-          
+
           <Tabs defaultValue="business">
             <TabsList className="mb-6">
               <TabsTrigger value="business">Informações do Negócio</TabsTrigger>
@@ -87,26 +97,26 @@ const Settings = () => {
               <TabsTrigger value="notifications">Notificações</TabsTrigger>
               <TabsTrigger value="google-reviews">Google Reviews</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="business">
-              <BusinessInfoSettings 
+              <BusinessInfoSettings
                 businessInfo={businessInfo}
                 onBusinessInfoChange={handleBusinessInfoChange}
                 onSaveBusinessInfo={handleSaveBusinessInfo}
                 onCancel={() => navigate(-1)}
               />
             </TabsContent>
-            
+
             <TabsContent value="reviews">
-              <ReviewSettings 
+              <ReviewSettings
                 reviewSettings={reviewSettings}
                 onReviewSettingsChange={handleReviewSettingsChange}
                 onSaveReviewSettings={handleSaveReviewSettings}
               />
             </TabsContent>
-            
+
             <TabsContent value="external-links">
-              <ExternalLinksSettings 
+              <ExternalLinksSettings
                 externalLinks={externalLinks}
                 onExternalLinkChange={handleExternalLinkChange}
                 onDeleteExternalLink={handleDeleteExternalLink}
@@ -119,7 +129,7 @@ const Settings = () => {
                 refreshLinks={refreshLinks}
               />
             </TabsContent>
-            
+
             <TabsContent value="notifications">
               <NotificationSettings />
             </TabsContent>
