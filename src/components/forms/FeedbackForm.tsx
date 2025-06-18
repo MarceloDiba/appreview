@@ -6,6 +6,12 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { User, X, Info } from 'lucide-react';
 
+// Função para validar UUID
+function isUUID(value: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(value);
+}
+
 interface FeedbackFormProps {
   businessName: string;
   businessId: string;
@@ -58,26 +64,27 @@ const FeedbackForm = ({
         }
       }
 
-      const { error } = await supabase.from('internal_feedback').insert([{
-        user_id: idUsuario,
-        rating: parseInt(formData.notaInterna),
-        feedback_text: formData.comentario,
-      }]);
+      const { error } = await supabase.from('internal_feedback').insert([
+        {
+          user_id: isUUID(idUsuario) ? idUsuario : null,
+          feedback_text: formData.comentario,
+        },
+      ]);
 
       if (error) throw error;
 
       toast.success('Feedback enviado com sucesso!');
       navigate('/thank-you');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao enviar feedback:', error);
-      toast.error('Ocorreu um erro ao enviar o feedback.');
+      toast.error(`Erro: ${error.message || 'Erro desconhecido ao enviar o feedback.'}`);
     } finally {
       setEnviando(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md rounded-2xl p-6 shadow-lg bg-white relative">
         {/* Botão Voltar */}
         <button
