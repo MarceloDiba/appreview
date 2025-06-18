@@ -99,9 +99,9 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
             {userRole !== 'none' ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Button variant="ghost" className="relative h-9 w-40 rounded-full">
                     <div className="flex h-full w-full items-center justify-center rounded-full bg-primary text-white">
-                      {userRole === 'admin' ? 'A' : 'U'}
+                      {userRole === 'admin' ? 'Admin' : 'perfil'}
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
