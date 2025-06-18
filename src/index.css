@@ -95,7 +95,7 @@
   }
 
   .emoji-button {
-    @apply flex flex-col items-center justify-center p-6 rounded-xl transition-all duration-300 cursor-pointer;
+    @apply flex flex-col items-center justify-center p-6 rounded-xl px-5 transition-all duration-300 cursor-pointer;
   }
 
   .emoji-button:hover {
