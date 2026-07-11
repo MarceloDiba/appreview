@@ -1,112 +1,104 @@
-
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import EmojiRating from '@/components/emoji-review/EmojiRating';
 import { supabase } from '@/integrations/supabase/client';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+
+type BusinessData = {
+  id: string;
+  name: string;
+  googleReviewUrl: string;
+  tripAdvisorUrl: string;
+};
+
+const normalizePlatform = (platform: string) => platform.trim().toLowerCase();
+const isUuid = (value: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 
 const Review = () => {
   const { businessId = '' } = useParams<{ businessId: string }>();
-  const [businessData, setBusinessData] = useState({
-    id: businessId,
-    name: "Carregando...",
-    googleReviewUrl: "",
-    tripAdvisorUrl: ""
-  });
+  const [businessData, setBusinessData] = useState<BusinessData | null>(null);
   const [loading, setLoading] = useState(true);
-  
+  const [notFound, setNotFound] = useState(false);
+
   useEffect(() => {
     const fetchBusinessData = async () => {
+      if (!businessId) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
+
       try {
-        // First try to find the QR code by ID
-        const { data: qrData, error: qrError } = await supabase
+        const qrQuery = supabase
           .from('qr_codes')
-          .select('id, name, user_id, times_scanned')
-          .eq('id', businessId)
-          .single();
-          
-        if (qrError && qrError.code !== 'PGRST116') {
-          console.error('Error fetching QR code:', qrError);
+          .select('id, name, user_id, times_scanned, slug')
+          .eq(isUuid(businessId) ? 'id' : 'slug', businessId);
+
+        const { data: qrData, error: qrError } = await qrQuery.maybeSingle();
+
+        if (qrError) {
+          throw qrError;
         }
-        
-        let userName = "Estabelecimento";
-        let userId = businessId;
-        
-        // If QR code found, use its data and find the business name from profiles
-        if (qrData) {
-          userId = qrData.user_id;
-          
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('business_name')
-            .eq('id', userId)
-            .single();
-            
-          if (profileError && profileError.code !== 'PGRST116') {
-            console.error('Error fetching profile:', profileError);
-          } else if (profileData) {
-            userName = profileData.business_name || qrData.name;
-          } else {
-            userName = qrData.name;
-          }
+
+        if (!qrData) {
+          setNotFound(true);
+          return;
         }
-        
-        // Try to find external review links
-        const { data: linksData, error: linksError } = await supabase
-          .from('platform_links')
-          .select('platform, url')
-          .eq('user_id', userId);
-          
+
+        const userId = qrData.user_id;
+
+        const [{ data: profileData, error: profileError }, { data: linksData, error: linksError }] = await Promise.all([
+          supabase.from('profiles').select('business_name').eq('id', userId).maybeSingle(),
+          supabase.from('platform_links').select('platform, url').eq('user_id', userId),
+        ]);
+
+        if (profileError) {
+          throw profileError;
+        }
+
         if (linksError) {
-          console.error('Error fetching platform links:', linksError);
+          throw linksError;
         }
-        
-        let googleUrl = '';
-        let tripAdvisorUrl = '';
-        
-        if (linksData && linksData.length > 0) {
-          const googleLink = linksData.find(link => link.platform === 'google');
-          const tripAdvisorLink = linksData.find(link => link.platform === 'tripadvisor');
-          
-          if (googleLink) googleUrl = googleLink.url;
-          if (tripAdvisorLink) tripAdvisorUrl = tripAdvisorLink.url;
-        }
-        
+
+        const normalizedLinks = (linksData || []).map((link) => ({
+          platform: normalizePlatform(link.platform),
+          url: link.url,
+        }));
+
+        const googleLink = normalizedLinks.find((link) => link.platform.includes('google'));
+        const tripAdvisorLink = normalizedLinks.find((link) => link.platform.includes('tripadvisor'));
+
         setBusinessData({
-          id: businessId,
-          name: userName,
-          googleReviewUrl: googleUrl || "https://g.page/r/review-placeholder",
-          tripAdvisorUrl: tripAdvisorUrl || ""
+          id: qrData.id,
+          name: profileData?.business_name || qrData.name || 'Estabelecimento',
+          googleReviewUrl: googleLink?.url || '',
+          tripAdvisorUrl: tripAdvisorLink?.url || '',
         });
-        
-        // Track the page view by incrementing the times_scanned counter in qr_codes table
-        if (qrData) {
-          try {
-            const currentCount = qrData.times_scanned || 0;
-            
-            const { error: updateError } = await supabase
-              .from('qr_codes')
-              .update({ times_scanned: currentCount + 1 })
-              .eq('id', businessId);
-              
-            if (updateError) {
-              console.error('Error updating scan count:', updateError);
-            }
-          } catch (error) {
-            console.error('Error incrementing counter:', error);
-          }
+
+        const currentCount = qrData.times_scanned || 0;
+        const { error: updateError } = await supabase
+          .from('qr_codes')
+          .update({ times_scanned: currentCount + 1 })
+          .eq('id', qrData.id);
+
+        if (updateError) {
+          console.error('Error updating scan count:', updateError);
         }
       } catch (error) {
         console.error('Error loading business data:', error);
-        toast.error('Erro ao carregar dados do estabelecimento');
+        toast.error('Erro ao carregar os dados do estabelecimento.');
+        setNotFound(true);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchBusinessData();
   }, [businessId]);
-  
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -114,7 +106,25 @@ const Review = () => {
       </div>
     );
   }
-  
+
+  if (notFound || !businessData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <Card className="w-full max-w-md p-6 text-center space-y-4">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Link de avaliação indisponível</h1>
+            <p className="text-sm text-gray-600 mt-2">
+              Não encontramos um QR Code ativo para este link.
+            </p>
+          </div>
+          <Button asChild>
+            <Link to="/">Voltar para o início</Link>
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <EmojiRating
