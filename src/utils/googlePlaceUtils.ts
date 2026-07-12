@@ -1,6 +1,23 @@
 
 /**
- * Extracts a Google Place ID from various Google URL formats
+ * Checks whether a URL looks like a Google review/business URL.
+ * This accepts review links even when they do not expose a Place ID.
+ */
+export const isGoogleReviewUrl = (url: string): boolean => {
+  if (!url || typeof url !== 'string') return false;
+
+  return [
+    /g\.page\/r\//i,
+    /g\.page\//i,
+    /search\.google\.com\/local\/writereview/i,
+    /maps\.google\./i,
+    /google\.[^/]+\/maps/i,
+  ].some((pattern) => pattern.test(url));
+};
+
+/**
+ * Extracts a Google Place ID from supported URL formats.
+ * Returns null for links that are valid for redirection but do not expose a Place ID.
  * 
  * @param url Google Maps or Business URL
  * @returns Place ID if found, null otherwise
@@ -25,18 +42,6 @@ export const extractPlaceIdFromUrl = (url: string): string | null => {
     const cidMatch = url.match(/[?&]cid=([^&]+)/i);
     if (cidMatch && cidMatch[1]) {
       return `cid:${cidMatch[1]}`;
-    }
-
-    // 4. g.page/...
-    const gPageMatch = url.match(/g\.page\/([^/?#]+)/i);
-    if (gPageMatch && gPageMatch[1]) {
-      return `gpage:${gPageMatch[1]}`;
-    }
-
-    // 5. g.page/r/...
-    const gPageRMatch = url.match(/g\.page\/r\/([^/?#]+)/i);
-    if (gPageRMatch && gPageRMatch[1]) {
-      return `gpage-r:${gPageRMatch[1]}`;
     }
 
     return null;
@@ -78,7 +83,7 @@ export const isValidPlaceId = (placeId: string): boolean => {
  * @param error Error message or object
  * @returns User-friendly error message
  */
-export const formatGooglePlacesError = (error: any): string => {
+export const formatGooglePlacesError = (error: unknown): string => {
   if (typeof error === 'string') {
     if (error.includes('ZERO_RESULTS')) {
       return 'Não foi possível encontrar o local. Verifique o URL e tente novamente.';

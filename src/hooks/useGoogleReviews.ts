@@ -30,6 +30,18 @@ export const useGoogleReviews = (userId: string) => {
   const [placeInfo, setPlaceInfo] = useState<PlaceInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const normalizeGoogleReviewsError = (message: string): string => {
+    if (
+      message.includes('Failed to send a request to the Edge Function') ||
+      message.includes('FunctionsFetchError') ||
+      message.includes('fetch failed')
+    ) {
+      return 'A importação automática de avaliações do Google ainda não está configurada neste ambiente. O link de avaliação pode funcionar normalmente, mas a aba Google Reviews precisa da Edge Function e da chave da API do Google Places.';
+    }
+
+    return message;
+  };
+
   const formatDate = (dateString: string): string => {
     try {
       const date = new Date(dateString);
@@ -66,7 +78,8 @@ export const useGoogleReviews = (userId: string) => {
         throw new Error('No data returned from Google Places API');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error fetching Google reviews';
+      const rawErrorMessage = error instanceof Error ? error.message : 'Error fetching Google reviews';
+      const errorMessage = normalizeGoogleReviewsError(rawErrorMessage);
       console.error('Error fetching Google reviews:', errorMessage);
       setError(errorMessage);
       toast.error('Erro ao carregar avaliações do Google. Por favor, tente novamente mais tarde.');
@@ -100,16 +113,17 @@ export const useGoogleReviews = (userId: string) => {
         return;
       }
       
-      const googleLink = links[0];
+      const googleLink = links[0] as (typeof links)[number] & { place_id?: string | null };
       if (!googleLink.place_id) {
-        setError('Link do Google configurado, mas sem Place ID válido. Atualize seu link nas configurações.');
+        setError('O link do Google foi salvo, mas não inclui um Place ID para importação. Para importar avaliações automaticamente nesta aba, use um link com `placeid=` nas configurações.');
         return;
       }
       
       // If we have a place_id, load reviews
       await fetchGoogleReviews(googleLink.place_id);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error loading Google reviews';
+      const rawErrorMessage = error instanceof Error ? error.message : 'Error loading Google reviews';
+      const errorMessage = normalizeGoogleReviewsError(rawErrorMessage);
       console.error('Error loading Google reviews:', errorMessage);
       setError(errorMessage);
     } finally {

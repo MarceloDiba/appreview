@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PlatformLink } from '@/components/settings/PlatformLink';
 import { toast } from 'sonner';
-import { extractPlaceIdFromUrl, isValidPlaceId } from '@/utils/googlePlaceUtils';
+import { extractPlaceIdFromUrl, isGoogleReviewUrl, isValidPlaceId } from '@/utils/googlePlaceUtils';
 
 export type ValidationStatus = 'pending' | 'valid' | 'invalid';
 
@@ -49,8 +49,8 @@ export const useExternalLinks = (userId: string | undefined) => {
             platform: link.display_name || link.platform,
             url: link.url,
             place_id: extra.place_id || '',
-            validation_status: extra.place_id ? ('valid' as ValidationStatus) : ('pending' as ValidationStatus),
-            business_name: extra.business_name || undefined,
+            validation_status: extra.place_id || link.url ? ('valid' as ValidationStatus) : ('pending' as ValidationStatus),
+            business_name: extra.business_name || (link.url && !extra.place_id && link.platform === 'google reviews' ? 'Link de avaliação salvo. A importação automática exige Place ID.' : undefined),
           };
         });
         
@@ -154,6 +154,23 @@ export const useExternalLinks = (userId: string | undefined) => {
   const processGooglePlaceId = async (url: string, index: number): Promise<string | null> => {
     try {
       const placeId = extractPlaceIdFromUrl(url);
+
+      if (!placeId && isGoogleReviewUrl(url)) {
+        setExternalLinks((prev) => {
+          const updatedLinks = [...prev];
+          updatedLinks[index] = {
+            ...updatedLinks[index],
+            place_id: '',
+            validation_status: 'valid' as ValidationStatus,
+            business_name: 'Link de avaliação salvo. A importação automática exige Place ID.',
+            error_message: undefined,
+          };
+          return updatedLinks;
+        });
+
+        toast.success('Link de avaliação do Google salvo com sucesso!');
+        return null;
+      }
       
       if (!placeId) {
         toast.error(`Não foi possível extrair o ID do local a partir do link: ${url}`);
@@ -264,7 +281,7 @@ export const useExternalLinks = (userId: string | undefined) => {
 
     // Cria uma cópia local atualizada manualmente
     const updatedLinks = await Promise.all(
-      externalLinks.map(async (link, index) => {
+      externalLinks.map(async (link) => {
         if (
           link.platform.toLowerCase() === 'google reviews' &&
           link.url &&
@@ -274,7 +291,10 @@ export const useExternalLinks = (userId: string | undefined) => {
           return {
             ...link,
             place_id: placeId || null,
-            validation_status: placeId ? 'valid' : 'invalid'
+            validation_status: placeId || isGoogleReviewUrl(link.url) ? 'valid' : 'invalid',
+            business_name: !placeId && isGoogleReviewUrl(link.url)
+              ? (link.business_name || 'Link de avaliação salvo. A importação automática exige Place ID.')
+              : link.business_name
           };
         }
         return link;
@@ -283,13 +303,14 @@ export const useExternalLinks = (userId: string | undefined) => {
 
     // Agora sim, monta os linksToInsert com base na versão correta
     const linksToInsert = updatedLinks
-      .filter(link => link.platform.toLowerCase() === 'google reviews' && link.place_id)
+      .filter(link => link.url?.trim())
       .map(link => ({
         user_id: userId,
         platform: link.platform.toLowerCase(),
         url: link.url,
         display_name: link.platform,
-        place_id: link.place_id
+        place_id: link.place_id || null,
+        business_name: link.business_name || null,
       }));
 
     // LOG 2: Mostra os dados que serão inseridos no Supabase
