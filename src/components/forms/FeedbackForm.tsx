@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { User, X, Info } from 'lucide-react';
+import { X, Lock } from 'lucide-react';
 
 // Função para validar UUID
 function isUUID(value: string): boolean {
@@ -29,12 +31,14 @@ const FeedbackForm = ({
 
   const [formData, setFormData] = useState({
     comentario: '',
+    nome: '',
+    contato: '',
     notaInterna: rating === 'negative' ? '1' : rating === 'neutral' ? '3' : '5',
   });
 
   const [enviando, setEnviando] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -59,21 +63,28 @@ const FeedbackForm = ({
 
         if (!qrError && qrData) {
           idUsuario = qrData.user_id;
-        } else {
-          idUsuario = businessId;
         }
+      }
+
+      if (!idUsuario || !isUUID(idUsuario)) {
+        toast.error('Não foi possível identificar o estabelecimento. Tente novamente pelo QR Code.');
+        setEnviando(false);
+        return;
       }
 
       const { error } = await supabase.from('internal_feedback').insert([
         {
-          user_id: isUUID(idUsuario) ? idUsuario : null,
+          user_id: idUsuario,
           feedback_text: formData.comentario,
+          rating: parseInt(formData.notaInterna, 10),
+          customer_name: formData.nome || null,
+          customer_email: formData.contato || null,
         },
       ]);
 
       if (error) throw error;
 
-      toast.success('Feedback enviado com sucesso!');
+      toast.success('Feedback enviado! O estabelecimento já foi avisado.');
       navigate('/thank-you');
     } catch (error: any) {
       console.error('Erro ao enviar feedback:', error);
@@ -94,30 +105,27 @@ const FeedbackForm = ({
           <X size={20} />
         </button>
 
-        {/* Botão Postar */}
+        {/* Botão Enviar */}
         <button
           type="submit"
           onClick={handleSubmit}
           disabled={enviando}
           className="absolute right-4 top-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-medium"
         >
-          {enviando ? 'Enviando...' : 'Postar'}
+          {enviando ? 'Enviando...' : 'Enviar'}
         </button>
 
         {/* Cabeçalho */}
         <div className="flex flex-col items-start gap-3 pt-10 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-white text-gray-500 rounded-full w-10 h-10 flex items-center justify-center border border-gray-300">
-              <User size={20} className="text-gray-500" />
-            </div>
-            <div className="text-left">
-              <h2 className="text-base font-medium">
-                {rating === 'negative' ? 'Usuário' : 'Como foi sua experiência?'}
-              </h2>
-              <div className="flex items-center gap-1">
-                <span className="text-sm text-gray-500">Postar publicamente</span>
-                <Info size={14} className="text-gray-500" />
-              </div>
+          <div className="text-left">
+            <h2 className="text-base font-medium">
+              Conte o que aconteceu
+            </h2>
+            <div className="flex items-center gap-1 mt-1">
+              <Lock size={14} className="text-gray-500" />
+              <span className="text-sm text-gray-500">
+                Vai direto para {businessName} resolver — não é publicado
+              </span>
             </div>
           </div>
         </div>
@@ -145,21 +153,46 @@ const FeedbackForm = ({
         </div>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <p className="text-sm text-black-500 text-left">
-            Conte mais sobre a sua experiência
-          </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <p className="text-sm text-black-500 text-left mb-2">
+              Conte mais sobre a sua experiência
+            </p>
+            <Textarea
+              id="comentario"
+              name="comentario"
+              value={formData.comentario}
+              onChange={handleChange}
+              required
+              placeholder="Conte como foi sua experiência neste lugar"
+              rows={4}
+              className="resize-none border border-blue-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 rounded-xl text-base p-4"
+            />
+          </div>
 
-          <Textarea
-            id="comentario"
-            name="comentario"
-            value={formData.comentario}
-            onChange={handleChange}
-            required
-            placeholder="Conte como foi sua experiência neste lugar"
-            rows={4}
-            className="resize-none border border-blue-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 rounded-xl text-base p-4"
-          />
+          <div>
+            <Label htmlFor="nome" className="text-sm text-gray-600">Seu nome (opcional)</Label>
+            <Input
+              id="nome"
+              name="nome"
+              value={formData.nome}
+              onChange={handleChange}
+              placeholder="Como podemos te chamar"
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="contato" className="text-sm text-gray-600">WhatsApp ou e-mail (opcional)</Label>
+            <Input
+              id="contato"
+              name="contato"
+              value={formData.contato}
+              onChange={handleChange}
+              placeholder="Deixe um contato se quiser retorno"
+              className="mt-1"
+            />
+          </div>
         </form>
       </Card>
     </div>

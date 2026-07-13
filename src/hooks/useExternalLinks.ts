@@ -50,7 +50,11 @@ export const useExternalLinks = (userId: string | undefined) => {
             url: link.url,
             place_id: extra.place_id || '',
             validation_status: extra.place_id || link.url ? ('valid' as ValidationStatus) : ('pending' as ValidationStatus),
-            business_name: extra.business_name || (link.url && !extra.place_id && link.platform === 'google reviews' ? 'Link de avaliação salvo. A importação automática exige Place ID.' : undefined),
+            business_name:
+              extra.business_name ||
+              (link.url && !extra.place_id && link.platform === 'google reviews'
+                ? 'Link de avaliação salvo. A importação automática exige Place ID.'
+                : undefined),
           };
         });
         

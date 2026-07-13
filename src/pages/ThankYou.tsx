@@ -17,10 +17,10 @@ const ThankYou = () => {
           <h1 className="text-2xl font-bold text-gray-800 mb-2">
             Obrigado pelo seu feedback!
           </h1>
-          
+
           <p className="text-gray-600 mb-6">
-            Sua opinião é muito importante para nós.
-            Valorizamos sua contribuição e estamos trabalhando para oferecer sempre a melhor experiência.
+            Recebemos seu relato e ele já está com o responsável do estabelecimento.
+            Se você deixou um contato, pode esperar um retorno em breve.
           </p>
           
           <Button asChild>
