@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Frown, Meh, Smile } from 'lucide-react';
+import { ExternalLink, Frown, Meh, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -12,19 +12,29 @@ type EmojiOption = 'negative' | 'neutral' | 'positive';
 interface EmojiRatingProps {
   businessName: string;
   businessId: string;
-  googleReviewUrl?: string;
-  tripAdvisorUrl?: string;
+  externalLinks?: Array<{
+    platform: string;
+    url: string;
+  }>;
 }
 
 const EmojiRating = ({ 
   businessName, 
   businessId, 
-  googleReviewUrl = 'https://g.page/r/review-placeholder', 
-  tripAdvisorUrl 
+  externalLinks = []
 }: EmojiRatingProps) => {
   const navigate = useNavigate();
   const [selectedRating, setSelectedRating] = useState<EmojiOption | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPlatformChooser, setShowPlatformChooser] = useState(false);
+
+  const availableExternalLinks = externalLinks.filter((link) => Boolean(link?.url));
+
+  const openExternalReview = (url: string) => {
+    toast.success('Abrindo plataforma de avaliação...');
+    window.open(url, '_blank');
+    navigate('/thank-you');
+  };
   
   const handleRating = async (rating: EmojiOption) => {
     setSelectedRating(rating);
@@ -73,6 +83,7 @@ const EmojiRating = ({
       setTimeout(() => {
         if (rating === 'negative') {
           // If negative, redirect to internal feedback form
+          setShowPlatformChooser(false);
           navigate(`/feedback/${businessId}`, { 
             state: { 
               rating,
@@ -81,16 +92,13 @@ const EmojiRating = ({
             } 
           });
         } else {
-          // If positive or neutral, redirect to external site
-          // Prefer Google Reviews if available, otherwise TripAdvisor
-          const externalUrl = googleReviewUrl || tripAdvisorUrl;
-          if (externalUrl) {
-            toast.success('Redirecionando para site de avaliação externo...');
-            // Open in new tab and navigate to thank-you page in current tab
-            window.open(externalUrl, '_blank');
-            navigate('/thank-you');
+          if (availableExternalLinks.length === 1) {
+            setShowPlatformChooser(false);
+            openExternalReview(availableExternalLinks[0].url);
+          } else if (availableExternalLinks.length >= 2) {
+            setShowPlatformChooser(true);
           } else {
-            // Fallback if no external URL is provided
+            setShowPlatformChooser(false);
             navigate(`/feedback/${businessId}`, { 
               state: { 
                 rating,
@@ -109,6 +117,47 @@ const EmojiRating = ({
     }
   };
   
+  if (showPlatformChooser) {
+    return (
+      <Card className="w-full max-w-md mx-auto p-6 shadow-lg border-0 bg-white">
+        <div className="text-center mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">
+            Onde você prefere avaliar?
+          </h2>
+          <p className="text-gray-600 mt-2">
+            Escolha a plataforma para continuar com sua avaliação de {businessName}.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {availableExternalLinks.map((link) => (
+            <Button
+              key={`${link.platform}-${link.url}`}
+              className="w-full justify-between h-12 text-base"
+              onClick={() => openExternalReview(link.url)}
+            >
+              <span>{link.platform}</span>
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+          ))}
+        </div>
+
+        <div className="mt-6 text-center">
+          <Button
+            variant="link"
+            className="text-gray-500 text-sm hover:text-primary"
+            onClick={() => {
+              setShowPlatformChooser(false);
+              setSelectedRating(null);
+            }}
+          >
+            Voltar e escolher outra opção
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full max-w-md mx-auto p-6 shadow-lg border-0 bg-white">
       <div className="text-center mb-8">

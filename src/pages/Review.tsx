@@ -9,8 +9,10 @@ import { toast } from 'sonner';
 type BusinessData = {
   id: string;
   name: string;
-  googleReviewUrl: string;
-  tripAdvisorUrl: string;
+  externalLinks: Array<{
+    platform: string;
+    url: string;
+  }>;
 };
 
 const normalizePlatform = (platform: string) => platform.trim().toLowerCase();
@@ -68,14 +70,12 @@ const Review = () => {
           url: link.url,
         }));
 
-        const googleLink = normalizedLinks.find((link) => link.platform.includes('google'));
-        const tripAdvisorLink = normalizedLinks.find((link) => link.platform.includes('tripadvisor'));
+        const externalLinks = normalizedLinks.filter((link) => Boolean(link.url));
 
         setBusinessData({
           id: qrData.id,
           name: profileData?.business_name || qrData.name || 'Estabelecimento',
-          googleReviewUrl: googleLink?.url || '',
-          tripAdvisorUrl: tripAdvisorLink?.url || '',
+          externalLinks,
         });
 
         const currentCount = qrData.times_scanned || 0;
@@ -130,8 +130,7 @@ const Review = () => {
       <EmojiRating
         businessId={businessData.id}
         businessName={businessData.name}
-        googleReviewUrl={businessData.googleReviewUrl}
-        tripAdvisorUrl={businessData.tripAdvisorUrl}
+        externalLinks={businessData.externalLinks}
       />
     </div>
   );
