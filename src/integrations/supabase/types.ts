@@ -33,6 +33,78 @@ export type Database = {
         }
         Relationships: []
       }
+      cached_reviews: {
+        Row: {
+          author_image: string | null
+          author_name: string
+          created_at: string
+          external_place_id: string
+          id: string
+          rating: number
+          review_id: string
+          text: string | null
+          time: string
+        }
+        Insert: {
+          author_image?: string | null
+          author_name: string
+          created_at?: string
+          external_place_id: string
+          id?: string
+          rating: number
+          review_id: string
+          text?: string | null
+          time: string
+        }
+        Update: {
+          author_image?: string | null
+          author_name?: string
+          created_at?: string
+          external_place_id?: string
+          id?: string
+          rating?: number
+          review_id?: string
+          text?: string | null
+          time?: string
+        }
+        Relationships: []
+      }
+      external_place_info: {
+        Row: {
+          average_rating: number
+          created_at: string
+          id: string
+          last_fetch_time: string | null
+          place_id: string
+          place_name: string
+          total_reviews: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          average_rating?: number
+          created_at?: string
+          id?: string
+          last_fetch_time?: string | null
+          place_id: string
+          place_name: string
+          total_reviews?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          average_rating?: number
+          created_at?: string
+          id?: string
+          last_fetch_time?: string | null
+          place_id?: string
+          place_name?: string
+          total_reviews?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       internal_feedback: {
         Row: {
           created_at: string | null
@@ -71,27 +143,33 @@ export type Database = {
       }
       platform_links: {
         Row: {
+          business_name: string | null
           created_at: string | null
           display_name: string | null
           id: string
+          place_id: string | null
           platform: string
           updated_at: string | null
           url: string
           user_id: string
         }
         Insert: {
+          business_name?: string | null
           created_at?: string | null
           display_name?: string | null
           id?: string
+          place_id?: string | null
           platform: string
           updated_at?: string | null
           url: string
           user_id: string
         }
         Update: {
+          business_name?: string | null
           created_at?: string | null
           display_name?: string | null
           id?: string
+          place_id?: string | null
           platform?: string
           updated_at?: string | null
           url?: string
