@@ -144,7 +144,7 @@ const Reviews = () => {
               <CardHeader>
                 <CardTitle>Integrações e Links Externos</CardTitle>
                 <CardDescription>
-                  Configure as integrações com plataformas de avaliação externas para importar e gerenciar automaticamente.
+                  Configure os links e a infraestrutura das plataformas de avaliação externas. Link salvo não significa importação automática ativa.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -160,15 +160,15 @@ const Reviews = () => {
                           />
                         </div>
                         Google Reviews API
-                        <span className="ml-2 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                          Conectado
+                        <span className="ml-2 text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">
+                          Link salvo / infra pendente
                         </span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-col gap-2">
                         <p className="text-sm text-gray-500">
-                          Importações automáticas de avaliações do Google Reviews através da API do Google Places.
+                          O link do Google pode estar salvo, mas a importação automática só funciona quando o Place ID, a Edge Function e a chave da Google Places API estiverem operacionais.
                         </p>
                         <Button 
                           variant="outline"
@@ -217,10 +217,9 @@ const Reviews = () => {
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 flex items-start">
                   <AlertCircle className="h-5 w-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="text-sm font-medium text-blue-700">API de avaliações</h4>
+                    <h4 className="text-sm font-medium text-blue-700">Status da importação automática</h4>
                     <p className="text-sm text-blue-600 mt-1">
-                      A integração com o Google Places API está ativa. As avaliações são automaticamente atualizadas a cada 12 horas.
-                      Você pode forçar uma atualização manualmente clicando no botão "Atualizar" na seção de Avaliações do Google.
+                      Se o link do Google já foi salvo, ele pode ser usado para redirecionar clientes. Já a importação automática desta aba continua dependente de Place ID, Edge Function publicada e secret GOOGLE_PLACES_API_KEY no Supabase.
                     </p>
                   </div>
                 </div>

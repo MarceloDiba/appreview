@@ -50,7 +50,11 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
       return (
         <div className="flex items-center text-green-600">
           <CheckCircle className="h-4 w-4 mr-1" />
-          <span className="text-xs">Verificado: {link.business_name}</span>
+          <span className="text-xs">
+            {link.place_id
+              ? `Verificado: ${link.business_name}`
+              : (link.business_name || 'Link de avaliação salvo. A importação automática exige Place ID.')}
+          </span>
         </div>
       );
     } else if (link.validation_status === 'invalid') {
@@ -128,6 +132,12 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
                 </div>
                 
                 {renderValidationStatus(link)}
+
+                {link.platform === 'Google Reviews' && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    Aceita links `g.page`, Google Maps e `writereview`. Para importar avaliações na aba Google Reviews, use um link com `placeid=`.
+                  </div>
+                )}
                 
                 {link.platform === 'Google Reviews' && link.place_id && (
                   <div className="text-xs text-gray-500 mt-1">
