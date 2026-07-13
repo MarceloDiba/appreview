@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import ReviewsList from '@/components/dashboard/ReviewsList';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
+import CasesList from '@/components/dashboard/cases/CasesList';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,7 +10,7 @@ import { toast } from 'sonner';
 import { AlertCircle, ImportIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
-// Mock data for demonstration
+// Mock data for demonstration (Google/TripAdvisor reviews only — internal cases come from real data below)
 const reviews = [
   {
     id: 'rev1',
@@ -28,14 +29,6 @@ const reviews = [
     comment: 'A comida estava boa, mas o atendimento demorou muito.',
     date: '2023-05-10',
     responseStatus: 'pending' as const
-  },
-  {
-    id: 'rev3',
-    customerName: 'Pedro Santos',
-    rating: 'negative' as const,
-    platform: 'internal' as const,
-    comment: 'Fiquei esperando por mais de uma hora e a comida chegou fria.',
-    date: '2023-05-08'
   },
   {
     id: 'rev4',
@@ -93,7 +86,7 @@ const Reviews = () => {
             <div>
               <h1 className="text-3xl font-bold">Avaliações</h1>
               <p className="text-gray-600 mt-1">
-                Gerencie e responda todas as avaliações do seu negócio.
+                Resolva os casos que chegam pelo Smiley e responda às avaliações públicas do seu negócio.
               </p>
             </div>
             
@@ -119,26 +112,30 @@ const Reviews = () => {
           
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
-              <TabsTrigger value="all">Todas ({reviews.length})</TabsTrigger>
+              <TabsTrigger value="all">Públicas ({reviews.length})</TabsTrigger>
               <TabsTrigger value="google">Google (2)</TabsTrigger>
               <TabsTrigger value="tripadvisor">TripAdvisor (2)</TabsTrigger>
-              <TabsTrigger value="internal">Internas (1)</TabsTrigger>
+              <TabsTrigger value="internal">Casos para resolver</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="all">
               <ReviewsList reviews={reviews} />
             </TabsContent>
-            
+
             <TabsContent value="google">
               <ReviewsList reviews={reviews.filter(r => r.platform === 'google')} />
             </TabsContent>
-            
+
             <TabsContent value="tripadvisor">
               <ReviewsList reviews={reviews.filter(r => r.platform === 'tripadvisor')} />
             </TabsContent>
-            
+
             <TabsContent value="internal">
-              <ReviewsList reviews={reviews.filter(r => r.platform === 'internal')} />
+              {userId ? (
+                <CasesList userId={userId} />
+              ) : (
+                <div className="text-center py-8 text-gray-500">Carregando...</div>
+              )}
             </TabsContent>
           </Tabs>
           

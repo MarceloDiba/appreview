@@ -20,8 +20,9 @@ const Index = () => {
                 para seu negócio
               </h1>
               <p className="mt-4 sm:mt-6 text-base sm:text-lg text-gray-600">
-                AppReview ajuda a capturar feedback positivo e negativo de forma inteligente, 
-                melhorando sua reputação online e aumentando a visibilidade no Google e TripAdvisor.
+                AppReview ajuda você a descobrir problemas na hora, resolver antes que o cliente
+                vá reclamar em público e mostrar que agiu — enquanto direciona quem amou a experiência
+                para avaliar no Google e TripAdvisor.
               </p>
               <div className="mt-6 sm:mt-8 flex flex-wrap gap-3 sm:gap-4">
                 <Button asChild size="lg" className="w-full sm:w-auto">
@@ -110,9 +111,9 @@ const Index = () => {
               <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-3 sm:mb-4">
                 <span className="text-xl sm:text-2xl font-bold text-primary">70%</span>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">Redução de avaliações negativas públicas</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Casos resolvidos antes de virar avaliação pública</h3>
               <p className="text-gray-600 text-sm sm:text-base">
-                Redução de até 70% nas avaliações negativas públicas, através do nosso sistema de captura interna de feedback.
+                Nossos clientes resolvem até 70% dos problemas direto com o cliente, antes que ele precise reclamar em público.
               </p>
             </div>
             
@@ -148,7 +149,8 @@ const Index = () => {
                 <div>
                   <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">Avaliação Smiley Intuitiva</h3>
                   <p className="text-gray-600 text-sm sm:text-base">
-                    Interface simples com 3 emoções que direciona clientes satisfeitos para plataformas externas e captura feedback negativo internamente.
+                    Interface simples com 3 emoções: quem amou a experiência vai direto avaliar no Google e TripAdvisor,
+                    e quem teve um problema vira um caso que você resolve na hora.
                   </p>
                 </div>
               </div>
@@ -301,7 +303,7 @@ const Index = () => {
                 </div>
                 <div className="flex items-start">
                   <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm sm:text-base">Captura interna de feedback negativo</span>
+                  <span className="text-sm sm:text-base">Casos de feedback negativo para resolver e responder</span>
                 </div>
                 <div className="flex items-start">
                   <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
