@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { ExternalLink, Frown, Meh, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from '@/i18n/useTranslation';
 
 type EmojiOption = 'negative' | 'neutral' | 'positive';
 
@@ -24,6 +25,7 @@ const EmojiRating = ({
   externalLinks = []
 }: EmojiRatingProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [selectedRating, setSelectedRating] = useState<EmojiOption | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPlatformChooser, setShowPlatformChooser] = useState(false);
@@ -122,10 +124,10 @@ const EmojiRating = ({
       <Card className="w-full max-w-md mx-auto p-6 shadow-lg border-0 bg-white">
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-bold text-gray-800">
-            Onde você prefere avaliar?
+            {t('chooserTitle')}
           </h2>
           <p className="text-gray-600 mt-2">
-            Escolha a plataforma para continuar com sua avaliação de {businessName}.
+            {t('chooserSubtitle', { business: businessName })}
           </p>
         </div>
 
@@ -151,7 +153,7 @@ const EmojiRating = ({
               setSelectedRating(null);
             }}
           >
-            Voltar e escolher outra opção
+            {t('backAndChooseAnother')}
           </Button>
         </div>
       </Card>
@@ -162,7 +164,7 @@ const EmojiRating = ({
     <Card className="w-full max-w-md mx-auto p-6 shadow-lg border-0 bg-white">
       <div className="text-center mb-8">
         <h2 className="text-xl md:text-2xl font-bold text-gray-800">
-          Como foi sua experiência?
+          {t('ratingQuestion')}
         </h2>
         <p className="text-gray-600 mt-2">
           {businessName}
@@ -173,34 +175,34 @@ const EmojiRating = ({
         <div 
           className={`emoji-button bg-review-negative/10 ${selectedRating === 'negative' ? 'ring-2 ring-review-negative animate-scale' : ''} ${isSubmitting ? 'opacity-50 pointer-events-none' : ''}`}
           onClick={() => !isSubmitting && handleRating('negative')}
-          aria-label="Avaliação negativa"
+          aria-label={t('ariaRatingBad')}
         >
           <div className="emoji-icon text-review-negative">
             <Frown className="h-12 w-12 md:h-16 md:w-16" />
           </div>
-          <span className="emoji-label">Ruim</span>
+          <span className="emoji-label">{t('ratingBad')}</span>
         </div>
         
         <div 
           className={`emoji-button bg-review-neutral/10 ${selectedRating === 'neutral' ? 'ring-2 ring-review-neutral animate-scale' : ''} ${isSubmitting ? 'opacity-50 pointer-events-none' : ''}`}
           onClick={() => !isSubmitting && handleRating('neutral')}
-          aria-label="Avaliação neutra"
+          aria-label={t('ariaRatingOk')}
         >
           <div className="emoji-icon text-review-neutral">
             <Meh className="h-12 w-12 md:h-16 md:w-16" />
           </div>
-          <span className="emoji-label">Regular</span>
+          <span className="emoji-label">{t('ratingOk')}</span>
         </div>
         
         <div 
           className={`emoji-button bg-review-positive/10 ${selectedRating === 'positive' ? 'ring-2 ring-review-positive animate-scale' : ''} ${isSubmitting ? 'opacity-50 pointer-events-none' : ''}`}
           onClick={() => !isSubmitting && handleRating('positive')}
-          aria-label="Avaliação positiva"
+          aria-label={t('ariaRatingGood')}
         >
           <div className="emoji-icon text-review-positive">
             <Smile className="h-12 w-12 md:h-16 md:w-16" />
           </div>
-          <span className="emoji-label">Bom</span>
+          <span className="emoji-label">{t('ratingGood')}</span>
         </div>
       </div>
       
@@ -211,7 +213,7 @@ const EmojiRating = ({
           onClick={() => window.history.back()}
           disabled={isSubmitting}
         >
-          Voltar
+          {t('back')}
         </Button>
       </div>
     </Card>

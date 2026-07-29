@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CheckCircle, ExternalLink } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 interface ThankYouState {
   businessName?: string;
@@ -12,6 +13,7 @@ interface ThankYouState {
 
 const ThankYou = () => {
   const location = useLocation();
+  const { t } = useTranslation();
   const { businessName, googleReviewUrl, tripAdvisorUrl } =
     (location.state as ThankYouState) || {};
 
@@ -25,14 +27,12 @@ const ThankYou = () => {
             <CheckCircle className="h-6 w-6" />
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            Obrigado pelo seu feedback!
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">{t('thanksTitle')}</h1>
 
           <p className="text-gray-600 mb-6">
-            Recebemos o seu relato e ele já está com o responsável
-            {businessName ? ` do ${businessName}` : ' do estabelecimento'}.
-            Se deixou um contacto, pode esperar retorno em breve.
+            {businessName
+              ? t('thanksBodyNamed', { business: businessName })
+              : t('thanksBodyGeneric')}
           </p>
         </div>
 
@@ -44,7 +44,7 @@ const ThankYou = () => {
         {hasPublicOption && (
           <div className="border-t border-gray-200 pt-5">
             <p className="text-sm font-medium text-gray-900 text-center">
-              Quer deixar também uma avaliação pública?
+              {t('thanksPublicPrompt')}
             </p>
             <div className="mt-3 flex flex-col gap-2">
               {googleReviewUrl && (
@@ -54,7 +54,7 @@ const ThankYou = () => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                 >
-                  Avaliar no Google
+                  {t('publicGoogle')}
                   <ExternalLink size={14} aria-hidden="true" />
                 </a>
               )}
@@ -65,7 +65,7 @@ const ThankYou = () => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                 >
-                  Avaliar no TripAdvisor
+                  {t('publicTripAdvisor')}
                   <ExternalLink size={14} aria-hidden="true" />
                 </a>
               )}
@@ -75,7 +75,7 @@ const ThankYou = () => {
 
         <div className="mt-6 text-center">
           <Button asChild variant="outline">
-            <Link to="/">Voltar à página inicial</Link>
+            <Link to="/">{t('thanksHome')}</Link>
           </Button>
         </div>
       </Card>
