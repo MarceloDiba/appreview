@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { X, Lock } from 'lucide-react';
+import { X, Send, ExternalLink } from 'lucide-react';
 
 // Função para validar UUID
 function isUUID(value: string): boolean {
@@ -19,6 +19,13 @@ interface FeedbackFormProps {
   businessId: string;
   userId?: string;
   rating: 'negative' | 'neutral' | 'positive';
+  /**
+   * Public review destinations. These must always be offered, whatever the
+   * rating — routing a customer away from public review based on sentiment is
+   * review gating, which Google prohibits and the EU Omnibus Directive bans.
+   */
+  googleReviewUrl?: string;
+  tripAdvisorUrl?: string;
 }
 
 const FeedbackForm = ({
@@ -26,6 +33,8 @@ const FeedbackForm = ({
   businessId,
   userId,
   rating,
+  googleReviewUrl,
+  tripAdvisorUrl,
 }: FeedbackFormProps) => {
   const navigate = useNavigate();
 
@@ -85,7 +94,11 @@ const FeedbackForm = ({
       if (error) throw error;
 
       toast.success('Feedback enviado! O estabelecimento já foi avisado.');
-      navigate('/thank-you');
+      // Carry the public review links forward so the option stays available
+      // after submitting — the thank-you page is not a dead end.
+      navigate('/thank-you', {
+        state: { businessName, googleReviewUrl, tripAdvisorUrl },
+      });
     } catch (error: any) {
       console.error('Erro ao enviar feedback:', error);
       toast.error(`Erro: ${error.message || 'Erro desconhecido ao enviar o feedback.'}`);
@@ -121,10 +134,10 @@ const FeedbackForm = ({
             <h2 className="text-base font-medium">
               Conte o que aconteceu
             </h2>
-            <div className="flex items-center gap-1 mt-1">
-              <Lock size={14} className="text-gray-500" />
+            <div className="flex items-start gap-1 mt-1">
+              <Send size={14} className="text-gray-500 mt-0.5 flex-shrink-0" />
               <span className="text-sm text-gray-500">
-                Vai direto para {businessName} resolver — não é publicado
+                {businessName} recebe o seu relato na hora e pode entrar em contacto.
               </span>
             </div>
           </div>
@@ -194,6 +207,47 @@ const FeedbackForm = ({
             />
           </div>
         </form>
+
+        {/*
+          Public review is offered here regardless of the rating given. Hiding it
+          from unhappy customers is review gating — prohibited by Google's policy,
+          the FTC's Consumer Review Rule and the EU Omnibus Directive. Do not
+          make this block conditional on `rating`.
+        */}
+        {(googleReviewUrl || tripAdvisorUrl) && (
+          <div className="mt-6 border-t border-gray-200 pt-5">
+            <p className="text-sm font-medium text-gray-900">
+              Também pode avaliar publicamente
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              A sua avaliação pública é sempre sua escolha. Nada aqui é filtrado ou escondido.
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              {googleReviewUrl && (
+                <a
+                  href={googleReviewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                >
+                  Avaliar no Google
+                  <ExternalLink size={14} aria-hidden="true" />
+                </a>
+              )}
+              {tripAdvisorUrl && (
+                <a
+                  href={tripAdvisorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                >
+                  Avaliar no TripAdvisor
+                  <ExternalLink size={14} aria-hidden="true" />
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

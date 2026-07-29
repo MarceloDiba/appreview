@@ -35,7 +35,14 @@ const Feedback = () => {
   const [loading, setLoading] = useState(!location.state);
 
   useEffect(() => {
-    if (location.state?.businessName) {
+    // The rating screen passes the business name along, but not the public
+    // review links. Skipping the fetch on name alone left googleReviewUrl and
+    // tripAdvisorUrl empty, so the public review option never rendered for a
+    // negative rating — review gating by omission. Only skip when the links
+    // are already in hand.
+    const hasPublicLinks =
+      !!location.state?.googleReviewUrl || !!location.state?.tripAdvisorUrl;
+    if (location.state?.businessName && hasPublicLinks) {
       setLoading(false);
       return;
     }
@@ -77,9 +84,15 @@ const Feedback = () => {
 
         setBusinessData({
           id: qrData.id,
-          name: profileData?.business_name || qrData.name || 'Estabelecimento',
+          name:
+            location.state?.businessName ||
+            profileData?.business_name ||
+            qrData.name ||
+            'Estabelecimento',
           userId: qrData.user_id,
-          rating: 'neutral',
+          // Keep the rating the customer actually gave. Defaulting to 'neutral'
+          // here would record a 3 for someone who tapped "Ruim".
+          rating: (location.state?.rating as Rating) || 'neutral',
           googleReviewUrl: googleLink?.url || '',
           tripAdvisorUrl: tripAdvisorLink?.url || '',
         });

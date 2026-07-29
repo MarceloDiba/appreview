@@ -1,194 +1,107 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import BusinessMetrics from '@/components/dashboard/BusinessMetrics';
-import QRCodeGenerator from '@/components/dashboard/QRCodeGenerator';
-import ReviewsList from '@/components/dashboard/ReviewsList';
+import { Card, CardContent } from '@/components/ui/card';
+import AttentionCenter from '@/components/dashboard/AttentionCenter';
+import { useInternalFeedback } from '@/hooks/useInternalFeedback';
+import { useAttentionInsights } from '@/hooks/useAttentionInsights';
+import { supabase } from '@/integrations/supabase/client';
+import { MessageSquare, QrCode, Settings as SettingsIcon } from 'lucide-react';
 
-// Mock data for demonstration
-const businessData = {
-  id: 'business123',
-  name: 'Restaurante Exemplo',
-  metrics: {
-    positive: 48,
-    neutral: 12,
-    negative: 4,
-    total: 64,
-    googleAverage: 4.7,
-    tripAdvisorAverage: 4.5
+const shortcuts = [
+  {
+    to: '/reviews',
+    icon: MessageSquare,
+    title: 'Casos para resolver',
+    description: 'Ler os relatos e registar o que foi feito.',
   },
-  reviews: [
-    {
-      id: 'rev1',
-      customerName: 'João Silva',
-      rating: 'positive' as const,
-      platform: 'google' as const,
-      comment: 'Excelente atendimento e comida muito saborosa. Recomendo!',
-      date: '2023-05-12',
-      responseStatus: 'responded' as const
-    },
-    {
-      id: 'rev2',
-      customerName: 'Maria Oliveira',
-      rating: 'neutral' as const,
-      platform: 'tripadvisor' as const,
-      comment: 'A comida estava boa, mas o atendimento demorou muito.',
-      date: '2023-05-10',
-      responseStatus: 'pending' as const
-    },
-    {
-      id: 'rev3',
-      customerName: 'Pedro Santos',
-      rating: 'negative' as const,
-      platform: 'internal' as const,
-      comment: 'Fiquei esperando por mais de uma hora e a comida chegou fria.',
-      date: '2023-05-08'
-    },
-    {
-      id: 'rev4',
-      customerName: 'Ana Costa',
-      rating: 'positive' as const,
-      platform: 'google' as const,
-      comment: 'Adorei o novo menu, especialmente o prato do dia!',
-      date: '2023-05-06',
-      responseStatus: 'responded' as const
-    },
-    {
-      id: 'rev5',
-      customerName: 'Luiz Ferreira',
-      rating: 'positive' as const,
-      platform: 'tripadvisor' as const,
-      comment: 'Ambiente aconchegante e música ao vivo muito boa.',
-      date: '2023-05-04'
-    }
-  ]
-};
+  {
+    to: '/qrcodes',
+    icon: QrCode,
+    title: 'QR Codes',
+    description: 'Criar e imprimir códigos por mesa ou balcão.',
+  },
+  {
+    to: '/settings',
+    icon: SettingsIcon,
+    title: 'Definições',
+    description: 'Ligar as suas páginas do Google e do TripAdvisor.',
+  },
+];
 
 const Dashboard = () => {
+  const [userId, setUserId] = useState<string>('');
+  const [businessName, setBusinessName] = useState<string>('');
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    const load = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!active) return;
+
+      if (user) {
+        setUserId(user.id);
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('business_name')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (active && profile?.business_name) {
+          setBusinessName(profile.business_name);
+        }
+      }
+
+      if (active) setLoadingUser(false);
+    };
+
+    load();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const { cases, loading: loadingCases } = useInternalFeedback(userId);
+  const insights = useAttentionInsights(cases);
+  const loading = loadingUser || (!!userId && loadingCases);
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar userRole="business" businessName={businessData.name} />
-      
-      <main className="flex-1 pt-20 px-4 pb-8">
-        <div className="container mx-auto max-w-6xl">
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-gray-600 mt-1">
-              Gerencie suas avaliações e reputação online.
+    <div className="flex min-h-screen flex-col bg-gray-50">
+      <Navbar userRole="business" businessName={businessName || undefined} />
+
+      <main className="flex-1 px-4 pb-12 pt-20">
+        <div className="container mx-auto max-w-5xl">
+          <header className="mb-6">
+            <h1 className="text-3xl font-bold">
+              {businessName ? `Olá, ${businessName}` : 'O seu painel'}
+            </h1>
+            <p className="mt-1 text-gray-600">
+              O que precisa da sua atenção hoje, em primeiro lugar.
             </p>
           </header>
-          
-          <BusinessMetrics metrics={businessData.metrics} />
-          
-          <div className="mt-8">
-            <Tabs defaultValue="reviews">
-              <TabsList className="mb-4">
-                <TabsTrigger value="reviews">Avaliações</TabsTrigger>
-                <TabsTrigger value="qrcodes">QR Codes</TabsTrigger>
-                <TabsTrigger value="links">Links Externos</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="reviews">
-                <ReviewsList reviews={businessData.reviews} />
-              </TabsContent>
-              
-              <TabsContent value="qrcodes">
-                <QRCodeGenerator 
-                  businessId={businessData.id}
-                  baseUrl="https://appreview.com"
-                />
-              </TabsContent>
-              
-              <TabsContent value="links">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Links Externos</CardTitle>
-                    <CardDescription>
-                      Gerencie seus links para plataformas externas e redes sociais.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-base">Google Review</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between gap-2">
-                            <input
-                              type="text"
-                              value="https://g.page/r/example-review-link"
-                              readOnly
-                              className="flex-1 p-2 text-sm border rounded bg-gray-50"
-                            />
-                            <Button variant="outline" size="sm">Editar</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-base">TripAdvisor</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between gap-2">
-                            <input
-                              type="text"
-                              value="https://tripadvisor.com/example-review"
-                              readOnly
-                              className="flex-1 p-2 text-sm border rounded bg-gray-50"
-                            />
-                            <Button variant="outline" size="sm">Editar</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-base">Instagram</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between gap-2">
-                            <input
-                              type="text"
-                              value="https://instagram.com/example"
-                              readOnly
-                              className="flex-1 p-2 text-sm border rounded bg-gray-50"
-                            />
-                            <Button variant="outline" size="sm">Editar</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-base">iFood</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between gap-2">
-                            <input
-                              type="text"
-                              value="https://ifood.com/example-restaurant"
-                              readOnly
-                              className="flex-1 p-2 text-sm border rounded bg-gray-50"
-                            />
-                            <Button variant="outline" size="sm">Editar</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    
-                    <div className="pt-4 flex justify-end">
-                      <Button>Adicionar Novo Link</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+
+          <AttentionCenter insights={insights} loading={loading} />
+
+          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {shortcuts.map(({ to, icon: Icon, title, description }) => (
+              <Card key={to} className="transition-shadow hover:shadow-md">
+                <CardContent className="p-5">
+                  <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <h3 className="mt-3 font-semibold text-gray-900">{title}</h3>
+                  <p className="mt-1 text-sm text-gray-600">{description}</p>
+                  <Button asChild variant="link" className="mt-2 h-auto p-0">
+                    <Link to={to}>Abrir</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </main>
