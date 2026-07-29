@@ -15,6 +15,8 @@ type FeedbackState = {
   tripAdvisorUrl: string;
 };
 
+import { toPublicReviewUrl } from '@/utils/tripAdvisorUtils';
+
 const normalizePlatform = (platform: string) => platform.trim().toLowerCase();
 const isUuid = (value: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -93,8 +95,8 @@ const Feedback = () => {
           // Keep the rating the customer actually gave. Defaulting to 'neutral'
           // here would record a 3 for someone who tapped "Ruim".
           rating: (location.state?.rating as Rating) || 'neutral',
-          googleReviewUrl: googleLink?.url || '',
-          tripAdvisorUrl: tripAdvisorLink?.url || '',
+          googleReviewUrl: googleLink?.url ? toPublicReviewUrl(googleLink.url) : '',
+          tripAdvisorUrl: tripAdvisorLink?.url ? toPublicReviewUrl(tripAdvisorLink.url) : '',
         });
       } catch (error) {
         console.error('Error loading business data:', error);
