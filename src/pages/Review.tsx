@@ -15,6 +15,8 @@ type BusinessData = {
   }>;
 };
 
+import { toPublicReviewUrl } from '@/utils/tripAdvisorUtils';
+
 const normalizePlatform = (platform: string) => platform.trim().toLowerCase();
 const isUuid = (value: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -67,7 +69,7 @@ const Review = () => {
 
         const normalizedLinks = (linksData || []).map((link) => ({
           platform: normalizePlatform(link.platform),
-          url: link.url,
+          url: toPublicReviewUrl(link.url),
         }));
 
         const externalLinks = normalizedLinks.filter((link) => Boolean(link.url));
