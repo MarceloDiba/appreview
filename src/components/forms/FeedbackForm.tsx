@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { X, Send, ExternalLink } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 // Função para validar UUID
 function isUUID(value: string): boolean {
@@ -37,6 +38,7 @@ const FeedbackForm = ({
   tripAdvisorUrl,
 }: FeedbackFormProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
     comentario: '',
@@ -125,19 +127,19 @@ const FeedbackForm = ({
           disabled={enviando}
           className="absolute right-4 top-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-medium"
         >
-          {enviando ? 'Enviando...' : 'Enviar'}
+          {enviando ? t('formSending') : t('formSend')}
         </button>
 
         {/* Cabeçalho */}
         <div className="flex flex-col items-start gap-3 pt-10 pb-6">
           <div className="text-left">
             <h2 className="text-base font-medium">
-              Conte o que aconteceu
+              {t('formTitle')}
             </h2>
             <div className="flex items-start gap-1 mt-1">
               <Send size={14} className="text-gray-500 mt-0.5 flex-shrink-0" />
               <span className="text-sm text-gray-500">
-                {businessName} recebe o seu relato na hora e pode entrar em contacto.
+                {t('formSubtitle', { business: businessName })}
               </span>
             </div>
           </div>
@@ -169,7 +171,7 @@ const FeedbackForm = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <p className="text-sm text-black-500 text-left mb-2">
-              Conte mais sobre a sua experiência
+              {t('formCommentLabel')}
             </p>
             <Textarea
               id="comentario"
@@ -177,32 +179,32 @@ const FeedbackForm = ({
               value={formData.comentario}
               onChange={handleChange}
               required
-              placeholder="Conte como foi sua experiência neste lugar"
+              placeholder={t('formCommentPlaceholder')}
               rows={4}
               className="resize-none border border-blue-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 rounded-xl text-base p-4"
             />
           </div>
 
           <div>
-            <Label htmlFor="nome" className="text-sm text-gray-600">Seu nome (opcional)</Label>
+            <Label htmlFor="nome" className="text-sm text-gray-600">{t('formNameLabel')}</Label>
             <Input
               id="nome"
               name="nome"
               value={formData.nome}
               onChange={handleChange}
-              placeholder="Como podemos te chamar"
+              placeholder={t('formNamePlaceholder')}
               className="mt-1"
             />
           </div>
 
           <div>
-            <Label htmlFor="contato" className="text-sm text-gray-600">WhatsApp ou e-mail (opcional)</Label>
+            <Label htmlFor="contato" className="text-sm text-gray-600">{t('formContactLabel')}</Label>
             <Input
               id="contato"
               name="contato"
               value={formData.contato}
               onChange={handleChange}
-              placeholder="Deixe um contato se quiser retorno"
+              placeholder={t('formContactPlaceholder')}
               className="mt-1"
             />
           </div>
@@ -217,10 +219,10 @@ const FeedbackForm = ({
         {(googleReviewUrl || tripAdvisorUrl) && (
           <div className="mt-6 border-t border-gray-200 pt-5">
             <p className="text-sm font-medium text-gray-900">
-              Também pode avaliar publicamente
+              {t('publicTitle')}
             </p>
             <p className="mt-1 text-sm text-gray-500">
-              A sua avaliação pública é sempre sua escolha. Nada aqui é filtrado ou escondido.
+              {t('publicSubtitle')}
             </p>
             <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               {googleReviewUrl && (
@@ -230,7 +232,7 @@ const FeedbackForm = ({
                   rel="noopener noreferrer"
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                 >
-                  Avaliar no Google
+                  {t('publicGoogle')}
                   <ExternalLink size={14} aria-hidden="true" />
                 </a>
               )}
@@ -241,7 +243,7 @@ const FeedbackForm = ({
                   rel="noopener noreferrer"
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                 >
-                  Avaliar no TripAdvisor
+                  {t('publicTripAdvisor')}
                   <ExternalLink size={14} aria-hidden="true" />
                 </a>
               )}
