@@ -1,8 +1,7 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
 
 type AuthContextType = {
@@ -20,32 +19,71 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast: useToastFn } = useToast();
+
+  /** Espelho do utilizador actual, para o listener saber se já havia sessão. */
+  const userRef = useRef<User | null>(null);
+  userRef.current = user;
 
   useEffect(() => {
-    // First, set up auth state listener
+    let settled = false;
+
+    /**
+     * O ecrã não pode ficar preso a carregar para sempre.
+     *
+     * Antes, `loading` só passava a falso quando `getSession()` respondia. Se
+     * essa promessa não resolvesse — sessão em estado estranho, rede a cair a
+     * meio, servidor lento — toda a aplicação ficava num spinner infinito, sem
+     * mensagem e sem saída. Aconteceu em desenvolvimento e aconteceria a um
+     * cliente sem que ele soubesse dizer porquê.
+     *
+     * Agora qualquer um dos três caminhos liberta o ecrã: a sessão chega, um
+     * evento de autenticação chega, ou passam-se dez segundos e assumimos que
+     * não há sessão. Assumir "não autenticado" manda a pessoa para o login, que
+     * é recuperável; ficar em espera não é.
+     */
+    const settle = (currentSession: Session | null) => {
+      settled = true;
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setLoading(false);
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        
-        if (event === 'SIGNED_IN') {
+        // `SIGNED_IN` também é disparado ao renovar o token e ao voltar ao
+        // separador. Avisar em todos enchia o ecrã de "Login realizado com
+        // sucesso!" repetidos. Só interessa a transição de fora para dentro.
+        const wasSignedIn = settled && !!userRef.current;
+        settle(currentSession);
+
+        if (event === 'SIGNED_IN' && !wasSignedIn) {
           toast.success('Login realizado com sucesso!');
         }
         if (event === 'SIGNED_OUT') {
-          toast.info('Logout realizado com sucesso!');
+          toast.info('Sessão terminada.');
         }
       }
     );
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session: currentSession } }) => settle(currentSession))
+      .catch((error) => {
+        console.error('Erro ao ler a sessão:', error);
+        settle(null);
+      });
 
-    return () => subscription.unsubscribe();
+    const timeout = window.setTimeout(() => {
+      if (!settled) {
+        console.warn('A sessão não respondeu a tempo. A continuar sem autenticação.');
+        settle(null);
+      }
+    }, 10000);
+
+    return () => {
+      window.clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

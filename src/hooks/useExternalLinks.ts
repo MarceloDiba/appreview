@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PlatformLink } from '@/components/settings/PlatformLink';
 import { toast } from 'sonner';
@@ -25,8 +25,24 @@ export const useExternalLinks = (userId: string | undefined) => {
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadExternalLinks = useCallback(async () => {
+  /**
+   * O utilizador já mexeu nestes campos nesta sessão?
+   *
+   * Isto existe por causa de um bug que dava para ver e não dava para explicar:
+   * abrir as definições, começar imediatamente a colar o link do Google, e o
+   * texto desaparecer sozinho a meio. A leitura da base de dados arrancava ao
+   * montar o ecrã e, quando chegava — um ou dois segundos depois, mais em rede
+   * fraca —, substituía tudo o que estivesse escrito pelo que estava gravado,
+   * que na primeira configuração é vazio.
+   *
+   * A partir do primeiro toque, o que está no ecrã manda. Só uma actualização
+   * pedida explicitamente pelo botão volta a trazer o que está no servidor.
+   */
+  const hasLocalEdits = useRef(false);
+
+  const loadExternalLinks = useCallback(async (force = false) => {
     if (!userId) return;
+    if (hasLocalEdits.current && !force) return;
     
     setIsLoading(true);
     setError(null);
@@ -59,6 +75,7 @@ export const useExternalLinks = (userId: string | undefined) => {
         });
         
         setExternalLinks(formattedLinks);
+        hasLocalEdits.current = false;
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error loading external links';
@@ -209,19 +226,30 @@ export const useExternalLinks = (userId: string | undefined) => {
   };
 
   const handleExternalLinkChange = (index: number, key: string, value: string) => {
+    hasLocalEdits.current = true;
     setExternalLinks((prev) => {
       const updatedLinks = [...prev];
       updatedLinks[index] = { ...updatedLinks[index], [key]: value };
       return updatedLinks;
     });
-    
-    // If this is a Google URL, try to extract and validate the place_id
-    if (key === 'url' && externalLinks[index]?.platform === 'Google Reviews') {
-      processGooglePlaceId(value, index);
-    }
+  };
+
+  /**
+   * A leitura do Place ID acontece quando o campo perde o foco, não a cada
+   * tecla. Antes corria em cada carácter escrito: um endereço colado letra a
+   * letra disparava dezenas de validações e uma chuva de avisos a dizer que o
+   * link estava errado, quando o dono ainda o estava a escrever.
+   */
+  const handleExternalLinkCommit = (index: number) => {
+    const link = externalLinks[index];
+    if (!link || link.platform !== 'Google Reviews') return;
+    if (!link.url?.trim()) return;
+
+    processGooglePlaceId(link.url.trim(), index);
   };
 
   const handleAddExternalLink = (newLink: PlatformLink) => {
+    hasLocalEdits.current = true;
     if (!newLink.platform || !newLink.url) {
       toast.error('Preencha todos os campos');
       return;
@@ -242,6 +270,7 @@ export const useExternalLinks = (userId: string | undefined) => {
   };
   
   const handleDeleteExternalLink = (index: number) => {
+    hasLocalEdits.current = true;
     const updatedLinks = [...externalLinks];
     updatedLinks.splice(index, 1);
     setExternalLinks(updatedLinks);
@@ -329,6 +358,7 @@ export const useExternalLinks = (userId: string | undefined) => {
       throw new Error(insertError.message);
     }
 
+    hasLocalEdits.current = false;
     toast.success('Links externos atualizados com sucesso!');
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar links';
@@ -363,11 +393,12 @@ export const useExternalLinks = (userId: string | undefined) => {
     isValidating,
     error,
     handleExternalLinkChange,
+    handleExternalLinkCommit,
     handleAddExternalLink,
     handleDeleteExternalLink,
     validateExternalLink,
     saveExternalLinks,
     refreshGooglePlaceData,
-    refreshLinks: loadExternalLinks
+    refreshLinks: () => loadExternalLinks(true)
   };
 };

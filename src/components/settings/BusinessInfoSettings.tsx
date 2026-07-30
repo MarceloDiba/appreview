@@ -1,67 +1,76 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
 
-interface BusinessInfo {
+export interface BusinessInfo {
+  /** Nome do negócio. Aparece a quem avalia e assina as respostas. */
   name: string;
-  address: string;
-  city: string;
-  postalCode: string;
+  /** Nome de quem responde aos clientes. */
+  ownerName: string;
   phone: string;
-  email: string;
-  description: string;
-  websiteUrl: string;
 }
 
 interface BusinessInfoSettingsProps {
   businessInfo: BusinessInfo;
-  onBusinessInfoChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onBusinessInfoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSaveBusinessInfo: () => void;
   onCancel: () => void;
+  saving?: boolean;
 }
 
+/**
+ * Só os campos que o produto guarda e usa de verdade.
+ *
+ * Antes havia morada, cidade, código postal, website, e-mail e descrição, todos
+ * pré-preenchidos com um "Restaurante Exemplo" inventado. Nada disso existe na
+ * tabela `profiles`: o dono apagava sete campos à mão, carregava em guardar,
+ * via "Informações atualizadas com sucesso!" — e não se guardava rigorosamente
+ * nada. Um formulário que mente é pior do que um formulário que não existe.
+ *
+ * Se um dia a morada fizer falta ao produto, entra primeiro na base de dados e
+ * só depois aqui.
+ */
 const BusinessInfoSettings: React.FC<BusinessInfoSettingsProps> = ({
   businessInfo,
   onBusinessInfoChange,
   onSaveBusinessInfo,
-  onCancel
+  onCancel,
+  saving = false,
 }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Informações do Negócio</CardTitle>
+        <CardTitle>Informações do seu negócio</CardTitle>
         <CardDescription>
-          Atualize as informações básicas do seu negócio que serão exibidas aos clientes.
+          O nome aparece a quem avalia pelo QR code e assina as respostas que enviar.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="name">Nome do Negócio</Label>
+            <Label htmlFor="name">Nome do seu negócio</Label>
             <Input
               id="name"
               name="name"
               value={businessInfo.name}
               onChange={onBusinessInfoChange}
+              placeholder="Como os clientes o conhecem"
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="email">E-mail de Contato</Label>
+            <Label htmlFor="ownerName">O seu nome</Label>
             <Input
-              id="email"
-              name="email"
-              type="email"
-              value={businessInfo.email}
+              id="ownerName"
+              name="ownerName"
+              value={businessInfo.ownerName}
               onChange={onBusinessInfoChange}
+              placeholder="Quem responde aos clientes"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="phone">Telefone</Label>
             <Input
@@ -69,64 +78,18 @@ const BusinessInfoSettings: React.FC<BusinessInfoSettingsProps> = ({
               name="phone"
               value={businessInfo.phone}
               onChange={onBusinessInfoChange}
+              placeholder="Para o contactarmos se algo falhar"
             />
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="websiteUrl">Website</Label>
-            <Input
-              id="websiteUrl"
-              name="websiteUrl"
-              value={businessInfo.websiteUrl}
-              onChange={onBusinessInfoChange}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="address">Endereço</Label>
-            <Input
-              id="address"
-              name="address"
-              value={businessInfo.address}
-              onChange={onBusinessInfoChange}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="city">Cidade</Label>
-            <Input
-              id="city"
-              name="city"
-              value={businessInfo.city}
-              onChange={onBusinessInfoChange}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="postalCode">CEP</Label>
-            <Input
-              id="postalCode"
-              name="postalCode"
-              value={businessInfo.postalCode}
-              onChange={onBusinessInfoChange}
-            />
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="description">Descrição do Negócio</Label>
-          <Textarea
-            id="description"
-            name="description"
-            value={businessInfo.description}
-            onChange={onBusinessInfoChange}
-            rows={4}
-          />
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={onCancel}>Cancelar</Button>
-        <Button onClick={onSaveBusinessInfo}>Salvar Alterações</Button>
+        <Button variant="outline" onClick={onCancel} disabled={saving}>
+          Cancelar
+        </Button>
+        <Button onClick={onSaveBusinessInfo} disabled={saving || !businessInfo.name.trim()}>
+          {saving ? 'A guardar...' : 'Guardar alterações'}
+        </Button>
       </CardFooter>
     </Card>
   );

@@ -47,7 +47,7 @@ const Index = () => {
             <div className="relative max-w-lg w-full mt-10 md:mt-0">
               <div className="bg-white rounded-lg shadow-xl p-5 sm:p-6 md:p-8 border border-gray-100">
                 <h3 className="text-lg sm:text-xl font-semibold text-center mb-6 sm:mb-8">
-                  Como foi sua experiência no Restaurante Exemplo?
+                  Como foi a sua experiência no Seu Negócio?
                 </h3>
                 <div className="flex justify-between space-x-2 sm:space-x-4">
                   <div className="emoji-button bg-review-negative/10 flex flex-col items-center p-2 sm:p-3 rounded-lg">

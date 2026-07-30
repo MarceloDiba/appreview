@@ -27,6 +27,7 @@ const QRCodes = lazy(() => import("./pages/QRCodes"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Demo = lazy(() => import("./pages/Demo"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,11 @@ const App = () => (
               <Route path="/qrcodes" element={
                 <ProtectedRoute>
                   <QRCodes />
+                </ProtectedRoute>
+              } />
+              <Route path="/configuracao" element={
+                <ProtectedRoute>
+                  <Onboarding />
                 </ProtectedRoute>
               } />
               <Route path="/settings" element={

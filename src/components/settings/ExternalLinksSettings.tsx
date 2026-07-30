@@ -12,6 +12,8 @@ import { ExternalLinkWithMeta } from '@/hooks/useExternalLinks';
 interface ExternalLinksSettingsProps {
   externalLinks: ExternalLinkWithMeta[];
   onExternalLinkChange: (index: number, key: string, value: string) => void;
+  /** Chamado quando o campo perde o foco — é aí que se lê o Place ID. */
+  onExternalLinkCommit?: (index: number) => void;
   onDeleteExternalLink: (index: number) => void;
   onAddExternalLink: (link: PlatformLink) => void;
   onSaveExternalLinks: () => void;
@@ -25,6 +27,7 @@ interface ExternalLinksSettingsProps {
 const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
   externalLinks,
   onExternalLinkChange,
+  onExternalLinkCommit,
   onDeleteExternalLink,
   onAddExternalLink,
   onSaveExternalLinks,
@@ -116,6 +119,7 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
                     type="text"
                     value={link.url}
                     onChange={(e) => onExternalLinkChange(index, 'url', e.target.value)}
+                    onBlur={() => onExternalLinkCommit?.(index)}
                     className="w-full text-sm p-1 border rounded"
                     placeholder="https://"
                   />
