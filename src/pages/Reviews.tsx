@@ -1,58 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import ReviewsList from '@/components/dashboard/ReviewsList';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
 import CasesList from '@/components/dashboard/cases/CasesList';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { AlertCircle, ImportIcon } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
-// Mock data for demonstration (Google/TripAdvisor reviews only — internal cases come from real data below)
-const reviews = [
-  {
-    id: 'rev1',
-    customerName: 'João Silva',
-    rating: 'positive' as const,
-    platform: 'google' as const,
-    comment: 'Excelente atendimento e comida muito saborosa. Recomendo!',
-    date: '2023-05-12',
-    responseStatus: 'responded' as const
-  },
-  {
-    id: 'rev2',
-    customerName: 'Maria Oliveira',
-    rating: 'neutral' as const,
-    platform: 'tripadvisor' as const,
-    comment: 'A comida estava boa, mas o atendimento demorou muito.',
-    date: '2023-05-10',
-    responseStatus: 'pending' as const
-  },
-  {
-    id: 'rev4',
-    customerName: 'Ana Costa',
-    rating: 'positive' as const,
-    platform: 'google' as const,
-    comment: 'Adorei o novo menu, especialmente o prato do dia!',
-    date: '2023-05-06',
-    responseStatus: 'responded' as const
-  },
-  {
-    id: 'rev5',
-    customerName: 'Luiz Ferreira',
-    rating: 'positive' as const,
-    platform: 'tripadvisor' as const,
-    comment: 'Ambiente aconchegante e música ao vivo muito boa.',
-    date: '2023-05-04'
-  }
-];
 
 const Reviews = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('internal');
   const [userId, setUserId] = useState<string | null>(null);
+  const [businessName, setBusinessName] = useState<string>('');
   
   useEffect(() => {
     // Get the current user's ID
@@ -60,6 +22,12 @@ const Reviews = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('business_name')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (profile?.business_name) setBusinessName(profile.business_name);
       }
     };
     
@@ -78,7 +46,7 @@ const Reviews = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar userRole="business" businessName="Restaurante Exemplo" />
+      <Navbar userRole="business" businessName={businessName || undefined} />
       
       <main className="flex-1 pt-20 px-4 pb-8">
         <div className="container mx-auto max-w-6xl">
@@ -98,10 +66,6 @@ const Reviews = () => {
               >
                 {isRefreshing ? 'Atualizando...' : 'Atualizar'}
               </Button>
-              <Button onClick={() => toast.info('Funcionalidade em desenvolvimento!')}>
-                <ImportIcon className="h-4 w-4 mr-2" />
-                Importar
-              </Button>
             </div>
           </header>
 
@@ -110,31 +74,16 @@ const Reviews = () => {
             {userId && <GoogleReviews userId={userId} />}
           </div>
           
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+          <Tabs defaultValue="internal" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
-              <TabsTrigger value="all">Públicas ({reviews.length})</TabsTrigger>
-              <TabsTrigger value="google">Google (2)</TabsTrigger>
-              <TabsTrigger value="tripadvisor">TripAdvisor (2)</TabsTrigger>
               <TabsTrigger value="internal">Casos para resolver</TabsTrigger>
             </TabsList>
-
-            <TabsContent value="all">
-              <ReviewsList reviews={reviews} />
-            </TabsContent>
-
-            <TabsContent value="google">
-              <ReviewsList reviews={reviews.filter(r => r.platform === 'google')} />
-            </TabsContent>
-
-            <TabsContent value="tripadvisor">
-              <ReviewsList reviews={reviews.filter(r => r.platform === 'tripadvisor')} />
-            </TabsContent>
 
             <TabsContent value="internal">
               {userId ? (
                 <CasesList userId={userId} />
               ) : (
-                <div className="text-center py-8 text-gray-500">Carregando...</div>
+                <div className="text-center py-8 text-gray-500">A carregar...</div>
               )}
             </TabsContent>
           </Tabs>
