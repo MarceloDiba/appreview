@@ -81,7 +81,7 @@ const Reviews = () => {
 
             <TabsContent value="internal">
               {userId ? (
-                <CasesList userId={userId} />
+                <CasesList userId={userId} businessName={businessName || undefined} />
               ) : (
                 <div className="text-center py-8 text-gray-500">A carregar...</div>
               )}

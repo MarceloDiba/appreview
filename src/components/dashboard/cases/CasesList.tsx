@@ -4,9 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import { useInternalFeedback } from '@/hooks/useInternalFeedback';
+import ReplySuggestions from '@/components/dashboard/ReplySuggestions';
 
 interface CasesListProps {
   userId: string;
+  /** Nome do negócio, para assinar as mensagens sugeridas. */
+  businessName?: string | null;
 }
 
 const formatDate = (dateString: string | null) => {
@@ -14,7 +17,7 @@ const formatDate = (dateString: string | null) => {
   return new Date(dateString).toLocaleDateString('pt-BR');
 };
 
-const CasesList: React.FC<CasesListProps> = ({ userId }) => {
+const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
   const { loading, cases, error, resolvingId, resolveCase } = useInternalFeedback(userId);
 
   if (loading) {
@@ -76,6 +79,15 @@ const CasesList: React.FC<CasesListProps> = ({ userId }) => {
                   {item.customer_email && (
                     <p className="mt-2 text-xs text-gray-500">Contato: {item.customer_email}</p>
                   )}
+
+                  <ReplySuggestions
+                    channel="private"
+                    rating={item.rating}
+                    text={item.feedback_text}
+                    customerName={item.customer_name}
+                    customerEmail={item.customer_email}
+                    businessName={businessName}
+                  />
                 </div>
                 <Button
                   size="sm"

@@ -47,7 +47,11 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId }) => {
           onRefresh={handleRefresh} 
         />
         <div className="mt-6">
-          <ReviewsList reviews={reviews} formatDate={formatDate} />
+          <ReviewsList
+            reviews={reviews}
+            formatDate={formatDate}
+            businessName={placeInfo?.place_name}
+          />
         </div>
       </CardContent>
       {placeInfo && placeInfo.last_fetch_time && (

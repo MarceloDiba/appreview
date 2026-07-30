@@ -6,9 +6,11 @@ import { GoogleReview } from '@/hooks/useGoogleReviews';
 interface ReviewsListProps {
   reviews: GoogleReview[];
   formatDate: (dateString: string) => string;
+  /** Nome do negócio, para assinar as respostas sugeridas. */
+  businessName?: string | null;
 }
 
-const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate }) => {
+const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate, businessName }) => {
   if (reviews.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -24,6 +26,7 @@ const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate }) => {
           key={review.review_id} 
           review={review} 
           formatDate={formatDate} 
+          businessName={businessName}
         />
       ))}
     </div>

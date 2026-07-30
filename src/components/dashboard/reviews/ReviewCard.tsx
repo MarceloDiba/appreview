@@ -3,13 +3,16 @@ import React from 'react';
 import { Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { GoogleReview } from '@/hooks/useGoogleReviews';
+import ReplySuggestions from '@/components/dashboard/ReplySuggestions';
 
 interface ReviewCardProps {
   review: GoogleReview;
   formatDate: (dateString: string) => string;
+  /** Usado para assinar a resposta sugerida. */
+  businessName?: string | null;
 }
 
-const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate }) => {
+const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessName }) => {
   const renderStars = (rating: number) => {
     return (
       <div className="flex">
@@ -50,6 +53,14 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate }) => {
         </div>
       </div>
       <div className="mt-2 text-gray-700">{review.text}</div>
+
+      <ReplySuggestions
+        channel="public"
+        rating={review.rating}
+        text={review.text}
+        customerName={review.author_name}
+        businessName={businessName}
+      />
     </div>
   );
 };
