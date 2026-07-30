@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { QR_PRINT_SIZE, QR_SCREEN_SIZE, downloadDataUrl, publicReviewUrl, qrDataUrl, slugFilename } from '@/lib/qr';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 
 /**
  * Configuração guiada.
@@ -22,18 +24,22 @@ import { QR_PRINT_SIZE, QR_SCREEN_SIZE, downloadDataUrl, publicReviewUrl, qrData
  * Aqui é um passo de cada vez, cada um guardado quando avança, e ninguém sai
  * sem um QR code pronto a imprimir. É esse o único activo físico do cliente: se
  * ele não sair daqui com o código na mão, nada do resto acontece.
+ *
+ * Primeira tela do painel a passar para o react-i18next (pt-BR / pt-PT / en).
+ * Os textos vivem nos catálogos em `src/i18n/owner/locales`.
  */
 
 type Step = 1 | 2 | 3;
 
-const STEPS: { n: Step; label: string }[] = [
-  { n: 1, label: 'O seu negócio' },
-  { n: 2, label: 'Onde o avaliam' },
-  { n: 3, label: 'O código para a mesa' },
+const STEPS: { n: Step; labelKey: string }[] = [
+  { n: 1, labelKey: 'onboarding.step1Label' },
+  { n: 2, labelKey: 'onboarding.step2Label' },
+  { n: 3, labelKey: 'onboarding.step3Label' },
 ];
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const { t } = useOwnerTranslation();
   const { user, loading: authLoading } = useAuth();
   const baseUrl = window.location.origin;
 
@@ -125,7 +131,7 @@ const Onboarding = () => {
       setStep(2);
     } catch (error) {
       console.error('Erro ao guardar o negócio:', error);
-      toast.error('Não foi possível guardar. Tente novamente.');
+      toast.error(t('onboarding.errSave'));
     } finally {
       setSaving(false);
     }
@@ -167,7 +173,7 @@ const Onboarding = () => {
       setStep(3);
     } catch (error) {
       console.error('Erro ao guardar os links:', error);
-      toast.error('Não foi possível guardar os links. Tente novamente.');
+      toast.error(t('onboarding.errLinks'));
     } finally {
       setSaving(false);
     }
@@ -191,7 +197,7 @@ const Onboarding = () => {
       setCreatedQr({ name: qrName.trim(), url, image: await qrDataUrl(url, QR_SCREEN_SIZE) });
     } catch (error) {
       console.error('Erro ao criar o QR code:', error);
-      toast.error('Não foi possível criar o QR code. Tente novamente.');
+      toast.error(t('onboarding.errQr'));
     } finally {
       setSaving(false);
     }
@@ -208,15 +214,17 @@ const Onboarding = () => {
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10">
       <div className="mx-auto max-w-xl">
+        <div className="mb-2 flex justify-end">
+          <LanguageSwitcher />
+        </div>
+
         <header className="mb-8 text-center">
-          <h1 className="text-2xl font-bold">Vamos pôr o seu negócio a funcionar</h1>
-          <p className="mt-2 text-gray-600">
-            São três passos. Leva menos de cinco minutos e no fim já tem o código pronto a imprimir.
-          </p>
+          <h1 className="text-2xl font-bold">{t('onboarding.headerTitle')}</h1>
+          <p className="mt-2 text-gray-600">{t('onboarding.headerSubtitle')}</p>
         </header>
 
         <ol className="mb-6 flex items-center justify-center gap-2 text-sm">
-          {STEPS.map(({ n, label }) => (
+          {STEPS.map(({ n, labelKey }) => (
             <li key={n} className="flex items-center gap-2">
               <span
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium ${
@@ -230,7 +238,7 @@ const Onboarding = () => {
                 {step > n ? <Check size={14} aria-hidden="true" /> : n}
               </span>
               <span className={step === n ? 'font-medium text-gray-900' : 'text-gray-500'}>
-                {label}
+                {t(labelKey)}
               </span>
               {n !== 3 && <span className="mx-1 text-gray-300">—</span>}
             </li>
@@ -240,43 +248,41 @@ const Onboarding = () => {
         {step === 1 && (
           <Card>
             <CardHeader>
-              <CardTitle>O seu negócio</CardTitle>
-              <CardDescription>
-                O nome aparece a quem avalia e assina as respostas que enviar.
-              </CardDescription>
+              <CardTitle>{t('onboarding.step1Title')}</CardTitle>
+              <CardDescription>{t('onboarding.step1Desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="businessName">Nome do seu negócio</Label>
+                <Label htmlFor="businessName">{t('onboarding.businessNameLabel')}</Label>
                 <Input
                   id="businessName"
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="Como os clientes o conhecem"
+                  placeholder={t('onboarding.businessNamePlaceholder')}
                   autoFocus
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ownerName">O seu nome (opcional)</Label>
+                <Label htmlFor="ownerName">{t('onboarding.ownerNameLabel')}</Label>
                 <Input
                   id="ownerName"
                   value={ownerName}
                   onChange={(e) => setOwnerName(e.target.value)}
-                  placeholder="Quem responde aos clientes"
+                  placeholder={t('onboarding.ownerNamePlaceholder')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefone (opcional)</Label>
+                <Label htmlFor="phone">{t('onboarding.phoneLabel')}</Label>
                 <Input
                   id="phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Para o contactarmos se algo falhar"
+                  placeholder={t('onboarding.phonePlaceholder')}
                 />
               </div>
               <div className="flex justify-end pt-2">
                 <Button onClick={saveBusiness} disabled={saving || !businessName.trim()}>
-                  {saving ? 'A guardar...' : 'Continuar'}
+                  {saving ? t('onboarding.saving') : t('onboarding.continue')}
                 </Button>
               </div>
             </CardContent>
@@ -286,46 +292,40 @@ const Onboarding = () => {
         {step === 2 && (
           <Card>
             <CardHeader>
-              <CardTitle>Onde os seus clientes o avaliam</CardTitle>
-              <CardDescription>
-                É para aqui que enviamos quem quiser deixar avaliação pública — qualquer que seja a
-                nota que deu. Cole o endereço da sua página no Google.
-              </CardDescription>
+              <CardTitle>{t('onboarding.step2Title')}</CardTitle>
+              <CardDescription>{t('onboarding.step2Desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="googleUrl">Endereço da sua página no Google</Label>
+                <Label htmlFor="googleUrl">{t('onboarding.googleLabel')}</Label>
                 <Input
                   id="googleUrl"
                   value={googleUrl}
                   onChange={(e) => setGoogleUrl(e.target.value)}
-                  placeholder="https://g.page/... ou o link do Google Maps"
+                  placeholder={t('onboarding.googlePlaceholder')}
                   autoFocus
                 />
-                <p className="text-xs text-gray-500">
-                  Procure o seu negócio no Google Maps e copie o endereço da barra do navegador.
-                  Serve também o link curto <code>g.page</code>.
-                </p>
+                <p className="text-xs text-gray-500">{t('onboarding.googleHelp')}</p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tripAdvisorUrl">TripAdvisor (opcional)</Label>
+                <Label htmlFor="tripAdvisorUrl">{t('onboarding.tripLabel')}</Label>
                 <Input
                   id="tripAdvisorUrl"
                   value={tripAdvisorUrl}
                   onChange={(e) => setTripAdvisorUrl(e.target.value)}
-                  placeholder="https://www.tripadvisor.pt/..."
+                  placeholder={t('onboarding.tripPlaceholder')}
                 />
               </div>
               <div className="flex items-center justify-between pt-2">
                 <Button variant="ghost" onClick={() => setStep(1)}>
-                  Voltar
+                  {t('onboarding.back')}
                 </Button>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setStep(3)} disabled={saving}>
-                    Fazer isto depois
+                    {t('onboarding.doLater')}
                   </Button>
                   <Button onClick={saveLinks} disabled={saving || !googleUrl.trim()}>
-                    {saving ? 'A guardar...' : 'Continuar'}
+                    {saving ? t('onboarding.saving') : t('onboarding.continue')}
                   </Button>
                 </div>
               </div>
@@ -336,31 +336,28 @@ const Onboarding = () => {
         {step === 3 && (
           <Card>
             <CardHeader>
-              <CardTitle>O código para pôr na mesa</CardTitle>
-              <CardDescription>
-                É este código que o cliente aponta com o telemóvel. Dê-lhe o nome do sítio onde vai
-                ficar, para saber depois de onde veio cada avaliação.
-              </CardDescription>
+              <CardTitle>{t('onboarding.step3Title')}</CardTitle>
+              <CardDescription>{t('onboarding.step3Desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {!createdQr ? (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="qrName">Onde vai ficar este código?</Label>
+                    <Label htmlFor="qrName">{t('onboarding.qrNameLabel')}</Label>
                     <Input
                       id="qrName"
                       value={qrName}
                       onChange={(e) => setQrName(e.target.value)}
-                      placeholder="Ex: Mesa 1, Balcão, Recepção"
+                      placeholder={t('onboarding.qrNamePlaceholder')}
                       autoFocus
                     />
                   </div>
                   <div className="flex items-center justify-between pt-2">
                     <Button variant="ghost" onClick={() => setStep(2)}>
-                      Voltar
+                      {t('onboarding.back')}
                     </Button>
                     <Button onClick={createQr} disabled={saving || !qrName.trim()}>
-                      {saving ? 'A criar...' : 'Criar o meu QR code'}
+                      {saving ? t('onboarding.creating') : t('onboarding.createQr')}
                     </Button>
                   </div>
                 </>
@@ -375,10 +372,7 @@ const Onboarding = () => {
                     />
                   </div>
                   <p className="font-medium">{createdQr.name}</p>
-                  <p className="text-sm text-gray-600">
-                    Está pronto. Imprima, ponha na mesa ou no balcão, e as avaliações começam a
-                    chegar ao seu painel.
-                  </p>
+                  <p className="text-sm text-gray-600">{t('onboarding.readyBody')}</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     <Button
                       onClick={async () => {
@@ -387,15 +381,15 @@ const Onboarding = () => {
                       }}
                     >
                       <Printer className="mr-2 h-4 w-4" aria-hidden="true" />
-                      Baixar para imprimir
+                      {t('onboarding.downloadPrint')}
                     </Button>
                     <Button variant="outline" onClick={() => navigate('/qrcodes')}>
-                      Ver todos os meus códigos
+                      {t('onboarding.seeAll')}
                     </Button>
                   </div>
                   <div className="pt-2">
                     <Button variant="ghost" onClick={() => navigate('/dashboard')}>
-                      Ir para o painel
+                      {t('onboarding.goToPanel')}
                     </Button>
                   </div>
                 </div>
@@ -410,7 +404,7 @@ const Onboarding = () => {
             onClick={() => navigate('/dashboard')}
             className="text-sm text-gray-500 underline hover:text-gray-700"
           >
-            Saltar por agora
+            {t('onboarding.skipForNow')}
           </button>
         </div>
       </div>
