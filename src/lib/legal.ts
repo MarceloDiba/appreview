@@ -32,15 +32,14 @@ export const LEGAL = {
   /** Preço em vigor, tal como anunciado na página inicial. */
   precoMensal: '49 €',
   /**
-   * Lei e foro aplicáveis. ATENÇÃO: mantidos em Portugal por o piloto e os
-   * titulares dos dados serem portugueses, mas a entidade que presta o serviço
-   * é brasileira (MDR, Aracaju). Esta combinação — prestador no Brasil, foro em
-   * Portugal — é uma decisão de negócio por confirmar com o Marcelo e por rever
-   * com quem perceba do cruzamento LGPD (Brasil) + RGPD (UE). Ver os avisos no
-   * PR que trouxe estes dados.
+   * Lei e foro aplicáveis. Decisão do Marcelo (30/07/2026): Brasil, foro de
+   * Aracaju, por a entidade que presta o serviço ser brasileira. O cliente do
+   * piloto é português, por isso — independentemente da lei escolhida — os
+   * titulares na UE mantêm os direitos do RGPD, que não se afastam por
+   * contrato. Isto e o regime duplo LGPD+RGPD ficam por validar com advogado.
    */
-  leiAplicavel: 'portuguesa',
-  foro: 'comarca de Lisboa, Portugal',
+  leiAplicavel: 'brasileira',
+  foro: 'comarca de Aracaju, Sergipe, Brasil',
   /** Data da versão em vigor destes documentos. */
   versao: '30 de julho de 2026',
 } as const;

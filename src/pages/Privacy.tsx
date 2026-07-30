@@ -10,9 +10,10 @@ import { LEGAL, SUBCONTRATANTES } from '@/lib/legal';
  *
  * 1. A distinção de papéis. Nos dados dos clientes finais, quem manda é o
  *    estabelecimento (responsável) e o AppReview é subcontratante. É isso que
- *    determina quem responde perante a CNPD.
- * 2. A transferência para o Brasil. O banco está em São Paulo e o cliente está
- *    em Lisboa. Esconder isto seria a falha mais fácil de provar contra nós.
+ *    determina quem responde perante as autoridades (ANPD no Brasil, CNPD na UE).
+ * 2. A empresa é brasileira e os dados ficam no Brasil, mas o piloto é em
+ *    Portugal — por isso valem LGPD e RGPD ao mesmo tempo. Esconder a
+ *    transferência seria a falha mais fácil de provar contra nós.
  */
 const Privacy = () => (
   <LegalLayout title="Política de Privacidade" updatedAt={LEGAL.versao}>
@@ -35,6 +36,16 @@ const Privacy = () => (
           {LEGAL.email}
         </a>
         .
+      </p>
+    </Seccao>
+
+    <Seccao titulo="Que leis de proteção de dados se aplicam">
+      <p>
+        O {LEGAL.servico} é prestado por uma empresa brasileira, e os dados ficam guardados no
+        Brasil. Por isso aplica-se a Lei Geral de Proteção de Dados brasileira (LGPD). Ao mesmo
+        tempo, o estabelecimento do piloto e os seus clientes estão em Portugal — e, para quem está
+        na União Europeia, aplica-se também o Regulamento Geral sobre a Proteção de Dados (RGPD).
+        Onde as duas leis derem direitos diferentes, seguimos o que for mais protetor para si.
       </p>
     </Seccao>
 
@@ -99,17 +110,18 @@ const Privacy = () => (
       </p>
     </Seccao>
 
-    <Seccao titulo="Onde ficam os dados — e a transferência para fora da União Europeia">
+    <Seccao titulo="Onde ficam os dados">
       <p>
-        A base de dados do {LEGAL.servico} está alojada na Supabase, na região de São Paulo, Brasil.
-        Isto significa que os dados recolhidos em Portugal são transferidos para fora do Espaço
-        Económico Europeu.
+        A base de dados do {LEGAL.servico} está alojada na Supabase, na região de São Paulo, Brasil
+        — o mesmo país onde está sediada a empresa que presta o serviço. No Brasil, o tratamento
+        segue a LGPD.
       </p>
       <p>
-        O Brasil não tem decisão de adequação da Comissão Europeia. A transferência é feita ao
-        abrigo das cláusulas contratuais-tipo aprovadas pela Comissão, incluídas no acordo de
-        tratamento de dados com o fornecedor de alojamento. Está prevista a migração da base de
-        dados para uma região da União Europeia.
+        Para os dados de estabelecimentos e clientes na União Europeia, guardá-los no Brasil é um
+        tratamento fora do Espaço Económico Europeu. O Brasil não tem, à data, decisão de adequação
+        da Comissão Europeia; a transferência apoia-se nas salvaguardas contratuais adequadas —
+        incluindo as cláusulas contratuais-tipo — previstas no acordo de tratamento de dados com o
+        fornecedor de alojamento.
       </p>
     </Seccao>
 
@@ -169,7 +181,17 @@ const Privacy = () => (
       </p>
       <p>
         Se achar que os seus dados estão a ser mal tratados, pode apresentar queixa à autoridade de
-        controlo. Em Portugal é a Comissão Nacional de Protecção de Dados (CNPD), em{' '}
+        controlo. No Brasil é a Autoridade Nacional de Proteção de Dados (ANPD), em{' '}
+        <a
+          className="text-primary underline"
+          href="https://www.gov.br/anpd"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          gov.br/anpd
+        </a>
+        . Se estiver na União Europeia, pode também recorrer à autoridade do seu país — em Portugal,
+        a Comissão Nacional de Proteção de Dados (CNPD), em{' '}
         <a
           className="text-primary underline"
           href="https://www.cnpd.pt"
