@@ -12,11 +12,19 @@
  * "contato", "o seu nome" e "seu nome": para quem lê, a variante errada soa
  * como texto traduzido por máquina — exatamente a impressão que este produto
  * não pode passar no momento em que pede um favor ao cliente.
+ *
+ * Não há espanhol aqui: o Marcelo decidiu (30/07/2026) que quem não fala
+ * português vê inglês, e ponto. A regra dele é Brasil→pt-BR, Portugal→pt-PT ou
+ * inglês, resto→inglês. O espanhol continua a existir noutro sítio e por outra
+ * razão — nas sugestões de resposta (`src/lib/replySuggestions.ts`), onde o
+ * dono responde a quem lhe escreveu, e uma avaliação de turista espanhol
+ * merece resposta em espanhol. São eixos diferentes: aqui é a língua que o
+ * cliente lê, lá é a língua em que ele escreveu.
  */
 
-export type Locale = 'pt-BR' | 'pt-PT' | 'es' | 'en';
+export type Locale = 'pt-BR' | 'pt-PT' | 'en';
 
-export const SUPPORTED_LOCALES: Locale[] = ['pt-BR', 'pt-PT', 'es', 'en'];
+export const SUPPORTED_LOCALES: Locale[] = ['pt-BR', 'pt-PT', 'en'];
 
 const DICTIONARY = {
   'pt-BR': {
@@ -97,45 +105,6 @@ const DICTIONARY = {
     thanksHome: 'Voltar à página inicial',
   },
 
-  es: {
-    ratingQuestion: '¿Qué tal fue tu experiencia?',
-    ratingBad: 'Mala',
-    ratingOk: 'Regular',
-    ratingGood: 'Buena',
-    back: 'Volver',
-    backAndChooseAnother: 'Volver y elegir otra opción',
-    ariaRatingBad: 'Valoración negativa',
-    ariaRatingOk: 'Valoración neutra',
-    ariaRatingGood: 'Valoración positiva',
-
-    chooserTitle: '¿Dónde prefieres dejar tu reseña?',
-    chooserSubtitle: 'Elige la plataforma para continuar con tu reseña de {business}.',
-
-    formTitle: 'Cuéntanos qué pasó',
-    formSubtitle: '{business} recibe tu comentario al instante y puede ponerse en contacto.',
-    formSend: 'Enviar',
-    formSending: 'Enviando...',
-    formCommentLabel: 'Cuéntanos más sobre tu experiencia',
-    formCommentPlaceholder: 'Cuéntanos cómo fue tu experiencia en este lugar',
-    formNameLabel: 'Tu nombre (opcional)',
-    formNamePlaceholder: 'Cómo podemos llamarte',
-    formContactLabel: 'WhatsApp o correo electrónico (opcional)',
-    formContactPlaceholder: 'Déjanos un contacto si quieres respuesta',
-
-    publicTitle: 'También puedes dejar una reseña pública',
-    publicSubtitle: 'Tu reseña pública es siempre tu decisión. Aquí no se filtra ni se oculta nada.',
-    publicGoogle: 'Reseñar en Google',
-    publicTripAdvisor: 'Reseñar en TripAdvisor',
-
-    thanksTitle: '¡Gracias por tu comentario!',
-    thanksBodyNamed:
-      'Hemos recibido tu comentario y ya está con el responsable de {business}. Si dejaste un contacto, recibirás respuesta pronto.',
-    thanksBodyGeneric:
-      'Hemos recibido tu comentario y ya está con el responsable del establecimiento. Si dejaste un contacto, recibirás respuesta pronto.',
-    thanksPublicPrompt: '¿Quieres dejar también una reseña pública?',
-    thanksHome: 'Volver al inicio',
-  },
-
   en: {
     ratingQuestion: 'How was your experience?',
     ratingBad: 'Bad',
@@ -188,11 +157,10 @@ export const normalizeLocale = (value: string | null | undefined): Locale | null
 
   if (tag === 'br' || tag === 'pt-br' || tag.startsWith('pt-br')) return 'pt-BR';
   if (tag === 'pt' || tag.startsWith('pt')) return 'pt-PT';
-  if (tag === 'es' || tag.startsWith('es') || tag.startsWith('ca') || tag.startsWith('gl')) {
-    return 'es';
-  }
   if (tag === 'en' || tag.startsWith('en')) return 'en';
 
+  // Tudo o resto — incluindo espanhol — cai no inglês pela via de quem chama,
+  // que trata `null` como "não é nenhuma das nossas" e usa o inglês.
   return null;
 };
 
@@ -209,9 +177,8 @@ export const normalizeLocale = (value: string | null | undefined): Locale | null
  * Um aparelho que diz só `pt`, sem região, cai em português de Portugal: é onde
  * está o piloto, e um aparelho brasileiro quase sempre diz `pt-BR`.
  *
- * Espanhol continua existindo mesmo não estando na regra de negócio: metade dos
- * turistas de Lisboa fala espanhol, e mandá-los para o inglês por omissão seria
- * piorar de propósito uma tradução que já está escrita e revista.
+ * Quem não fala português vê inglês — inclusive quem fala espanhol. Foi decisão
+ * do Marcelo (30/07/2026), depois de eu ter defendido manter o espanhol.
  */
 export const detectLocale = (): Locale => {
   if (typeof navigator === 'undefined') return 'en';
