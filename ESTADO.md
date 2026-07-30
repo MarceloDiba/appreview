@@ -1,5 +1,8 @@
 # Estado do AppReview — 30 de julho de 2026
 
+> Actualizado no fim da sessão de 30/07. Os itens 1 a 3 já foram corrigidos e
+> publicados (PR #9). A lista abaixo começa no item 4.
+
 Documento de passagem. Quem pegar este projecto lê isto primeiro.
 
 ## O que está em produção e verificado
@@ -19,6 +22,14 @@ https://appreview-flame.vercel.app
 - **Verificação de tipos obrigatória no CI.** `npm run build` (Vite) NÃO verifica tipos;
   foi o `tsc` que revelou o review gating. Rodar sempre
   `npx tsc --noEmit -p tsconfig.app.json` antes de qualquer deploy.
+- **QR code a funcionar de verdade.** A imagem era gerada a partir de um identificador
+  fixo da página, antes de o slug existir — o código impresso apontava para uma página
+  inexistente. Corrigido no PR #9: grava-se primeiro, desenha-se depois. Geração local
+  (biblioteca `qrcode`, sem serviço externo), 1024 px para impressão, e cartão de mesa
+  A6 trilingue pronto a imprimir. **O endereço do QR não é editável de propósito** —
+  era isso que permitia o erro.
+- **Sem dado falso à vista do cliente.** Saíram as avaliações inventadas do `/reviews` e
+  o "Restaurante Exemplo" de `/qrcodes` e `/reviews`.
 
 ## Infraestrutura
 
@@ -37,16 +48,29 @@ o piloto provar. O risco começa no primeiro cliente real que escrever algo.
 
 Ver `memory/appreview-pendencias-produto.md` para o detalhe. Resumo:
 
-1. QR code impresso aponta para endereço inexistente **(a corrigir agora)**
-2. QR sem versão para impressão, e dependente de serviço externo **(a corrigir agora)**
-3. `/reviews` mostra avaliações inventadas **(a corrigir agora)**
-4. "Restaurante Exemplo" no cabeçalho de 4 páginas
-5. `/admin` e `/profile` sem ligação ao banco
-6. Configurar o Google exige colar URL à mão
-7. Sugestões de resposta — não existe
-8. Termos e Política de Privacidade — exigência do RGPD
-9. Limpar dados de teste do banco
-10. Modelo de agência para gerir vários clientes
+~~1 a 3: QR code e dado falso~~ — **feitos, PR #9.**
+
+4. `"Restaurante Exemplo"` ainda no cabeçalho de `/profile` e no estado inicial de
+   `/settings`
+5. `/admin` e `/profile` sem qualquer ligação ao banco
+6. Configurar o Google exige colar URL à mão — falta busca com autocomplete.
+   Bloqueia self-service, não o piloto concierge
+7. **Sugestões de resposta** — não existe. Marcelo nomeou como parte do produto
+8. **Termos de Serviço e Política de Privacidade** — exigência do RGPD para ter
+   cliente real em Portugal
+9. Limpar dados de teste do banco antes do piloto
+10. Modelo de agência: a NOÁ não consegue gerir vários clientes de um lugar.
+    Dói a partir do 3.º cliente
+
+**Sugestão de ordem para a próxima sessão:** 7 e 8 primeiro — um porque é produto que
+o Marcelo pediu, o outro porque é legal. Depois 4, 5, 9. O 6 e o 10 só quando o piloto
+provar que vale escalar.
+
+## O que nunca foi feito e é a coisa mais valiosa que falta
+
+O **teste de ponta a ponta pelo próprio Marcelo**: criar conta, ligar o Google, criar um
+QR, escanear com o telemóvel, escrever algo e ver o caso aparecer na Central de Atenção.
+Nada foi validado pelos olhos dele — só pelos meus.
 
 ## Posicionamento — importante
 
