@@ -1,98 +1,150 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { useUser } from '@/components/providers/UserProvider';
 import { useAuth } from '@/context/AuthContext';
-import BusinessInfoSettings from '@/components/settings/BusinessInfoSettings';
-import ReviewSettings from '@/components/settings/ReviewSettings';
+import BusinessInfoSettings, { type BusinessInfo } from '@/components/settings/BusinessInfoSettings';
 import ExternalLinksSettings from '@/components/settings/ExternalLinksSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import { useExternalLinks } from '@/hooks/useExternalLinks';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
+import { supabase } from '@/integrations/supabase/client';
 
+const EMPTY: BusinessInfo = { name: '', ownerName: '', phone: '' };
+
+/**
+ * As definições passaram a ler e a gravar o que existe na base de dados.
+ *
+ * Antes o estado inicial era um "Restaurante Exemplo" inventado com morada em
+ * São Paulo, e o botão de guardar só mostrava um aviso de sucesso. O dono
+ * apagava campo a campo aquilo que nunca foi dele, e o que escrevia
+ * desaparecia ao recarregar a página.
+ *
+ * Saiu também o separador "Avaliações": eram cinco interruptores que não
+ * faziam nada, e o primeiro — "Permitir Avaliações Negativas: se desativado,
+ * avaliações negativas serão enviadas apenas para formulário interno" —
+ * anunciava exactamente o modelo que é proibido. Ver
+ * `src/components/forms/FeedbackForm.tsx`.
+ */
 const Settings = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const userId = user?.id;
 
-  const [businessInfo, setBusinessInfo] = useState({
-    name: 'Restaurante Exemplo',
-    address: 'Rua das Flores, 123',
-    city: 'São Paulo',
-    postalCode: '01234-567',
-    phone: '(11) 99999-9999',
-    email: 'contato@restauranteexemplo.com.br',
-    description: 'Restaurante especializado em comida tradicional brasileira. Ambiente aconchegante e familiar.',
-    websiteUrl: 'https://restauranteexemplo.com.br',
-  });
+  const [businessInfo, setBusinessInfo] = useState<BusinessInfo>(EMPTY);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
 
-  const [reviewSettings, setReviewSettings] = useState({
-    allowNegativeReviews: true,
-    autoRedirectPositive: true,
-    negativeFormCustomization: false,
-    rememberCustomer: true,
-    followUpEmail: false,
-  });
+  const {
+    externalLinks,
+    isLoading,
+    isValidating,
+    handleExternalLinkChange,
+    handleExternalLinkCommit,
+    handleAddExternalLink,
+    handleDeleteExternalLink,
+    refreshGooglePlaceData,
+    saveExternalLinks,
+    refreshLinks,
+    error,
+  } = useExternalLinks(userId);
 
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
 
-const { user, loading } = useAuth();
+    const load = async () => {
+      const { data, error: profileError } = await supabase
+        .from('profiles')
+        .select('business_name, first_name, last_name, phone')
+        .eq('id', userId)
+        .maybeSingle();
 
+      if (!active) return;
 
-// Garante que o hook receba "undefined" até o user estar pronto
-const userId = user?.id;
+      if (profileError) {
+        console.error('Erro ao carregar o perfil:', profileError.message);
+      } else if (data) {
+        setBusinessInfo({
+          name: data.business_name || '',
+          ownerName: [data.first_name, data.last_name].filter(Boolean).join(' ').trim(),
+          phone: data.phone || '',
+        });
+      }
 
-const {
-  externalLinks,
-  isLoading,
-  isValidating,
-  handleExternalLinkChange,
-  handleAddExternalLink,
-  handleDeleteExternalLink,
-  refreshGooglePlaceData,
-  saveExternalLinks,
-  refreshLinks,
-  error,
-} = useExternalLinks(userId); // ✅ sempre chamado, mas com userId indefinido no início
+    };
 
-if (loading || !userId) {
-  return <p className="p-4">Carregando utilizador...</p>;
-}
+    // Falhar a leitura não pode deixar o ecrã preso a carregar.
+    load()
+      .catch((loadError) => console.error('Erro ao carregar o perfil:', loadError))
+      .finally(() => {
+        if (active) setLoadingProfile(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [userId]);
 
-
-  const handleBusinessInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleBusinessInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setBusinessInfo(prev => ({ ...prev, [name]: value }));
+    setBusinessInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleReviewSettingsChange = (key: string, value: boolean) => {
-    setReviewSettings(prev => ({ ...prev, [key]: value }));
+  const handleSaveBusinessInfo = async () => {
+    if (!userId) return;
+    setSavingProfile(true);
+
+    try {
+      const [firstName, ...rest] = businessInfo.ownerName.trim().split(/\s+/);
+      const { error: saveError } = await supabase.from('profiles').upsert({
+        id: userId,
+        business_name: businessInfo.name.trim(),
+        first_name: firstName || null,
+        last_name: rest.length ? rest.join(' ') : null,
+        phone: businessInfo.phone.trim() || null,
+        updated_at: new Date().toISOString(),
+      });
+
+      if (saveError) throw saveError;
+      toast.success('Informações guardadas.');
+    } catch (saveError) {
+      const message = saveError instanceof Error ? saveError.message : 'Erro ao guardar';
+      console.error('Erro ao guardar o perfil:', message);
+      toast.error('Não foi possível guardar. Tente novamente.');
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
-  const handleSaveBusinessInfo = () => {
-    toast.success('Informações atualizadas com sucesso!');
-  };
-
-  const handleSaveReviewSettings = () => {
-    toast.success('Configurações de avaliação atualizadas!');
-  };
+  if (authLoading || !userId || loadingProfile) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-t-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar userRole="business" businessName={businessInfo.name} />
+      <Navbar userRole="business" businessName={businessInfo.name || undefined} />
 
       <main className="flex-1 pt-20 px-4 pb-8">
         <div className="container mx-auto max-w-6xl">
           <header className="mb-8">
             <h1 className="text-3xl font-bold">Configurações</h1>
             <p className="text-gray-600 mt-1">
-              Gerencie as configurações do seu negócio e personalize sua experiência.
+              Se preferir fazer isto passo a passo,{' '}
+              <Link to="/configuracao" className="text-primary underline">
+                use a configuração guiada
+              </Link>
+              .
             </p>
           </header>
 
           <Tabs defaultValue="business">
             <TabsList className="mb-6">
-              <TabsTrigger value="business">Informações do Negócio</TabsTrigger>
-              <TabsTrigger value="reviews">Avaliações</TabsTrigger>
+              <TabsTrigger value="business">O meu negócio</TabsTrigger>
               <TabsTrigger value="external-links">Links Externos</TabsTrigger>
               <TabsTrigger value="notifications">Notificações</TabsTrigger>
               <TabsTrigger value="google-reviews">Google Reviews</TabsTrigger>
@@ -104,14 +156,7 @@ if (loading || !userId) {
                 onBusinessInfoChange={handleBusinessInfoChange}
                 onSaveBusinessInfo={handleSaveBusinessInfo}
                 onCancel={() => navigate(-1)}
-              />
-            </TabsContent>
-
-            <TabsContent value="reviews">
-              <ReviewSettings
-                reviewSettings={reviewSettings}
-                onReviewSettingsChange={handleReviewSettingsChange}
-                onSaveReviewSettings={handleSaveReviewSettings}
+                saving={savingProfile}
               />
             </TabsContent>
 
@@ -119,6 +164,7 @@ if (loading || !userId) {
               <ExternalLinksSettings
                 externalLinks={externalLinks}
                 onExternalLinkChange={handleExternalLinkChange}
+                onExternalLinkCommit={handleExternalLinkCommit}
                 onDeleteExternalLink={handleDeleteExternalLink}
                 onAddExternalLink={handleAddExternalLink}
                 onSaveExternalLinks={saveExternalLinks}
@@ -135,7 +181,7 @@ if (loading || !userId) {
             </TabsContent>
 
             <TabsContent value="google-reviews">
-              {user && <GoogleReviews userId={user.id} />}
+              <GoogleReviews userId={userId} />
             </TabsContent>
           </Tabs>
         </div>

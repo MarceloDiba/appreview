@@ -14,14 +14,14 @@ const adminData = {
   revenueMonthly: 2340.60,
   newUsersThisMonth: 17,
   users: [
-    { id: 'user1', name: 'Restaurante Pizzaria Bella', plan: 'standard', status: 'active', joined: '2023-03-15' },
+    { id: 'user1', name: 'Negócio de Exemplo', plan: 'standard', status: 'active', joined: '2023-03-15' },
     { id: 'user2', name: 'Salão de Beleza Glamour', plan: 'standard', status: 'active', joined: '2023-02-28' },
     { id: 'user3', name: 'Clínica Estética Renova', plan: 'standard', status: 'inactive', joined: '2023-04-05' },
     { id: 'user4', name: 'Bar do João', plan: 'standard', status: 'active', joined: '2023-01-10' },
     { id: 'user5', name: 'Hotel Paraíso', plan: 'standard', status: 'trial', joined: '2023-05-01' }
   ],
   recentPayments: [
-    { id: 'pay1', business: 'Restaurante Pizzaria Bella', amount: 24.90, date: '2023-05-01', status: 'completed' },
+    { id: 'pay1', business: 'Negócio de Exemplo', amount: 24.90, date: '2023-05-01', status: 'completed' },
     { id: 'pay2', business: 'Salão de Beleza Glamour', amount: 24.90, date: '2023-05-01', status: 'completed' },
     { id: 'pay3', business: 'Bar do João', amount: 24.90, date: '2023-05-01', status: 'completed' },
     { id: 'pay4', business: 'Hotel Paraíso', amount: 0, date: '2023-05-01', status: 'trial' },

@@ -155,7 +155,7 @@ const Demo = () => {
                     <div className="border shadow-lg rounded-lg p-8 bg-white max-w-sm">
                       <div className="text-center mb-6">
                         <h3 className="text-xl font-bold">Como foi sua experiência?</h3>
-                        <p className="text-gray-600 mt-1">Restaurante Exemplo</p>
+                        <p className="text-gray-600 mt-1">O Seu Negócio</p>
                       </div>
                       
                       <div className="flex justify-between mt-8 mb-6">

@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { getSetupState } from '@/hooks/useSetupStatus';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -51,7 +53,11 @@ const Login = () => {
           toast.error(`Erro ao fazer login: ${error.message}`);
         }
       } else {
-        navigate('/dashboard');
+        // Quem ainda não tem nome, link do Google e um QR code vai para o passo
+        // a passo em vez de aterrar num painel vazio sem saber o que fazer.
+        const { data: { user: signedIn } } = await supabase.auth.getUser();
+        const setup = signedIn ? await getSetupState(signedIn.id) : null;
+        navigate(setup && !setup.isComplete ? '/configuracao' : '/dashboard');
       }
     } catch (error) {
       console.error('Unexpected error during login:', error);
