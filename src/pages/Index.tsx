@@ -371,6 +371,8 @@ const Index = () => {
                     diba@noadigital.com.br
                   </a>
                 </li>
+                <li><Link to="/termos" className="hover:text-white transition-colors">Termos de Serviço</Link></li>
+                <li><Link to="/privacidade" className="hover:text-white transition-colors">Política de Privacidade</Link></li>
               </ul>
             </div>
           </div>

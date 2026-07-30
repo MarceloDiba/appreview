@@ -51,6 +51,9 @@ const DICTIONARY = {
     formNamePlaceholder: 'Como podemos chamar você',
     formContactLabel: 'WhatsApp ou e-mail (opcional)',
     formContactPlaceholder: 'Deixe um contato se quiser retorno',
+    formPrivacyNotice:
+      'O que você escrever vai direto para {business}, que é quem cuida desses dados. Nome e contato são opcionais.',
+    formPrivacyLink: 'Como seus dados são tratados',
 
     publicTitle: 'Você também pode avaliar publicamente',
     publicSubtitle: 'A avaliação pública é sempre escolha sua. Nada aqui é filtrado ou escondido.',
@@ -90,6 +93,9 @@ const DICTIONARY = {
     formNamePlaceholder: 'Como o podemos tratar',
     formContactLabel: 'WhatsApp ou e-mail (opcional)',
     formContactPlaceholder: 'Deixe um contacto se quiser retorno',
+    formPrivacyNotice:
+      'O que escrever vai directamente para {business}, que é quem trata destes dados. Nome e contacto são opcionais.',
+    formPrivacyLink: 'Como os seus dados são tratados',
 
     publicTitle: 'Também pode avaliar publicamente',
     publicSubtitle: 'A sua avaliação pública é sempre sua escolha. Nada aqui é filtrado ou escondido.',
@@ -129,6 +135,9 @@ const DICTIONARY = {
     formNamePlaceholder: 'What should we call you',
     formContactLabel: 'WhatsApp or email (optional)',
     formContactPlaceholder: 'Leave a contact if you would like a reply',
+    formPrivacyNotice:
+      'What you write goes straight to {business}, who is responsible for this data. Name and contact are optional.',
+    formPrivacyLink: 'How your data is handled',
 
     publicTitle: 'You can also leave a public review',
     publicSubtitle: 'Your public review is always your choice. Nothing here is filtered or hidden.',
