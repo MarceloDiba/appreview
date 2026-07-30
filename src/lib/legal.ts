@@ -20,16 +20,25 @@ export const LEGAL = {
   /** Nome comercial do serviço. */
   servico: 'AppReview',
   /** Entidade que presta o serviço e assina os contratos. */
-  entidade: PENDENTE,
+  entidade: 'MDR Propaganda Ltda. ME',
   /** NIPC/CNPJ ou equivalente da entidade acima. */
-  identificacaoFiscal: PENDENTE,
+  identificacaoFiscal: 'CNPJ 20.927.148/0001-83',
   /** Morada da sede, exigida no contrato e na política de privacidade. */
-  morada: PENDENTE,
+  morada: 'Rua Itaporanga, 433, Aracaju, Sergipe, Brasil',
   /** Endereço para exercer direitos de protecção de dados e para suporte. */
   email: 'diba@noadigital.com.br',
+  /** Meio de pagamento em vigor. */
+  meioPagamento: 'Stripe',
   /** Preço em vigor, tal como anunciado na página inicial. */
   precoMensal: '49 €',
-  /** Lei e foro aplicáveis. O cliente do piloto é português. */
+  /**
+   * Lei e foro aplicáveis. ATENÇÃO: mantidos em Portugal por o piloto e os
+   * titulares dos dados serem portugueses, mas a entidade que presta o serviço
+   * é brasileira (MDR, Aracaju). Esta combinação — prestador no Brasil, foro em
+   * Portugal — é uma decisão de negócio por confirmar com o Marcelo e por rever
+   * com quem perceba do cruzamento LGPD (Brasil) + RGPD (UE). Ver os avisos no
+   * PR que trouxe estes dados.
+   */
   leiAplicavel: 'portuguesa',
   foro: 'comarca de Lisboa, Portugal',
   /** Data da versão em vigor destes documentos. */

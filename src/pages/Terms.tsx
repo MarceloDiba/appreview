@@ -89,8 +89,8 @@ const Terms = () => (
     <Seccao titulo="Preço e pagamento">
       <p>
         O serviço custa {LEGAL.precoMensal} por mês por estabelecimento, com os impostos aplicáveis
-        acrescidos quando devidos. O pagamento é feito por <Dado valor={LEGAL.entidade} /> através
-        dos meios acordados no momento da adesão, e cobrado no início de cada período mensal.
+        acrescidos quando devidos. O pagamento é feito à <Dado valor={LEGAL.entidade} />, processado
+        pela {LEGAL.meioPagamento}, e cobrado no início de cada período mensal.
       </p>
       <p>
         Se o preço mudar, avisamos por e-mail com pelo menos 30 dias de antecedência. O novo preço
