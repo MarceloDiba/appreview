@@ -9,29 +9,16 @@ import { useAttentionInsights } from '@/hooks/useAttentionInsights';
 import { useSetupStatus } from '@/hooks/useSetupStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { MessageSquare, QrCode, Settings as SettingsIcon } from 'lucide-react';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 const shortcuts = [
-  {
-    to: '/reviews',
-    icon: MessageSquare,
-    title: 'Casos para resolver',
-    description: 'Ler os relatos e registar o que foi feito.',
-  },
-  {
-    to: '/qrcodes',
-    icon: QrCode,
-    title: 'QR Codes',
-    description: 'Criar e imprimir códigos por mesa ou balcão.',
-  },
-  {
-    to: '/settings',
-    icon: SettingsIcon,
-    title: 'Definições',
-    description: 'Ligar as suas páginas do Google e do TripAdvisor.',
-  },
+  { to: '/reviews', icon: MessageSquare, titleKey: 'dashboard.shortcuts.reviewsTitle', descKey: 'dashboard.shortcuts.reviewsDesc' },
+  { to: '/qrcodes', icon: QrCode, titleKey: 'dashboard.shortcuts.qrTitle', descKey: 'dashboard.shortcuts.qrDesc' },
+  { to: '/settings', icon: SettingsIcon, titleKey: 'dashboard.shortcuts.settingsTitle', descKey: 'dashboard.shortcuts.settingsDesc' },
 ];
 
 const Dashboard = () => {
+  const { t } = useOwnerTranslation();
   const [userId, setUserId] = useState<string>('');
   const [businessName, setBusinessName] = useState<string>('');
   const [loadingUser, setLoadingUser] = useState(true);
@@ -82,11 +69,11 @@ const Dashboard = () => {
         <div className="container mx-auto max-w-5xl">
           <header className="mb-6">
             <h1 className="text-3xl font-bold">
-              {businessName ? `Olá, ${businessName}` : 'O seu painel'}
+              {businessName
+                ? t('dashboard.greetingNamed', { name: businessName })
+                : t('dashboard.greetingGeneric')}
             </h1>
-            <p className="mt-1 text-gray-600">
-              O que precisa da sua atenção hoje, em primeiro lugar.
-            </p>
+            <p className="mt-1 text-gray-600">{t('dashboard.subtitle')}</p>
           </header>
 
           {/*
@@ -98,21 +85,24 @@ const Dashboard = () => {
             <Card className="mb-6 border-amber-200 bg-amber-50">
               <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="font-semibold text-amber-900">Falta terminar a configuração</h2>
+                  <h2 className="font-semibold text-amber-900">{t('dashboard.setupBanner.title')}</h2>
                   <p className="mt-1 text-sm text-amber-800">
-                    {[
-                      !setup.businessName && 'o nome do seu negócio',
-                      !setup.hasGoogleLink && 'o endereço da sua página no Google',
-                      setup.qrCount === 0 && 'o primeiro QR code',
-                    ]
-                      .filter(Boolean)
-                      .join(', ')
-                      .replace(/, ([^,]*)$/, ' e $1')}{' '}
-                    — sem isto não chegam avaliações.
+                    {(() => {
+                      const missing = [
+                        !setup.businessName && t('dashboard.setupBanner.name'),
+                        !setup.hasGoogleLink && t('dashboard.setupBanner.google'),
+                        setup.qrCount === 0 && t('dashboard.setupBanner.qr'),
+                      ].filter(Boolean) as string[];
+                      const list =
+                        missing.length <= 1
+                          ? missing.join('')
+                          : `${missing.slice(0, -1).join(', ')} ${t('dashboard.setupBanner.and')} ${missing[missing.length - 1]}`;
+                      return `${list} ${t('dashboard.setupBanner.suffix')}`;
+                    })()}
                   </p>
                 </div>
                 <Button asChild>
-                  <Link to="/configuracao">Continuar</Link>
+                  <Link to="/configuracao">{t('dashboard.setupBanner.continue')}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -121,14 +111,14 @@ const Dashboard = () => {
           <AttentionCenter insights={insights} loading={loading} />
 
           <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {shortcuts.map(({ to, icon: Icon, title, description }) => (
+            {shortcuts.map(({ to, icon: Icon, titleKey, descKey }) => (
               <Card key={to} className="transition-shadow hover:shadow-md">
                 <CardContent className="p-5">
                   <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
-                  <h3 className="mt-3 font-semibold text-gray-900">{title}</h3>
-                  <p className="mt-1 text-sm text-gray-600">{description}</p>
+                  <h3 className="mt-3 font-semibold text-gray-900">{t(titleKey)}</h3>
+                  <p className="mt-1 text-sm text-gray-600">{t(descKey)}</p>
                   <Button asChild variant="link" className="mt-2 h-auto p-0">
-                    <Link to={to}>Abrir</Link>
+                    <Link to={to}>{t('dashboard.shortcuts.open')}</Link>
                   </Button>
                 </CardContent>
               </Card>

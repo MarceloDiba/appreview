@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, CheckCircle2, Clock, Info, Lightbulb, MailWarning } from 'lucide-react';
 import type { AlertLevel, AttentionAlert, AttentionInsights } from '@/hooks/useAttentionInsights';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface AttentionCenterProps {
   insights: AttentionInsights;
@@ -82,11 +83,13 @@ const AlertRow: React.FC<{ alert: AttentionAlert }> = ({ alert }) => {
 };
 
 const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) => {
+  const { t } = useOwnerTranslation();
+
   if (loading) {
     return (
       <Card>
         <CardContent className="py-10 text-center text-gray-500">
-          A analisar a sua semana...
+          {t('attention.ui.analyzing')}
         </CardContent>
       </Card>
     );
@@ -100,17 +103,17 @@ const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) 
     stats.weekAverage !== null ? stats.weekAverage.toFixed(1) : '—';
   const weekAverageHint =
     stats.weekAverage !== null && stats.baselineAverage !== null
-      ? `Média anterior ${stats.baselineAverage.toFixed(1)}`
-      : 'Sem histórico suficiente';
+      ? t('attention.ui.prevAverage', { value: stats.baselineAverage.toFixed(1) })
+      : t('attention.ui.noHistory');
 
   const resolutionLabel =
     stats.resolutionRate !== null ? `${Math.round(stats.resolutionRate * 100)}%` : '—';
 
   return (
-    <section aria-label="Central de atenção" className="space-y-4">
+    <section aria-label={t('attention.ui.heading')} className="space-y-4">
       <div className="flex items-baseline justify-between gap-4">
-        <h2 className="text-xl font-semibold text-gray-900">Central de atenção</h2>
-        <span className="text-xs text-gray-500">Últimos 7 dias</span>
+        <h2 className="text-xl font-semibold text-gray-900">{t('attention.ui.heading')}</h2>
+        <span className="text-xs text-gray-500">{t('attention.ui.last7')}</span>
       </div>
 
       {/* The single most important thing right now. */}
@@ -127,7 +130,7 @@ const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) 
                   {priority.label}
                 </span>
                 <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                  Sua prioridade agora
+                  {t('attention.ui.priorityNow')}
                 </span>
               </div>
 
@@ -147,7 +150,7 @@ const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) 
               {stats.openCases > 0 && (
                 <div className="mt-4">
                   <Button asChild size="sm">
-                    <Link to="/reviews">Abrir os casos</Link>
+                    <Link to="/reviews">{t('attention.ui.openCasesBtn')}</Link>
                   </Button>
                 </div>
               )}
@@ -158,26 +161,24 @@ const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) 
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile
-          label="Casos em aberto"
+          label={t('attention.ui.openCases')}
           value={String(stats.openCases)}
           hint={
             stats.oldestOpenDays !== null
-              ? `Mais antigo há ${stats.oldestOpenDays} ${
-                  stats.oldestOpenDays === 1 ? 'dia' : 'dias'
-                }`
-              : 'Nada pendente'
+              ? t('attention.ui.oldest', { count: stats.oldestOpenDays })
+              : t('attention.ui.nothingPending')
           }
         />
         <StatTile
-          label="À espera de retorno"
+          label={t('attention.ui.awaitingReturn')}
           value={String(stats.awaitingContact)}
-          hint="Deixaram contacto"
+          hint={t('attention.ui.leftContact')}
         />
-        <StatTile label="Média da semana" value={weekAverageLabel} hint={weekAverageHint} />
+        <StatTile label={t('attention.ui.weekAverage')} value={weekAverageLabel} hint={weekAverageHint} />
         <StatTile
-          label="Taxa de resolução"
+          label={t('attention.ui.resolutionRate')}
           value={resolutionLabel}
-          hint={`${stats.resolvedTotal} resolvidos no total`}
+          hint={t('attention.ui.resolvedTotal', { count: stats.resolvedTotal })}
         />
       </div>
 
@@ -185,7 +186,7 @@ const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) 
         <Card>
           <CardContent className="p-5">
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-              Também merece atenção
+              {t('attention.ui.alsoWorth')}
             </h3>
             <div>
               {alerts.map((alert) => (
