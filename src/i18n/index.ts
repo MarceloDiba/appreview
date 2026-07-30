@@ -4,17 +4,61 @@
  * O painel do dono fica só em português de propósito: quem o usa é o dono do
  * negócio, não o visitante. Traduzi-lo seria custo de manutenção sem retorno.
  *
- * Sem biblioteca externa: são três idiomas e um punhado de textos. O dicionário
- * é tipado, então esquecer uma chave em qualquer idioma quebra o build em vez
- * de aparecer como texto faltando na tela do cliente.
+ * Sem biblioteca externa: são quatro variantes e um punhado de textos. O
+ * dicionário é tipado, então esquecer uma chave em qualquer idioma quebra o
+ * build em vez de aparecer como texto faltando na tela do cliente.
+ *
+ * **Português do Brasil e de Portugal são variantes separadas.** "Contacto" e
+ * "contato", "o seu nome" e "seu nome": para quem lê, a variante errada soa
+ * como texto traduzido por máquina — exatamente a impressão que este produto
+ * não pode passar no momento em que pede um favor ao cliente.
  */
 
-export type Locale = 'pt' | 'es' | 'en';
+export type Locale = 'pt-BR' | 'pt-PT' | 'es' | 'en';
 
-export const SUPPORTED_LOCALES: Locale[] = ['pt', 'es', 'en'];
+export const SUPPORTED_LOCALES: Locale[] = ['pt-BR', 'pt-PT', 'es', 'en'];
 
 const DICTIONARY = {
-  pt: {
+  'pt-BR': {
+    ratingQuestion: 'Como foi sua experiência?',
+    ratingBad: 'Ruim',
+    ratingOk: 'Razoável',
+    ratingGood: 'Boa',
+    back: 'Voltar',
+    backAndChooseAnother: 'Voltar e escolher outra opção',
+    ariaRatingBad: 'Avaliação negativa',
+    ariaRatingOk: 'Avaliação neutra',
+    ariaRatingGood: 'Avaliação positiva',
+
+    chooserTitle: 'Onde você prefere avaliar?',
+    chooserSubtitle: 'Escolha a plataforma para continuar sua avaliação de {business}.',
+
+    formTitle: 'Conte o que aconteceu',
+    formSubtitle: '{business} recebe seu comentário na hora e pode entrar em contato.',
+    formSend: 'Enviar',
+    formSending: 'Enviando...',
+    formCommentLabel: 'Conte mais sobre sua experiência',
+    formCommentPlaceholder: 'Conte como foi sua experiência neste lugar',
+    formNameLabel: 'Seu nome (opcional)',
+    formNamePlaceholder: 'Como podemos chamar você',
+    formContactLabel: 'WhatsApp ou e-mail (opcional)',
+    formContactPlaceholder: 'Deixe um contato se quiser retorno',
+
+    publicTitle: 'Você também pode avaliar publicamente',
+    publicSubtitle: 'A avaliação pública é sempre escolha sua. Nada aqui é filtrado ou escondido.',
+    publicGoogle: 'Avaliar no Google',
+    publicTripAdvisor: 'Avaliar no TripAdvisor',
+
+    thanksTitle: 'Obrigado pelo seu comentário!',
+    thanksBodyNamed:
+      'Recebemos o que você escreveu e já está com o responsável do {business}. Se você deixou um contato, pode esperar retorno em breve.',
+    thanksBodyGeneric:
+      'Recebemos o que você escreveu e já está com o responsável do estabelecimento. Se você deixou um contato, pode esperar retorno em breve.',
+    thanksPublicPrompt: 'Quer deixar também uma avaliação pública?',
+    thanksHome: 'Voltar para a página inicial',
+  },
+
+  'pt-PT': {
     ratingQuestion: 'Como foi a sua experiência?',
     ratingBad: 'Mau',
     ratingOk: 'Razoável',
@@ -132,24 +176,51 @@ const DICTIONARY = {
   },
 } as const;
 
-export type TranslationKey = keyof (typeof DICTIONARY)['pt'];
+export type TranslationKey = keyof (typeof DICTIONARY)['pt-BR'];
 
 /**
- * Português cobre PT e BR; espanhol cobre Espanha e América Latina; qualquer
- * outro idioma cai em inglês, que é a língua franca do turista em Lisboa.
+ * Aceita o que uma pessoa escreveria à mão em `?lang=` além dos códigos
+ * exactos: `br`, `pt-br`, `pt`, `en-gb`, e por aí.
+ */
+export const normalizeLocale = (value: string | null | undefined): Locale | null => {
+  if (!value) return null;
+  const tag = value.trim().toLowerCase();
+
+  if (tag === 'br' || tag === 'pt-br' || tag.startsWith('pt-br')) return 'pt-BR';
+  if (tag === 'pt' || tag.startsWith('pt')) return 'pt-PT';
+  if (tag === 'es' || tag.startsWith('es') || tag.startsWith('ca') || tag.startsWith('gl')) {
+    return 'es';
+  }
+  if (tag === 'en' || tag.startsWith('en')) return 'en';
+
+  return null;
+};
+
+/**
+ * O idioma vem do telemóvel de quem escaneia, não do país onde o QR está
+ * colado.
+ *
+ * É de propósito, e não é o mesmo que localização: um brasileiro de férias em
+ * Lisboa lê melhor "seu nome" do que "o seu nome", e é o aparelho dele que diz
+ * isso. Localizar por IP exigiria um serviço externo no caminho do cliente —
+ * mais uma dependência que pode cair no único momento em que o produto tem uma
+ * chance de funcionar.
+ *
+ * Um aparelho que diz só `pt`, sem região, cai em português de Portugal: é onde
+ * está o piloto, e um aparelho brasileiro quase sempre diz `pt-BR`.
+ *
+ * Espanhol continua existindo mesmo não estando na regra de negócio: metade dos
+ * turistas de Lisboa fala espanhol, e mandá-los para o inglês por omissão seria
+ * piorar de propósito uma tradução que já está escrita e revista.
  */
 export const detectLocale = (): Locale => {
   if (typeof navigator === 'undefined') return 'en';
 
-  const candidates = navigator.languages?.length
-    ? navigator.languages
-    : [navigator.language];
+  const candidates = navigator.languages?.length ? navigator.languages : [navigator.language];
 
   for (const tag of candidates) {
-    const base = tag.toLowerCase().split('-')[0];
-    if (base === 'pt') return 'pt';
-    if (base === 'es' || base === 'ca' || base === 'gl') return 'es';
-    if (base === 'en') return 'en';
+    const match = normalizeLocale(tag);
+    if (match) return match;
   }
 
   return 'en';
