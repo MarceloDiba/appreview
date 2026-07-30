@@ -47,44 +47,47 @@ o piloto provar. O risco começa no primeiro cliente real que escrever algo. A
 transferência passa a estar declarada na Política de Privacidade (PR #11), o que
 reduz a exposição mas não a elimina — declarar não é o mesmo que resolver.
 
-## À espera de revisão (não está em produção)
+## Método de trabalho (acordado 30/07)
 
-- **PR #10 — Sugestões de resposta (ponto 7).** Cada avaliação do Google e cada
-  caso interno passa a ter texto pronto e editável para copiar, em PT, ES ou EN
-  conforme o idioma em que o cliente escreveu. Determinístico, sem IA e sem
-  chave paga, como a Central de Atenção; o motor está isolado em
-  `src/lib/replySuggestions.ts` e pode ser trocado por IA por trás da mesma
-  interface. Não responde ao Google por API — o dono copia e cola.
-- **PR #11 — Termos e Privacidade (ponto 8).** `/termos` e `/privacidade`,
-  ligadas do rodapé, do registo e do formulário do cliente (aviso trilingue).
-  Declaram a transferência de dados para o Brasil e separam os papéis: nos dados
-  de quem avalia, o responsável é o estabelecimento e o AppReview é
-  subcontratante. **Não pode ser assinado por ninguém enquanto o Marcelo não
-  der a entidade legal, o número fiscal e a morada** — aparecem na página como
-  "[a confirmar]" de propósito, em `src/lib/legal.ts`.
+Ser económico com tokens. Decisões em lote antes de codar; PRs maiores por tema,
+não um por ajuste; verificar com `tsc` + CI (que faz build), sem abrir navegador
+a não ser que o Marcelo precise mesmo de ver algo; nada de mexer no dev
+server/preview sem necessidade. Este ficheiro é o backlog vivo.
 
-## O que falta, por ordem
+## Em produção (mergeado)
 
-Ver `memory/appreview-pendencias-produto.md` para o detalhe. Resumo:
+PR #9 (QR + dado falso), #10 (sugestões de resposta), #11 (Termos/Privacidade),
+#13 (configuração guiada + fim dos dados inventados), #14 (idioma do cliente por
+região: pt-BR/pt-PT/en, sem espanhol). Isto cobre os antigos pontos 4, 7 e 8.
 
-~~1 a 3: QR code e dado falso~~ — **feitos, PR #9.**
-~~7: Sugestões de resposta~~ — **escrito, PR #10, por rever.**
-~~8: Termos e Privacidade~~ — **escrito, PR #11, por rever e por completar
-com os dados legais do Marcelo.**
+## PRs abertos
 
-4. `"Restaurante Exemplo"` ainda no cabeçalho de `/profile` e no estado inicial de
-   `/settings`
-5. `/admin` e `/profile` sem qualquer ligação ao banco
-6. Configurar o Google exige colar URL à mão — falta busca com autocomplete.
-   Bloqueia self-service, não o piloto concierge
-9. Limpar dados de teste do banco antes do piloto
-10. Modelo de agência: a NOÁ não consegue gerir vários clientes de um lugar.
-    Dói a partir do 3.º cliente
+- **#15 — painel do dono multilíngue (base).** react-i18next, um JSON por
+  idioma em `src/i18n/owner`, seletor de idioma. Só o passo a passo migrado, como
+  amostra; **tom do pt-BR aprovado pelo Marcelo.** A seguir: expandir para o
+  painel inteiro (ver backlog).
+- **#16 — dados legais.** Entidade MDR Propaganda Ltda. ME, CNPJ
+  20.927.148/0001-83, sede em Aracaju/SE, pagamento por Stripe. Lei/foro do
+  Brasil (Aracaju). Privacidade reescrita para o regime duplo LGPD+RGPD. Tudo
+  **por validar com advogado** (o Marcelo valida depois).
 
-**Sugestão de ordem para a próxima sessão:** rever e mergear o #10 e o #11, e
-completar os dados legais. Depois 4, 5 e 9 — são pequenos e tiram o resto do
-dado falso da frente do cliente. O 6 e o 10 só quando o piloto provar que vale
-escalar.
+## Backlog (decisões já tomadas — é só executar)
+
+1. **Painel multilíngue completo** — traduzir as ~14 telas restantes num PR
+   único. Peça mais pesada: `useAttentionInsights` (prosa gerada, com plural).
+   Pôr o seletor de idioma no Navbar.
+2. **Stripe** — integrar a cobrança a sério. Adiado a pedido do Marcelo, mas
+   **vamos precisar**. Mexe em dinheiro: só executar com aval explícito.
+3. **Revisão jurídica** dos Termos/Privacidade (LGPD+RGPD, lei/foro). O Marcelo
+   trata fora; eu deixei o texto o mais defensável possível.
+
+## Backlog (sem bloquear o piloto — prioridade minha)
+
+- `/admin` sem ligação ao banco (interno, baixa prioridade).
+- Autocomplete do Google nas definições (bloqueia self-service, não o concierge).
+- **Limpar dados de teste do banco antes do piloto** — é apagar linhas, portanto
+  **exige aval** antes de correr.
+- Modelo de agência (dói a partir do 3.º cliente).
 
 ## O que nunca foi feito e é a coisa mais valiosa que falta
 
