@@ -1,7 +1,8 @@
 # Estado do AppReview — 30 de julho de 2026
 
-> Actualizado no fim da sessão de 30/07. Os itens 1 a 3 já foram corrigidos e
-> publicados (PR #9). A lista abaixo começa no item 4.
+> Actualizado no fim da segunda sessão de 30/07. Os itens 1 a 3 estão em
+> produção (PR #9). Os itens 7 e 8 estão escritos e à espera de revisão nos
+> PR #10 e #11 — ainda não estão em produção.
 
 Documento de passagem. Quem pegar este projecto lê isto primeiro.
 
@@ -42,29 +43,48 @@ https://appreview-flame.vercel.app
 
 **Pendência conhecida:** o banco está no Brasil e o piloto é em Lisboa — transferência
 internacional de dados sob o RGPD. Marcelo decidiu adiar a mudança para a Europa até
-o piloto provar. O risco começa no primeiro cliente real que escrever algo.
+o piloto provar. O risco começa no primeiro cliente real que escrever algo. A
+transferência passa a estar declarada na Política de Privacidade (PR #11), o que
+reduz a exposição mas não a elimina — declarar não é o mesmo que resolver.
+
+## À espera de revisão (não está em produção)
+
+- **PR #10 — Sugestões de resposta (ponto 7).** Cada avaliação do Google e cada
+  caso interno passa a ter texto pronto e editável para copiar, em PT, ES ou EN
+  conforme o idioma em que o cliente escreveu. Determinístico, sem IA e sem
+  chave paga, como a Central de Atenção; o motor está isolado em
+  `src/lib/replySuggestions.ts` e pode ser trocado por IA por trás da mesma
+  interface. Não responde ao Google por API — o dono copia e cola.
+- **PR #11 — Termos e Privacidade (ponto 8).** `/termos` e `/privacidade`,
+  ligadas do rodapé, do registo e do formulário do cliente (aviso trilingue).
+  Declaram a transferência de dados para o Brasil e separam os papéis: nos dados
+  de quem avalia, o responsável é o estabelecimento e o AppReview é
+  subcontratante. **Não pode ser assinado por ninguém enquanto o Marcelo não
+  der a entidade legal, o número fiscal e a morada** — aparecem na página como
+  "[a confirmar]" de propósito, em `src/lib/legal.ts`.
 
 ## O que falta, por ordem
 
 Ver `memory/appreview-pendencias-produto.md` para o detalhe. Resumo:
 
 ~~1 a 3: QR code e dado falso~~ — **feitos, PR #9.**
+~~7: Sugestões de resposta~~ — **escrito, PR #10, por rever.**
+~~8: Termos e Privacidade~~ — **escrito, PR #11, por rever e por completar
+com os dados legais do Marcelo.**
 
 4. `"Restaurante Exemplo"` ainda no cabeçalho de `/profile` e no estado inicial de
    `/settings`
 5. `/admin` e `/profile` sem qualquer ligação ao banco
 6. Configurar o Google exige colar URL à mão — falta busca com autocomplete.
    Bloqueia self-service, não o piloto concierge
-7. **Sugestões de resposta** — não existe. Marcelo nomeou como parte do produto
-8. **Termos de Serviço e Política de Privacidade** — exigência do RGPD para ter
-   cliente real em Portugal
 9. Limpar dados de teste do banco antes do piloto
 10. Modelo de agência: a NOÁ não consegue gerir vários clientes de um lugar.
     Dói a partir do 3.º cliente
 
-**Sugestão de ordem para a próxima sessão:** 7 e 8 primeiro — um porque é produto que
-o Marcelo pediu, o outro porque é legal. Depois 4, 5, 9. O 6 e o 10 só quando o piloto
-provar que vale escalar.
+**Sugestão de ordem para a próxima sessão:** rever e mergear o #10 e o #11, e
+completar os dados legais. Depois 4, 5 e 9 — são pequenos e tiram o resto do
+dado falso da frente do cliente. O 6 e o 10 só quando o piloto provar que vale
+escalar.
 
 ## O que nunca foi feito e é a coisa mais valiosa que falta
 
@@ -92,3 +112,7 @@ portanto o arranque é remoto — os donos imprimem e colocam o QR.
 - A migration `20260712_google_reviews_cache_tables.sql` nunca foi guardada no repo.
   As tabelas existem no banco, a receita para as recriar não existe no código.
 - Lint tem 6 erros e 10 avisos herdados do projecto Lovable original. Não bloqueiam.
+- Há ficheiros duplicados pelo macOS na árvore (`AttentionCenter 2.tsx`,
+  `useAttentionInsights 2.ts`, `i18n/index 2.ts`, `useTranslation 2.ts`,
+  `tripAdvisorUtils 2.ts`), fora do git mas dentro de `src/`. O `tsc` compila-os.
+  São cópias mortas — vale apagá-las, mas ninguém o fez ainda.
