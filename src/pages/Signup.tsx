@@ -153,6 +153,22 @@ const Signup = () => {
             >
               {isSubmitting ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
+            {/*
+              O aviso fica antes do botão e não num visto separado de propósito:
+              é informação, não consentimento a arrancar. O consentimento aqui é
+              a própria criação da conta.
+            */}
+            <p className="mt-3 text-center text-xs text-gray-500">
+              Ao criar conta aceita os{' '}
+              <Link to="/termos" className="underline hover:text-gray-700">
+                Termos de Serviço
+              </Link>{' '}
+              e a{' '}
+              <Link to="/privacidade" className="underline hover:text-gray-700">
+                Política de Privacidade
+              </Link>
+              .
+            </p>
           </div>
         </form>
 

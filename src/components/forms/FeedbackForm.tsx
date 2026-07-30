@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -208,6 +208,19 @@ const FeedbackForm = ({
               className="mt-1"
             />
           </div>
+
+          {/*
+            Aviso no momento da recolha, como o RGPD exige. Fica junto aos
+            campos de nome e contacto — que é onde o cliente decide se dá dados
+            pessoais — e diz-lhe quem fica com eles: o estabelecimento.
+          */}
+          <p className="text-xs leading-relaxed text-gray-500">
+            {t('formPrivacyNotice', { business: businessName })}{' '}
+            <Link to="/privacidade" className="underline hover:text-gray-700">
+              {t('formPrivacyLink')}
+            </Link>
+            .
+          </p>
         </form>
 
         {/*

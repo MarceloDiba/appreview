@@ -28,6 +28,8 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Demo = lazy(() => import("./pages/Demo"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
 
 const queryClient = new QueryClient();
 
@@ -93,6 +95,8 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/demo" element={<Demo />} />
+              <Route path="/termos" element={<Terms />} />
+              <Route path="/privacidade" element={<Privacy />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
