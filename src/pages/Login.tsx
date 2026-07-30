@@ -9,9 +9,12 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { getSetupState } from '@/hooks/useSetupStatus';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { t } = useOwnerTranslation();
   const { signIn, user } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -35,7 +38,7 @@ const Login = () => {
     e.preventDefault();
     
     if (!formData.email || !formData.password) {
-      toast.error('Por favor, preencha todos os campos');
+      toast.error(t('auth.fillAllFields'));
       return;
     }
     
@@ -48,9 +51,9 @@ const Login = () => {
         console.error('Login error:', error);
         
         if (error.message.includes('Invalid login credentials')) {
-          toast.error('Email ou senha incorretos');
+          toast.error(t('auth.wrongCredentials'));
         } else {
-          toast.error(`Erro ao fazer login: ${error.message}`);
+          toast.error(`${t('auth.loginErrorPrefix')}: ${error.message}`);
         }
       } else {
         // Quem ainda não tem nome, link do Google e um QR code vai para o passo
@@ -61,7 +64,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error('Unexpected error during login:', error);
-      toast.error('Ocorreu um erro ao fazer login. Tente novamente.');
+      toast.error(t('auth.unexpectedError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -70,19 +73,22 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md mx-auto p-6 shadow-lg">
+        <div className="mb-2 flex justify-end">
+          <LanguageSwitcher />
+        </div>
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-primary">AppReview</h1>
-          <p className="text-gray-600 mt-2">Entre na sua conta</p>
+          <p className="text-gray-600 mt-2">{t('auth.loginSubtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="email">{t('auth.email')}</Label>
             <Input
               id="email"
               name="email"
               type="email"
-              placeholder="seu@email.com"
+              placeholder={t('auth.emailPlaceholder')}
               value={formData.email}
               onChange={handleChange}
               required
@@ -91,16 +97,16 @@ const Login = () => {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password">{t('auth.password')}</Label>
               <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                Esqueceu a senha?
+                {t('auth.forgotPassword')}
               </Link>
             </div>
             <Input
               id="password"
               name="password"
               type="password"
-              placeholder="Sua senha"
+              placeholder={t('auth.passwordPlaceholder')}
               value={formData.password}
               onChange={handleChange}
               required
@@ -108,25 +114,25 @@ const Login = () => {
           </div>
 
           <div className="pt-2">
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Entrando...' : 'Entrar'}
+              {isSubmitting ? t('auth.signingIn') : t('auth.signIn')}
             </Button>
           </div>
         </form>
 
         <div className="mt-4 text-center">
           <p className="text-gray-600 text-sm">
-            Não tem uma conta?{' '}
+            {t('auth.noAccount')}{' '}
             <Link to="/signup" className="text-primary hover:underline">
-              Cadastre-se
+              {t('auth.createAccount')}
             </Link>
           </p>
           <Link to="/" className="text-gray-500 text-sm hover:text-primary block mt-2">
-            Voltar para a página inicial
+            {t('auth.backHome')}
           </Link>
         </div>
       </Card>
