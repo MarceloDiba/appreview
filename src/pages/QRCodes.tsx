@@ -1,19 +1,38 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import QRCodeGenerator from '@/components/dashboard/QRCodeGenerator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const QRCodes = () => {
-  // In a real app, this would come from user's account data
-  const businessId = 'business123';
+  const [businessName, setBusinessName] = useState<string>('');
   const baseUrl = window.location.origin;
+
+  useEffect(() => {
+    let active = true;
+
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !active) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('business_name')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (active && profile?.business_name) setBusinessName(profile.business_name);
+    };
+
+    load();
+    return () => { active = false; };
+  }, []);
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar userRole="business" businessName="Restaurante Exemplo" />
+      <Navbar userRole="business" businessName={businessName || undefined} />
       
       <main className="flex-1 pt-20 px-4 pb-8">
         <div className="container mx-auto max-w-6xl">
@@ -24,10 +43,7 @@ const QRCodes = () => {
             </p>
           </header>
           
-          <QRCodeGenerator 
-            businessId={businessId}
-            baseUrl={baseUrl}
-          />
+          <QRCodeGenerator baseUrl={baseUrl} businessName={businessName} />
           
           <div className="mt-8">
             <Card>

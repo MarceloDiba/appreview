@@ -1,295 +1,350 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+import { Printer, Download, Trash2 } from 'lucide-react';
+import {
+  QR_PRINT_SIZE,
+  QR_SCREEN_SIZE,
+  downloadDataUrl,
+  publicReviewUrl,
+  qrDataUrl,
+  slugFilename,
+} from '@/lib/qr';
 
 interface QRCodeGeneratorProps {
-  businessId: string;
   baseUrl: string;
+  businessName?: string;
 }
 
-const QRCodeGenerator = ({ businessId, baseUrl }: QRCodeGeneratorProps) => {
+interface SavedQR {
+  id: string;
+  name: string;
+  slug: string;
+  url: string;
+  image: string;
+}
+
+/**
+ * A ordem das operações aqui é a correcção do bug que teria matado o piloto.
+ *
+ * Antes: a imagem do QR era gerada a partir de um `businessId` fixo da página,
+ * o slug só nascia ao gravar, e o `redirect_url` guardava o endereço antigo. O
+ * código impresso apontava para uma página que não existe — e ninguém
+ * descobriria, porque o dono não escaneia o próprio QR.
+ *
+ * Agora: grava-se primeiro para obter o slug, e só depois se desenha a imagem a
+ * partir dele. O endereço deixou de ser editável de propósito: um endereço
+ * escrito à mão quebra a atribuição do caso ao negócio.
+ */
+const QRCodeGenerator = ({ baseUrl, businessName }: QRCodeGeneratorProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [qrValue, setQrValue] = useState(`${baseUrl}/review/${businessId}`);
-  const [qrImage, setQrImage] = useState<string | null>(null);
-  const [qrName, setQrName] = useState('Avaliação Padrão');
-  const [savedQRCodes, setSavedQRCodes] = useState<Array<{id: string, name: string, url: string, image: string}>>([]);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [qrName, setQrName] = useState('Mesa 1');
+  const [creating, setCreating] = useState(false);
+  const [savedQRCodes, setSavedQRCodes] = useState<SavedQR[]>([]);
   const [isLoadingQRs, setIsLoadingQRs] = useState(true);
-  
-  // Fetch saved QR codes on component mount
-  useEffect(() => {
-    if (user) {
-      fetchSavedQRCodes();
-    }
-  }, [user]);
-  
-  const fetchSavedQRCodes = async () => {
+  const [lastCreated, setLastCreated] = useState<SavedQR | null>(null);
+
+  const fetchSavedQRCodes = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('qr_codes')
-        .select('*')
-        .eq('user_id', user.id);
-        
-      if (error) {
-        throw error;
-      }
-      
-      if (data) {
-        // Generate QR image URLs for each saved QR code
-        const qrCodesWithImages = data.map(qr => ({
-          id: qr.id,
-          name: qr.name,
-          url: qr.redirect_url,
-          image: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qr.redirect_url)}`
-        }));
-        
-        setSavedQRCodes(qrCodesWithImages);
-      }
+        .select('id, name, slug')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const withImages = await Promise.all(
+        (data || []).map(async (qr) => {
+          const url = publicReviewUrl(baseUrl, qr.slug);
+          return {
+            id: qr.id,
+            name: qr.name,
+            slug: qr.slug,
+            url,
+            image: await qrDataUrl(url, QR_SCREEN_SIZE),
+          };
+        })
+      );
+
+      setSavedQRCodes(withImages);
     } catch (error) {
       console.error('Error fetching QR codes:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível carregar seus QR Codes",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Não foi possível carregar os seus QR Codes',
+        variant: 'destructive',
       });
     } finally {
       setIsLoadingQRs(false);
     }
-  };
-  
-  const generateQRCode = async () => {
-    setIsLoading(true);
-    
+  }, [user, baseUrl, toast]);
+
+  useEffect(() => {
+    if (user) fetchSavedQRCodes();
+  }, [user, fetchSavedQRCodes]);
+
+  const createQRCode = async () => {
+    if (!user || !qrName.trim()) return;
+    setCreating(true);
+
     try {
-      // Use a real QR code generation API
-      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrValue)}`;
-      
-      // Simulate loading time for QR code generation
-      setTimeout(() => {
-        setQrImage(qrImageUrl);
-        setIsLoading(false);
-      }, 1000);
-    } catch (error) {
-      setIsLoading(false);
-      toast({
-        title: "Erro",
-        description: "Não foi possível gerar o QR Code",
-        variant: "destructive",
-      });
-    }
-  };
-  
-  const saveQRCode = async () => {
-    if (!qrImage || !user) return;
-    
-    try {
-      // Generate a unique slug for the QR code
+      // 1. O slug primeiro. É ele que define o endereço público.
       const slug = uuidv4().substring(0, 8);
-      
-      // Save QR code to the database
+      const url = publicReviewUrl(baseUrl, slug);
+
+      // 2. Gravar com o endereço já correcto.
       const { data, error } = await supabase
         .from('qr_codes')
-        .insert([
-          {
-            user_id: user.id,
-            name: qrName,
-            slug: slug,
-            redirect_url: qrValue,
-          }
-        ])
-        .select()
+        .insert([{ user_id: user.id, name: qrName.trim(), slug, redirect_url: url }])
+        .select('id, name, slug')
         .single();
-        
-      if (error) {
-        throw error;
-      }
-      
-      // Add new QR code to the list
-      const newQRCode = {
+
+      if (error) throw error;
+
+      // 3. Só agora a imagem, derivada do slug gravado.
+      const created: SavedQR = {
         id: data.id,
-        name: qrName,
-        url: qrValue,
-        image: qrImage
+        name: data.name,
+        slug: data.slug,
+        url,
+        image: await qrDataUrl(url, QR_SCREEN_SIZE),
       };
-      
-      setSavedQRCodes([...savedQRCodes, newQRCode]);
-      
+
+      setLastCreated(created);
+      setSavedQRCodes((prev) => [created, ...prev]);
+
       toast({
-        title: "QR Code salvo",
-        description: `QR Code "${qrName}" foi salvo com sucesso.`,
+        title: 'QR Code criado',
+        description: `"${created.name}" está pronto a imprimir.`,
       });
     } catch (error) {
-      console.error('Error saving QR code:', error);
+      console.error('Error creating QR code:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível salvar o QR Code",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Não foi possível criar o QR Code',
+        variant: 'destructive',
       });
+    } finally {
+      setCreating(false);
     }
   };
-  
+
   const deleteQRCode = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('qr_codes')
-        .delete()
-        .eq('id', id);
-        
-      if (error) {
-        throw error;
-      }
-      
-      // Remove QR code from the list
-      setSavedQRCodes(savedQRCodes.filter(qr => qr.id !== id));
-      
-      toast({
-        title: "QR Code removido",
-        description: "QR Code foi removido com sucesso.",
-      });
+      const { error } = await supabase.from('qr_codes').delete().eq('id', id);
+      if (error) throw error;
+
+      setSavedQRCodes((prev) => prev.filter((qr) => qr.id !== id));
+      setLastCreated((prev) => (prev?.id === id ? null : prev));
+
+      toast({ title: 'QR Code removido' });
     } catch (error) {
       console.error('Error deleting QR code:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível remover o QR Code",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Não foi possível remover o QR Code',
+        variant: 'destructive',
       });
     }
   };
-  
-  const downloadQRCode = (qrImageUrl: string, name: string) => {
-    // Create a temporary link to download the QR code image
-    const a = document.createElement('a');
-    a.href = qrImageUrl;
-    a.download = `qrcode-${name.toLowerCase().replace(/\s+/g, '-')}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    
+
+  /** Descarrega em resolução de impressão, não a da pré-visualização. */
+  const downloadForPrint = async (qr: SavedQR) => {
+    const highRes = await qrDataUrl(qr.url, QR_PRINT_SIZE);
+    downloadDataUrl(highRes, `qrcode-${slugFilename(qr.name)}.png`);
     toast({
-      title: "Download iniciado",
-      description: "O download do QR Code foi iniciado.",
+      title: 'Download iniciado',
+      description: `${QR_PRINT_SIZE} px — pronto para imprimir.`,
     });
   };
-  
+
+  /**
+   * Cartão de mesa pronto a imprimir. Trilingue de propósito: quem escaneia
+   * pode ser turista, e o texto na mesa é a única parte do fluxo que não se
+   * adapta ao telemóvel de quem lê.
+   */
+  const printCard = async (qr: SavedQR) => {
+    const highRes = await qrDataUrl(qr.url, QR_PRINT_SIZE);
+    const win = window.open('', '_blank', 'width=800,height=1000');
+    if (!win) {
+      toast({
+        title: 'Bloqueado pelo navegador',
+        description: 'Permita janelas emergentes para imprimir.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const safeName = (businessName || '').replace(/[<>&]/g, '');
+
+    win.document.write(`<!doctype html>
+<html lang="pt"><head><meta charset="utf-8" />
+<title>Cartao ${qr.name}</title>
+<style>
+  @page { size: A6; margin: 8mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .card { text-align: center; padding: 10mm 6mm; }
+  .biz { font-size: 11pt; font-weight: 600; color: #333; margin: 0 0 3mm; }
+  .ask { font-size: 15pt; font-weight: 700; margin: 0 0 5mm; line-height: 1.25; }
+  img { width: 52mm; height: 52mm; display: block; margin: 0 auto 5mm; }
+  .langs { font-size: 9.5pt; color: #555; line-height: 1.5; margin: 0; }
+  .tag { margin: 6mm 0 0; font-size: 7.5pt; color: #999; }
+  @media print { .hint { display: none; } }
+  .hint { margin-top: 8mm; font-size: 9pt; color: #888; }
+</style></head><body>
+  <div class="card">
+    ${safeName ? `<p class="biz">${safeName}</p>` : ''}
+    <p class="ask">Como foi a sua experiência?</p>
+    <img src="${highRes}" alt="QR Code" />
+    <p class="langs">
+      Aponte a câmara do telemóvel<br />
+      <em>Apunta la cámara de tu móvil</em><br />
+      <em>Point your phone camera here</em>
+    </p>
+    <p class="tag">${qr.name}</p>
+    <p class="hint">Use Ficheiro &gt; Imprimir, ou Cmd/Ctrl + P</p>
+  </div>
+  <script>window.onload = function () { setTimeout(function () { window.print(); }, 300); };</script>
+</body></html>`);
+    win.document.close();
+  };
+
   return (
     <Tabs defaultValue="generate">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="generate">Gerar QR Code</TabsTrigger>
-        <TabsTrigger value="saved">QR Codes Salvos</TabsTrigger>
+        <TabsTrigger value="generate">Criar QR Code</TabsTrigger>
+        <TabsTrigger value="saved">Os meus QR Codes ({savedQRCodes.length})</TabsTrigger>
       </TabsList>
-      
+
       <TabsContent value="generate">
         <Card>
           <CardHeader>
-            <CardTitle>Gerador de QR Code</CardTitle>
+            <CardTitle>Criar um QR Code</CardTitle>
             <CardDescription>
-              Crie QR Codes personalizados para compartilhar com seus clientes.
+              Dê um nome ao local — mesa, balcão, recibo — e nós criamos o código pronto a
+              imprimir. Um por local, para saber de onde vem cada avaliação.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="qr-name">Nome do QR Code</Label>
+              <Label htmlFor="qr-name">Onde vai ficar este código?</Label>
               <Input
                 id="qr-name"
                 value={qrName}
                 onChange={(e) => setQrName(e.target.value)}
-                placeholder="Ex: Mesa 1, Balcão, etc."
+                placeholder="Ex: Mesa 1, Balcão, Esplanada"
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="qr-url">URL de Avaliação</Label>
-              <Input
-                id="qr-url"
-                value={qrValue}
-                onChange={(e) => setQrValue(e.target.value)}
-                placeholder="URL para o QR Code"
-              />
-              <p className="text-xs text-gray-500">
-                Esta é a URL que será aberta quando o cliente escanear o QR Code.
-              </p>
-            </div>
-            
-            <div className="flex justify-center pt-4">
-              <Button onClick={generateQRCode} disabled={isLoading}>
-                {isLoading ? 'Gerando...' : 'Gerar QR Code'}
+
+            <div className="flex justify-center pt-2">
+              <Button onClick={createQRCode} disabled={creating || !qrName.trim()}>
+                {creating ? 'A criar...' : 'Criar QR Code'}
               </Button>
             </div>
-            
-            {qrImage && (
+
+            {lastCreated && (
               <div className="mt-6 flex flex-col items-center">
-                <div className="border p-4 rounded-md bg-white">
-                  <img src={qrImage} alt="QR Code" width={200} height={200} />
+                <div className="rounded-md border bg-white p-4">
+                  <img
+                    src={lastCreated.image}
+                    alt={`QR Code ${lastCreated.name}`}
+                    width={QR_SCREEN_SIZE}
+                    height={QR_SCREEN_SIZE}
+                  />
                 </div>
-                <div className="text-sm text-gray-500 mt-2">{qrName}</div>
+                <div className="mt-2 font-medium">{lastCreated.name}</div>
+                <div className="mt-1 break-all text-center text-xs text-gray-500">
+                  {lastCreated.url}
+                </div>
               </div>
             )}
           </CardContent>
-          
-          {qrImage && (
-            <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={() => downloadQRCode(qrImage, qrName)}>
-                Baixar
+
+          {lastCreated && (
+            <CardFooter className="flex flex-wrap justify-center gap-2">
+              <Button onClick={() => printCard(lastCreated)}>
+                <Printer className="mr-2 h-4 w-4" aria-hidden="true" />
+                Imprimir cartão de mesa
               </Button>
-              <Button onClick={saveQRCode}>
-                Salvar QR Code
+              <Button variant="outline" onClick={() => downloadForPrint(lastCreated)}>
+                <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+                Baixar imagem
               </Button>
             </CardFooter>
           )}
         </Card>
       </TabsContent>
-      
+
       <TabsContent value="saved">
         <Card>
           <CardHeader>
-            <CardTitle>QR Codes Salvos</CardTitle>
-            <CardDescription>
-              Gerencie todos os QR Codes que você já criou.
-            </CardDescription>
+            <CardTitle>Os meus QR Codes</CardTitle>
+            <CardDescription>Imprima, baixe ou remova os códigos que já criou.</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoadingQRs ? (
               <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
+                <div className="h-8 w-8 animate-spin rounded-full border-t-2 border-primary" />
               </div>
             ) : savedQRCodes.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>Você ainda não tem QR Codes salvos.</p>
-                <p className="text-sm mt-2">Vá para a aba "Gerar QR Code" para criar um.</p>
+              <div className="py-8 text-center text-gray-500">
+                <p>Ainda não tem QR Codes.</p>
+                <p className="mt-2 text-sm">Use a aba "Criar QR Code" para fazer o primeiro.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {savedQRCodes.map((qrCode) => (
                   <Card key={qrCode.id} className="overflow-hidden">
-                    <div className="p-4 flex flex-col items-center">
-                      <img src={qrCode.image} alt={qrCode.name} width={150} height={150} />
-                      <h3 className="font-medium mt-2">{qrCode.name}</h3>
-                      <p className="text-xs text-gray-500 truncate w-full text-center mt-1">
+                    <div className="flex flex-col items-center p-4">
+                      <img
+                        src={qrCode.image}
+                        alt={`QR Code ${qrCode.name}`}
+                        width={150}
+                        height={150}
+                      />
+                      <h3 className="mt-2 font-medium">{qrCode.name}</h3>
+                      <p className="mt-1 w-full break-all text-center text-xs text-gray-500">
                         {qrCode.url}
                       </p>
                     </div>
-                    <CardFooter className="bg-gray-50 px-4 py-2 flex justify-between">
-                      <Button variant="ghost" size="sm" className="text-gray-500" onClick={() => {
-                        downloadQRCode(qrCode.image, qrCode.name);
-                      }}>
-                        Baixar
+                    <CardFooter className="flex justify-between gap-1 bg-gray-50 px-3 py-2">
+                      <Button variant="ghost" size="sm" onClick={() => printCard(qrCode)}>
+                        <Printer className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                        Imprimir
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-red-500" onClick={() => {
-                        deleteQRCode(qrCode.id);
-                      }}>
-                        Excluir
+                      <Button variant="ghost" size="sm" onClick={() => downloadForPrint(qrCode)}>
+                        <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span className="sr-only">Baixar {qrCode.name}</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500"
+                        onClick={() => deleteQRCode(qrCode.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span className="sr-only">Remover {qrCode.name}</span>
                       </Button>
                     </CardFooter>
                   </Card>
