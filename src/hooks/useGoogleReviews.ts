@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { enUS, pt, ptBR } from 'date-fns/locale';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 
 export interface GoogleReview {
   review_id: string;
@@ -34,6 +35,10 @@ export const useGoogleReviews = (userId: string) => {
 
   const normalizeGoogleReviewsError = useCallback(
     (message: string): string => {
+      if (message.includes('PLACE_ID_UNRESOLVED')) {
+        return t('reviews.google.placeIdMissing');
+      }
+
       if (
         message.includes('Failed to send a request to the Edge Function') ||
         message.includes('FunctionsFetchError') ||
@@ -75,16 +80,24 @@ export const useGoogleReviews = (userId: string) => {
     }
   };
 
-  const fetchGoogleReviews = useCallback(async (placeId: string) => {
+  const fetchGoogleReviews = useCallback(async (placeId?: string) => {
     setRefreshing(true);
     setError(null);
     
     try {
       const { data, error } = await supabase.functions.invoke('fetch-google-reviews', {
-        body: { place_id: placeId }
+        body: placeId ? { place_id: placeId } : {}
       });
       
-      if (error) throw new Error(error.message);
+      if (error) {
+        if (error instanceof FunctionsHttpError) {
+          const responseBody = await error.context.json().catch(() => null);
+          if (responseBody?.code === 'PLACE_ID_UNRESOLVED') {
+            throw new Error('PLACE_ID_UNRESOLVED');
+          }
+        }
+        throw new Error(error.message);
+      }
       
       if (data?.place_info) {
         setPlaceInfo(data.place_info);
@@ -101,7 +114,7 @@ export const useGoogleReviews = (userId: string) => {
     } finally {
       setRefreshing(false);
     }
-  }, [userId, normalizeGoogleReviewsError, t]);
+  }, [normalizeGoogleReviewsError, t]);
 
   const loadGoogleReviews = useCallback(async () => {
     if (!userId) {
@@ -129,13 +142,9 @@ export const useGoogleReviews = (userId: string) => {
       }
       
       const googleLink = links[0] as (typeof links)[number] & { place_id?: string | null };
-      if (!googleLink.place_id) {
-        setError(t('reviews.google.placeIdMissing'));
-        return;
-      }
-      
-      // If we have a place_id, load reviews
-      await fetchGoogleReviews(googleLink.place_id);
+
+      // A Edge Function também resolve links curtos g.page de forma autenticada.
+      await fetchGoogleReviews(googleLink.place_id || undefined);
     } catch (error) {
       const rawErrorMessage = error instanceof Error ? error.message : 'Error loading Google reviews';
       const errorMessage = normalizeGoogleReviewsError(rawErrorMessage);

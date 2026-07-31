@@ -47,11 +47,13 @@ Produção: https://appreview-flame.vercel.app
 
 ## Antes do piloto
 
-1. Marcelo executar `docs/checklist-piloto-e2e.md`: criar conta, configurar o
-   Google, criar/imprimir e escanear o QR, avaliar e confirmar o caso no painel.
-2. Decidir depois o destino da conta de teste mista preservada: ela contém dados
+1. Criar uma conta totalmente nova e repetir a configuração inicial; a passagem
+   de 31/07 foi feita com a conta existente da Noá.
+2. Depois de publicar a resolução automática de links `g.page`, reabrir
+   Avaliações do Google e confirmar negócio, média e avaliações importadas.
+3. Decidir depois o destino da conta de teste mista preservada: ela contém dados
    reais do H5 e não pode ser apagada em bloco.
-3. Revisão jurídica externa do PR #16.
+4. Revisão jurídica externa do PR #16.
 
 ## Limpeza de dados de teste
 
@@ -81,6 +83,13 @@ em cache) foram preservados. Evidência completa em
 
 H5 Texas Burger — Avenida e Mania de Petiscos, ambos em Lisboa. Marcelo está em
 Aracaju até dezembro; o arranque será remoto.
+
+A passagem manual de 31/07 validou QR físico, idioma, nota baixa sem gating,
+Central de Atenção, persistência do caso tratado e logout. Encontrou um defeito
+na importação do Google: links curtos `g.page` eram salvos sem Place ID. A
+correção resolve o redirecionamento do próprio Google de forma autenticada e sem
+consulta paga apenas para descobrir o identificador. Evidência em
+`docs/checklist-piloto-e2e.md`.
 
 ## Riscos e armadilhas
 

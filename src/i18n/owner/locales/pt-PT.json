@@ -221,7 +221,7 @@
       "notVerified": "Não verificado",
       "verifying": "A verificar...",
       "placeIdDetected": "Place ID detetado. A importação automática ainda não foi verificada.",
-      "googleHint": "Aceita links g.page, Google Maps e writereview. Para importar avaliações no separador Google Reviews, use um link com placeid=.",
+      "googleHint": "Aceita links g.page, Google Maps e writereview. O Place ID é identificado automaticamente quando as avaliações são carregadas.",
       "placeId": "Place ID",
       "addTitle": "Adicionar novo link",
       "platformLabel": "Plataforma",
@@ -305,7 +305,7 @@
       "loadToast": "Não foi possível carregar as avaliações do Google. Tente novamente mais tarde.",
       "notAuthenticated": "A sua sessão terminou. Entre novamente para ver as avaliações.",
       "linkMissing": "Ainda não configurou um link do Google. Vá às Definições e adicione o link do seu negócio.",
-      "placeIdMissing": "O link do Google foi guardado, mas não tem o Place ID necessário para importar avaliações. Atualize o link nas Definições.",
+      "placeIdMissing": "Não foi possível identificar o Place ID no link guardado. Atualize o link do Google nas Definições.",
       "noPlaceId": "Configure o Place ID antes de atualizar as avaliações."
     },
     "cases": {

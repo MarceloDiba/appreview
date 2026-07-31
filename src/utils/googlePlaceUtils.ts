@@ -9,6 +9,7 @@ export const isGoogleReviewUrl = (url: string): boolean => {
   return [
     /g\.page\/r\//i,
     /g\.page\//i,
+    /maps\.app\.goo\.gl\//i,
     /search\.google\.com\/local\/writereview/i,
     /maps\.google\./i,
     /google\.[^/]+\/maps/i,
@@ -29,13 +30,13 @@ export const extractPlaceIdFromUrl = (url: string): string | null => {
     // 1. placeid=...
     const placeIdMatch = url.match(/[?&]placeid=([^&]+)/i);
     if (placeIdMatch && placeIdMatch[1]) {
-      return placeIdMatch[1];
+      return decodeURIComponent(placeIdMatch[1]);
     }
 
     // 2. place_id=...
     const altPlaceIdMatch = url.match(/[?&]place_id=([^&]+)/i);
     if (altPlaceIdMatch && altPlaceIdMatch[1]) {
-      return altPlaceIdMatch[1];
+      return decodeURIComponent(altPlaceIdMatch[1]);
     }
 
     // 3. cid=...
