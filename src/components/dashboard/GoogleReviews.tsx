@@ -6,12 +6,14 @@ import LoadingState from './reviews/LoadingState';
 import ErrorState from './reviews/ErrorState';
 import ReviewsHeader from './reviews/ReviewsHeader';
 import ReviewsList from './reviews/ReviewsList';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface GoogleReviewsProps {
   userId: string;
 }
 
 const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId }) => {
+  const { t } = useOwnerTranslation();
   const {
     loading,
     refreshing,
@@ -57,7 +59,7 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId }) => {
       {placeInfo && placeInfo.last_fetch_time && (
         <CardFooter className="pt-0">
           <div className="text-xs text-gray-400 text-right w-full">
-            Última atualização: {formatDate(placeInfo.last_fetch_time)}
+            {t('reviews.google.lastUpdate', { date: formatDate(placeInfo.last_fetch_time) })}
           </div>
         </CardFooter>
       )}

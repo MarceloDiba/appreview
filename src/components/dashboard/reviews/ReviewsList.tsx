@@ -2,6 +2,7 @@
 import React from 'react';
 import ReviewCard from './ReviewCard';
 import { GoogleReview } from '@/hooks/useGoogleReviews';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface ReviewsListProps {
   reviews: GoogleReview[];
@@ -11,10 +12,11 @@ interface ReviewsListProps {
 }
 
 const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate, businessName }) => {
+  const { t } = useOwnerTranslation();
   if (reviews.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        Nenhuma avaliação encontrada
+        {t('reviews.google.empty')}
       </div>
     );
   }

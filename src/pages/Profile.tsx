@@ -9,12 +9,8 @@ import { toast } from 'sonner';
 import { CreditCard, Shield, UserCog } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
-/**
- * Repetidos aqui em vez de importados de `src/lib/legal.ts`: esse ficheiro vem
- * no PR dos Termos e da Privacidade, e este ecrã não deve depender dele para
- * poder ser revisto e mergeado à parte.
- */
 const SUPORTE_EMAIL = 'diba@noadigital.com.br';
 const PRECO_MENSAL = '49 €';
 
@@ -30,6 +26,7 @@ const PRECO_MENSAL = '49 €';
  * sério.
  */
 const Profile = () => {
+  const { t } = useOwnerTranslation();
   const { user, loading: authLoading } = useAuth();
 
   const [profileData, setProfileData] = useState({ name: '', phone: '', businessName: '' });
@@ -85,10 +82,10 @@ const Profile = () => {
       });
 
       if (error) throw error;
-      toast.success('Perfil guardado.');
+      toast.success(t('profile.savedToast'));
     } catch (error) {
       console.error('Erro ao guardar o perfil:', error);
-      toast.error('Não foi possível guardar. Tente novamente.');
+      toast.error(t('profile.saveErrorToast'));
     } finally {
       setSaving(false);
     }
@@ -96,11 +93,11 @@ const Profile = () => {
 
   const handlePasswordChange = async () => {
     if (profilePassword.new !== profilePassword.confirm) {
-      toast.error('As palavras-passe não coincidem');
+      toast.error(t('profile.pwMismatch'));
       return;
     }
     if (profilePassword.new.length < 8) {
-      toast.error('A palavra-passe deve ter pelo menos 8 caracteres');
+      toast.error(t('profile.pwTooShort'));
       return;
     }
 
@@ -110,11 +107,11 @@ const Profile = () => {
       if (error) throw error;
 
       setProfilePassword({ new: '', confirm: '' });
-      toast.success('Palavra-passe alterada.');
+      toast.success(t('profile.pwChanged'));
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erro ao alterar a palavra-passe';
       console.error('Erro ao alterar a palavra-passe:', message);
-      toast.error('Não foi possível alterar a palavra-passe.');
+      toast.error(t('profile.pwError'));
     } finally {
       setChangingPassword(false);
     }
@@ -135,7 +132,7 @@ const Profile = () => {
       <main className="flex-1 pt-20 px-4 pb-8">
         <div className="container mx-auto max-w-4xl">
           <header className="mb-8">
-            <h1 className="text-3xl font-bold">A minha conta</h1>
+            <h1 className="text-3xl font-bold">{t('nav.account')}</h1>
             <p className="text-gray-600 mt-1">
               {user?.email}
             </p>
@@ -145,26 +142,26 @@ const Profile = () => {
             <TabsList className="mb-6">
               <TabsTrigger value="profile">
                 <UserCog className="h-4 w-4 mr-2" />
-                Perfil
+                {t('profile.tabProfile')}
               </TabsTrigger>
               <TabsTrigger value="password">
                 <Shield className="h-4 w-4 mr-2" />
-                Palavra-passe
+                {t('profile.tabPassword')}
               </TabsTrigger>
               <TabsTrigger value="billing">
                 <CreditCard className="h-4 w-4 mr-2" />
-                Assinatura
+                {t('profile.tabBilling')}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile">
               <Card>
                 <CardHeader>
-                  <CardTitle>Os seus dados</CardTitle>
+                  <CardTitle>{t('profile.dataTitle')}</CardTitle>
                   <CardDescription>
-                    O nome do negócio muda nas{' '}
+                    {t('profile.dataDescPrefix')}{' '}
                     <a href="/settings" className="text-primary underline">
-                      Configurações
+                      {t('profile.settingsLink')}
                     </a>
                     .
                   </CardDescription>
@@ -172,37 +169,37 @@ const Profile = () => {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="name">O seu nome</Label>
+                      <Label htmlFor="name">{t('profile.nameLabel')}</Label>
                       <Input
                         id="name"
                         value={profileData.name}
                         onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                        placeholder="Quem responde aos clientes"
+                        placeholder={t('profile.namePlaceholder')}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email">E-mail de acesso</Label>
+                      <Label htmlFor="email">{t('profile.emailLabel')}</Label>
                       <Input id="email" value={user?.email || ''} disabled />
                       <p className="text-xs text-gray-500">
-                        Para mudar o e-mail de acesso, escreva-nos para {SUPORTE_EMAIL}.
+                        {t('profile.emailHint', { email: SUPORTE_EMAIL })}
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Telefone</Label>
+                      <Label htmlFor="phone">{t('profile.phoneLabel')}</Label>
                       <Input
                         id="phone"
                         value={profileData.phone}
                         onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                        placeholder="Para o contactarmos se algo falhar"
+                        placeholder={t('profile.phonePlaceholder')}
                       />
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-end">
                   <Button onClick={handleProfileUpdate} disabled={saving}>
-                    {saving ? 'A guardar...' : 'Guardar alterações'}
+                    {saving ? t('profile.saving') : t('profile.save')}
                   </Button>
                 </CardFooter>
               </Card>
@@ -211,14 +208,12 @@ const Profile = () => {
             <TabsContent value="password">
               <Card>
                 <CardHeader>
-                  <CardTitle>Alterar a palavra-passe</CardTitle>
-                  <CardDescription>
-                    Escolha uma nova palavra-passe com pelo menos 8 caracteres.
-                  </CardDescription>
+                  <CardTitle>{t('profile.pwTitle')}</CardTitle>
+                  <CardDescription>{t('profile.pwDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="new-password">Nova palavra-passe</Label>
+                    <Label htmlFor="new-password">{t('profile.pwNew')}</Label>
                     <Input
                       id="new-password"
                       type="password"
@@ -230,7 +225,7 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirmar</Label>
+                    <Label htmlFor="confirm-password">{t('profile.pwConfirm')}</Label>
                     <Input
                       id="confirm-password"
                       type="password"
@@ -247,7 +242,7 @@ const Profile = () => {
                     className="ml-auto"
                     disabled={changingPassword || !profilePassword.new || !profilePassword.confirm}
                   >
-                    {changingPassword ? 'A alterar...' : 'Alterar palavra-passe'}
+                    {changingPassword ? t('profile.pwChanging') : t('profile.pwSubmit')}
                   </Button>
                 </CardFooter>
               </Card>
@@ -256,23 +251,19 @@ const Profile = () => {
             <TabsContent value="billing">
               <Card>
                 <CardHeader>
-                  <CardTitle>Assinatura</CardTitle>
-                  <CardDescription>Como está a sua conta hoje.</CardDescription>
+                  <CardTitle>{t('profile.billingTitle')}</CardTitle>
+                  <CardDescription>{t('profile.billingDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <p className="text-gray-700">{t('profile.billingBody1', { price: PRECO_MENSAL })}</p>
                   <p className="text-gray-700">
-                    O AppReview custa {PRECO_MENSAL} por mês por negócio. Durante o
-                    arranque, a assinatura e a facturação são tratadas directamente connosco — não
-                    há cobrança automática dentro da aplicação nem cartão guardado aqui.
-                  </p>
-                  <p className="text-gray-700">
-                    Para mudar, pausar ou cancelar, escreva para{' '}
+                    {t('profile.billingContactPrefix')}{' '}
                     <a className="text-primary underline" href={`mailto:${SUPORTE_EMAIL}`}>
                       {SUPORTE_EMAIL}
                     </a>
-                    . Respondemos no próprio dia.
+                    {t('profile.billingContactSuffix')}
                   </p>
-                  <p className="text-sm text-gray-500">Sem período mínimo de fidelização.</p>
+                  <p className="text-sm text-gray-500">{t('profile.billingNoMinimum')}</p>
                 </CardContent>
               </Card>
             </TabsContent>

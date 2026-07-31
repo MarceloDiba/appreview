@@ -10,6 +10,7 @@ import {
   type ReplyChannel,
   type ReplyLocale,
 } from '@/lib/replySuggestions';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface ReplySuggestionsProps {
   rating: number;
@@ -39,6 +40,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
   businessName,
   channel,
 }) => {
+  const { t } = useOwnerTranslation();
   const [open, setOpen] = useState(false);
   const [locale, setLocale] = useState<ReplyLocale>(() => detectReplyLocale(text));
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -64,19 +66,18 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
       await navigator.clipboard.writeText(body);
       setCopiedId(id);
       window.setTimeout(() => setCopiedId((current) => (current === id ? null : current)), 2000);
-      toast.success('Resposta copiada. Cole onde vai responder.');
+      toast.success(t('reply.copiedToast'));
     } catch {
       // Safari em http, telemóvel antigo, permissão negada: o texto está à
       // vista e é seleccionável, por isso isto é um aviso, não um erro fatal.
-      toast.error('Não foi possível copiar automaticamente. Seleccione o texto e copie à mão.');
+      toast.error(t('reply.copyErrorToast'));
     }
   };
 
   const mailtoHref = (body: string) => {
-    const subject =
-      businessName?.trim()
-        ? `Sobre a sua mensagem — ${businessName.trim()}`
-        : 'Sobre a sua mensagem';
+    const subject = businessName?.trim()
+      ? t('reply.emailSubject', { business: businessName.trim() })
+      : t('reply.emailSubjectGeneric');
     return `mailto:${encodeURIComponent(customerEmail || '')}?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
@@ -91,7 +92,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
         onClick={() => setOpen(true)}
       >
         <MessageSquareQuote size={15} className="mr-2" aria-hidden="true" />
-        Sugerir resposta
+        {t('reply.cta')}
       </Button>
     );
   }
@@ -101,15 +102,15 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
           <MessageSquareQuote size={16} aria-hidden="true" />
-          Sugestões de resposta
+          {t('reply.title')}
         </div>
         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setOpen(false)}>
-          Fechar
+          {t('reply.close')}
         </Button>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-gray-500">Idioma da resposta:</span>
+        <span className="text-xs text-gray-500">{t('reply.languageLabel')}</span>
         {LOCALES.map((code) => (
           <button
             key={code}
@@ -143,7 +144,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
                 }
                 rows={Math.min(12, body.split('\n').length + 2)}
                 className="mt-3 resize-y text-sm"
-                aria-label={`Texto sugerido: ${suggestion.title}`}
+                aria-label={t('reply.textareaLabel', { title: suggestion.title })}
               />
 
               <div className="mt-3 flex flex-wrap gap-2">
@@ -153,14 +154,14 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
                   ) : (
                     <Copy size={14} className="mr-2" aria-hidden="true" />
                   )}
-                  {isCopied ? 'Copiado' : 'Copiar'}
+                  {isCopied ? t('reply.copied') : t('reply.copy')}
                 </Button>
 
                 {channel === 'private' && customerEmail && (
                   <Button size="sm" variant="outline" asChild>
                     <a href={mailtoHref(body)}>
                       <Mail size={14} className="mr-2" aria-hidden="true" />
-                      Enviar por e-mail
+                      {t('reply.sendEmail')}
                     </a>
                   </Button>
                 )}
@@ -172,7 +173,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Abrir o Google para responder
+                      {t('reply.openGoogle')}
                       <ExternalLink size={13} className="ml-2" aria-hidden="true" />
                     </a>
                   </Button>
@@ -184,9 +185,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
       </div>
 
       <p className="mt-4 text-xs text-gray-500">
-        {channel === 'public'
-          ? 'O AppReview não publica respostas por si: a resposta pública tem de sair do seu perfil de empresa no Google. Copie, cole lá e ajuste o que só você sabe.'
-          : 'Esta mensagem vai directamente para quem lhe escreveu. Nunca ofereça algo em troca de apagar ou mudar uma avaliação pública — isso é proibido pelo Google e pela lei europeia.'}
+        {channel === 'public' ? t('reply.footerPublic') : t('reply.footerPrivate')}
       </p>
     </div>
   );

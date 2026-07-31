@@ -7,9 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { t } = useOwnerTranslation();
   const { signUp, user } = useAuth();
   const [formData, setFormData] = useState({
     businessName: '',
@@ -36,7 +39,7 @@ const Signup = () => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      toast.error("As senhas não conferem");
+      toast.error(t('signup.passwordsDontMatch'));
       return;
     }
     
@@ -54,20 +57,20 @@ const Signup = () => {
         console.error('Signup error:', error);
         
         if (error.message.includes('email already registered')) {
-          toast.error('Este email já está registrado. Tente fazer login.');
+          toast.error(t('signup.emailInUse'));
         } else {
-          toast.error(`Erro ao fazer cadastro: ${error.message}`);
+          toast.error(`${t('signup.signupErrorPrefix')}: ${error.message}`);
         }
       } else {
-        toast.success('Cadastro realizado com sucesso!');
-        toast.info('Confirme seu email para acessar sua conta.', {
+        toast.success(t('signup.successToast'));
+        toast.info(t('signup.confirmEmailToast'), {
           duration: 5000
         });
         navigate('/login');
       }
     } catch (error) {
       console.error('Unexpected error during signup:', error);
-      toast.error('Ocorreu um erro ao fazer cadastro. Tente novamente.');
+      toast.error(t('signup.unexpectedError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -76,30 +79,33 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md mx-auto p-6 shadow-lg">
+        <div className="mb-2 flex justify-end">
+          <LanguageSwitcher />
+        </div>
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-primary">AppReview</h1>
-          <p className="text-gray-600 mt-2">Crie sua conta</p>
+          <p className="text-gray-600 mt-2">{t('signup.title')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="businessName">Nome do Negócio</Label>
+            <Label htmlFor="businessName">{t('signup.businessName')}</Label>
             <Input
               id="businessName"
               name="businessName"
-              placeholder="Nome da sua empresa"
+              placeholder={t('signup.businessNamePlaceholder')}
               value={formData.businessName}
               onChange={handleChange}
               required
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="name">Nome Completo</Label>
+            <Label htmlFor="name">{t('signup.fullName')}</Label>
             <Input
               id="name"
               name="name"
-              placeholder="Seu nome completo"
+              placeholder={t('signup.fullNamePlaceholder')}
               value={formData.name}
               onChange={handleChange}
               required
@@ -107,12 +113,12 @@ const Signup = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="email">{t('signup.email')}</Label>
             <Input
               id="email"
               name="email"
               type="email"
-              placeholder="seu@email.com"
+              placeholder={t('signup.emailPlaceholder')}
               value={formData.email}
               onChange={handleChange}
               required
@@ -120,25 +126,25 @@ const Signup = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
+            <Label htmlFor="password">{t('signup.password')}</Label>
             <Input
               id="password"
               name="password"
               type="password"
-              placeholder="Sua senha"
+              placeholder={t('signup.passwordPlaceholder')}
               value={formData.password}
               onChange={handleChange}
               required
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+            <Label htmlFor="confirmPassword">{t('signup.confirmPassword')}</Label>
             <Input
               id="confirmPassword"
               name="confirmPassword"
               type="password"
-              placeholder="Confirme sua senha"
+              placeholder={t('signup.confirmPasswordPlaceholder')}
               value={formData.confirmPassword}
               onChange={handleChange}
               required
@@ -146,12 +152,12 @@ const Signup = () => {
           </div>
 
           <div className="pt-2">
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Cadastrando...' : 'Cadastrar'}
+              {isSubmitting ? t('signup.submitting') : t('signup.submit')}
             </Button>
             {/*
               O aviso fica antes do botão e não num visto separado de propósito:
@@ -159,13 +165,13 @@ const Signup = () => {
               a própria criação da conta.
             */}
             <p className="mt-3 text-center text-xs text-gray-500">
-              Ao criar conta aceita os{' '}
+              {t('signup.termsPrefix')}{' '}
               <Link to="/termos" className="underline hover:text-gray-700">
-                Termos de Serviço
+                {t('signup.terms')}
               </Link>{' '}
-              e a{' '}
+              {t('signup.and')}{' '}
               <Link to="/privacidade" className="underline hover:text-gray-700">
-                Política de Privacidade
+                {t('signup.privacy')}
               </Link>
               .
             </p>
@@ -174,13 +180,13 @@ const Signup = () => {
 
         <div className="mt-4 text-center">
           <p className="text-gray-600 text-sm">
-            Já tem uma conta?{' '}
+            {t('signup.haveAccount')}{' '}
             <Link to="/login" className="text-primary hover:underline">
-              Entrar
+              {t('signup.signIn')}
             </Link>
           </p>
           <Link to="/" className="text-gray-500 text-sm hover:text-primary block mt-2">
-            Voltar para a página inicial
+            {t('signup.backHome')}
           </Link>
         </div>
       </Card>

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import { useInternalFeedback } from '@/hooks/useInternalFeedback';
 import ReplySuggestions from '@/components/dashboard/ReplySuggestions';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface CasesListProps {
   userId: string;
@@ -12,19 +13,21 @@ interface CasesListProps {
   businessName?: string | null;
 }
 
-const formatDate = (dateString: string | null) => {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('pt-BR');
-};
-
 const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
+  const { t, i18n } = useOwnerTranslation();
   const { loading, cases, error, resolvingId, resolveCase } = useInternalFeedback(userId);
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '';
+    return new Intl.DateTimeFormat(i18n.resolvedLanguage || i18n.language).format(
+      new Date(dateString)
+    );
+  };
 
   if (loading) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-gray-500">
-          Carregando casos...
+          {t('reviews.cases.loading')}
         </CardContent>
       </Card>
     );
@@ -34,7 +37,7 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
     return (
       <Card>
         <CardContent className="py-8 text-center text-gray-500">
-          Erro ao carregar casos: {error}
+          {error}
         </CardContent>
       </Card>
     );
@@ -44,7 +47,7 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
     return (
       <Card>
         <CardContent className="py-8 text-center text-gray-500">
-          Nenhum caso ainda. Quando alguém avaliar "Ruim" no Smiley, o caso aparece aqui na hora.
+          {t('reviews.cases.empty')}
         </CardContent>
       </Card>
     );
@@ -60,10 +63,10 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium">{item.customer_name || 'Cliente anônimo'}</span>
+                    <span className="font-medium">{item.customer_name || t('reviews.cases.anonCustomer')}</span>
                     <span className="text-sm text-gray-500">{formatDate(item.created_at)}</span>
                     <Badge variant={isAddressed ? 'secondary' : 'destructive'}>
-                      {isAddressed ? 'Resolvido' : 'Aberto'}
+                      {isAddressed ? t('reviews.cases.resolved') : t('reviews.cases.open')}
                     </Badge>
                   </div>
                   <div className="flex mt-1">
@@ -77,7 +80,7 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
                   </div>
                   <p className="mt-2 text-gray-700 text-sm">{item.feedback_text}</p>
                   {item.customer_email && (
-                    <p className="mt-2 text-xs text-gray-500">Contato: {item.customer_email}</p>
+                    <p className="mt-2 text-xs text-gray-500">{t('reviews.cases.contact')}: {item.customer_email}</p>
                   )}
 
                   <ReplySuggestions
@@ -95,7 +98,7 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
                   disabled={resolvingId === item.id}
                   onClick={() => resolveCase(item.id, !isAddressed)}
                 >
-                  {isAddressed ? 'Reabrir' : 'Marcar como resolvido'}
+                  {isAddressed ? t('reviews.cases.reopen') : t('reviews.cases.markResolved')}
                 </Button>
               </div>
             </CardContent>

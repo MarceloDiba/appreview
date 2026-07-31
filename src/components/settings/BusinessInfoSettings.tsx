@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 export interface BusinessInfo {
   /** Nome do negócio. Aparece a quem avalia e assina as respostas. */
@@ -39,56 +40,55 @@ const BusinessInfoSettings: React.FC<BusinessInfoSettingsProps> = ({
   onCancel,
   saving = false,
 }) => {
+  const { t } = useOwnerTranslation();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Informações do seu negócio</CardTitle>
-        <CardDescription>
-          O nome aparece a quem avalia pelo QR code e assina as respostas que enviar.
-        </CardDescription>
+        <CardTitle>{t('settings.business.title')}</CardTitle>
+        <CardDescription>{t('settings.business.desc')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="name">Nome do seu negócio</Label>
+            <Label htmlFor="name">{t('settings.business.nameLabel')}</Label>
             <Input
               id="name"
               name="name"
               value={businessInfo.name}
               onChange={onBusinessInfoChange}
-              placeholder="Como os clientes o conhecem"
+              placeholder={t('settings.business.namePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="ownerName">O seu nome</Label>
+            <Label htmlFor="ownerName">{t('settings.business.ownerLabel')}</Label>
             <Input
               id="ownerName"
               name="ownerName"
               value={businessInfo.ownerName}
               onChange={onBusinessInfoChange}
-              placeholder="Quem responde aos clientes"
+              placeholder={t('settings.business.ownerPlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Telefone</Label>
+            <Label htmlFor="phone">{t('settings.business.phoneLabel')}</Label>
             <Input
               id="phone"
               name="phone"
               value={businessInfo.phone}
               onChange={onBusinessInfoChange}
-              placeholder="Para o contactarmos se algo falhar"
+              placeholder={t('settings.business.phonePlaceholder')}
             />
           </div>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline" onClick={onCancel} disabled={saving}>
-          Cancelar
+          {t('settings.business.cancel')}
         </Button>
         <Button onClick={onSaveBusinessInfo} disabled={saving || !businessInfo.name.trim()}>
-          {saving ? 'A guardar...' : 'Guardar alterações'}
+          {saving ? t('settings.business.saving') : t('settings.business.save')}
         </Button>
       </CardFooter>
     </Card>

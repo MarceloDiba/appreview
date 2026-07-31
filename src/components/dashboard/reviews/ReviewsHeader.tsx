@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CardDescription, CardTitle } from '@/components/ui/card';
 import { createGoogleMapsUrl } from '@/utils/googlePlaceUtils';
 import { PlaceInfo } from '@/hooks/useGoogleReviews';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface ReviewsHeaderProps {
   placeInfo: PlaceInfo | null;
@@ -15,8 +16,14 @@ interface ReviewsHeaderProps {
 const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({ 
   placeInfo, 
   refreshing, 
-  onRefresh 
+  onRefresh
 }) => {
+  const { t, i18n } = useOwnerTranslation();
+  const numberFormat = new Intl.NumberFormat(i18n.resolvedLanguage || i18n.language);
+  const ratingFormat = new Intl.NumberFormat(i18n.resolvedLanguage || i18n.language, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
   const renderStars = (rating: number) => {
     return (
       <div className="flex">
@@ -34,11 +41,14 @@ const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
   return (
     <div className="flex flex-row items-center justify-between">
       <div>
-        <CardTitle>Avaliações do Google</CardTitle>
+        <CardTitle>{t('reviews.google.title')}</CardTitle>
         <CardDescription>
           {placeInfo && (
             <>
-              {placeInfo.total_reviews} avaliações · Média: {placeInfo.average_rating.toFixed(1)}
+              {t('reviews.google.totalAndAverage', {
+                total: numberFormat.format(placeInfo.total_reviews),
+                average: ratingFormat.format(placeInfo.average_rating),
+              })}
               {renderStars(placeInfo.average_rating)}
             </>
           )}
@@ -46,13 +56,13 @@ const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
       </div>
       <div className="flex items-center space-x-2">
         {placeInfo?.place_id && (
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => window.open(createGoogleMapsUrl(placeInfo.place_id), '_blank')}
           >
             <ExternalLink className="h-4 w-4 mr-2" />
-            Ver no Google
+            {t('reviews.google.viewOnGoogle')}
           </Button>
         )}
         <Button
@@ -62,7 +72,7 @@ const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
           disabled={refreshing}
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          Atualizar
+          {t('reviews.google.refresh')}
         </Button>
       </div>
     </div>

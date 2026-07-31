@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { InternalCase } from '@/hooks/useInternalFeedback';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 export type AlertLevel = 'critical' | 'serious' | 'warning' | 'good' | 'neutral';
 
@@ -45,17 +46,25 @@ const daysSince = (iso: string | null): number | null => {
 const mean = (values: number[]): number | null =>
   values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
 
-const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
-
 /**
  * Turns the raw internal cases into one clear priority plus supporting signals.
  *
- * Deliberately deterministic: no external API, no AI, no key required. The rules
- * are ordered by how much the owner loses by ignoring them — an unanswered
- * customer who left contact details outranks a statistical wobble.
+ * Deliberadamente determinístico: sem API externa, sem IA, sem chave. As regras
+ * estão ordenadas pelo quanto o dono perde ao ignorá-las — um cliente sem
+ * resposta que deixou contacto pesa mais do que uma oscilação estatística.
+ *
+ * O texto sai traduzido pelo react-i18next (pt-BR/pt-PT/en), com plural e
+ * interpolação resolvidos pelos catálogos em `src/i18n/owner`. Por isso o hook
+ * chama `useOwnerTranslation` e recalcula quando o idioma muda.
  */
 export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights => {
+  const { t, i18n } = useOwnerTranslation();
+
   return useMemo(() => {
+    const decimalFormat = new Intl.NumberFormat(
+      i18n.resolvedLanguage || i18n.language,
+      { minimumFractionDigits: 1, maximumFractionDigits: 1 }
+    );
     const now = Date.now();
     const open = cases.filter((c) => !c.is_addressed);
     const resolvedTotal = cases.length - open.length;
@@ -73,9 +82,9 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
 
     const inWindow = (c: InternalCase, fromDaysAgo: number, toDaysAgo: number) => {
       if (!c.created_at) return false;
-      const t = new Date(c.created_at).getTime();
-      if (Number.isNaN(t)) return false;
-      const age = now - t;
+      const time = new Date(c.created_at).getTime();
+      if (Number.isNaN(time)) return false;
+      const age = now - time;
       return age >= toDaysAgo * DAY_MS && age < fromDaysAgo * DAY_MS;
     };
 
@@ -107,40 +116,32 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
       const names = awaitingContact
         .map((c) => c.customer_name)
         .filter((n): n is string => !!n && n.trim() !== '');
+      const detail = names.length
+        ? t('attention.awaiting.detailNames', {
+            names: names.slice(0, 3).join(', ') + (names.length > 3 ? ` ${t('attention.andOthers')}` : ''),
+          })
+        : t('attention.awaiting.detailGeneric');
       alerts.push({
         id: 'awaiting-contact',
         level: 'critical',
-        label: 'Sem retorno',
-        title: `${awaitingContact.length} ${plural(
-          awaitingContact.length,
-          'cliente deixou contacto e ainda não teve retorno',
-          'clientes deixaram contacto e ainda não tiveram retorno'
-        )}`,
-        detail: names.length
-          ? `Inclui ${names.slice(0, 3).join(', ')}${names.length > 3 ? ' e outros' : ''}.`
-          : 'Eles esperaram tempo para escrever e deixaram como falar com eles.',
-        action:
-          'Responda hoje, mesmo que ainda não tenha solução. Um contacto no mesmo dia costuma recuperar o cliente; uma semana de silêncio raramente recupera.',
+        label: t('attention.label.awaiting'),
+        title: t('attention.awaiting.title', { count: awaitingContact.length }),
+        detail,
+        action: t('attention.awaiting.action'),
       });
     }
 
     // 2. A case has been sitting open for too long.
     if (oldestOpen && oldestOpen.days >= 2) {
-      const who = oldestOpen.item.customer_name?.trim() || 'Um cliente';
+      const who = oldestOpen.item.customer_name?.trim() || t('attention.stale.someone');
+      const quote = oldestOpen.item.feedback_text?.trim();
       alerts.push({
         id: 'stale-case',
         level: oldestOpen.days >= 7 ? 'critical' : 'serious',
-        label: 'Caso parado',
-        title: `${who} está à espera há ${oldestOpen.days} ${plural(
-          oldestOpen.days,
-          'dia',
-          'dias'
-        )}`,
-        detail: oldestOpen.item.feedback_text?.trim()
-          ? `"${oldestOpen.item.feedback_text.trim()}"`
-          : 'O caso continua aberto no seu painel.',
-        action:
-          'Resolva ou marque como resolvido com uma nota do que foi feito. O registo é o que prova que você agiu.',
+        label: t('attention.label.stale'),
+        title: t('attention.stale.title', { who, count: oldestOpen.days }),
+        detail: quote ? t('attention.stale.detailQuote', { quote }) : t('attention.stale.detailGeneric'),
+        action: t('attention.stale.action'),
       });
     }
 
@@ -155,13 +156,13 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
       alerts.push({
         id: 'rating-drop',
         level: 'serious',
-        label: 'Fora do padrão',
-        title: `A média desta semana caiu para ${weekAverage.toFixed(1)}`,
-        detail: `Nas quatro semanas anteriores estava em ${baselineAverage.toFixed(
-          1
-        )}. A queda é de ${(baselineAverage - weekAverage).toFixed(1)} ponto.`,
-        action:
-          'Leia os casos desta semana à procura do que se repete. Uma queda súbita costuma ter uma causa única: um turno, um prato, uma pessoa.',
+        label: t('attention.label.ratingDrop'),
+        title: t('attention.ratingDrop.title', { average: decimalFormat.format(weekAverage) }),
+        detail: t('attention.ratingDrop.detail', {
+          baseline: decimalFormat.format(baselineAverage),
+          drop: decimalFormat.format(baselineAverage - weekAverage),
+        }),
+        action: t('attention.ratingDrop.action'),
       });
     }
 
@@ -175,13 +176,13 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
       alerts.push({
         id: 'volume-spike',
         level: 'warning',
-        label: 'Volume acima',
-        title: `${week.length} casos esta semana, contra uma média de ${baselineWeeklyCount.toFixed(
-          1
-        )}`,
-        detail: 'O número de clientes insatisfeitos subiu em relação às semanas anteriores.',
-        action:
-          'Verifique se algo mudou na operação nos últimos sete dias — equipa, fornecedor, horário, menu.',
+        label: t('attention.label.volume'),
+        title: t('attention.volume.title', {
+          count: week.length,
+          average: decimalFormat.format(baselineWeeklyCount),
+        }),
+        detail: t('attention.volume.detail'),
+        action: t('attention.volume.action'),
       });
     }
 
@@ -191,40 +192,25 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
       alerts.push({
         id: 'open-cases',
         level: 'warning',
-        label: 'Em aberto',
-        title: `${openWithoutContact} ${plural(
-          openWithoutContact,
-          'caso aberto sem contacto do cliente',
-          'casos abertos sem contacto do cliente'
-        )}`,
-        detail: 'Não dá para responder a estes, mas o relato continua a valer como sinal.',
-        action:
-          'Leia, corrija o que for operacional e marque como resolvido para manter o painel limpo.',
+        label: t('attention.label.open'),
+        title: t('attention.open.title', { count: openWithoutContact }),
+        detail: t('attention.open.detail'),
+        action: t('attention.open.action'),
       });
     }
 
     // 6. Nothing is wrong — say so plainly and keep one useful habit in view.
     if (alerts.length === 0) {
+      const empty = cases.length === 0;
       alerts.push({
         id: 'all-clear',
         level: 'good',
-        label: 'Em dia',
-        title:
-          cases.length === 0
-            ? 'Ainda não há casos registados'
-            : 'Nenhum caso em aberto esta semana',
-        detail:
-          cases.length === 0
-            ? 'Assim que alguém avaliar como "Ruim" no QR code, o caso aparece aqui na hora.'
-            : `Você já resolveu ${resolvedTotal} ${plural(
-                resolvedTotal,
-                'caso',
-                'casos'
-              )} no total.`,
-        action:
-          cases.length === 0
-            ? 'Confirme que o QR code está visível na mesa ou no balcão — é ele que alimenta esta página.'
-            : 'Aproveite para pedir avaliação pública a quem teve boa experiência. É o melhor momento.',
+        label: t('attention.label.allClear'),
+        title: empty ? t('attention.allClear.titleEmpty') : t('attention.allClear.titleClear'),
+        detail: empty
+          ? t('attention.allClear.detailEmpty')
+          : t('attention.allClear.detailResolved', { count: resolvedTotal }),
+        action: empty ? t('attention.allClear.actionEmpty') : t('attention.allClear.actionClear'),
       });
     }
 
@@ -243,5 +229,5 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
       alerts: alerts.slice(1),
       stats,
     };
-  }, [cases]);
+  }, [cases, i18n.language, i18n.resolvedLanguage, t]);
 };
