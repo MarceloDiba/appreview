@@ -21,19 +21,14 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 de resposta; #11 Termos/Privacidade; #12 docs; #13 configuração guiada
 (`/configuracao`) + fim dos dados inventados em `/settings` e `/profile` + fix do
 spinner eterno de auth; #14 idioma do cliente por região (pt-BR/pt-PT/en, sem
-espanhol).
+espanhol); #16 dados legais da MDR, lei/foro do Brasil e texto LGPD+RGPD
+(continua pendente de revisão jurídica externa).
 
 ## PRs abertos
 
 - **#15 — painel do dono multilíngue.** Implementação concluída na branch
   `feat/painel-multilingue`. O PR só deve ficar pronto para revisão após o CI
   deste pacote ficar verde.
-- **#16 — dados legais.** Entidade **MDR Propaganda Ltda. ME**, CNPJ
-  **20.927.148/0001-83**, sede **Rua Itaporanga, 433, Aracaju, Sergipe, Brasil**,
-  pagamento **Stripe**, lei/foro **Brasil (Aracaju)**, privacidade reescrita para
-  **LGPD+RGPD**. Verde. **Precisa de revisão de advogado** (Marcelo valida
-  depois). Falta o Stripe de verdade (só o texto menciona; cobrança ainda é
-  manual).
 
 ## Decisões tomadas (não re-perguntar)
 

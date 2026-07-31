@@ -19,6 +19,8 @@ Produção: https://appreview-flame.vercel.app
 - Avaliações reais do Google.
 - Sugestões de resposta editáveis, sem publicação automática.
 - Termos e Privacidade.
+- Dados legais da MDR, lei e foro do Brasil e texto LGPD+RGPD (PR #16). O texto
+  está publicado no código, mas continua pendente de revisão jurídica externa.
 - Configuração guiada em `/configuracao`.
 - Fluxo do cliente em pt-BR, pt-PT e inglês, sem espanhol.
 - Sem dados demonstrativos à vista do cliente nas telas principais.
@@ -29,9 +31,6 @@ Produção: https://appreview-flame.vercel.app
 - **PR #15 — painel do dono multilíngue.** Implementação concluída na branch
   `feat/painel-multilingue`: pt-BR, pt-PT e inglês, com datas e números
   localizados. Inclui verificação automatizada dos catálogos no CI.
-- **PR #16 — dados legais.** Entidade MDR Propaganda Ltda. ME, LGPD+RGPD e foro
-  de Aracaju. Verde, mas precisa de revisão jurídica antes de ser tratado como
-  texto definitivo.
 
 ## Antes do piloto
 
