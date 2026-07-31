@@ -8,6 +8,7 @@ import { ExternalLink, PlusCircle, Trash2, RefreshCw, CheckCircle, AlertCircle }
 import { PlatformLink } from './PlatformLink';
 import { cn } from '@/lib/utils';
 import { ExternalLinkWithMeta } from '@/hooks/useExternalLinks';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface ExternalLinksSettingsProps {
   externalLinks: ExternalLinkWithMeta[];
@@ -37,6 +38,7 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
   error = null,
   refreshLinks
 }) => {
+  const { t } = useOwnerTranslation();
   const [newLink, setNewLink] = useState<PlatformLink>({ platform: '', url: '' });
 
   const handleAddLink = () => {
@@ -55,8 +57,8 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
           <CheckCircle className="h-4 w-4 mr-1" />
           <span className="text-xs">
             {link.place_id
-              ? `Verificado: ${link.business_name}`
-              : (link.business_name || 'Link de avaliação salvo. A importação automática exige Place ID.')}
+              ? t('settings.links.verified', { name: link.business_name })
+              : (link.business_name || t('settings.links.savedNoPlaceId'))}
           </span>
         </div>
       );
@@ -64,14 +66,14 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
       return (
         <div className="flex items-center text-amber-600">
           <AlertCircle className="h-4 w-4 mr-1" />
-          <span className="text-xs">{link.error_message || 'Não verificado'}</span>
+          <span className="text-xs">{link.error_message || t('settings.links.notVerified')}</span>
         </div>
       );
     } else if (link.validation_status === 'pending' && link.place_id) {
       return (
         <div className="flex items-center text-blue-600">
           <RefreshCw className={cn("h-4 w-4 mr-1", isValidating && "animate-spin")} />
-          <span className="text-xs">Verificando...</span>
+          <span className="text-xs">{t('settings.links.verifying')}</span>
         </div>
       );
     }
@@ -84,20 +86,18 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle>Links Externos</CardTitle>
-            <CardDescription>
-              Gerencie links para suas plataformas externas de avaliação e redes sociais.
-            </CardDescription>
+            <CardTitle>{t('settings.links.title')}</CardTitle>
+            <CardDescription>{t('settings.links.desc')}</CardDescription>
           </div>
           {refreshLinks && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={refreshLinks}
               disabled={isLoading}
             >
               <RefreshCw className={cn("h-4 w-4 mr-1", isLoading && "animate-spin")} />
-              Atualizar
+              {t('settings.links.refresh')}
             </Button>
           )}
         </div>
@@ -138,14 +138,12 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
                 {renderValidationStatus(link)}
 
                 {link.platform === 'Google Reviews' && (
-                  <div className="text-xs text-gray-500 mt-1">
-                    Aceita links `g.page`, Google Maps e `writereview`. Para importar avaliações na aba Google Reviews, use um link com `placeid=`.
-                  </div>
+                  <div className="text-xs text-gray-500 mt-1">{t('settings.links.googleHint')}</div>
                 )}
-                
+
                 {link.platform === 'Google Reviews' && link.place_id && (
                   <div className="text-xs text-gray-500 mt-1">
-                    <span>Place ID: {link.place_id}</span>
+                    <span>{t('settings.links.placeId')}: {link.place_id}</span>
                     {onRefreshPlaceData && (
                       <Button
                         variant="ghost"
@@ -173,19 +171,19 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
         </div>
         
         <div className="border-t pt-4">
-          <h3 className="text-sm font-medium mb-3">Adicionar Novo Link</h3>
+          <h3 className="text-sm font-medium mb-3">{t('settings.links.addTitle')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="platform">Plataforma</Label>
+              <Label htmlFor="platform">{t('settings.links.platformLabel')}</Label>
               <Input
                 id="platform"
-                placeholder="Ex: WhatsApp, Instagram, etc."
+                placeholder={t('settings.links.platformPlaceholder')}
                 value={newLink.platform}
                 onChange={(e) => setNewLink({...newLink, platform: e.target.value})}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="url">URL</Label>
+              <Label htmlFor="url">{t('settings.links.urlLabel')}</Label>
               <Input
                 id="url"
                 placeholder="https://..."
@@ -194,19 +192,19 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
               />
             </div>
           </div>
-          <Button 
-            onClick={handleAddLink} 
+          <Button
+            onClick={handleAddLink}
             className="mt-4"
             variant="outline"
           >
             <PlusCircle className="h-4 w-4 mr-2" />
-            Adicionar Link
+            {t('settings.links.addBtn')}
           </Button>
         </div>
       </CardContent>
       <CardFooter>
         <Button onClick={onSaveExternalLinks} disabled={isLoading}>
-          {isLoading ? 'Salvando...' : 'Salvar Links'}
+          {isLoading ? t('settings.links.saving') : t('settings.links.save')}
         </Button>
       </CardFooter>
     </Card>

@@ -10,6 +10,7 @@ import NotificationSettings from '@/components/settings/NotificationSettings';
 import { useExternalLinks } from '@/hooks/useExternalLinks';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
 import { supabase } from '@/integrations/supabase/client';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 const EMPTY: BusinessInfo = { name: '', ownerName: '', phone: '' };
 
@@ -29,6 +30,7 @@ const EMPTY: BusinessInfo = { name: '', ownerName: '', phone: '' };
  */
 const Settings = () => {
   const navigate = useNavigate();
+  const { t } = useOwnerTranslation();
   const { user, loading: authLoading } = useAuth();
   const userId = user?.id;
 
@@ -107,11 +109,11 @@ const Settings = () => {
       });
 
       if (saveError) throw saveError;
-      toast.success('Informações guardadas.');
+      toast.success(t('settings.saved'));
     } catch (saveError) {
       const message = saveError instanceof Error ? saveError.message : 'Erro ao guardar';
       console.error('Erro ao guardar o perfil:', message);
-      toast.error('Não foi possível guardar. Tente novamente.');
+      toast.error(t('settings.saveError'));
     } finally {
       setSavingProfile(false);
     }
@@ -132,11 +134,11 @@ const Settings = () => {
       <main className="flex-1 pt-20 px-4 pb-8">
         <div className="container mx-auto max-w-6xl">
           <header className="mb-8">
-            <h1 className="text-3xl font-bold">Configurações</h1>
+            <h1 className="text-3xl font-bold">{t('settings.title')}</h1>
             <p className="text-gray-600 mt-1">
-              Se preferir fazer isto passo a passo,{' '}
+              {t('settings.subtitlePrefix')}{' '}
               <Link to="/configuracao" className="text-primary underline">
-                use a configuração guiada
+                {t('settings.guidedLink')}
               </Link>
               .
             </p>
@@ -144,10 +146,10 @@ const Settings = () => {
 
           <Tabs defaultValue="business">
             <TabsList className="mb-6">
-              <TabsTrigger value="business">O meu negócio</TabsTrigger>
-              <TabsTrigger value="external-links">Links Externos</TabsTrigger>
-              <TabsTrigger value="notifications">Notificações</TabsTrigger>
-              <TabsTrigger value="google-reviews">Google Reviews</TabsTrigger>
+              <TabsTrigger value="business">{t('settings.tabBusiness')}</TabsTrigger>
+              <TabsTrigger value="external-links">{t('settings.tabLinks')}</TabsTrigger>
+              <TabsTrigger value="notifications">{t('settings.tabNotifications')}</TabsTrigger>
+              <TabsTrigger value="google-reviews">{t('settings.tabGoogle')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="business">
