@@ -35,8 +35,14 @@ Passagem feita por Marcelo com a conta existente da Noá:
 - **Passou:** caso marcado como tratado e estado persistente.
 - **Passou:** logout encerrou a sessão e voltou à página inicial.
 - **Não executado:** criar uma conta totalmente nova.
-- **Falha encontrada:** o link curto `g.page` foi salvo sem Place ID e a área
-  Avaliações do Google não conseguiu importar. A correção técnica passa a
-  resolver o redirecionamento autenticado do próprio Google automaticamente.
-- **Reteste pendente:** abrir Avaliações do Google depois da publicação da
-  correção e confirmar negócio, média e avaliações.
+- **Primeira falha corrigida:** o link curto `g.page` foi salvo sem Place ID. A
+  função publicada passou a resolver o redirecionamento autenticado do próprio
+  Google automaticamente.
+- **Reteste de 31/07:** o Place ID foi identificado e gravado corretamente, mas
+  a consulta seguinte recebeu erro no endpoint legado da Places API. O painel
+  mostrou “Não foi possível carregar as avaliações do Google agora”.
+- **Correção preparada:** migrar a consulta para Place Details (New), mantendo
+  o cache de 12 horas e os vínculos individuais de autor e origem exigidos pelo
+  Google Maps.
+- **Reteste pendente:** depois da publicação da migração, abrir Avaliações do
+  Google e confirmar negócio, média, total, avaliações e links de origem.

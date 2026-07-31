@@ -16,7 +16,8 @@ Produção: https://appreview-flame.vercel.app
 - Review gating corrigido.
 - QR code real, gerado localmente, com cartão A6 pronto para imprimir.
 - Dashboard e Central de Atenção com dados reais.
-- Avaliações reais do Google.
+- Avaliações reais do Google existentes em cache. Novas importações dependem da
+  migração preparada para Place Details (New).
 - Sugestões de resposta editáveis, sem publicação automática.
 - Termos e Privacidade.
 - Dados legais da MDR, lei e foro do Brasil e texto LGPD+RGPD (PR #16). O texto
@@ -45,14 +46,21 @@ Produção: https://appreview-flame.vercel.app
 - Nenhuma chamada à API paga do Google foi feita durante o rollout.
 - Os dados reais preservados permanecem intactos: 1 vínculo, 1 lugar e 5
   avaliações em cache.
+- O reteste confirmou que a resolução do `g.page` e a gravação do Place ID
+  funcionam. O 502 seguinte vem da consulta ao endpoint legado; a correção migra
+  para Place Details (New) e mantém links obrigatórios de autor e origem.
+- A tabela oficial consultada em 31/07/2026 concede 1.000 consultas
+  bem-sucedidas/mês sem custo para essa categoria. O cache de 12 h limita dois
+  pilotos a cerca de 120/mês; acima do limite, a tarifa publicada é US$ 25 por
+  1.000 consultas.
 
 ## Antes do piloto
 
 1. Criar uma conta totalmente nova e repetir a configuração inicial; a passagem
    de 31/07 foi feita com a conta existente da Noá.
-2. Depois do merge do frontend da resolução automática de links `g.page`,
-   reabrir Avaliações do Google e confirmar negócio, média e avaliações
-   importadas.
+2. Depois da publicação da migração para Place Details (New), reabrir
+   Avaliações do Google e confirmar negócio, média, total, avaliações e links
+   individuais de origem.
 3. Decidir depois o destino da conta de teste mista preservada: ela contém dados
    reais do H5 e não pode ser apagada em bloco.
 4. Revisão jurídica externa do PR #16.
@@ -87,10 +95,10 @@ H5 Texas Burger — Avenida e Mania de Petiscos, ambos em Lisboa. Marcelo está 
 Aracaju até dezembro; o arranque será remoto.
 
 A passagem manual de 31/07 validou QR físico, idioma, nota baixa sem gating,
-Central de Atenção, persistência do caso tratado e logout. Encontrou um defeito
-na importação do Google: links curtos `g.page` eram salvos sem Place ID. A
-correção resolve o redirecionamento do próprio Google de forma autenticada e sem
-consulta paga apenas para descobrir o identificador. Evidência em
+Central de Atenção, persistência do caso tratado e logout. O primeiro defeito da
+importação foi corrigido: o link curto `g.page` agora produz e grava o Place ID.
+O reteste encontrou uma segunda falha no endpoint legado da Places API; a
+migração para Place Details (New) está preparada. Evidência em
 `docs/checklist-piloto-e2e.md`.
 
 ## Riscos e armadilhas

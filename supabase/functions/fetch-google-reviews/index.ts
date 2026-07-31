@@ -12,6 +12,28 @@ const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
 const googleApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY') || '';
 const cacheTtlHours = 12;
 
+interface GooglePlacesReview {
+  name?: string;
+  rating?: number;
+  text?: { text?: string };
+  originalText?: { text?: string };
+  authorAttribution?: {
+    displayName?: string;
+    uri?: string;
+    photoUri?: string;
+  };
+  publishTime?: string;
+  googleMapsUri?: string;
+}
+
+interface GooglePlaceDetailsResponse {
+  displayName?: { text?: string };
+  rating?: number;
+  userRatingCount?: number;
+  reviews?: GooglePlacesReview[];
+  error?: { status?: string };
+}
+
 const jsonResponse = (body: Record<string, unknown>, status = 200) =>
   new Response(JSON.stringify(body), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -246,9 +268,11 @@ serve(async (req) => {
             review_id: review.review_id,
             author_name: review.author_name,
             author_image: review.author_image,
+            author_uri: review.author_uri,
             rating: review.rating,
-            text: review.text,
-            time: review.time
+            text: review.text || '',
+            time: review.time,
+            google_maps_uri: review.google_maps_uri,
           })) || [];
           
           return jsonResponse({
@@ -260,27 +284,74 @@ serve(async (req) => {
       }
     }
 
-    // If we need to fetch new data, call the Google Places API
+    // If we need to fetch new data, call Place Details (New). The legacy
+    // endpoint rejects projects where the old Places API was not previously
+    // enabled. A narrow field mask also makes the billable SKU explicit.
     if (!googleApiKey) {
       console.error('GOOGLE_PLACES_API_KEY is not configured');
       return jsonResponse({ error: 'Google integration is not configured' }, 500);
     }
 
-    const fieldsParam = 'name,rating,reviews,user_ratings_total';
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(placeId)}&fields=${fieldsParam}&key=${googleApiKey}`;
-    
-    const response = await fetch(url);
-    const data = await response.json();
-    
-    if (data.status !== 'OK') {
-      return jsonResponse({ error: `Google Places API error: ${data.status}` }, 502);
+    const fieldsParam = 'displayName,rating,userRatingCount,reviews';
+    const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'X-Goog-Api-Key': googleApiKey,
+        'X-Goog-FieldMask': fieldsParam,
+      },
+    });
+
+    let data: GooglePlaceDetailsResponse;
+    try {
+      data = await response.json();
+    } catch {
+      console.error('Google Places API (New) returned an invalid response:', response.status);
+      return jsonResponse({ code: 'GOOGLE_PLACES_ERROR', error: 'Google Places API request failed' }, 502);
     }
-    
-    const placeDetails = data.result;
+
+    if (!response.ok) {
+      console.error(
+        'Google Places API (New) request failed:',
+        response.status,
+        data.error?.status || 'UNKNOWN',
+      );
+      return jsonResponse({ code: 'GOOGLE_PLACES_ERROR', error: 'Google Places API request failed' }, 502);
+    }
+
+    const placeName = data.displayName?.text?.trim();
+    if (!placeName) {
+      console.error('Google Places API (New) response has no display name');
+      return jsonResponse({ code: 'GOOGLE_PLACES_ERROR', error: 'Google Places API response is incomplete' }, 502);
+    }
+
+    const normalizedReviews = (Array.isArray(data.reviews) ? data.reviews : [])
+      .flatMap((review) => {
+        const authorName = review.authorAttribution?.displayName?.trim();
+        if (
+          !review.name ||
+          typeof review.rating !== 'number' ||
+          !review.publishTime ||
+          !authorName
+        ) {
+          return [];
+        }
+
+        return [{
+          review_id: review.name,
+          author_name: authorName,
+          author_image: review.authorAttribution?.photoUri || null,
+          author_uri: review.authorAttribution?.uri || null,
+          rating: review.rating,
+          text: review.text?.text || review.originalText?.text || null,
+          time: review.publishTime,
+          google_maps_uri: review.googleMapsUri || null,
+        }];
+      });
 
     const { error: businessNameError } = await supabase
       .from('platform_links')
-      .update({ business_name: placeDetails.name || null })
+      .update({ business_name: placeName })
       .eq('id', configuredLink.id)
       .eq('user_id', user.id);
 
@@ -294,9 +365,9 @@ serve(async (req) => {
       .upsert({
         place_id: placeId,
         user_id: user.id,
-        place_name: placeDetails.name,
-        average_rating: placeDetails.rating || 0,
-        total_reviews: placeDetails.user_ratings_total || 0,
+        place_name: placeName,
+        average_rating: typeof data.rating === 'number' ? data.rating : 0,
+        total_reviews: typeof data.userRatingCount === 'number' ? data.userRatingCount : 0,
         last_fetch_time: new Date().toISOString()
       }, { 
         onConflict: 'place_id,user_id', 
@@ -324,15 +395,16 @@ serve(async (req) => {
     }
     
     // Insert new cached reviews
-    const reviews = Array.isArray(placeDetails.reviews) ? placeDetails.reviews : [];
-    const reviewsToInsert = reviews.map(review => ({
+    const reviewsToInsert = normalizedReviews.map(review => ({
       external_place_id: upsertedPlaceInfo.id,
-      review_id: review.time.toString(), // Using timestamp as a unique ID
+      review_id: review.review_id,
       author_name: review.author_name,
-      author_image: review.profile_photo_url,
+      author_image: review.author_image,
+      author_uri: review.author_uri,
       rating: review.rating,
       text: review.text,
-      time: new Date(review.time * 1000).toISOString()
+      time: review.time,
+      google_maps_uri: review.google_maps_uri,
     }));
     
     if (reviewsToInsert.length > 0) {
@@ -351,9 +423,11 @@ serve(async (req) => {
       review_id: review.review_id,
       author_name: review.author_name,
       author_image: review.author_image,
+      author_uri: review.author_uri,
       rating: review.rating,
-      text: review.text,
-      time: review.time
+      text: review.text || '',
+      time: review.time,
+      google_maps_uri: review.google_maps_uri,
     }));
     
     // Return the place info and reviews
