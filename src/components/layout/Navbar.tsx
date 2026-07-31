@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -8,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/context/AuthContext';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 
@@ -24,8 +25,15 @@ interface NavbarProps {
  */
 const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
   const { t } = useOwnerTranslation();
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/', { replace: true });
+  };
 
   const isActive = (path: string) => {
     if (path === '/' && location.pathname === '/') return true;
@@ -105,8 +113,8 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
                     <Link to="/settings">{t('nav.settings')}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/">{t('nav.logout')}</Link>
+                  <DropdownMenuItem onSelect={() => void handleLogout()}>
+                    {t('nav.logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

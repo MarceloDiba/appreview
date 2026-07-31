@@ -12,8 +12,9 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   partir do `main`. Preço 49 €/mês.
 - Supabase: projeto `tjbznhwdjyabuacrfqie`, região sa-east-1 (São Paulo).
 - Produção: https://appreview-flame.vercel.app
-- **CI (`.github/workflows/ci.yml`)**: roda `tsc --noEmit`, verificação do i18n
-  do painel e build (bloqueantes) + lint (não bloqueante). É a fonte de verdade.
+- **CI (`.github/workflows/ci.yml`)**: `npm run verify` roda TypeScript,
+  verificação do i18n e build (bloqueantes) + lint (não bloqueante). É o mesmo
+  comando usado localmente e a fonte de verdade.
 
 ## Já em produção (PRs mergeados)
 
@@ -22,13 +23,14 @@ de resposta; #11 Termos/Privacidade; #12 docs; #13 configuração guiada
 (`/configuracao`) + fim dos dados inventados em `/settings` e `/profile` + fix do
 spinner eterno de auth; #14 idioma do cliente por região (pt-BR/pt-PT/en, sem
 espanhol); #16 dados legais da MDR, lei/foro do Brasil e texto LGPD+RGPD
-(continua pendente de revisão jurídica externa).
+(continua pendente de revisão jurídica externa); #15 painel completo do dono em
+pt-BR, pt-PT e inglês.
 
 ## PRs abertos
 
-- **#15 — painel do dono multilíngue.** Implementação concluída na branch
-  `feat/painel-multilingue`. O PR só deve ficar pronto para revisão após o CI
-  deste pacote ficar verde.
+- **Prontidão do piloto**, branch `codex/prontidao-piloto`: comando único de
+  verificação, checklist ponta a ponta, logout real e registo da limpeza segura
+  dos dados de teste. Não fazer merge nem deploy manual.
 
 ## Decisões tomadas (não re-perguntar)
 
@@ -38,16 +40,16 @@ espanhol); #16 dados legais da MDR, lei/foro do Brasil e texto LGPD+RGPD
 - Legal: entidade brasileira (MDR), lei/foro Brasil, regime duplo LGPD+RGPD,
   revisão jurídica por fora.
 - Stripe: integrar **depois** (mexe em dinheiro → só com aval).
-- Painel multilíngue: **fazer o painel inteiro num PR** (o #15). Tom do pt-BR já
-  aprovado pelo Marcelo.
+- Painel multilíngue: concluído no #15. Tom do pt-BR aprovado pelo Marcelo.
 - i18n do painel: **react-i18next** (JSON por idioma), instância à parte do
   cliente. Ver `AGENTS.md`.
 - Decisões técnicas e alterações locais reversíveis podem seguir sem nova
   aprovação depois de apresentado o plano.
 
-## PR #15 — tradução do painel
+## PR #15 — tradução do painel (mergeado)
 
-Branch `feat/painel-multilingue`. Infra pronta: `src/i18n/owner/instance.ts`,
+Merge `6eda1c9` confirmado na `main`; o deploy automático desse commit ficou
+saudável no Vercel. Infra: `src/i18n/owner/instance.ts`,
 `useOwnerTranslation.ts`, `LanguageSwitcher.tsx`, catálogos em
 `src/i18n/owner/locales/{pt-BR,pt-PT,en}.json` (366 chaves no pacote final).
 
@@ -68,19 +70,16 @@ de resposta.
 - `scripts/check-owner-i18n.mjs` verifica paridade dos catálogos, valores vazios
   e resolução das chaves estáticas; o CI executa esse script.
 
-### Verificação do i18n (rodar antes de commitar)
+### Verificação local obrigatória
 
 ```bash
-npx tsc --noEmit -p tsconfig.app.json
-npm run check:i18n-owner
+npm run verify
 ```
 
 ## Tarefas de fundo já sinalizadas (chips)
 
-- **Logout do Navbar** não deslogava (era `<Link to="/">`). O Marcelo iniciou a
-  correção numa sessão à parte; ela editou `Navbar.tsx` no working tree (fica com
-  o fix + as traduções). **Não commitar o fix do logout na branch do painel** —
-  é da task dele.
+- **Logout do Navbar:** corrigido na branch de prontidão; agora chama
+  `useAuth().signOut()` antes de voltar para `/`.
 - **NotificationSettings não persiste nada** (interruptores e "salvar" que não
   gravam). Sinalizado para implementar de verdade ou remover.
 
@@ -96,10 +95,17 @@ npm run check:i18n-owner
 ## Piloto
 
 H5 Texas Burger (Avenida) e Mania de Petiscos, ambos em Lisboa. Marcelo no Brasil
-(Aracaju) até dezembro → arranque remoto. **Antes do piloto: limpar dados de
-teste do banco** (pré-autorizado apagar teste; nunca dado real).
+(Aracaju) até dezembro → arranque remoto.
 
-## O que falta além do painel (backlog, sem bloquear piloto)
+- O roteiro reutilizável está em `docs/checklist-piloto-e2e.md`; a passagem
+  visual ainda precisa ser feita pelo próprio Marcelo.
+- A limpeza segura está registada em
+  `docs/limpeza-dados-teste-2026-07-30.md`. Três contas puramente de teste e
+  cinco registros E2E/smoke foram removidos.
+- Uma conta de teste mista foi preservada porque contém vínculo, lugar e cache
+  reais do H5. Não apagar a conta inteira sem separar ou recriar esses dados.
 
-`/admin` sem ligação ao banco; autocomplete do Google nas definições; limpar
-dados de teste; modelo de agência (dói a partir do 3.º cliente); Stripe a sério.
+## O que falta além do piloto (backlog)
+
+`/admin` sem ligação ao banco; autocomplete do Google nas definições; modelo de
+agência (dói a partir do 3.º cliente); Stripe a sério.
