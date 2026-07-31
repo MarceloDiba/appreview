@@ -58,7 +58,7 @@ em cache) foram preservados. Evidência completa em
 2. **Google self-service:** adicionar busca/autocomplete; hoje é preciso colar
    o link. Não bloqueia o piloto concierge.
 3. **Admin:** a rota demonstrativa com usuários, receita e pagamentos
-   inventados foi removida. Antes de criar uma área real, aplicar
+   inventados foi removida no PR #19. Antes de criar uma área real, aplicar
    `20260731_harden_admin_access.sql`, definir quem provisiona administradores e
    implementar autorização no servidor.
 4. **Modelo de agência:** permitir que a NOÁ administre vários clientes num
