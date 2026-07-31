@@ -52,8 +52,9 @@ em cache) foram preservados. Evidência completa em
 
 ## Próximos temas
 
-1. **Notificações:** os interruptores e o botão de guardar ainda não persistem.
-   Implementar de verdade ou remover a interface.
+1. **Notificações:** a interface sem efeito foi removida no PR #18. Para
+   reintroduzir, definir eventos, canais, provedor, consentimento e tratamento
+   de falhas; só então implementar entrega real e preferências persistidas.
 2. **Google self-service:** adicionar busca/autocomplete; hoje é preciso colar
    o link. Não bloqueia o piloto concierge.
 3. **Admin:** ligar `/admin` ao banco e remover os dados demonstrativos dessa
