@@ -82,6 +82,9 @@ npm run verify
   `useAuth().signOut()` antes de voltar para `/`.
 - **Notificações:** a aba falsa foi removida no PR #18. Só reintroduzir com
   motor real de entrega, preferências persistidas e tratamento de falhas.
+- **Admin:** a rota com dados inventados foi removida no PR #19. A migration
+  `20260731_harden_admin_access.sql` fecha a autoatribuição de privilégios, mas
+  precisa ser aplicada antes de reintroduzir uma área administrativa.
 
 ## Armadilhas
 
@@ -107,6 +110,5 @@ H5 Texas Burger (Avenida) e Mania de Petiscos, ambos em Lisboa. Marcelo no Brasi
 
 ## O que falta além do piloto (backlog)
 
-`/admin` sem ligação ao banco; autocomplete do Google nas definições; sistema
-real de notificações; modelo de agência (dói a partir do 3.º cliente); Stripe a
-sério.
+Área administrativa real; autocomplete do Google nas definições; sistema real
+de notificações; modelo de agência (dói a partir do 3.º cliente); Stripe a sério.

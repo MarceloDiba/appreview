@@ -15,7 +15,6 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
  */
 const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Admin = lazy(() => import("./pages/Admin"));
 const Review = lazy(() => import("./pages/Review"));
 const Feedback = lazy(() => import("./pages/Feedback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -57,11 +56,6 @@ const App = () => (
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin" element={
-                <ProtectedRoute>
-                  <Admin />
                 </ProtectedRoute>
               } />
               <Route path="/review/:businessId" element={<Review />} />
