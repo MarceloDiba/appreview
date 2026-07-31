@@ -80,8 +80,9 @@ npm run verify
 
 - **Logout do Navbar:** corrigido na branch de prontidão; agora chama
   `useAuth().signOut()` antes de voltar para `/`.
-- **NotificationSettings não persiste nada** (interruptores e "salvar" que não
-  gravam). Sinalizado para implementar de verdade ou remover.
+- **Notificações:** a aba falsa foi removida na branch
+  `codex/remove-notificacoes-falsas`. Só reintroduzir com motor real de entrega,
+  preferências persistidas e tratamento de falhas.
 
 ## Armadilhas
 
@@ -107,5 +108,6 @@ H5 Texas Burger (Avenida) e Mania de Petiscos, ambos em Lisboa. Marcelo no Brasi
 
 ## O que falta além do piloto (backlog)
 
-`/admin` sem ligação ao banco; autocomplete do Google nas definições; modelo de
-agência (dói a partir do 3.º cliente); Stripe a sério.
+`/admin` sem ligação ao banco; autocomplete do Google nas definições; sistema
+real de notificações; modelo de agência (dói a partir do 3.º cliente); Stripe a
+sério.

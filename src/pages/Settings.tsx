@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import BusinessInfoSettings, { type BusinessInfo } from '@/components/settings/BusinessInfoSettings';
 import ExternalLinksSettings from '@/components/settings/ExternalLinksSettings';
-import NotificationSettings from '@/components/settings/NotificationSettings';
 import { useExternalLinks } from '@/hooks/useExternalLinks';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +26,10 @@ const EMPTY: BusinessInfo = { name: '', ownerName: '', phone: '' };
  * avaliações negativas serão enviadas apenas para formulário interno" —
  * anunciava exactamente o modelo que é proibido. Ver
  * `src/components/forms/FeedbackForm.tsx`.
+ *
+ * O separador de notificações também saiu enquanto não houver um motor real
+ * de entrega. Guardar interruptores sem enviar email, push ou resumo semanal
+ * daria ao dono uma confirmação falsa de que os alertas estão ativos.
  */
 const Settings = () => {
   const navigate = useNavigate();
@@ -148,7 +151,6 @@ const Settings = () => {
             <TabsList className="mb-6">
               <TabsTrigger value="business">{t('settings.tabBusiness')}</TabsTrigger>
               <TabsTrigger value="external-links">{t('settings.tabLinks')}</TabsTrigger>
-              <TabsTrigger value="notifications">{t('settings.tabNotifications')}</TabsTrigger>
               <TabsTrigger value="google-reviews">{t('settings.tabGoogle')}</TabsTrigger>
             </TabsList>
 
@@ -176,10 +178,6 @@ const Settings = () => {
                 error={error}
                 refreshLinks={refreshLinks}
               />
-            </TabsContent>
-
-            <TabsContent value="notifications">
-              <NotificationSettings />
             </TabsContent>
 
             <TabsContent value="google-reviews">

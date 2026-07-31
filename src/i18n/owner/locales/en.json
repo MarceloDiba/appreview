@@ -196,7 +196,6 @@
     "guidedLink": "use the guided setup",
     "tabBusiness": "My business",
     "tabLinks": "External links",
-    "tabNotifications": "Notifications",
     "tabGoogle": "Google Reviews",
     "saved": "Saved.",
     "saveError": "Couldn't save. Please try again.",
@@ -246,22 +245,6 @@
       "linksSaved": "External links updated.",
       "saveError": "Couldn't save the external links. Please try again.",
       "noGooglePlaceId": "There's no Google Place ID linked to refresh."
-    },
-    "notif": {
-      "title": "Notifications",
-      "desc": "Manage how and when you get alerts about your business.",
-      "newReviews": "New reviews",
-      "newReviewsDesc": "Get notified when your business receives new reviews.",
-      "negative": "Negative reviews",
-      "negativeDesc": "Get instant alerts for negative reviews (1-2 stars).",
-      "weekly": "Weekly report",
-      "weeklyDesc": "Get a weekly summary of how your reviews are doing.",
-      "email": "Email",
-      "emailDesc": "Get alerts by email.",
-      "push": "Push",
-      "pushDesc": "Get push notifications in the browser.",
-      "save": "Save preferences",
-      "saved": "Preferences saved."
     }
   },
   "profile": {

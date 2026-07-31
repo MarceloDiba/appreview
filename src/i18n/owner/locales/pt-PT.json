@@ -196,7 +196,6 @@
     "guidedLink": "use a configuração guiada",
     "tabBusiness": "O meu negócio",
     "tabLinks": "Links externos",
-    "tabNotifications": "Notificações",
     "tabGoogle": "Google Reviews",
     "saved": "Informações guardadas.",
     "saveError": "Não foi possível guardar. Tente novamente.",
@@ -246,22 +245,6 @@
       "linksSaved": "Links externos atualizados.",
       "saveError": "Não foi possível guardar os links externos. Tente novamente.",
       "noGooglePlaceId": "Não há um Place ID do Google associado para atualizar."
-    },
-    "notif": {
-      "title": "Notificações",
-      "desc": "Faça a gestão de como e quando recebe avisos sobre o seu negócio.",
-      "newReviews": "Novas avaliações",
-      "newReviewsDesc": "Receba avisos quando o seu negócio receber novas avaliações.",
-      "negative": "Avaliações negativas",
-      "negativeDesc": "Receba alertas imediatos para avaliações negativas (1-2 estrelas).",
-      "weekly": "Relatório semanal",
-      "weeklyDesc": "Receba um resumo semanal do desempenho das suas avaliações.",
-      "email": "E-mail",
-      "emailDesc": "Receba avisos por e-mail.",
-      "push": "Push",
-      "pushDesc": "Receba notificações push no navegador.",
-      "save": "Guardar preferências",
-      "saved": "Preferências guardadas."
     }
   },
   "profile": {
