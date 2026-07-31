@@ -40,7 +40,8 @@ Produção: https://appreview-flame.vercel.app
 - Deploy automático da Vercel saudável em todos os merges; último commit
   `d13ceb4`.
 - Migrations de proteção administrativa e cache registradas no Supabase.
-- Edge Function `fetch-google-reviews` ativa na versão 4 com JWT obrigatório.
+- Edge Function `fetch-google-reviews` ativa na versão 6 com JWT obrigatório e
+  resolução autenticada de links curtos `g.page`.
 - Nenhuma chamada à API paga do Google foi feita durante o rollout.
 - Os dados reais preservados permanecem intactos: 1 vínculo, 1 lugar e 5
   avaliações em cache.
@@ -49,8 +50,9 @@ Produção: https://appreview-flame.vercel.app
 
 1. Criar uma conta totalmente nova e repetir a configuração inicial; a passagem
    de 31/07 foi feita com a conta existente da Noá.
-2. Depois de publicar a resolução automática de links `g.page`, reabrir
-   Avaliações do Google e confirmar negócio, média e avaliações importadas.
+2. Depois do merge do frontend da resolução automática de links `g.page`,
+   reabrir Avaliações do Google e confirmar negócio, média e avaliações
+   importadas.
 3. Decidir depois o destino da conta de teste mista preservada: ela contém dados
    reais do H5 e não pode ser apagada em bloco.
 4. Revisão jurídica externa do PR #16.

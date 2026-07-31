@@ -38,7 +38,7 @@ do Google reproduzível e protegido.
 - `external_place_info` e `cached_reviews` estão com RLS ativo e políticas por
   proprietário; os dados reais preservados continuam em 1 lugar e 5 avaliações
   em cache.
-- `fetch-google-reviews` está ativa na versão 4, com verificação JWT, usuário
+- `fetch-google-reviews` está ativa na versão 6, com verificação JWT, usuário
   derivado da sessão e limite de uma consulta ao Google por conta a cada 12 h.
 - Nenhuma chamada à API do Google foi feita durante a publicação.
 
@@ -119,8 +119,8 @@ H5 Texas Burger (Avenida) e Mania de Petiscos, ambos em Lisboa. Marcelo no Brasi
   repetido antes de ativar cada negócio piloto.
 - A passagem encontrou um link `g.page` salvo sem Place ID. A correção resolve
   o redirecionamento autenticado do próprio Google, grava o identificador na
-  conta e mantém o cache de 12 h. Retestar a aba Avaliações do Google depois da
-  publicação.
+  conta e mantém o cache de 12 h. A função corrigida foi publicada na versão 6;
+  retestar a aba Avaliações do Google depois do merge do frontend.
 - O registo completo está em `docs/checklist-piloto-e2e.md`.
 - A limpeza segura está registada em
   `docs/limpeza-dados-teste-2026-07-30.md`. Três contas puramente de teste e
