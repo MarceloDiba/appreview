@@ -1,5 +1,8 @@
 # AppReview — regras para o assistente
 
+> Compatibilidade com Claude. As regras canônicas e atualizadas do projeto
+> ficam em `AGENTS.md`.
+
 Ferramenta de gestão de reputação para donos de negócio que não sabem de
 tecnologia. QR na mesa → cliente avalia → nota baixa vira caso interno para o
 dono resolver; **a avaliação pública é sempre oferecida, qualquer que seja a

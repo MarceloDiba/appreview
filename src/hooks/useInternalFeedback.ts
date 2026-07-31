@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 export interface InternalCase {
   id: string;
@@ -13,6 +14,7 @@ export interface InternalCase {
 }
 
 export const useInternalFeedback = (userId: string) => {
+  const { t } = useOwnerTranslation();
   const [loading, setLoading] = useState(true);
   const [cases, setCases] = useState<InternalCase[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -40,11 +42,11 @@ export const useInternalFeedback = (userId: string) => {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao carregar os casos.';
       console.error('Error loading internal feedback:', message);
-      setError(message);
+      setError(t('reviews.cases.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, t]);
 
   const resolveCase = useCallback(async (id: string, addressed: boolean) => {
     setResolvingId(id);
@@ -57,15 +59,17 @@ export const useInternalFeedback = (userId: string) => {
       if (updateError) throw updateError;
 
       setCases(prev => prev.map(c => (c.id === id ? { ...c, is_addressed: addressed } : c)));
-      toast.success(addressed ? 'Caso marcado como resolvido!' : 'Caso reaberto.');
+      toast.success(
+        addressed ? t('reviews.cases.resolvedToast') : t('reviews.cases.reopenedToast')
+      );
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao atualizar o caso.';
       console.error('Error updating internal feedback:', message);
-      toast.error(message);
+      toast.error(t('reviews.cases.updateError'));
     } finally {
       setResolvingId(null);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchCases();

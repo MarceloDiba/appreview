@@ -2,8 +2,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { formatDistanceToNow, format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { formatDistanceToNow } from 'date-fns';
+import { enUS, pt, ptBR } from 'date-fns/locale';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 export interface GoogleReview {
   review_id: string;
@@ -24,29 +25,37 @@ export interface PlaceInfo {
 }
 
 export const useGoogleReviews = (userId: string) => {
+  const { t, i18n } = useOwnerTranslation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [reviews, setReviews] = useState<GoogleReview[]>([]);
   const [placeInfo, setPlaceInfo] = useState<PlaceInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const normalizeGoogleReviewsError = (message: string): string => {
-    if (
-      message.includes('Failed to send a request to the Edge Function') ||
-      message.includes('FunctionsFetchError') ||
-      message.includes('fetch failed')
-    ) {
-      return 'A importação automática de avaliações do Google ainda não está configurada neste ambiente. O link de avaliação pode funcionar normalmente, mas a aba Google Reviews precisa da Edge Function e da chave da API do Google Places.';
-    }
+  const normalizeGoogleReviewsError = useCallback(
+    (message: string): string => {
+      if (
+        message.includes('Failed to send a request to the Edge Function') ||
+        message.includes('FunctionsFetchError') ||
+        message.includes('fetch failed')
+      ) {
+        return t('reviews.google.autoImportUnavailable');
+      }
 
-    return message;
-  };
+      return t('reviews.google.genericError');
+    },
+    [t]
+  );
 
   const formatDate = (dateString: string): string => {
     try {
       const date = new Date(dateString);
-      return format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-    } catch (e) {
+      return new Intl.DateTimeFormat(i18n.resolvedLanguage || i18n.language, {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      }).format(date);
+    } catch {
       return dateString;
     }
   };
@@ -54,8 +63,14 @@ export const useGoogleReviews = (userId: string) => {
   const formatRelativeTime = (dateString: string): string => {
     try {
       const date = new Date(dateString);
-      return formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
-    } catch (e) {
+      const locale =
+        i18n.resolvedLanguage === 'pt-BR'
+          ? ptBR
+          : i18n.resolvedLanguage === 'pt-PT'
+            ? pt
+            : enUS;
+      return formatDistanceToNow(date, { addSuffix: true, locale });
+    } catch {
       return dateString;
     }
   };
@@ -82,15 +97,15 @@ export const useGoogleReviews = (userId: string) => {
       const errorMessage = normalizeGoogleReviewsError(rawErrorMessage);
       console.error('Error fetching Google reviews:', errorMessage);
       setError(errorMessage);
-      toast.error('Erro ao carregar avaliações do Google. Por favor, tente novamente mais tarde.');
+      toast.error(t('reviews.google.loadToast'));
     } finally {
       setRefreshing(false);
     }
-  }, [userId]);
+  }, [userId, normalizeGoogleReviewsError, t]);
 
   const loadGoogleReviews = useCallback(async () => {
     if (!userId) {
-      setError('Usuário não autenticado');
+      setError(t('reviews.google.notAuthenticated'));
       setLoading(false);
       return;
     }
@@ -109,13 +124,13 @@ export const useGoogleReviews = (userId: string) => {
       if (linksError) throw new Error(linksError.message);
       
       if (!links || links.length === 0) {
-        setError('Você ainda não configurou um link do Google Reviews. Vá para a aba "Links Externos" para configurar.');
+        setError(t('reviews.google.linkMissing'));
         return;
       }
       
       const googleLink = links[0] as (typeof links)[number] & { place_id?: string | null };
       if (!googleLink.place_id) {
-        setError('O link do Google foi salvo, mas não inclui um Place ID para importação. Para importar avaliações automaticamente nesta aba, use um link com `placeid=` nas configurações.');
+        setError(t('reviews.google.placeIdMissing'));
         return;
       }
       
@@ -129,16 +144,16 @@ export const useGoogleReviews = (userId: string) => {
     } finally {
       setLoading(false);
     }
-  }, [userId, fetchGoogleReviews]);
+  }, [userId, fetchGoogleReviews, normalizeGoogleReviewsError, t]);
 
   const handleRefresh = async () => {
     if (!placeInfo?.place_id) {
-      toast.error('Nenhum Place ID configurado para atualizar');
+      toast.error(t('reviews.google.noPlaceId'));
       return;
     }
     
     await fetchGoogleReviews(placeInfo.place_id, true);
-    toast.success('Avaliações atualizadas com sucesso!');
+    toast.success(t('reviews.refreshedToast'));
   };
 
   useEffect(() => {

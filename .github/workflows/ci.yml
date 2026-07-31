@@ -25,6 +25,9 @@ jobs:
       - name: Verificar tipos
         run: npx tsc --noEmit -p tsconfig.app.json
 
+      - name: Verificar i18n do painel
+        run: npm run check:i18n-owner
+
       - name: Build
         run: npm run build
 

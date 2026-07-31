@@ -58,9 +58,13 @@ const mean = (values: number[]): number | null =>
  * chama `useOwnerTranslation` e recalcula quando o idioma muda.
  */
 export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights => {
-  const { t } = useOwnerTranslation();
+  const { t, i18n } = useOwnerTranslation();
 
   return useMemo(() => {
+    const decimalFormat = new Intl.NumberFormat(
+      i18n.resolvedLanguage || i18n.language,
+      { minimumFractionDigits: 1, maximumFractionDigits: 1 }
+    );
     const now = Date.now();
     const open = cases.filter((c) => !c.is_addressed);
     const resolvedTotal = cases.length - open.length;
@@ -153,10 +157,10 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
         id: 'rating-drop',
         level: 'serious',
         label: t('attention.label.ratingDrop'),
-        title: t('attention.ratingDrop.title', { average: weekAverage.toFixed(1) }),
+        title: t('attention.ratingDrop.title', { average: decimalFormat.format(weekAverage) }),
         detail: t('attention.ratingDrop.detail', {
-          baseline: baselineAverage.toFixed(1),
-          drop: (baselineAverage - weekAverage).toFixed(1),
+          baseline: decimalFormat.format(baselineAverage),
+          drop: decimalFormat.format(baselineAverage - weekAverage),
         }),
         action: t('attention.ratingDrop.action'),
       });
@@ -175,7 +179,7 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
         label: t('attention.label.volume'),
         title: t('attention.volume.title', {
           count: week.length,
-          average: baselineWeeklyCount.toFixed(1),
+          average: decimalFormat.format(baselineWeeklyCount),
         }),
         detail: t('attention.volume.detail'),
         action: t('attention.volume.action'),
@@ -225,5 +229,5 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
       alerts: alerts.slice(1),
       stats,
     };
-  }, [cases, t]);
+  }, [cases, i18n.language, i18n.resolvedLanguage, t]);
 };

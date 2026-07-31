@@ -1,7 +1,7 @@
 # AppReview — documento de continuação (handoff)
 
 Estado em 30/07/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
-sem re-descobrir nada. Leia também `CLAUDE.md` (regras) e `ESTADO.md` (backlog).
+sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Produto e infra
 
@@ -12,8 +12,8 @@ sem re-descobrir nada. Leia também `CLAUDE.md` (regras) e `ESTADO.md` (backlog)
   partir do `main`. Preço 49 €/mês.
 - Supabase: projeto `tjbznhwdjyabuacrfqie`, região sa-east-1 (São Paulo).
 - Produção: https://appreview-flame.vercel.app
-- **CI (`.github/workflows/ci.yml`)**: roda `tsc --noEmit` (bloqueante) + build +
-  lint (não bloqueante). É a fonte de verdade da verificação.
+- **CI (`.github/workflows/ci.yml`)**: roda `tsc --noEmit`, verificação do i18n
+  do painel e build (bloqueantes) + lint (não bloqueante). É a fonte de verdade.
 
 ## Já em produção (PRs mergeados)
 
@@ -25,8 +25,9 @@ espanhol).
 
 ## PRs abertos
 
-- **#15 — painel do dono multilíngue (RASCUNHO).** É o PR em curso (ver abaixo).
-  Só sair do rascunho quando o painel inteiro estiver traduzido.
+- **#15 — painel do dono multilíngue.** Implementação concluída na branch
+  `feat/painel-multilingue`. O PR só deve ficar pronto para revisão após o CI
+  deste pacote ficar verde.
 - **#16 — dados legais.** Entidade **MDR Propaganda Ltda. ME**, CNPJ
   **20.927.148/0001-83**, sede **Rua Itaporanga, 433, Aracaju, Sergipe, Brasil**,
   pagamento **Stripe**, lei/foro **Brasil (Aracaju)**, privacidade reescrita para
@@ -45,63 +46,38 @@ espanhol).
 - Painel multilíngue: **fazer o painel inteiro num PR** (o #15). Tom do pt-BR já
   aprovado pelo Marcelo.
 - i18n do painel: **react-i18next** (JSON por idioma), instância à parte do
-  cliente. Ver `CLAUDE.md`.
+  cliente. Ver `AGENTS.md`.
+- Decisões técnicas e alterações locais reversíveis podem seguir sem nova
+  aprovação depois de apresentado o plano.
 
-## PR #15 — tradução do painel: o que está feito e o que falta
+## PR #15 — tradução do painel
 
 Branch `feat/painel-multilingue`. Infra pronta: `src/i18n/owner/instance.ts`,
 `useOwnerTranslation.ts`, `LanguageSwitcher.tsx`, catálogos em
-`src/i18n/owner/locales/{pt-BR,pt-PT,en}.json` (~245 chaves).
+`src/i18n/owner/locales/{pt-BR,pt-PT,en}.json` (366 chaves no pacote final).
 
-**Traduzido (commitado):** Onboarding, Login, Signup, Navbar (só painel/partilhado;
-admin e marketing ficam em pt), Dashboard, **Central de Atenção** (o
-`useAttentionInsights` gera o texto via i18next com plural), Configurações
-(negócio, links externos, notificações), Perfil.
+**Traduzido:** Onboarding, Login, Signup, Navbar (só painel/partilhado; admin e
+marketing ficam em pt), Dashboard, Central de Atenção, Configurações, Perfil,
+Avaliações, casos internos, Google Reviews, QR Codes e interface das sugestões
+de resposta.
 
-**FALTA traduzir (é o que continuar):**
-1. `src/pages/Reviews.tsx` + `src/components/dashboard/cases/CasesList.tsx` +
-   `src/components/dashboard/GoogleReviews.tsx` +
-   `src/components/dashboard/reviews/*` (ReviewCard, ReviewsList, ReviewsHeader,
-   LoadingState, ErrorState).
-2. `src/pages/QRCodes.tsx` + `src/components/dashboard/QRCodeGenerator.tsx`
-   (atenção: o **cartão de mesa impresso** é para o cliente final e é trilingue
-   pt-PT+ES+EN — deixar como está, não é painel).
-3. `src/components/dashboard/ReplySuggestions.tsx` — só a interface (botões,
-   rótulos); o texto das respostas geradas fica no seu próprio sistema
-   (`src/lib/replySuggestions.ts`), não mexer.
-
-**Como continuar cada tela:** adicionar as chaves aos 3 JSON (manter as chaves
-idênticas nos três), trocar textos por `t('chave')` via `useOwnerTranslation`,
-verificar (abaixo), commitar na branch. **Quando as 3 telas acima estiverem
-feitas:** tirar o #15 do rascunho (`gh pr ready 15`) e mandar o link ao Marcelo.
+- Datas, números, médias e percentagens acompanham o idioma escolhido.
+- Mensagens e avisos gerados pelos hooks do painel também passam pelo i18n.
+- O cartão de mesa impresso permanece trilingue e intocado: é material do
+  cliente final, não interface do dono.
+- O motor das respostas sugeridas em `src/lib/replySuggestions.ts` permanece
+  separado e responde na língua em que o cliente escreveu.
+- O antigo marcador visível `Mock Place (validação ignorada)` foi
+  neutralizado. Sem autorização para uma chamada potencialmente paga, o painel
+  informa apenas que o Place ID foi detetado e ainda não foi verificado.
+- `scripts/check-owner-i18n.mjs` verifica paridade dos catálogos, valores vazios
+  e resolução das chaves estáticas; o CI executa esse script.
 
 ### Verificação do i18n (rodar antes de commitar)
 
 ```bash
-node ./node_modules/typescript/bin/tsc --noEmit -p tsconfig.app.json   # tem de sair 0
-```
-E este script (chaves batendo nos 3 idiomas + toda chave `t()` resolve):
-```python
-python3 - <<'PY'
-import json, io, re, glob
-def flat(d,p=''):
-    o=set()
-    for k,v in d.items():
-        nk=f"{p}.{k}" if p else k
-        o|=flat(v,nk) if isinstance(v,dict) else {nk}
-    return o
-cats={l:flat(json.load(io.open(f'src/i18n/owner/locales/{l}.json'))) for l in ['pt-BR','pt-PT','en']}
-base=cats['pt-BR']
-for l,ks in cats.items():
-    if base-ks or ks-base: print(l,"DIVERGE",sorted(base^ks))
-valid=base|{k[:-4] for k in base if k.endswith('_one')}
-used=set()
-for f in glob.glob('src/**/*.tsx',recursive=True)+glob.glob('src/**/*.ts',recursive=True):
-    if ' 2.' in f: continue
-    for m in re.finditer(r"t\(\s*['\"]([a-zA-Z0-9_.]+)['\"]", io.open(f).read()): used.add(m.group(1))
-pref=('onboarding.','nav.','auth.','signup.','attention.','dashboard.','settings.','profile.','reviews.','qrcodes.','reply.','language.')
-print("t() faltando:", [k for k in used if k.startswith(pref) and k not in valid] or "NENHUMA")
-PY
+npx tsc --noEmit -p tsconfig.app.json
+npm run check:i18n-owner
 ```
 
 ## Tarefas de fundo já sinalizadas (chips)

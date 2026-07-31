@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 const QRCodes = () => {
+  const { t } = useOwnerTranslation();
   const [businessName, setBusinessName] = useState<string>('');
   const baseUrl = window.location.origin;
 
@@ -37,69 +39,53 @@ const QRCodes = () => {
       <main className="flex-1 pt-20 px-4 pb-8">
         <div className="container mx-auto max-w-6xl">
           <header className="mb-8">
-            <h1 className="text-3xl font-bold">QR Codes</h1>
-            <p className="text-gray-600 mt-1">
-              Gere e gerencie QR Codes para coletar avaliações dos seus clientes.
-            </p>
+            <h1 className="text-3xl font-bold">{t('qrcodes.title')}</h1>
+            <p className="text-gray-600 mt-1">{t('qrcodes.subtitle')}</p>
           </header>
-          
+
           <QRCodeGenerator baseUrl={baseUrl} businessName={businessName} />
-          
+
           <div className="mt-8">
             <Card>
               <CardHeader>
-                <CardTitle>Como usar os QR Codes</CardTitle>
-                <CardDescription>
-                  Dicas para utilizar os QR Codes de maneira eficiente no seu negócio.
-                </CardDescription>
+                <CardTitle>{t('qrcodes.howToTitle')}</CardTitle>
+                <CardDescription>{t('qrcodes.howToDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Card className="bg-gray-50 border shadow-sm">
                     <CardHeader>
-                      <CardTitle className="text-lg">No local</CardTitle>
+                      <CardTitle className="text-lg">{t('qrcodes.onSite')}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-600">
-                        Coloque QR Codes nas mesas, balcões, ou pontos de saída do seu estabelecimento. 
-                        Incentive clientes a escanear o código após o atendimento.
-                      </p>
+                      <p className="text-sm text-gray-600">{t('qrcodes.onSiteDesc')}</p>
                     </CardContent>
                   </Card>
-                  
+
                   <Card className="bg-gray-50 border shadow-sm">
                     <CardHeader>
-                      <CardTitle className="text-lg">Em materiais</CardTitle>
+                      <CardTitle className="text-lg">{t('qrcodes.inMaterials')}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-600">
-                        Adicione QR Codes em cartões de visita, notas fiscais, embalagens de produtos, 
-                        ou qualquer material que o cliente leve consigo.
-                      </p>
+                      <p className="text-sm text-gray-600">{t('qrcodes.inMaterialsDesc')}</p>
                     </CardContent>
                   </Card>
-                  
+
                   <Card className="bg-gray-50 border shadow-sm">
                     <CardHeader>
-                      <CardTitle className="text-lg">Online</CardTitle>
+                      <CardTitle className="text-lg">{t('qrcodes.online')}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-600">
-                        Compartilhe a imagem do QR Code em suas redes sociais, 
-                        site, e-mails ou newsletters para clientes que visitaram seu negócio.
-                      </p>
+                      <p className="text-sm text-gray-600">{t('qrcodes.onlineDesc')}</p>
                     </CardContent>
                   </Card>
                 </div>
-                
+
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 flex items-start">
                   <AlertCircle className="h-5 w-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="text-sm font-medium text-blue-700">Dica Profissional</h4>
-                    <p className="text-sm text-blue-600 mt-1">
-                      Crie QR Codes específicos para diferentes pontos do seu negócio ou diferentes campanhas.
-                      Isso ajudará a identificar de onde vêm as avaliações e medir a eficácia de cada ponto de contato.
-                    </p>
+                    <h4 className="text-sm font-medium text-blue-700">{t('qrcodes.tipTitle')}</h4>
+                    <p className="text-sm text-blue-600 mt-1">{t('qrcodes.tipDesc')}</p>
                   </div>
                 </div>
               </CardContent>

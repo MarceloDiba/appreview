@@ -83,7 +83,7 @@ const AlertRow: React.FC<{ alert: AttentionAlert }> = ({ alert }) => {
 };
 
 const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) => {
-  const { t } = useOwnerTranslation();
+  const { t, i18n } = useOwnerTranslation();
 
   if (loading) {
     return (
@@ -98,16 +98,23 @@ const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) 
   const { priority, alerts, stats } = insights;
   const style = levelStyles[priority.level];
   const PriorityIcon = style.icon;
+  const locale = i18n.resolvedLanguage || i18n.language;
+  const integerFormat = new Intl.NumberFormat(locale);
+  const decimalFormat = new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  const percentFormat = new Intl.NumberFormat(locale, { style: 'percent' });
 
   const weekAverageLabel =
-    stats.weekAverage !== null ? stats.weekAverage.toFixed(1) : '—';
+    stats.weekAverage !== null ? decimalFormat.format(stats.weekAverage) : '—';
   const weekAverageHint =
     stats.weekAverage !== null && stats.baselineAverage !== null
-      ? t('attention.ui.prevAverage', { value: stats.baselineAverage.toFixed(1) })
+      ? t('attention.ui.prevAverage', { value: decimalFormat.format(stats.baselineAverage) })
       : t('attention.ui.noHistory');
 
   const resolutionLabel =
-    stats.resolutionRate !== null ? `${Math.round(stats.resolutionRate * 100)}%` : '—';
+    stats.resolutionRate !== null ? percentFormat.format(stats.resolutionRate) : '—';
 
   return (
     <section aria-label={t('attention.ui.heading')} className="space-y-4">
@@ -162,7 +169,7 @@ const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile
           label={t('attention.ui.openCases')}
-          value={String(stats.openCases)}
+          value={integerFormat.format(stats.openCases)}
           hint={
             stats.oldestOpenDays !== null
               ? t('attention.ui.oldest', { count: stats.oldestOpenDays })
@@ -171,7 +178,7 @@ const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) 
         />
         <StatTile
           label={t('attention.ui.awaitingReturn')}
-          value={String(stats.awaitingContact)}
+          value={integerFormat.format(stats.awaitingContact)}
           hint={t('attention.ui.leftContact')}
         />
         <StatTile label={t('attention.ui.weekAverage')} value={weekAverageLabel} hint={weekAverageHint} />

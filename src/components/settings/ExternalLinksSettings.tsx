@@ -73,7 +73,11 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
       return (
         <div className="flex items-center text-blue-600">
           <RefreshCw className={cn("h-4 w-4 mr-1", isValidating && "animate-spin")} />
-          <span className="text-xs">{t('settings.links.verifying')}</span>
+          <span className="text-xs">
+            {isValidating
+              ? t('settings.links.verifying')
+              : t('settings.links.placeIdDetected')}
+          </span>
         </div>
       );
     }
