@@ -67,7 +67,15 @@ export type Database = {
           text?: string | null
           time?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cached_reviews_external_place_id_fkey"
+            columns: ["external_place_id"]
+            isOneToOne: false
+            referencedRelation: "external_place_info"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       external_place_info: {
         Row: {
