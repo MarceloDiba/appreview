@@ -57,8 +57,10 @@ em cache) foram preservados. Evidência completa em
    de falhas; só então implementar entrega real e preferências persistidas.
 2. **Google self-service:** adicionar busca/autocomplete; hoje é preciso colar
    o link. Não bloqueia o piloto concierge.
-3. **Admin:** ligar `/admin` ao banco e remover os dados demonstrativos dessa
-   área interna antes de uso real.
+3. **Admin:** a rota demonstrativa com usuários, receita e pagamentos
+   inventados foi removida. Antes de criar uma área real, aplicar
+   `20260731_harden_admin_access.sql`, definir quem provisiona administradores e
+   implementar autorização no servidor.
 4. **Modelo de agência:** permitir que a NOÁ administre vários clientes num
    único lugar. Passa a doer a partir do terceiro cliente.
 5. **Stripe:** cobrança real continua manual. Qualquer integração exige

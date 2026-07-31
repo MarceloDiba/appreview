@@ -13,15 +13,14 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 
 interface NavbarProps {
-  userRole?: 'admin' | 'business' | 'none';
+  userRole?: 'business' | 'none';
   businessName?: string;
 }
 
 /**
- * O painel do dono (userRole === 'business') e os itens partilhados — conta,
- * definições, sair, entrar/começar — passam pelo react-i18next. As telas de
- * admin (interno) e os links de marketing da landing ficam em português, que é
- * a língua dessas páginas.
+ * O painel do dono e os itens partilhados — conta, definições, sair,
+ * entrar/começar — passam pelo react-i18next. Os links de marketing da landing
+ * ficam em português, que é a língua dessa página.
  */
 const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
   const { t } = useOwnerTranslation();
@@ -65,15 +64,6 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
           {/* Desktop navigation */}
           <div className="hidden md:block">
             <div className="flex items-center space-x-4">
-              {userRole === 'admin' && (
-                <>
-                  <Link to="/admin" className={deskLink('/admin', isActive('/admin'))}>Dashboard</Link>
-                  <Link to="/admin/users" className={deskLink('/admin/users', isActive('/admin/users'))}>Usuários</Link>
-                  <Link to="/admin/plans" className={deskLink('/admin/plans', isActive('/admin/plans'))}>Planos</Link>
-                  <Link to="/admin/analytics" className={deskLink('/admin/analytics', isActive('/admin/analytics'))}>Estatísticas</Link>
-                </>
-              )}
-
               {userRole === 'business' && (
                 <>
                   <Link to="/dashboard" className={deskLink('/dashboard', isActive('/dashboard'))}>{t('nav.dashboard')}</Link>
@@ -101,7 +91,7 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-9 w-40 rounded-full">
                     <div className="flex h-full w-full items-center justify-center rounded-full bg-primary text-white">
-                      {userRole === 'admin' ? 'Admin' : t('nav.profile')}
+                      {t('nav.profile')}
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
@@ -149,15 +139,6 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white shadow-lg">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {userRole === 'admin' && (
-              <>
-                <Link to="/admin" className={mobLink('/admin', isActive('/admin'))} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
-                <Link to="/admin/users" className={mobLink('/admin/users', isActive('/admin/users'))} onClick={() => setIsMobileMenuOpen(false)}>Usuários</Link>
-                <Link to="/admin/plans" className={mobLink('/admin/plans', isActive('/admin/plans'))} onClick={() => setIsMobileMenuOpen(false)}>Planos</Link>
-                <Link to="/admin/analytics" className={mobLink('/admin/analytics', isActive('/admin/analytics'))} onClick={() => setIsMobileMenuOpen(false)}>Estatísticas</Link>
-              </>
-            )}
-
             {userRole === 'business' && (
               <>
                 <Link to="/dashboard" className={mobLink('/dashboard', isActive('/dashboard'))} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.dashboard')}</Link>
