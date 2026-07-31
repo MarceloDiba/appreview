@@ -65,9 +65,9 @@ em cache) foram preservados. Evidência completa em
    único lugar. Passa a doer a partir do terceiro cliente.
 5. **Stripe:** cobrança real continua manual. Qualquer integração exige
    aprovação por mexer com dinheiro.
-6. **Infra do cache Google:** migration e RLS preparados na branch
-   `codex/reproduz-cache-google`. Ordem obrigatória de publicação: aplicar a
-   migration e só depois publicar a Edge Function autenticada.
+6. **Infra do cache Google:** migration e RLS preparados no PR #20. Ordem
+   obrigatória de publicação: aplicar a migration e só depois publicar a Edge
+   Function autenticada.
 
 ## Piloto
 

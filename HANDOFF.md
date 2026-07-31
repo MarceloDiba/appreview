@@ -86,8 +86,8 @@ npm run verify
   `20260731_harden_admin_access.sql` fecha a autoatribuição de privilégios, mas
   precisa ser aplicada antes de reintroduzir uma área administrativa.
 - **Cache Google:** a migration reproduzível e as políticas por proprietário
-  estão na branch `codex/reproduz-cache-google`. Aplicar a migration antes de
-  publicar a nova versão da Edge Function `fetch-google-reviews`.
+  estão no PR #20. Aplicar a migration antes de publicar a nova versão da Edge
+  Function `fetch-google-reviews`.
 
 ## Armadilhas
 
