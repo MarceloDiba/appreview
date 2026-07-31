@@ -28,9 +28,9 @@ pt-BR, pt-PT e inglês.
 
 ## PRs abertos
 
-- **Prontidão do piloto**, branch `codex/prontidao-piloto`: comando único de
-  verificação, checklist ponta a ponta, logout real e registo da limpeza segura
-  dos dados de teste. Não fazer merge nem deploy manual.
+- **#17 — prontidão do piloto**, branch `codex/prontidao-piloto`: comando único
+  de verificação, checklist ponta a ponta, logout real e registo da limpeza
+  segura dos dados de teste. Não fazer merge nem deploy manual.
 
 ## Decisões tomadas (não re-perguntar)
 

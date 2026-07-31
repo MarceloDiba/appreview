@@ -30,8 +30,9 @@ Produção: https://appreview-flame.vercel.app
 
 ## Em revisão
 
-- **Prontidão do piloto**, branch `codex/prontidao-piloto`: `npm run verify`,
-  checklist ponta a ponta, logout funcional e documentação da limpeza de teste.
+- **PR #17 — prontidão do piloto**, branch `codex/prontidao-piloto`:
+  `npm run verify`, checklist ponta a ponta, logout funcional e documentação da
+  limpeza de teste.
 
 ## Antes do piloto
 
