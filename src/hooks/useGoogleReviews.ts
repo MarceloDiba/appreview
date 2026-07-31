@@ -75,13 +75,13 @@ export const useGoogleReviews = (userId: string) => {
     }
   };
 
-  const fetchGoogleReviews = useCallback(async (placeId: string, forceRefresh = false) => {
+  const fetchGoogleReviews = useCallback(async (placeId: string) => {
     setRefreshing(true);
     setError(null);
     
     try {
       const { data, error } = await supabase.functions.invoke('fetch-google-reviews', {
-        body: { place_id: placeId, user_id: userId, force_refresh: forceRefresh }
+        body: { place_id: placeId }
       });
       
       if (error) throw new Error(error.message);
@@ -152,7 +152,7 @@ export const useGoogleReviews = (userId: string) => {
       return;
     }
     
-    await fetchGoogleReviews(placeInfo.place_id, true);
+    await fetchGoogleReviews(placeInfo.place_id);
     toast.success(t('reviews.refreshedToast'));
   };
 
