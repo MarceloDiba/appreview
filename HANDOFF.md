@@ -38,7 +38,7 @@ do Google reproduzível e protegido.
 - `external_place_info` e `cached_reviews` estão com RLS ativo e políticas por
   proprietário; os dados reais preservados continuam em 1 lugar e 5 avaliações
   em cache.
-- `fetch-google-reviews` está ativa na versão 4, com verificação JWT, usuário
+- `fetch-google-reviews` está ativa na versão 6, com verificação JWT, usuário
   derivado da sessão e limite de uma consulta ao Google por conta a cada 12 h.
 - Nenhuma chamada à API do Google foi feita durante a publicação.
 
@@ -112,8 +112,16 @@ npm run verify
 H5 Texas Burger (Avenida) e Mania de Petiscos, ambos em Lisboa. Marcelo no Brasil
 (Aracaju) até dezembro → arranque remoto.
 
-- O roteiro reutilizável está em `docs/checklist-piloto-e2e.md`; a passagem
-  visual ainda precisa ser feita pelo próprio Marcelo.
+- Marcelo executou em 31/07 a passagem com a conta existente da Noá. Passaram:
+  QR físico e idioma, nota baixa mantendo avaliação pública, Central de Atenção,
+  persistência do caso tratado e logout.
+- Não foi criada uma conta totalmente nova; esse cenário ainda precisa ser
+  repetido antes de ativar cada negócio piloto.
+- A passagem encontrou um link `g.page` salvo sem Place ID. A correção resolve
+  o redirecionamento autenticado do próprio Google, grava o identificador na
+  conta e mantém o cache de 12 h. A função corrigida foi publicada na versão 6;
+  retestar a aba Avaliações do Google depois do merge do frontend.
+- O registo completo está em `docs/checklist-piloto-e2e.md`.
 - A limpeza segura está registada em
   `docs/limpeza-dados-teste-2026-07-30.md`. Três contas puramente de teste e
   cinco registros E2E/smoke foram removidos.

@@ -221,7 +221,7 @@
       "notVerified": "Not verified",
       "verifying": "Verifying...",
       "placeIdDetected": "Place ID detected. Automatic import hasn't been verified yet.",
-      "googleHint": "Accepts g.page, Google Maps and writereview links. To import reviews in the Google Reviews tab, use a link with placeid=.",
+      "googleHint": "Accepts g.page, Google Maps and writereview links. The Place ID is detected automatically when reviews load.",
       "placeId": "Place ID",
       "addTitle": "Add a new link",
       "platformLabel": "Platform",
@@ -305,7 +305,7 @@
       "loadToast": "Couldn't load Google reviews. Please try again later.",
       "notAuthenticated": "Your session has ended. Sign in again to view reviews.",
       "linkMissing": "You haven't set up a Google link yet. Go to Settings and add your business link.",
-      "placeIdMissing": "The Google link was saved, but it doesn't include the Place ID needed to import reviews. Update the link in Settings.",
+      "placeIdMissing": "The Place ID couldn't be identified from the saved link. Update the Google link in Settings.",
       "noPlaceId": "Set up the Place ID before refreshing reviews."
     },
     "cases": {

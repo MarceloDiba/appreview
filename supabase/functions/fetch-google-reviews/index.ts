@@ -18,6 +18,77 @@ const jsonResponse = (body: Record<string, unknown>, status = 200) =>
     status,
   });
 
+const validPlaceIdPattern = /^(ChI[a-zA-Z0-9_-]+|[a-zA-Z0-9_-]{20,})$/;
+const allowedGoogleHosts = new Set([
+  'g.page',
+  'goo.gl',
+  'maps.app.goo.gl',
+  'google.com',
+  'www.google.com',
+  'maps.google.com',
+  'search.google.com',
+  'google.com.br',
+  'www.google.com.br',
+  'maps.google.com.br',
+  'google.pt',
+  'www.google.pt',
+  'maps.google.pt',
+]);
+
+const extractPlaceId = (value: string): string | null => {
+  try {
+    const url = new URL(value);
+    const placeId = url.searchParams.get('placeid') || url.searchParams.get('place_id');
+    if (!placeId) return null;
+
+    const normalized = placeId.trim();
+    return validPlaceIdPattern.test(normalized) ? normalized : null;
+  } catch {
+    return null;
+  }
+};
+
+const parseAllowedGoogleUrl = (value: string): URL | null => {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || !allowedGoogleHosts.has(url.hostname.toLowerCase())) {
+      return null;
+    }
+    return url;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Links curtos g.page e maps.app.goo.gl não mostram o Place ID ao cliente,
+ * mas o próprio redirecionamento do Google normalmente o inclui. Seguir apenas
+ * hosts Google explicitamente permitidos evita transformar a função num proxy
+ * para endereços arbitrários e não usa a API paga do Places.
+ */
+const resolvePlaceIdFromGoogleUrl = async (value: string): Promise<string | null> => {
+  let currentUrl = value;
+
+  for (let redirectCount = 0; redirectCount <= 5; redirectCount += 1) {
+    const parsedUrl = parseAllowedGoogleUrl(currentUrl);
+    if (!parsedUrl) return null;
+
+    const directPlaceId = extractPlaceId(parsedUrl.toString());
+    if (directPlaceId) return directPlaceId;
+
+    const response = await fetch(parsedUrl, {
+      method: 'HEAD',
+      redirect: 'manual',
+    });
+    const location = response.headers.get('location');
+    if (!location) return null;
+
+    currentUrl = new URL(location, parsedUrl).toString();
+  }
+
+  return null;
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -50,19 +121,22 @@ serve(async (req) => {
       return jsonResponse({ error: 'Invalid JSON body' }, 400);
     }
 
-    const placeId = typeof payload?.place_id === 'string' ? payload.place_id.trim() : '';
+    const requestedPlaceId =
+      typeof payload?.place_id === 'string' ? payload.place_id.trim() : '';
 
-    if (!placeId || placeId.length > 255) {
+    if (
+      requestedPlaceId &&
+      (requestedPlaceId.length > 255 || !validPlaceIdPattern.test(requestedPlaceId))
+    ) {
       return jsonResponse({ error: 'Invalid place_id parameter' }, 400);
     }
 
-    // A chamada paga só pode usar o Place ID que o próprio dono configurou.
+    // A chamada paga só pode usar o link que o próprio dono configurou.
     const { data: configuredLink, error: linkError } = await supabase
       .from('platform_links')
-      .select('id')
+      .select('id, url, place_id')
       .eq('user_id', user.id)
       .eq('platform', 'google reviews')
-      .eq('place_id', placeId)
       .maybeSingle();
 
     if (linkError) {
@@ -71,7 +145,43 @@ serve(async (req) => {
     }
 
     if (!configuredLink) {
-      return jsonResponse({ error: 'Place ID is not configured for this account' }, 403);
+      return jsonResponse({ error: 'Google link is not configured for this account' }, 403);
+    }
+
+    let placeId =
+      typeof configuredLink.place_id === 'string' ? configuredLink.place_id.trim() : '';
+
+    if (placeId && requestedPlaceId && placeId !== requestedPlaceId) {
+      return jsonResponse({ error: 'Place ID does not match the configured Google link' }, 403);
+    }
+
+    if (!placeId) {
+      try {
+        placeId = (await resolvePlaceIdFromGoogleUrl(configuredLink.url)) || '';
+      } catch (resolutionError) {
+        console.error('Error resolving Google Place ID:', resolutionError);
+      }
+
+      if (!placeId) {
+        return jsonResponse(
+          {
+            code: 'PLACE_ID_UNRESOLVED',
+            error: 'Place ID could not be resolved from the configured Google link',
+          },
+          422,
+        );
+      }
+
+      const { error: placeIdUpdateError } = await supabase
+        .from('platform_links')
+        .update({ place_id: placeId })
+        .eq('id', configuredLink.id)
+        .eq('user_id', user.id);
+
+      if (placeIdUpdateError) {
+        console.error('Error saving resolved Google Place ID:', placeIdUpdateError);
+        return jsonResponse({ error: 'Failed to save the resolved Google Place ID' }, 500);
+      }
     }
 
     // Limite por conta, inclusive quando o Place ID é trocado. Sem isso, seria
@@ -167,6 +277,16 @@ serve(async (req) => {
     }
     
     const placeDetails = data.result;
+
+    const { error: businessNameError } = await supabase
+      .from('platform_links')
+      .update({ business_name: placeDetails.name || null })
+      .eq('id', configuredLink.id)
+      .eq('user_id', user.id);
+
+    if (businessNameError) {
+      console.error('Error saving the Google business name:', businessNameError);
+    }
     
     // Upsert the place info
     const { data: upsertedPlaceInfo, error: placeError } = await supabase

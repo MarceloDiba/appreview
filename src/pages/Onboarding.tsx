@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { QR_PRINT_SIZE, QR_SCREEN_SIZE, downloadDataUrl, publicReviewUrl, qrDataUrl, slugFilename } from '@/lib/qr';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
+import { extractPlaceIdFromUrl } from '@/utils/googlePlaceUtils';
 
 /**
  * Configuração guiada.
@@ -165,6 +166,8 @@ const Onboarding = () => {
             platform: l.platform,
             display_name: l.display,
             url: l.url,
+            place_id:
+              l.platform === 'google reviews' ? extractPlaceIdFromUrl(l.url) : null,
           }))
         );
         if (error) throw error;
