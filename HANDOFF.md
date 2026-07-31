@@ -1,6 +1,6 @@
 # AppReview — documento de continuação (handoff)
 
-Estado em 30/07/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
+Estado em 31/07/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Produto e infra
@@ -24,13 +24,23 @@ de resposta; #11 Termos/Privacidade; #12 docs; #13 configuração guiada
 spinner eterno de auth; #14 idioma do cliente por região (pt-BR/pt-PT/en, sem
 espanhol); #16 dados legais da MDR, lei/foro do Brasil e texto LGPD+RGPD
 (continua pendente de revisão jurídica externa); #15 painel completo do dono em
-pt-BR, pt-PT e inglês.
+pt-BR, pt-PT e inglês; #17 prontidão do piloto; #18 remoção das notificações
+sem entrega; #19 remoção do admin demonstrativo e proteção do acesso; #20 cache
+do Google reproduzível e protegido.
 
-## PRs abertos
+## Rollout de prontidão concluído
 
-- **#17 — prontidão do piloto**, branch `codex/prontidao-piloto`: comando único
-  de verificação, checklist ponta a ponta, logout real e registo da limpeza
-  segura dos dados de teste. Não fazer merge nem deploy manual.
+- PRs #17–#20 mergeados em ordem na `main`.
+- Todos os quatro commits de merge tiveram deploy automático saudável na
+  Vercel; o último é `d13ceb4`.
+- As migrations `20260731_harden_admin_access` e
+  `20260731090000_google_reviews_cache_tables` estão no histórico do Supabase.
+- `external_place_info` e `cached_reviews` estão com RLS ativo e políticas por
+  proprietário; os dados reais preservados continuam em 1 lugar e 5 avaliações
+  em cache.
+- `fetch-google-reviews` está ativa na versão 4, com verificação JWT, usuário
+  derivado da sessão e limite de uma consulta ao Google por conta a cada 12 h.
+- Nenhuma chamada à API do Google foi feita durante a publicação.
 
 ## Decisões tomadas (não re-perguntar)
 
@@ -78,16 +88,15 @@ npm run verify
 
 ## Tarefas de fundo já sinalizadas (chips)
 
-- **Logout do Navbar:** corrigido na branch de prontidão; agora chama
+- **Logout do Navbar:** em produção; agora chama
   `useAuth().signOut()` antes de voltar para `/`.
-- **Notificações:** a aba falsa foi removida no PR #18. Só reintroduzir com
+- **Notificações:** a aba falsa foi removida em produção. Só reintroduzir com
   motor real de entrega, preferências persistidas e tratamento de falhas.
-- **Admin:** a rota com dados inventados foi removida no PR #19. A migration
-  `20260731_harden_admin_access.sql` fecha a autoatribuição de privilégios, mas
-  precisa ser aplicada antes de reintroduzir uma área administrativa.
-- **Cache Google:** a migration reproduzível e as políticas por proprietário
-  estão no PR #20. Aplicar a migration antes de publicar a nova versão da Edge
-  Function `fetch-google-reviews`.
+- **Admin:** a rota com dados inventados foi removida e a migration
+  `20260731_harden_admin_access.sql` foi aplicada; clientes não podem mais se
+  autoatribuir privilégios.
+- **Cache Google:** migration, RLS e Edge Function autenticada estão publicados.
+  A opção pública de avaliação continua sempre disponível para qualquer nota.
 
 ## Armadilhas
 

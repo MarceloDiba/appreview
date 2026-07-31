@@ -1,4 +1,4 @@
-# Estado do AppReview — 30 de julho de 2026
+# Estado do AppReview — 31 de julho de 2026
 
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
@@ -26,13 +26,24 @@ Produção: https://appreview-flame.vercel.app
 - Painel completo do dono em pt-BR, pt-PT e inglês (PR #15). O merge `6eda1c9`
   chegou à `main` e o deploy automático ficou saudável no Vercel.
 - Sem dados demonstrativos à vista do cliente nas telas principais.
-- `tsc` obrigatório no CI.
+- `npm run verify` é o contrato único local e do CI: TypeScript, paridade do
+  i18n do painel e build.
+- Logout encerra a sessão antes de voltar à página inicial.
+- Interfaces falsas de notificações e administração foram removidas.
+- Autoatribuição administrativa bloqueada no Supabase.
+- Cache do Google com migration versionada, RLS por proprietário e Edge
+  Function autenticada, limitada a uma consulta por conta a cada 12 horas.
 
-## Em revisão
+## Prontidão técnica concluída
 
-- **PR #17 — prontidão do piloto**, branch `codex/prontidao-piloto`:
-  `npm run verify`, checklist ponta a ponta, logout funcional e documentação da
-  limpeza de teste.
+- PRs #17, #18, #19 e #20 mergeados em ordem na `main`.
+- Deploy automático da Vercel saudável em todos os merges; último commit
+  `d13ceb4`.
+- Migrations de proteção administrativa e cache registradas no Supabase.
+- Edge Function `fetch-google-reviews` ativa na versão 4 com JWT obrigatório.
+- Nenhuma chamada à API paga do Google foi feita durante o rollout.
+- Os dados reais preservados permanecem intactos: 1 vínculo, 1 lugar e 5
+  avaliações em cache.
 
 ## Antes do piloto
 
@@ -58,16 +69,13 @@ em cache) foram preservados. Evidência completa em
 2. **Google self-service:** adicionar busca/autocomplete; hoje é preciso colar
    o link. Não bloqueia o piloto concierge.
 3. **Admin:** a rota demonstrativa com usuários, receita e pagamentos
-   inventados foi removida no PR #19. Antes de criar uma área real, aplicar
-   `20260731_harden_admin_access.sql`, definir quem provisiona administradores e
-   implementar autorização no servidor.
+   inventados foi removida e a migration de proteção foi aplicada. Antes de
+   criar uma área real, definir quem provisiona administradores e implementar
+   autorização no servidor.
 4. **Modelo de agência:** permitir que a NOÁ administre vários clientes num
    único lugar. Passa a doer a partir do terceiro cliente.
 5. **Stripe:** cobrança real continua manual. Qualquer integração exige
    aprovação por mexer com dinheiro.
-6. **Infra do cache Google:** migration e RLS preparados no PR #20. Ordem
-   obrigatória de publicação: aplicar a migration e só depois publicar a Edge
-   Function autenticada.
 
 ## Piloto
 
