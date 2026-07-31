@@ -23,25 +23,32 @@ Produção: https://appreview-flame.vercel.app
   está publicado no código, mas continua pendente de revisão jurídica externa.
 - Configuração guiada em `/configuracao`.
 - Fluxo do cliente em pt-BR, pt-PT e inglês, sem espanhol.
+- Painel completo do dono em pt-BR, pt-PT e inglês (PR #15). O merge `6eda1c9`
+  chegou à `main` e o deploy automático ficou saudável no Vercel.
 - Sem dados demonstrativos à vista do cliente nas telas principais.
 - `tsc` obrigatório no CI.
 
 ## Em revisão
 
-- **PR #15 — painel do dono multilíngue.** Implementação concluída na branch
-  `feat/painel-multilingue`: pt-BR, pt-PT e inglês, com datas e números
-  localizados. Inclui verificação automatizada dos catálogos no CI.
+- **PR #17 — prontidão do piloto**, branch `codex/prontidao-piloto`:
+  `npm run verify`, checklist ponta a ponta, logout funcional e documentação da
+  limpeza de teste.
 
 ## Antes do piloto
 
-1. Marcelo fazer o teste completo: criar conta, configurar o Google, criar e
-   imprimir um QR, escanear no telemóvel, enviar uma avaliação e confirmar o
-   caso no painel.
-2. Limpar os dados de teste do banco. Está pré-autorizado apagar somente dados
-   inequivocamente identificados como teste; nunca dados reais.
-3. Confirmar quais contas e registos pertencem ao H5 Texas Burger — Avenida e à
-   Mania de Petiscos antes da limpeza.
-4. Revisão jurídica externa do PR #16.
+1. Marcelo executar `docs/checklist-piloto-e2e.md`: criar conta, configurar o
+   Google, criar/imprimir e escanear o QR, avaliar e confirmar o caso no painel.
+2. Decidir depois o destino da conta de teste mista preservada: ela contém dados
+   reais do H5 e não pode ser apagada em bloco.
+3. Revisão jurídica externa do PR #16.
+
+## Limpeza de dados de teste
+
+Concluída com inventário e verificação em 30/07. Foram removidas três contas
+puramente de teste e cinco registros E2E/smoke de uma quarta conta. A conta
+operacional da Noá e os 7 registros reais do H5 (vínculo, lugar e 5 avaliações
+em cache) foram preservados. Evidência completa em
+`docs/limpeza-dados-teste-2026-07-30.md`.
 
 ## Próximos temas
 

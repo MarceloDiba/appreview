@@ -19,17 +19,10 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      # Bloqueante. `npm run build` (Vite) NÃO verifica tipos — foi este passo
-      # que revelou o bug de review gating, em que o FeedbackForm não declarava
-      # as props dos links públicos e eles chegavam vazios em produção.
-      - name: Verificar tipos
-        run: npx tsc --noEmit -p tsconfig.app.json
-
-      - name: Verificar i18n do painel
-        run: npm run check:i18n-owner
-
-      - name: Build
-        run: npm run build
+      # Um único contrato de validação para desenvolvimento e CI. Inclui tipos,
+      # i18n do painel e build; o build do Vite sozinho NÃO verifica tipos.
+      - name: Verificar aplicação
+        run: npm run verify
 
       # Informativo por enquanto: existem 6 erros e 10 avisos herdados do
       # projeto original (Lovable). Quando essa dívida for zerada, remover o
