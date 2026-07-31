@@ -42,6 +42,18 @@ do Google reproduzível e protegido.
   derivado da sessão e limite de uma consulta ao Google por conta a cada 12 h.
 - Nenhuma chamada à API do Google foi feita durante a publicação.
 
+### Reteste da importação Google — 31/07
+
+- A resolução do link `g.page` funcionou: o Place ID real foi gravado na conta
+  da Noá. A falha seguinte foi isolada no endpoint legado de Place Details, que
+  devolveu 502 pela Edge Function antes de qualquer gravação de cache.
+- A correção migra para Place Details (New), usa máscara restrita aos campos que
+  o produto mostra e preserva links de autor e da avaliação original.
+- Preço oficial consultado em 31/07/2026: o campo `reviews` usa a categoria
+  Enterprise + Atmosphere, com 1.000 consultas bem-sucedidas/mês sem custo e
+  US$ 25 por 1.000 depois desse limite. Com cache de 12 h e dois pilotos, o teto
+  teórico é cerca de 120/mês. Não houve chamada manual à API.
+
 ## Decisões tomadas (não re-perguntar)
 
 - Idioma: Brasil→pt-BR, Portugal→pt-PT ou inglês, resto→inglês. **Sem espanhol**
@@ -117,10 +129,10 @@ H5 Texas Burger (Avenida) e Mania de Petiscos, ambos em Lisboa. Marcelo no Brasi
   persistência do caso tratado e logout.
 - Não foi criada uma conta totalmente nova; esse cenário ainda precisa ser
   repetido antes de ativar cada negócio piloto.
-- A passagem encontrou um link `g.page` salvo sem Place ID. A correção resolve
-  o redirecionamento autenticado do próprio Google, grava o identificador na
-  conta e mantém o cache de 12 h. A função corrigida foi publicada na versão 6;
-  retestar a aba Avaliações do Google depois do merge do frontend.
+- A passagem encontrou um link `g.page` salvo sem Place ID. A versão 6 resolveu
+  o redirecionamento e gravou o identificador, mas o reteste expôs uma segunda
+  falha: o endpoint legado de Place Details rejeitou a importação. A migração
+  para Place Details (New) está preparada; retestar depois de publicada.
 - O registo completo está em `docs/checklist-piloto-e2e.md`.
 - A limpeza segura está registada em
   `docs/limpeza-dados-teste-2026-07-30.md`. Três contas puramente de teste e

@@ -10,10 +10,12 @@ import { FunctionsHttpError } from '@supabase/supabase-js';
 export interface GoogleReview {
   review_id: string;
   author_name: string;
-  author_image?: string;
+  author_image?: string | null;
+  author_uri?: string | null;
   rating: number;
   text: string;
   time: string;
+  google_maps_uri?: string | null;
 }
 
 export interface PlaceInfo {
