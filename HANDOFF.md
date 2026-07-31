@@ -80,9 +80,8 @@ npm run verify
 
 - **Logout do Navbar:** corrigido na branch de prontidão; agora chama
   `useAuth().signOut()` antes de voltar para `/`.
-- **Notificações:** a aba falsa foi removida na branch
-  `codex/remove-notificacoes-falsas`. Só reintroduzir com motor real de entrega,
-  preferências persistidas e tratamento de falhas.
+- **Notificações:** a aba falsa foi removida no PR #18. Só reintroduzir com
+  motor real de entrega, preferências persistidas e tratamento de falhas.
 
 ## Armadilhas
 
