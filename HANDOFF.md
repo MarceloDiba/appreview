@@ -33,6 +33,17 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   editável. Não chama IA nem API externa e não detecta se o gestor respondeu.
 - `design-qa.md` registra comparação visual, mobile, interações e resultado
   aprovado. Nenhuma publicação ou integração WhatsApp foi feita.
+- O painel local foi redesenhado a partir da direção aprovada em 14/08: pulso
+  real do Google, uma prioridade do assessor, saúde do Perfil da Empresa,
+  caminho do QR e WhatsApp planejado. O demo reutiliza os mesmos componentes;
+  `/demo?view=panel` permite rever a tela sem autenticação e identifica todos os
+  dados fictícios.
+- Contagem de avaliações sem resposta e idade da última foto continuam
+  bloqueadas por integração: Places retorna no máximo cinco avaliações. A
+  solução recomendada é OAuth + Business Profile API; até lá, o painel real
+  mostra “conecte para medir”, nunca números inventados.
+- `PLANO_FUNCIONAL.md` consolida as fases, ferramentas, dependências, critérios
+  de funcionamento e gates de custo. Nada foi publicado ou contratado.
 
 ## Produto e infra
 

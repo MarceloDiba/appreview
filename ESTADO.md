@@ -25,6 +25,15 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   determinístico de respostas, sem custo externo.
 - [ ] Definir provedor, consentimento, frequência e custo antes de implementar
   relatórios ou notas proativas por WhatsApp.
+- [x] Redesenhar localmente o painel como assessor: reputação, prioridade do
+  dia, saúde do Perfil Google e caminho do QR.
+- [x] Fazer o demo reutilizar os mesmos componentes do painel e disponibilizar
+  a revisão ilustrativa em `/demo?view=panel`.
+- [x] Documentar em `PLANO_FUNCIONAL.md` o caminho até uma versão realmente
+  funcional.
+- [ ] Solicitar acesso às Google Business Profile APIs e implementar OAuth antes
+  de exibir contagem real de respostas pendentes, idade de fotos ou dados do
+  perfil.
 
 ## Regra de produto que não pode regredir
 

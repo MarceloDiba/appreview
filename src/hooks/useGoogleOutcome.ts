@@ -12,6 +12,11 @@ export interface GoogleOutcomeData {
   clickThroughRate: number | null;
   reviewGrowth: number | null;
   ratingChange: number | null;
+  history: Array<{
+    capturedAt: string;
+    averageRating: number;
+    totalReviews: number;
+  }>;
 }
 
 export const useGoogleOutcome = (userId?: string) => {
@@ -109,6 +114,11 @@ export const useGoogleOutcome = (userId?: string) => {
         ratingChange: baseline
           ? Number(place.average_rating) - Number(baseline.average_rating)
           : null,
+        history: snapshots.map((snapshot) => ({
+          capturedAt: snapshot.captured_at,
+          averageRating: Number(snapshot.average_rating),
+          totalReviews: snapshot.total_reviews,
+        })),
       });
       setLoading(false);
     };

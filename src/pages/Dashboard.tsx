@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import GoogleOutcomeCard from '@/components/dashboard/GoogleOutcomeCard';
+import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
 import ReputationAdvisorCard from '@/components/dashboard/ReputationAdvisorCard';
 import { useSetupStatus } from '@/hooks/useSetupStatus';
+import { useGoogleOutcome } from '@/hooks/useGoogleOutcome';
 import { supabase } from '@/integrations/supabase/client';
-import { MessageSquare, QrCode, Settings as SettingsIcon } from 'lucide-react';
+import { MessageCircle, MessageSquare, QrCode, Settings as SettingsIcon } from 'lucide-react';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 const shortcuts = [
@@ -56,21 +57,14 @@ const Dashboard = () => {
   }, []);
 
   const setup = useSetupStatus(userId || undefined);
+  const outcome = useGoogleOutcome(userId || undefined);
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-[#f7f6f2]">
       <Navbar userRole="business" businessName={businessName || undefined} />
 
       <main className="flex-1 px-4 pb-12 pt-20">
-        <div className="container mx-auto max-w-5xl">
-          <header className="mb-6">
-            <h1 className="text-3xl font-bold">
-              {businessName
-                ? t('dashboard.greetingNamed', { name: businessName })
-                : t('dashboard.greetingGeneric')}
-            </h1>
-            <p className="mt-1 text-gray-600">{t('dashboard.subtitle')}</p>
-          </header>
+        <div className="container mx-auto max-w-7xl">
 
           {/*
             Enquanto faltar uma das três peças — nome, link do Google, QR code —
@@ -104,10 +98,24 @@ const Dashboard = () => {
             </Card>
           )}
 
-          <ReputationAdvisorCard userId={userId || undefined} />
-          <GoogleOutcomeCard userId={userId || undefined} />
+          <GoogleOutcomeCard data={outcome.data} loading={outcome.loading} error={outcome.error} />
+          <div className="mt-4">
+            <ReputationAdvisorCard userId={userId || undefined} />
+          </div>
+          {outcome.data && <div className="mt-4"><GooglePathCard data={outcome.data} /></div>}
 
-          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mt-4 flex flex-col gap-3 rounded-xl border border-dashed border-stone-300 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <MessageCircle className="h-6 w-6 text-stone-500" aria-hidden="true" />
+              <div>
+                <p className="font-semibold text-stone-900">{t('dashboard.whatsapp.title')}</p>
+                <p className="text-sm text-stone-500">{t('dashboard.whatsapp.subtitle')}</p>
+              </div>
+            </div>
+            <span className="w-fit rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">{t('dashboard.whatsapp.planned')}</span>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
             {shortcuts.map(({ to, icon: Icon, titleKey, descKey }) => (
               <Card key={to} className="transition-shadow hover:shadow-md">
                 <CardContent className="p-5">

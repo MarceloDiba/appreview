@@ -1,18 +1,81 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Bot, Copy, ExternalLink, MessageCircle, MessageSquareText, Pencil, QrCode, Star } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ExternalLink, MessageCircle, MessageSquareText, QrCode } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
+import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
+import ReputationAdvisorCard from '@/components/dashboard/ReputationAdvisorCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GoogleOutcomeData } from '@/hooks/useGoogleOutcome';
+import { AdvisorReview } from '@/hooks/useReputationAdvisor';
 
 const ExampleBadge = () => <span className="rounded-full bg-violet-50 px-3 py-1 text-xs text-primary">Exemplo ilustrativo</span>;
 
-const Demo = () => (
+const previewOutcome: GoogleOutcomeData = {
+  placeName: 'Seu negócio',
+  averageRating: 4.6,
+  totalReviews: 128,
+  lastUpdatedAt: '2026-08-14T09:00:00-03:00',
+  qrOpens: 180,
+  googleClicks: 134,
+  privateFeedback: 8,
+  clickThroughRate: 74,
+  reviewGrowth: 18,
+  ratingChange: 0.2,
+  history: [
+    { capturedAt: '2026-07-15T09:00:00-03:00', averageRating: 3.6, totalReviews: 110 },
+    { capturedAt: '2026-07-19T09:00:00-03:00', averageRating: 3.9, totalReviews: 113 },
+    { capturedAt: '2026-07-23T09:00:00-03:00', averageRating: 4.1, totalReviews: 116 },
+    { capturedAt: '2026-07-27T09:00:00-03:00', averageRating: 4.0, totalReviews: 118 },
+    { capturedAt: '2026-07-31T09:00:00-03:00', averageRating: 4.3, totalReviews: 121 },
+    { capturedAt: '2026-08-04T09:00:00-03:00', averageRating: 4.4, totalReviews: 123 },
+    { capturedAt: '2026-08-08T09:00:00-03:00', averageRating: 4.5, totalReviews: 125 },
+    { capturedAt: '2026-08-12T09:00:00-03:00', averageRating: 4.6, totalReviews: 128 },
+  ],
+};
+
+const previewReview: AdvisorReview = {
+  authorName: 'Mariana Souza',
+  rating: 2,
+  text: 'O atendimento foi demorado e não resolveram meu problema como eu esperava.',
+  time: '2026-08-12T14:30:00-03:00',
+  googleMapsUri: 'https://www.google.com/maps',
+  suggestedReply: 'Olá, Mariana! Lamentamos pela demora e por não termos atendido às suas expectativas. Seu relato é muito importante para entendermos onde falhamos e melhorarmos. Podemos conversar?',
+};
+
+const AdvisorPanelPreview = ({ embedded = false }: { embedded?: boolean }) => (
+  <div className={embedded ? 'rounded-2xl bg-[#f7f6f2] p-3 sm:p-5' : ''}>
+    <GoogleOutcomeCard data={previewOutcome} illustrative />
+    <div className="mt-4"><ReputationAdvisorCard previewReview={previewReview} illustrative /></div>
+    <div className="mt-4"><GooglePathCard data={previewOutcome} illustrative /></div>
+    <div className="mt-4 flex flex-col gap-3 rounded-xl border border-dashed border-stone-300 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-3"><MessageCircle className="h-6 w-6 text-stone-500" /><div><p className="font-semibold text-stone-900">Planejado: receber prioridades e resumo no WhatsApp</p><p className="text-sm text-stone-500">Depende de consentimento, provedor e aprovação de eventual custo.</p></div></div>
+      <span className="w-fit rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">Recurso planejado</span>
+    </div>
+  </div>
+);
+
+const Demo = () => {
+  const [searchParams] = useSearchParams();
+  const panelOnly = searchParams.get('view') === 'panel';
+
+  if (panelOnly) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#f7f6f2]">
+        <Navbar userRole="business" businessName="Seu negócio · Exemplo ilustrativo" />
+        <main className="flex-1 px-4 pb-12 pt-24">
+          <div className="container mx-auto max-w-7xl"><AdvisorPanelPreview /></div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
   <div className="flex min-h-screen flex-col bg-gray-50">
     <Navbar userRole="none" />
     <main className="flex-1 px-4 pb-12 pt-24">
-      <div className="container mx-auto max-w-5xl">
+      <div className="container mx-auto max-w-7xl">
         <header className="mx-auto mb-8 max-w-3xl text-center">
           <ExampleBadge />
           <h1 className="mt-4 text-4xl font-bold">Veja como o assessor trabalha por você</h1>
@@ -49,29 +112,7 @@ const Demo = () => (
           </TabsContent>
 
           <TabsContent value="advisor">
-            <Card className="overflow-hidden shadow-lg">
-              <CardHeader className="border-b bg-violet-50/50">
-                <div className="flex items-center justify-between gap-3"><CardTitle className="flex items-center gap-2"><Bot className="h-5 w-5 text-primary" />Seu assessor de reputação</CardTitle><ExampleBadge /></div>
-              </CardHeader>
-              <CardContent className="grid gap-6 p-6 md:grid-cols-2">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-primary">Merece sua atenção</p>
-                  <div className="mt-3 rounded-xl border p-4">
-                    <div className="flex items-center justify-between"><p className="font-medium">Cliente exemplo</p><div className="flex">{[1,2,3,4,5].map((item) => <Star key={item} className={`h-4 w-4 ${item <= 2 ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}`} />)}</div></div>
-                    <p className="mt-3 text-sm text-gray-700">“Demoraram para responder e precisei insistir para ter uma solução.”</p>
-                    <div className="mt-3"><ExampleBadge /></div>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-primary">Resposta sugerida</p>
-                  <div className="mt-3 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
-                    <p className="text-sm leading-relaxed text-gray-700">Olá! Lamentamos pela demora no retorno. Seu relato é importante para entendermos onde falhamos e melhorar esse ponto.</p>
-                    <div className="mt-4 flex gap-2 border-t border-violet-100 pt-3"><Button size="sm" variant="outline"><Copy className="mr-2 h-4 w-4" />Copiar</Button><Button size="sm" variant="ghost"><Pencil className="mr-2 h-4 w-4" />Editar</Button></div>
-                  </div>
-                  <p className="mt-3 text-xs text-gray-500">Você revisa e publica no Google. O AppReview não publica automaticamente.</p>
-                </div>
-              </CardContent>
-            </Card>
+            <AdvisorPanelPreview embedded />
           </TabsContent>
 
           <TabsContent value="whatsapp">
@@ -89,6 +130,7 @@ const Demo = () => (
       </div>
     </main>
   </div>
-);
+  );
+};
 
 export default Demo;
