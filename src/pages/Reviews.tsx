@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
+import GoogleBusinessReviewQueue from '@/components/dashboard/GoogleBusinessReviewQueue';
 import CasesList from '@/components/dashboard/cases/CasesList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,11 +42,13 @@ const Reviews = () => {
 
           <div className="mb-8">
             {userId ? (
-              <GoogleReviews userId={userId} />
+              <GoogleBusinessReviewQueue userId={userId} businessName={businessName || undefined} />
             ) : (
               <div className="py-8 text-center text-gray-500">{t('reviews.loading')}</div>
             )}
           </div>
+
+          {userId && <div className="mb-8"><GoogleReviews userId={userId} /></div>}
 
           <Tabs defaultValue="internal">
             <TabsList className="mb-4">

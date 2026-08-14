@@ -154,6 +154,147 @@ export type Database = {
           },
         ]
       }
+      google_business_connections: {
+        Row: {
+          created_at: string
+          granted_scopes: string[]
+          last_error: string | null
+          last_synced_at: string | null
+          refresh_token_secret_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_scopes?: string[]
+          last_error?: string | null
+          last_synced_at?: string | null
+          refresh_token_secret_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_scopes?: string[]
+          last_error?: string | null
+          last_synced_at?: string | null
+          refresh_token_secret_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      google_business_locations: {
+        Row: {
+          account_name: string
+          created_at: string
+          id: string
+          is_selected: boolean
+          last_synced_at: string | null
+          location_name: string
+          place_id: string | null
+          review_sync_completed_at: string | null
+          review_sync_cursor: string | null
+          store_code: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_name: string
+          created_at?: string
+          id?: string
+          is_selected?: boolean
+          last_synced_at?: string | null
+          location_name: string
+          place_id?: string | null
+          review_sync_completed_at?: string | null
+          review_sync_cursor?: string | null
+          store_code?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_name?: string
+          created_at?: string
+          id?: string
+          is_selected?: boolean
+          last_synced_at?: string | null
+          location_name?: string
+          place_id?: string | null
+          review_sync_completed_at?: string | null
+          review_sync_cursor?: string | null
+          store_code?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      google_business_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          google_review_name: string
+          id: string
+          is_anonymous: boolean
+          location_id: string
+          rating: number
+          reply_state: string | null
+          reply_text: string | null
+          reply_updated_at: string | null
+          review_created_at: string | null
+          review_updated_at: string | null
+          reviewer_name: string | null
+          reviewer_photo_url: string | null
+          synced_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          google_review_name: string
+          id?: string
+          is_anonymous?: boolean
+          location_id: string
+          rating: number
+          reply_state?: string | null
+          reply_text?: string | null
+          reply_updated_at?: string | null
+          review_created_at?: string | null
+          review_updated_at?: string | null
+          reviewer_name?: string | null
+          reviewer_photo_url?: string | null
+          synced_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          google_review_name?: string
+          id?: string
+          is_anonymous?: boolean
+          location_id?: string
+          rating?: number
+          reply_state?: string | null
+          reply_text?: string | null
+          reply_updated_at?: string | null
+          review_created_at?: string | null
+          review_updated_at?: string | null
+          reviewer_name?: string | null
+          reviewer_photo_url?: string | null
+          synced_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       internal_feedback: {
         Row: {
           created_at: string | null

@@ -39,9 +39,17 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   coluna lateral, fundo neutro, azul para ação e violeta como assinatura.
 - [x] Levar a mesma paleta, cartões e hierarquia para a fila assistida e validar
   o fluxo completo na demonstração local.
-- [ ] Solicitar acesso às Google Business Profile APIs e implementar OAuth antes
-  de exibir contagem real de respostas pendentes, idade de fotos ou dados do
-  perfil.
+- [x] Preparar localmente OAuth, armazenamento cifrado de token, seleção de
+  localização, importação paginada e publicação explícita de respostas para o
+  Perfil da Empresa no Google. Nada foi aplicado ou chamado remotamente.
+- [x] Ligar localmente Configurações → consentimento → escolha da localização →
+  fila real, com fallback honesto para o cache público enquanto a conexão não
+  existe.
+- [ ] Solicitar acesso Basic às Google Business Profile APIs, configurar OAuth
+  no Google Cloud e aplicar/publicar o lote antes de exibir contagem real de
+  respostas pendentes, idade de fotos ou dados do perfil.
+- [ ] Com consentimento do dono, ligar uma localização piloto e sincronizar até
+  ao fim da paginação; só então trocar a fila ilustrativa por dados reais.
 
 ## Regra de produto que não pode regredir
 

@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import BusinessInfoSettings, { type BusinessInfo } from '@/components/settings/BusinessInfoSettings';
 import ExternalLinksSettings from '@/components/settings/ExternalLinksSettings';
+import GoogleBusinessConnection from '@/components/settings/GoogleBusinessConnection';
+import GoogleBusinessLocationPicker from '@/components/settings/GoogleBusinessLocationPicker';
 import { useExternalLinks } from '@/hooks/useExternalLinks';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
 import { supabase } from '@/integrations/supabase/client';
@@ -181,6 +183,8 @@ const Settings = () => {
             </TabsContent>
 
             <TabsContent value="google-reviews">
+              <GoogleBusinessConnection />
+              <GoogleBusinessLocationPicker />
               <GoogleReviews userId={userId} />
             </TabsContent>
           </Tabs>

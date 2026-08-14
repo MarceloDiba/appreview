@@ -318,6 +318,25 @@
     }
   },
   "settings": {
+    "googleConnection": {
+      "title": "Ligar Perfil de Empresa no Google",
+      "description": "Ligue a localização que gere para trazer a fila completa de avaliações e identificar respostas pendentes com dados do próprio Google.",
+      "consent": "Autoriza o acesso diretamente no Google. O AppReview não vê a sua palavra-passe nem publica respostas automaticamente.",
+      "connect": "Ligar Google",
+      "connecting": "A abrir Google…",
+      "unavailable": "A ligação oficial ao Perfil de Empresa ainda está a ser configurada neste ambiente.",
+      "startError": "Não foi possível iniciar a ligação ao Google. Tente novamente mais tarde."
+    },
+    "googleLocation": {
+      "title": "Escolha o negócio certo",
+      "description": "Depois de autorizar o Google, procure as localizações disponíveis e escolha a que deve alimentar o seu painel.",
+      "discover": "Procurar locais no Google",
+      "discovering": "A procurar…",
+      "discoverError": "Não foi possível listar os locais no Google.",
+      "selected": "Localização selecionada.",
+      "selectError": "Não foi possível selecionar esta localização.",
+      "active": "Selecionada"
+    },
     "title": "Definições",
     "subtitlePrefix": "Se preferir fazer isto passo a passo,",
     "guidedLink": "use a configuração guiada",
@@ -437,6 +456,26 @@
       "linkMissing": "Ainda não configurou um link do Google. Vá às Definições e adicione o link do seu negócio.",
       "placeIdMissing": "Não foi possível identificar o Place ID no link guardado. Atualize o link do Google nas Definições.",
       "noPlaceId": "Configure o Place ID antes de atualizar as avaliações."
+      ,"official": {
+        "title": "Fila de respostas no Google",
+        "connectFirst": "Ligue o Perfil de Empresa para carregar todas as avaliações e as respostas já publicadas.",
+        "connectAction": "Ligar Perfil do Google",
+        "selectLocation": "Escolha a localização do negócio ligado antes de abrir a fila.",
+        "sync": "Sincronizar Google",
+        "syncing": "A sincronizar…",
+        "incomplete": "Ainda estamos a trazer todas as páginas do Google. A contagem de pendentes só vale quando a sincronização terminar.",
+        "error": "Não foi possível concluir a ação no Google. Nenhuma resposta foi marcada como publicada localmente.",
+        "empty": "Todas as avaliações importadas já têm resposta no Google.",
+        "anonymous": "Cliente anónimo",
+        "noComment": "Sem comentário escrito",
+        "draft": "Resposta sugerida — reveja antes de publicar",
+        "publish": "Publicar resposta no Google",
+        "publishing": "A confirmar no Google…",
+        "published": "Resposta confirmada no Google.",
+        "publishError": "A resposta não foi publicada no Google.",
+        "disclaimer": "A publicação acontece somente neste comando e é confirmada novamente no Google.",
+        "startSync": "Sincronize o Google para carregar a fila real."
+      }
     },
     "cases": {
       "loading": "A carregar casos...",

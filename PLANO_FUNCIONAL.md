@@ -44,6 +44,26 @@ conta e à tabela vigente do Google; confirmar novamente antes do rollout.
 
 Objetivo: tornar reais os indicadores de saúde e permitir assessoria completa.
 
+### Fundação local concluída em 14/08/2026
+
+- migration `20260814193000_google_business_profile_connection.sql` com
+  conexão, localizações, avaliações e estados OAuth isolados por proprietário;
+- refresh token armazenado no Supabase Vault, sem exposição pelo navegador;
+- Edge Functions para iniciar OAuth, concluir o callback e listar localizações,
+  importar uma página de avaliações ou publicar uma resposta explicitamente
+  escolhida;
+- Configurações com entrada de consentimento e seleção da localização; a página
+  Avaliações já prefere a fila real quando existir uma conexão válida e mantém
+  o cache Places como leitura pública limitada enquanto ela não existir;
+- cada página de avaliações devolve `next_page_token`; enquanto ele existir,
+  nenhuma interface pode dizer que a fila ou a contagem de pendências está
+  completa;
+- configuração de ambiente e passo a passo em
+  `docs/google-business-profile-rollout.md`.
+
+Nada desta fundação foi aplicado em Supabase, Google Cloud ou produção. Ainda
+não houve chamada à API Business Profile, consentimento de cliente ou custo.
+
 Entregas:
 
 - OAuth do Google com consentimento explícito e escopo mínimo
@@ -67,6 +87,10 @@ Dependências:
 - armazenamento cifrado e renovação de tokens no Supabase;
 - revisão periódica das políticas da API;
 - revogação de acesso disponível ao cliente.
+
+Gate externo: o pedido de acesso Basic à API exige um projeto Google Cloud e um
+Perfil da Empresa verificado e ativo por pelo menos 60 dias. O código local não
+substitui essa aprovação do Google.
 
 Ferramentas recomendadas: Google Business Profile APIs, OAuth 2.0, Supabase
 Edge Functions e Vault/Secrets. O acesso à API tem aprovação e quotas; preço e

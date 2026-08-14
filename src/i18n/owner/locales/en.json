@@ -318,6 +318,25 @@
     }
   },
   "settings": {
+    "googleConnection": {
+      "title": "Connect Google Business Profile",
+      "description": "Connect the location you manage to load the full review inbox and identify unanswered reviews using Google’s own data.",
+      "consent": "You authorize access directly with Google. AppReview never sees your password and never publishes replies automatically.",
+      "connect": "Connect Google",
+      "connecting": "Opening Google…",
+      "unavailable": "The official Business Profile connection is still being configured in this environment.",
+      "startError": "Google connection could not be started. Please try again later."
+    },
+    "googleLocation": {
+      "title": "Choose the right business",
+      "description": "After authorizing Google, find the available locations and select the one that should feed your dashboard.",
+      "discover": "Find Google locations",
+      "discovering": "Finding…",
+      "discoverError": "Google locations could not be listed.",
+      "selected": "Location selected.",
+      "selectError": "This location could not be selected.",
+      "active": "Selected"
+    },
     "title": "Settings",
     "subtitlePrefix": "If you'd rather do this step by step,",
     "guidedLink": "use the guided setup",
@@ -437,6 +456,26 @@
       "linkMissing": "You haven't set up a Google link yet. Go to Settings and add your business link.",
       "placeIdMissing": "The Place ID couldn't be identified from the saved link. Update the Google link in Settings.",
       "noPlaceId": "Set up the Place ID before refreshing reviews."
+      ,"official": {
+        "title": "Google reply queue",
+        "connectFirst": "Connect Business Profile to load all reviews and replies already published.",
+        "connectAction": "Connect Google Profile",
+        "selectLocation": "Choose the connected business location before opening the queue.",
+        "sync": "Sync Google",
+        "syncing": "Syncing…",
+        "incomplete": "Google has more pages to import. The pending count is only valid when synchronization is complete.",
+        "error": "The Google action could not be completed. No reply was marked as published locally.",
+        "empty": "Every imported review already has a Google reply.",
+        "anonymous": "Anonymous customer",
+        "noComment": "No written comment",
+        "draft": "Suggested reply — review before publishing",
+        "publish": "Publish reply on Google",
+        "publishing": "Confirming with Google…",
+        "published": "Reply confirmed on Google.",
+        "publishError": "The reply was not published on Google.",
+        "disclaimer": "Publishing only happens through this command and is confirmed with Google again.",
+        "startSync": "Sync Google to load the real queue."
+      }
     },
     "cases": {
       "loading": "Loading cases...",

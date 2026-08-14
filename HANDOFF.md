@@ -58,6 +58,25 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   atualizados com essa linguagem sem copiar conteúdo, marca ou dados do anexo.
 - A implementação preserva os mesmos dados, estados honestos e fluxo assistido;
   nenhuma integração, publicação ou custo foi acionado nesta mudança visual.
+- A fundação da conexão oficial com o Perfil da Empresa foi preparada localmente
+  no mesmo branch: migration `20260814193000_google_business_profile_connection.sql`,
+  `start-google-business-oauth`, `google-business-oauth-callback` e
+  `sync-google-business-profile`. Ela armazena só o refresh token no Supabase
+  Vault, usa state OAuth único e expirável, lista localizações, sincroniza
+  avaliações por página e publica uma resposta apenas por ação explícita, com
+  leitura de confirmação no Google.
+- A nova chamada de Configurações é honesta: inicia o consentimento quando os
+  segredos e a Edge Function estiverem publicados; sem essa configuração mostra
+  que a conexão oficial ainda não está disponível. Nenhuma credencial, migration,
+  função ou chamada Google foi criada/remota nesta frente.
+- `src/pages/Reviews.tsx` já prefere `GoogleBusinessReviewQueue` quando houver
+  ligação e localização selecionada. A fila só permite publicar depois de
+  editar/confirmar; durante uma sincronização com páginas pendentes, não exibe
+  contagem que pareça completa. Sem ligação, mostra a fonte Places já existente
+  como leitura limitada.
+- O gate que resta é externo: o projeto Google Cloud precisa de aprovação Basic
+  para as Business Profile APIs, OAuth Web e consentimento do proprietário.
+  Procedimento completo em `docs/google-business-profile-rollout.md`.
 
 ## Produto e infra
 
