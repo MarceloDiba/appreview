@@ -23,9 +23,6 @@ export interface AttentionInsights {
   alerts: AttentionAlert[];
   stats: {
     openCases: number;
-    newCases: number;
-    inProgressCases: number;
-    unassignedCases: number;
     awaitingContact: number;
     oldestOpenDays: number | null;
     weekCount: number;
@@ -69,11 +66,8 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
       { minimumFractionDigits: 1, maximumFractionDigits: 1 }
     );
     const now = Date.now();
-    const open = cases.filter((c) => c.case_status !== 'resolved');
+    const open = cases.filter((c) => !c.is_addressed);
     const resolvedTotal = cases.length - open.length;
-    const newCases = open.filter((c) => c.case_status === 'new').length;
-    const inProgressCases = open.filter((c) => c.case_status === 'in_progress').length;
-    const unassignedCases = open.filter((c) => !c.responsible_name?.trim()).length;
 
     const awaitingContact = open.filter(
       (c) => !!c.customer_email && c.customer_email.trim() !== ''
@@ -105,9 +99,6 @@ export const useAttentionInsights = (cases: InternalCase[]): AttentionInsights =
 
     const stats: AttentionInsights['stats'] = {
       openCases: open.length,
-      newCases,
-      inProgressCases,
-      unassignedCases,
       awaitingContact: awaitingContact.length,
       oldestOpenDays: oldestOpen?.days ?? null,
       weekCount: week.length,

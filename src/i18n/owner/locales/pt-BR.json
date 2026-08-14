@@ -25,7 +25,7 @@
     "back": "Voltar",
     "doLater": "Fazer isso depois",
     "step3Title": "O código para colocar na mesa",
-    "step3Desc": "É este código que o cliente aponta com o celular. Dê a ele o nome do lugar onde vai ficar, para identificar a origem dos relatos enviados pelo AppReview.",
+    "step3Desc": "É este código que o cliente aponta com o celular. Dê a ele o nome do lugar onde vai ficar, para você saber depois de onde veio cada avaliação.",
     "qrNameLabel": "Onde vai ficar este código?",
     "qrNamePlaceholder": "Ex: Mesa 1, Balcão, Recepção",
     "createQr": "Criar meu QR code",
@@ -103,10 +103,6 @@
       "last7": "Últimos 7 dias",
       "priorityNow": "Sua prioridade agora",
       "openCases": "Casos em aberto",
-      "newCases": "Novos",
-      "inProgress": "Em atendimento",
-      "withoutOwner_one": "{{count}} sem responsável",
-      "withoutOwner_other": "{{count}} sem responsável",
       "oldest_one": "Mais antigo há {{count}} dia",
       "oldest_other": "Mais antigo há {{count}} dias",
       "nothingPending": "Nada pendente",
@@ -115,7 +111,6 @@
       "weekAverage": "Média da semana",
       "prevAverage": "Média anterior {{value}}",
       "noHistory": "Sem histórico suficiente",
-      "weekSignal": "Sinal da semana: {{value}} · {{comparison}}",
       "resolutionRate": "Taxa de resolução",
       "resolvedTotal_one": "{{count}} resolvido no total",
       "resolvedTotal_other": "{{count}} resolvidos no total",
@@ -135,7 +130,7 @@
       "title_other": "{{count}} clientes deixaram contato e ainda não tiveram retorno",
       "detailNames": "Inclui {{names}}.",
       "detailGeneric": "Eles esperaram para escrever e deixaram como falar com eles.",
-      "action": "Assuma o caso, defina o responsável e faça um primeiro contato mesmo que a solução ainda esteja em andamento."
+      "action": "Responda hoje, mesmo sem solução ainda. Um contato no mesmo dia costuma recuperar o cliente; uma semana de silêncio raramente recupera."
     },
     "stale": {
       "someone": "Um cliente",
@@ -169,7 +164,7 @@
       "detailResolved_one": "Você já resolveu {{count}} caso no total.",
       "detailResolved_other": "Você já resolveu {{count}} casos no total.",
       "actionEmpty": "Confirme que o QR code está visível na mesa ou no balcão — é ele que alimenta esta página.",
-      "actionClear": "Confirme que o QR continua visível e oferece as mesmas opções de avaliação pública para todos os clientes."
+      "actionClear": "Aproveite para pedir avaliação pública a quem teve boa experiência. É o melhor momento."
     }
   },
   "dashboard": {
@@ -319,42 +314,16 @@
     "cases": {
       "loading": "Carregando casos...",
       "loadError": "Não foi possível carregar os casos. Tente de novo.",
-      "empty": "Nenhum caso ainda. Quando um cliente enviar um relato pelo QR code, ele aparecerá aqui.",
+      "empty": "Nenhum caso ainda. Quando alguém avaliar \"Ruim\" no Smiley, o caso aparece aqui na hora.",
       "anonCustomer": "Cliente anônimo",
+      "resolved": "Resolvido",
+      "open": "Aberto",
       "contact": "Contato",
       "reopen": "Reabrir",
-      "rating": "Nota {{count}} de 5",
-      "start": "Assumir caso",
-      "prepareAction": "Registrar ação",
-      "editAction": "Editar registro",
-      "actionRecorded": "Providência registrada",
-      "completedAt": "Concluído em {{date}}",
-      "actionTitle": "Próxima ação",
-      "actionDesc": "Deixe o contexto pronto para qualquer pessoa continuar o atendimento.",
-      "responsible": "Responsável",
-      "responsiblePlaceholder": "Ex: Marcelo ou gerente do turno",
-      "outcome": "Resultado",
-      "resolutionNote": "O que foi feito?",
-      "resolutionPlaceholder": "Ex: Falamos com o cliente, corrigimos o pedido e alinhamos o processo com a cozinha.",
-      "cancel": "Cancelar",
-      "saveProgress": "Salvar andamento",
-      "resolveWithRecord": "Concluir com registro",
-      "noteRequired": "Registre o que foi feito antes de concluir o caso.",
-      "savedToast": "Caso atualizado.",
-      "updateError": "Não foi possível atualizar o caso. Tente de novo.",
-      "status": {
-        "new": "Novo",
-        "in_progress": "Em atendimento",
-        "resolved": "Resolvido"
-      },
-      "outcomes": {
-        "none": "Ainda não definido",
-        "recovered": "Cliente recuperado",
-        "contacted": "Cliente contatado",
-        "operational_fix": "Falha operacional corrigida",
-        "no_response": "Cliente não respondeu",
-        "not_applicable": "Sem retorno necessário"
-      }
+      "markResolved": "Marcar como resolvido",
+      "resolvedToast": "Caso marcado como resolvido.",
+      "reopenedToast": "Caso reaberto.",
+      "updateError": "Não foi possível atualizar o caso. Tente de novo."
     },
     "integrations": {
       "title": "Integrações e links externos",
@@ -378,7 +347,7 @@
     "createTab": "Criar QR code",
     "savedTab": "Meus QR codes ({{count}})",
     "createTitle": "Criar um QR code",
-    "createDesc": "Dê um nome ao local — mesa, balcão, recibo — e criamos o código pronto para imprimir. Um por local, para identificar a origem dos relatos enviados pelo AppReview.",
+    "createDesc": "Dê um nome ao local — mesa, balcão, recibo — e criamos o código pronto para imprimir. Um por local, para saber de onde vem cada avaliação.",
     "defaultName": "Mesa 1",
     "nameLabel": "Onde vai ficar este código?",
     "namePlaceholder": "Ex: Mesa 1, Balcão, Área externa",
@@ -413,7 +382,7 @@
     "online": "Online",
     "onlineDesc": "Compartilhe a imagem do QR code nas suas redes sociais, site, e-mails ou newsletters para clientes que visitaram o seu negócio.",
     "tipTitle": "Dica profissional",
-    "tipDesc": "Crie QR codes específicos para diferentes pontos do negócio. Assim cada relato interno mostra onde a experiência aconteceu."
+    "tipDesc": "Crie QR codes específicos para diferentes pontos do seu negócio ou diferentes campanhas. Isso ajuda a identificar de onde vêm as avaliações e a medir a eficácia de cada ponto de contato."
   },
   "reply": {
     "cta": "Sugerir resposta",

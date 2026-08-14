@@ -144,16 +144,3 @@ H5 Texas Burger (Avenida) e Mania de Petiscos, ambos em Lisboa. Marcelo no Brasi
 
 Área administrativa real; autocomplete do Google nas definições; sistema real
 de notificações; modelo de agência (dói a partir do 3.º cliente); Stripe a sério.
-
-## Trabalho local posterior — assistente do gestor
-
-Em 14/08/2026 foi aberta a branch local `codex/gestor-assistente`, baseada no
-merge do PR #23. Ainda não foi publicada. O objetivo é deixar de depender de o
-gestor vigiar mais um painel: o caso passa a ter origem por QR, estado,
-responsável, providência, resultado e datas de atendimento. Todas as notas
-seguem o mesmo caminho até às opções públicas, sem fricção seletiva.
-
-A migration `20260814170000_case_action_workflow.sql` precisa ser aplicada antes
-de qualquer frontend desta branch ser publicado. Alertas externos não fazem
-parte do lote local e nenhum fornecedor foi contratado. Ver
-`docs/produto-assistente-do-gestor.md`.
