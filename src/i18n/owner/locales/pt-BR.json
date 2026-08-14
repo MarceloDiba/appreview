@@ -196,6 +196,26 @@
       "disclaimer": "Clique indica intenção, não confirma publicação. A variação de avaliações e nota vem do próprio Google e não é atribuída automaticamente ao AppReview.",
       "openReviews": "Ver avaliações e preparar respostas"
     },
+    "advisor": {
+      "title": "Seu assessor de reputação",
+      "subtitle": "Uma avaliação para ler e uma resposta para você revisar.",
+      "localBadge": "Sem custo externo",
+      "error": "Não foi possível preparar o briefing agora.",
+      "emptyTitle": "Ainda não há avaliação com texto para analisar",
+      "emptyBody": "Quando o cache do Google trouxer uma avaliação escrita, o assessor organiza a leitura e prepara um rascunho.",
+      "openReviews": "Abrir avaliações",
+      "attentionLabel": "Merece sua atenção",
+      "recentLabel": "Avaliação recente",
+      "ratingAria": "{{rating}} de 5 estrelas",
+      "source": "Ver avaliação no Google",
+      "replyLabel": "Resposta sugerida",
+      "copy": "Copiar resposta",
+      "copiedButton": "Copiada",
+      "edit": "Revisar e editar",
+      "copied": "Resposta copiada.",
+      "copyError": "Não foi possível copiar a resposta.",
+      "disclaimer": "O rascunho é determinístico e editável. Você decide e publica no Google; o AppReview não publica automaticamente."
+    },
     "setupBanner": {
       "title": "Falta terminar a configuração",
       "name": "o nome do seu negócio",

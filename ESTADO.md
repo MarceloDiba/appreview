@@ -19,6 +19,12 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [ ] Revisão de Marcelo no produto local antes de qualquer PR/publicação.
 - [ ] Aplicar migration e publicar somente depois de aprovação específica do
   lote; não houve alteração remota nem chamada manual à API Google.
+- [x] Reposicionar localmente a experiência como assessor de reputação, com
+  landing e demonstração aprovadas visualmente.
+- [x] Criar briefing no painel a partir do cache Google e do gerador
+  determinístico de respostas, sem custo externo.
+- [ ] Definir provedor, consentimento, frequência e custo antes de implementar
+  relatórios ou notas proativas por WhatsApp.
 
 ## Regra de produto que não pode regredir
 

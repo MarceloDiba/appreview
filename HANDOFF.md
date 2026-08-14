@@ -25,6 +25,14 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   gerado nesta frente.
 - Verificação local concluída por `npm run verify`. O lint continua não
   bloqueante e falha apenas em cinco erros herdados, fora dos arquivos alterados.
+- Direção visual aprovada por Marcelo: “Seu assessor de reputação no Google”. A
+  landing e a demonstração agora explicam leitura, priorização e assistência de
+  resposta; WhatsApp e alertas aparecem somente como recursos planejados.
+- O painel ganhou um briefing local que seleciona uma avaliação escrita do
+  cache Google, prioriza nota até 3 e prepara uma resposta determinística e
+  editável. Não chama IA nem API externa e não detecta se o gestor respondeu.
+- `design-qa.md` registra comparação visual, mobile, interações e resultado
+  aprovado. Nenhuma publicação ou integração WhatsApp foi feita.
 
 ## Produto e infra
 

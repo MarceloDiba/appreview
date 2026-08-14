@@ -4,6 +4,7 @@ import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import GoogleOutcomeCard from '@/components/dashboard/GoogleOutcomeCard';
+import ReputationAdvisorCard from '@/components/dashboard/ReputationAdvisorCard';
 import { useSetupStatus } from '@/hooks/useSetupStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { MessageSquare, QrCode, Settings as SettingsIcon } from 'lucide-react';
@@ -103,6 +104,7 @@ const Dashboard = () => {
             </Card>
           )}
 
+          <ReputationAdvisorCard userId={userId || undefined} />
           <GoogleOutcomeCard userId={userId || undefined} />
 
           <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">

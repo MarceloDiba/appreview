@@ -196,6 +196,26 @@
       "disclaimer": "A click shows intent, not a published review. Rating and review-count changes come from Google and are not automatically attributed to AppReview.",
       "openReviews": "View reviews and prepare replies"
     },
+    "advisor": {
+      "title": "Your reputation advisor",
+      "subtitle": "One review to read and one reply for you to review.",
+      "localBadge": "No external cost",
+      "error": "The briefing could not be prepared right now.",
+      "emptyTitle": "There is no written review to analyze yet",
+      "emptyBody": "When the Google cache contains a written review, the advisor organizes it and prepares a draft.",
+      "openReviews": "Open reviews",
+      "attentionLabel": "Worth your attention",
+      "recentLabel": "Recent review",
+      "ratingAria": "{{rating}} out of 5 stars",
+      "source": "View review on Google",
+      "replyLabel": "Suggested reply",
+      "copy": "Copy reply",
+      "copiedButton": "Copied",
+      "edit": "Review and edit",
+      "copied": "Reply copied.",
+      "copyError": "The reply could not be copied.",
+      "disclaimer": "The draft is deterministic and editable. You decide and publish on Google; AppReview never publishes automatically."
+    },
     "setupBanner": {
       "title": "Finish the setup",
       "name": "your business name",
