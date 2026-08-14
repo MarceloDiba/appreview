@@ -86,6 +86,7 @@ const FeedbackForm = ({
       const { error } = await supabase.from('internal_feedback').insert([
         {
           user_id: idUsuario,
+          qr_code_id: businessId,
           feedback_text: formData.comentario,
           rating: parseInt(formData.notaInterna, 10),
           customer_name: formData.nome || null,
@@ -101,9 +102,10 @@ const FeedbackForm = ({
       navigate('/thank-you', {
         state: { businessName, googleReviewUrl, tripAdvisorUrl },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao enviar feedback:', error);
-      toast.error(`Erro: ${error.message || 'Erro desconhecido ao enviar o feedback.'}`);
+      const message = error instanceof Error ? error.message : 'Erro desconhecido ao enviar o feedback.';
+      toast.error(`Erro: ${message}`);
     } finally {
       setEnviando(false);
     }

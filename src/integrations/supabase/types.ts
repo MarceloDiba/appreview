@@ -121,35 +121,56 @@ export type Database = {
       }
       internal_feedback: {
         Row: {
+          acknowledged_at: string | null
+          case_status: string
           created_at: string | null
           customer_email: string | null
           customer_name: string | null
           feedback_text: string | null
           id: string
           is_addressed: boolean | null
+          qr_code_id: string | null
           rating: number
+          resolution_note: string | null
+          resolution_outcome: string | null
+          resolved_at: string | null
+          responsible_name: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          acknowledged_at?: string | null
+          case_status?: string
           created_at?: string | null
           customer_email?: string | null
           customer_name?: string | null
           feedback_text?: string | null
           id?: string
           is_addressed?: boolean | null
+          qr_code_id?: string | null
           rating: number
+          resolution_note?: string | null
+          resolution_outcome?: string | null
+          resolved_at?: string | null
+          responsible_name?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          acknowledged_at?: string | null
+          case_status?: string
           created_at?: string | null
           customer_email?: string | null
           customer_name?: string | null
           feedback_text?: string | null
           id?: string
           is_addressed?: boolean | null
+          qr_code_id?: string | null
           rating?: number
+          resolution_note?: string | null
+          resolution_outcome?: string | null
+          resolved_at?: string | null
+          responsible_name?: string | null
           updated_at?: string | null
           user_id?: string
         }

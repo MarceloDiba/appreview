@@ -25,7 +25,7 @@
     "back": "Back",
     "doLater": "Do this later",
     "step3Title": "The code to put on the table",
-    "step3Desc": "This is the code the customer points their phone at. Give it the name of the spot where it will sit, so you know later where each review came from.",
+    "step3Desc": "This is the code customers point their phone at. Name the spot where it will sit, so you can identify where AppReview feedback came from.",
     "qrNameLabel": "Where will this code go?",
     "qrNamePlaceholder": "e.g. Table 1, Counter, Reception",
     "createQr": "Create my QR code",
@@ -103,6 +103,10 @@
       "last7": "Last 7 days",
       "priorityNow": "Your priority right now",
       "openCases": "Open cases",
+      "newCases": "New",
+      "inProgress": "In progress",
+      "withoutOwner_one": "{{count}} without an owner",
+      "withoutOwner_other": "{{count}} without an owner",
       "oldest_one": "Oldest one {{count}} day ago",
       "oldest_other": "Oldest one {{count}} days ago",
       "nothingPending": "Nothing pending",
@@ -111,6 +115,7 @@
       "weekAverage": "This week's average",
       "prevAverage": "Previous average {{value}}",
       "noHistory": "Not enough history",
+      "weekSignal": "This week's signal: {{value}} · {{comparison}}",
       "resolutionRate": "Resolution rate",
       "resolvedTotal_one": "{{count}} resolved in total",
       "resolvedTotal_other": "{{count}} resolved in total",
@@ -130,7 +135,7 @@
       "title_other": "{{count}} customers left a contact and haven't heard back",
       "detailNames": "Includes {{names}}.",
       "detailGeneric": "They took the time to write and left a way to reach them.",
-      "action": "Reply today, even without a solution yet. A same-day contact usually wins the customer back; a week of silence rarely does."
+      "action": "Take the case, name an owner and make first contact even if the solution is still in progress."
     },
     "stale": {
       "someone": "A customer",
@@ -164,7 +169,7 @@
       "detailResolved_one": "You've resolved {{count}} case in total.",
       "detailResolved_other": "You've resolved {{count}} cases in total.",
       "actionEmpty": "Make sure the QR code is visible on the table or the counter — it's what feeds this page.",
-      "actionClear": "Take the chance to ask for a public review from anyone who had a good time. It's the best moment."
+      "actionClear": "Check that the QR code is still visible and offers the same public review options to every customer."
     }
   },
   "dashboard": {
@@ -314,16 +319,42 @@
     "cases": {
       "loading": "Loading cases...",
       "loadError": "Couldn't load the cases. Please try again.",
-      "empty": "No cases yet. When someone rates \"Bad\" on the Smiley, the case shows up here instantly.",
+      "empty": "No cases yet. When a customer sends feedback through a QR code, it will appear here.",
       "anonCustomer": "Anonymous customer",
-      "resolved": "Resolved",
-      "open": "Open",
       "contact": "Contact",
       "reopen": "Reopen",
-      "markResolved": "Mark as resolved",
-      "resolvedToast": "Case marked as resolved.",
-      "reopenedToast": "Case reopened.",
-      "updateError": "Couldn't update the case. Please try again."
+      "rating": "{{count}} out of 5",
+      "start": "Take case",
+      "prepareAction": "Record action",
+      "editAction": "Edit record",
+      "actionRecorded": "Action recorded",
+      "completedAt": "Completed {{date}}",
+      "actionTitle": "Next action",
+      "actionDesc": "Leave enough context for anyone to continue the service recovery.",
+      "responsible": "Owner",
+      "responsiblePlaceholder": "e.g. Marcelo or shift manager",
+      "outcome": "Outcome",
+      "resolutionNote": "What was done?",
+      "resolutionPlaceholder": "e.g. We contacted the customer, corrected the order and aligned the kitchen process.",
+      "cancel": "Cancel",
+      "saveProgress": "Save progress",
+      "resolveWithRecord": "Complete with record",
+      "noteRequired": "Record what was done before completing the case.",
+      "savedToast": "Case updated.",
+      "updateError": "Couldn't update the case. Please try again.",
+      "status": {
+        "new": "New",
+        "in_progress": "In progress",
+        "resolved": "Resolved"
+      },
+      "outcomes": {
+        "none": "Not decided yet",
+        "recovered": "Customer recovered",
+        "contacted": "Customer contacted",
+        "operational_fix": "Operational issue fixed",
+        "no_response": "Customer did not reply",
+        "not_applicable": "No follow-up needed"
+      }
     },
     "integrations": {
       "title": "Integrations and external links",
@@ -347,7 +378,7 @@
     "createTab": "Create QR code",
     "savedTab": "My QR codes ({{count}})",
     "createTitle": "Create a QR code",
-    "createDesc": "Give the spot a name — table, counter, receipt — and we'll create the code ready to print. One per spot, so you know where each review came from.",
+    "createDesc": "Give the spot a name — table, counter, receipt — and we'll create the code ready to print. One per spot, so you can identify where AppReview feedback came from.",
     "defaultName": "Table 1",
     "nameLabel": "Where will this code go?",
     "namePlaceholder": "e.g. Table 1, Counter, Patio",
@@ -382,7 +413,7 @@
     "online": "Online",
     "onlineDesc": "Share the QR code image on your social media, website, emails or newsletters for customers who visited your business.",
     "tipTitle": "Pro tip",
-    "tipDesc": "Create specific QR codes for different spots in your business or different campaigns. This helps identify where reviews come from and measure the effectiveness of each touchpoint."
+    "tipDesc": "Create specific QR codes for different service points. Each internal report will then show where the experience happened."
   },
   "reply": {
     "cta": "Suggest a reply",

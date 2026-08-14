@@ -75,6 +75,19 @@ em cache) foram preservados. Evidência completa em
 
 ## Próximos temas
 
+### Em desenvolvimento local — assistente do gestor
+
+Branch `codex/gestor-assistente`, ainda sem publicação. O primeiro lote transforma
+feedback interno numa fila operacional: fluxo neutro para qualquer nota,
+atribuição por QR, estados novo/em atendimento/resolvido, responsável,
+providência e resultado. Também remove promessas e controles que não tinham
+efeito real. Migration pendente:
+`20260814170000_case_action_workflow.sql`.
+
+O envio real de alertas continua fora deste lote. A próxima decisão será canal
+e fornecedor, sem contratação automática. Especificação em
+`docs/produto-assistente-do-gestor.md`.
+
 1. **Notificações:** a interface sem efeito foi removida no PR #18. Para
    reintroduzir, definir eventos, canais, provedor, consentimento e tratamento
    de falhas; só então implementar entrega real e preferências persistidas.

@@ -15,13 +15,13 @@ const Index = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
             <div className="max-w-xl w-full">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                Saiba do problema enquanto o cliente ainda está{' '}
-                <span className="text-primary">no seu negócio</span>
+                Transforme cada problema em uma{' '}
+                <span className="text-primary">ação clara para a equipe</span>
               </h1>
               <p className="mt-4 sm:mt-6 text-base sm:text-lg text-gray-600">
                 Todo cliente que escaneia o QR code pode avaliar publicamente no Google e no
-                TripAdvisor — sempre, qualquer que seja a nota. Quando a experiência foi ruim,
-                você também recebe um alerta na hora, para resolver antes que o cliente vá embora.
+                TripAdvisor — sempre, qualquer que seja a nota. Se também enviar um relato direto,
+                ele vira uma ação organizada para a equipe acompanhar até a conclusão.
               </p>
               <div className="mt-6 sm:mt-8 flex flex-wrap gap-3 sm:gap-4">
                 <Button asChild size="lg" className="w-full sm:w-auto">
@@ -125,10 +125,10 @@ const Index = () => {
               <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-3 sm:mb-4">
                 <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">3. Você age na hora</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">3. Você sabe o que fazer</h3>
               <p className="text-gray-600 text-sm sm:text-base">
-                Uma nota baixa abre um caso no seu painel, com o relato do cliente. Você resolve
-                enquanto ele ainda está ali e registra o que foi feito.
+                O relato abre um caso com prioridade, responsável e próxima ação. A equipe registra
+                o que fez e acompanha o resultado até a conclusão.
               </p>
             </div>
           </div>
@@ -168,8 +168,8 @@ const Index = () => {
                 <div>
                   <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">Casos para resolver</h3>
                   <p className="text-gray-600 text-sm sm:text-base">
-                    Cada avaliação negativa vira um caso com o relato do cliente e o contato que
-                    ele quis deixar. Você marca como resolvido e fica o registro de que agiu.
+                    Cada relato enviado pelo AppReview vira um caso com a nota, o contato e o ponto
+                    de atendimento. A equipe registra responsável, providência e resultado.
                   </p>
                 </div>
               </div>
@@ -179,10 +179,10 @@ const Index = () => {
                   <Star className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">Google e TripAdvisor no mesmo lugar</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">Destinos públicos e Google no painel</h3>
                   <p className="text-gray-600 text-sm sm:text-base">
-                    Configure os links das suas páginas públicas uma vez. O cliente escolhe onde
-                    quer avaliar e você acompanha as avaliações pelo painel.
+                    Configure os destinos públicos uma vez. O cliente escolhe onde quer avaliar;
+                    as avaliações do Google ficam disponíveis no painel para preparar respostas.
                   </p>
                 </div>
               </div>
@@ -194,8 +194,8 @@ const Index = () => {
                 <div>
                   <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">QR Codes ilimitados</h3>
                   <p className="text-gray-600 text-sm sm:text-base">
-                    Crie um QR code por mesa, por balcão ou por unidade, e veja de onde veio cada
-                    avaliação.
+                    Crie um QR code por mesa, balcão ou ponto de atendimento e identifique a origem
+                    dos relatos enviados diretamente pelo AppReview.
                   </p>
                 </div>
               </div>
@@ -319,10 +319,10 @@ const Index = () => {
         <div className="container mx-auto max-w-7xl">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="max-w-xl">
-              <h2 className="text-2xl sm:text-3xl font-bold">Pronto para não perder mais um cliente calado?</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold">Pronto para tirar as reclamações do improviso?</h2>
               <p className="mt-3 sm:mt-4 text-gray-600 text-sm sm:text-base">
-                Coloque um QR code no seu balcão hoje e passe a saber da insatisfação enquanto
-                ainda dá para resolver.
+                Coloque um QR code no atendimento e dê à sua equipe uma fila clara de problemas,
+                responsáveis e providências.
               </p>
             </div>
 

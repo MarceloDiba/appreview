@@ -168,8 +168,8 @@ const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) 
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile
-          label={t('attention.ui.openCases')}
-          value={integerFormat.format(stats.openCases)}
+          label={t('attention.ui.newCases')}
+          value={integerFormat.format(stats.newCases)}
           hint={
             stats.oldestOpenDays !== null
               ? t('attention.ui.oldest', { count: stats.oldestOpenDays })
@@ -177,17 +177,27 @@ const AttentionCenter: React.FC<AttentionCenterProps> = ({ insights, loading }) 
           }
         />
         <StatTile
+          label={t('attention.ui.inProgress')}
+          value={integerFormat.format(stats.inProgressCases)}
+          hint={t('attention.ui.withoutOwner', { count: stats.unassignedCases })}
+        />
+        <StatTile
           label={t('attention.ui.awaitingReturn')}
           value={integerFormat.format(stats.awaitingContact)}
           hint={t('attention.ui.leftContact')}
         />
-        <StatTile label={t('attention.ui.weekAverage')} value={weekAverageLabel} hint={weekAverageHint} />
         <StatTile
           label={t('attention.ui.resolutionRate')}
           value={resolutionLabel}
           hint={t('attention.ui.resolvedTotal', { count: stats.resolvedTotal })}
         />
       </div>
+
+      {(stats.weekAverage !== null || stats.baselineAverage !== null) && (
+        <p className="text-xs text-gray-500">
+          {t('attention.ui.weekSignal', { value: weekAverageLabel, comparison: weekAverageHint })}
+        </p>
+      )}
 
       {alerts.length > 0 && (
         <Card>
