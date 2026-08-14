@@ -1,5 +1,33 @@
 # Design QA — painel do assessor de reputação
 
+## Redesign visual — referência compacta enviada por Marcelo
+
+- Verdade visual: `/var/folders/jy/f70jwlvs5pv08dc69m_yfpr40000gn/T/codex-clipboard-e85b1705-8deb-45bd-94d5-7c92f138d85b.png`.
+- Implementação do painel: `/Users/marcelodiba/.codex/visualizations/2026/07/31/019fb619-4a08-7671-813d-70bbec4a7d20/appreview-restyle-qa-2026-08-14/01-painel-nova-direcao.png`.
+- Implementação da fila: `/Users/marcelodiba/.codex/visualizations/2026/07/31/019fb619-4a08-7671-813d-70bbec4a7d20/appreview-restyle-qa-2026-08-14/02-fila-nova-direcao.png`.
+- Comparação conjunta: `/Users/marcelodiba/.codex/visualizations/2026/07/31/019fb619-4a08-7671-813d-70bbec4a7d20/appreview-restyle-qa-2026-08-14/03-comparacao-referencia-painel.png`.
+- Rotas: `http://127.0.0.1:4178/demo?view=panel` e `http://127.0.0.1:4178/demo?view=queue`.
+- Referência: 2960 × 2864 px. Implementação: 1280 × 1390 px em viewport desktop de 1280 CSS px e densidade 1. A comparação usa `contain` em quadros iguais de 720 × 720 px.
+- Estado: painel ilustrativo em pt-BR; conteúdo e fluxos do AppReview preservados. A referência define cores e formatos, não conteúdo.
+
+### Superfícies de fidelidade
+
+- Tipografia: hierarquia sans-serif compacta, pesos médios e textos auxiliares em cinza reproduzem a densidade da referência sem reduzir a legibilidade.
+- Espaçamento e layout: fundo neutro, conteúdo principal largo, coluna lateral de 330 px, cartões de raio moderado, bordas finas e sombras discretas seguem a composição aprovada.
+- Cores: azul `#2457D6` concentra ações e links; violeta `#6D43C0` fica na marca e assinatura; verde, âmbar e vermelho são exclusivamente semânticos.
+- Imagens e ícones: não há fotografia nem ilustração no alvo funcional. A marca existente foi preservada e os ícones vêm da biblioteca já adotada; nenhum SVG ou desenho CSS artesanal foi criado.
+- Conteúdo: nenhum texto ou número do anexo foi copiado. Dados demonstrativos continuam marcados como “Exemplo ilustrativo” e o painel real mantém estados honestos.
+
+### Interações, comparação e resultado
+
+- Foram verificados o painel, a entrada para a fila, edição do rascunho, duas respostas simuladas, um adiamento e o encerramento com quatro respondidas e uma deixada para depois.
+- A comparação conjunta confirmou a mesma lógica de superfícies, densidade, coluna lateral, azul de ação, estados semânticos e cartões compactos.
+- Não há diferenças P0, P1 ou P2 em relação à direção solicitada. A ausência de busca global e de módulos do anexo é intencional: o conteúdo não fazia parte do alvo.
+- O navegador integrado continuou sem expor leitura de console ou aplicar viewport móvel nesta sessão; ambos permanecem lacunas de instrumentação P3. O fluxo executou sem erro visível e a verificação técnica é separada.
+- Não foi necessário recorte focado adicional: cartões, botões, ícones, rótulos e textos permanecem legíveis na comparação completa e foram inspecionados nas capturas individuais.
+
+final result: passed
+
 ## Extensão — caixa de entrada assistida
 
 - Verdade visual: direção aprovada do painel em `/Users/marcelodiba/.codex/generated_images/019fb619-4a08-7671-813d-70bbec4a7d20/exec-69a4632d-cfa8-4316-9536-ca486efe5d2f.png`.

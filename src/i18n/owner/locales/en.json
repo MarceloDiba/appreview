@@ -172,6 +172,7 @@
     "greetingGeneric": "Your dashboard",
     "subtitle": "See whether your QR is taking customers to Google and how your reputation is changing.",
     "shortcuts": {
+      "title": "Quick access",
       "reviewsTitle": "Google reviews",
       "reviewsDesc": "Read reviews and prepare replies.",
       "qrTitle": "QR codes",
@@ -181,6 +182,8 @@
       "open": "Open"
     },
     "googleOutcome": {
+      "summaryTitle": "Reputation summary",
+      "summarySubtitle": "How your business appears today to people searching on Google.",
       "title": "Google results",
       "loadError": "The indicators could not be loaded right now.",
       "emptyTitle": "Connect Google to receive your briefing",
@@ -298,6 +301,11 @@
       "title": "Planned: receive priorities and a summary on WhatsApp",
       "subtitle": "Depends on consent, a provider and approval of any potential cost.",
       "planned": "Planned feature"
+    },
+    "workspace": {
+      "eyebrow": "Business Profile",
+      "fallbackName": "Your business",
+      "subtitle": "Your Google reputation workspace, organized so you can decide and act."
     },
     "setupBanner": {
       "title": "Finish the setup",

@@ -52,6 +52,12 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - Decisão de produto: a fila não cria casos, responsáveis, providências ou
   datas. O estado útil é o do próprio Google — aguardando resposta ou
   respondida — com adiamento apenas para organizar a sessão atual.
+- Nova direção visual local aprovada por Marcelo em 14/08: fundo cinza-claro,
+  cartões brancos compactos, coluna lateral, azul `#2457D6` para ações e
+  violeta `#6D43C0` apenas como assinatura do AppReview. Dashboard e fila foram
+  atualizados com essa linguagem sem copiar conteúdo, marca ou dados do anexo.
+- A implementação preserva os mesmos dados, estados honestos e fluxo assistido;
+  nenhuma integração, publicação ou custo foi acionado nesta mudança visual.
 
 ## Produto e infra
 

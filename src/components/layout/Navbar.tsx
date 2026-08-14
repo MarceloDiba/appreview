@@ -11,6 +11,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
+import { UserRound } from 'lucide-react';
 
 interface NavbarProps {
   userRole?: 'business' | 'none';
@@ -41,22 +42,22 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
   };
 
   const deskLink = (path: string, active: boolean) =>
-    `px-3 py-2 rounded-md text-sm font-medium ${active ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`;
+    `relative px-3 py-5 text-sm font-medium transition-colors ${active ? 'text-[#2457D6] after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-full after:bg-[#2457D6]' : 'text-slate-600 hover:text-[#2457D6]'}`;
   const mobLink = (path: string, active: boolean) =>
     `block px-3 py-2 rounded-md text-base font-medium ${active ? 'text-primary bg-primary/5' : 'text-gray-600 hover:text-primary'}`;
 
   return (
-    <nav className="bg-white border-b border-gray-200 fixed w-full z-10">
+    <nav className="fixed z-10 w-full border-b border-slate-200 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0">
-              <span className="text-primary font-bold text-xl">AppReview</span>
+              <span className="text-xl font-bold text-[#6D43C0]">AppReview</span>
             </Link>
 
             {userRole === 'business' && businessName && (
-              <div className="hidden md:block ml-4 pl-4 border-l border-gray-300">
-                <span className="text-gray-600">{businessName}</span>
+              <div className="ml-4 hidden border-l border-slate-300 pl-4 md:block">
+                <span className="text-sm text-slate-600">{businessName}</span>
               </div>
             )}
           </div>
@@ -89,9 +90,9 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
             {userRole !== 'none' ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-40 rounded-full">
-                    <div className="flex h-full w-full items-center justify-center rounded-full bg-primary text-white">
-                      {t('nav.profile')}
+                  <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0" aria-label={t('nav.profile')}>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2457D6] text-white">
+                      <UserRound className="h-4 w-4" aria-hidden="true" />
                     </div>
                   </Button>
                 </DropdownMenuTrigger>

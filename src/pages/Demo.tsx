@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { ExternalLink, MessageCircle, MessageSquareText, QrCode } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
-import ReputationAdvisorCard from '@/components/dashboard/ReputationAdvisorCard';
+import ReputationAdvisorCard, { ProfileHealthCard } from '@/components/dashboard/ReputationAdvisorCard';
 import ReviewQueueDemo from '@/components/dashboard/ReviewQueueDemo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,13 +46,33 @@ const previewReview: AdvisorReview = {
 };
 
 const AdvisorPanelPreview = ({ embedded = false }: { embedded?: boolean }) => (
-  <div className={embedded ? 'rounded-2xl bg-[#f7f6f2] p-3 sm:p-5' : ''}>
-    <GoogleOutcomeCard data={previewOutcome} illustrative />
-    <div className="mt-4"><ReputationAdvisorCard previewReview={previewReview} illustrative reviewQueueCount={3} reviewQueueHref="/demo?view=queue" /></div>
-    <div className="mt-4"><GooglePathCard data={previewOutcome} illustrative /></div>
-    <div className="mt-4 flex flex-col gap-3 rounded-xl border border-dashed border-stone-300 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-3"><MessageCircle className="h-6 w-6 text-stone-500" /><div><p className="font-semibold text-stone-900">Planejado: receber prioridades e resumo no WhatsApp</p><p className="text-sm text-stone-500">Depende de consentimento, provedor e aprovação de eventual custo.</p></div></div>
-      <span className="w-fit rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">Recurso planejado</span>
+  <div className={embedded ? 'rounded-xl bg-[#f5f7f9] p-3 sm:p-5' : ''}>
+    <header className="mb-5 py-2">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6D43C0]">Perfil da empresa</p>
+      <div className="mt-1 flex flex-wrap items-center gap-3"><h1 className="text-2xl font-semibold tracking-tight text-slate-950">Seu negócio</h1><ExampleBadge /></div>
+      <p className="mt-1 text-sm text-slate-500">Seu painel de reputação no Google, organizado para decidir e agir.</p>
+    </header>
+
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
+      <section className="min-w-0 space-y-4">
+        <GoogleOutcomeCard data={previewOutcome} illustrative />
+        <ReputationAdvisorCard previewReview={previewReview} illustrative reviewQueueCount={3} reviewQueueHref="/demo?view=queue" showProfileHealth={false} />
+        <GooglePathCard data={previewOutcome} illustrative />
+      </section>
+
+      <aside className="space-y-4">
+        <ProfileHealthCard illustrative />
+        <Card className="rounded-xl border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50"><MessageCircle className="h-4 w-4 text-emerald-700" /></span>
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">Recurso planejado</span>
+            </div>
+            <p className="mt-4 font-semibold text-slate-950">Resumo e prioridades no WhatsApp</p>
+            <p className="mt-1 text-sm leading-relaxed text-slate-500">Depende de consentimento, provedor e aprovação de eventual custo.</p>
+          </CardContent>
+        </Card>
+      </aside>
     </div>
   </div>
 );
@@ -64,7 +84,7 @@ const Demo = () => {
 
   if (queueOnly) {
     return (
-      <div className="flex min-h-screen flex-col bg-[#f7f6f2]">
+      <div className="flex min-h-screen flex-col bg-[#f5f7f9]">
         <Navbar userRole="business" businessName="Seu negócio · Exemplo ilustrativo" />
         <ReviewQueueDemo />
       </div>
@@ -73,7 +93,7 @@ const Demo = () => {
 
   if (panelOnly) {
     return (
-      <div className="flex min-h-screen flex-col bg-[#f7f6f2]">
+      <div className="flex min-h-screen flex-col bg-[#f5f7f9]">
         <Navbar userRole="business" businessName="Seu negócio · Exemplo ilustrativo" />
         <main className="flex-1 px-4 pb-12 pt-24">
           <div className="container mx-auto max-w-7xl"><AdvisorPanelPreview /></div>

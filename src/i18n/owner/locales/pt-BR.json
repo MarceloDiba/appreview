@@ -172,6 +172,7 @@
     "greetingGeneric": "Seu painel",
     "subtitle": "Veja se o QR está levando clientes ao Google e como sua reputação está evoluindo.",
     "shortcuts": {
+      "title": "Acessos rápidos",
       "reviewsTitle": "Avaliações do Google",
       "reviewsDesc": "Ler avaliações e preparar respostas.",
       "qrTitle": "QR Codes",
@@ -181,6 +182,8 @@
       "open": "Abrir"
     },
     "googleOutcome": {
+      "summaryTitle": "Resumo da reputação",
+      "summarySubtitle": "Como seu negócio aparece hoje para quem busca no Google.",
       "title": "Resultado no Google",
       "loadError": "Não foi possível carregar os indicadores agora.",
       "emptyTitle": "Conecte o Google para receber seu briefing",
@@ -298,6 +301,11 @@
       "title": "Planejado: receber prioridades e resumo no WhatsApp",
       "subtitle": "Depende de consentimento, provedor e aprovação de eventual custo.",
       "planned": "Recurso planejado"
+    },
+    "workspace": {
+      "eyebrow": "Perfil da empresa",
+      "fallbackName": "Seu negócio",
+      "subtitle": "Seu painel de reputação no Google, organizado para decidir e agir."
     },
     "setupBanner": {
       "title": "Falta terminar a configuração",
