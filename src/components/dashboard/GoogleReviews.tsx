@@ -49,6 +49,9 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId }) => {
           onRefresh={handleRefresh} 
         />
         <div className="mt-6">
+          <div className="mb-3 text-xs text-gray-500">
+            {t('reviews.google.relevanceNotice')} · {t('reviews.google.attribution')}
+          </div>
           <ReviewsList
             reviews={reviews}
             formatDate={formatDate}

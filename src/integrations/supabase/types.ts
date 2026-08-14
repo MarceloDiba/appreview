@@ -37,8 +37,10 @@ export type Database = {
         Row: {
           author_image: string | null
           author_name: string
+          author_uri: string | null
           created_at: string
           external_place_id: string
+          google_maps_uri: string | null
           id: string
           rating: number
           review_id: string
@@ -48,8 +50,10 @@ export type Database = {
         Insert: {
           author_image?: string | null
           author_name: string
+          author_uri?: string | null
           created_at?: string
           external_place_id: string
+          google_maps_uri?: string | null
           id?: string
           rating: number
           review_id: string
@@ -59,8 +63,10 @@ export type Database = {
         Update: {
           author_image?: string | null
           author_name?: string
+          author_uri?: string | null
           created_at?: string
           external_place_id?: string
+          google_maps_uri?: string | null
           id?: string
           rating?: number
           review_id?: string
