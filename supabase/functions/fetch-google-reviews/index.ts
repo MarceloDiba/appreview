@@ -380,6 +380,23 @@ serve(async (req) => {
       console.error('Error upserting place info:', placeError);
       return jsonResponse({ error: 'Failed to store place data' }, 500);
     }
+
+    // Preserve an honest history of Google's own totals. This measures change
+    // observed on Google; it does not claim AppReview caused that change.
+    const { error: snapshotError } = await supabase
+      .from('google_review_snapshots')
+      .insert({
+        external_place_id: upsertedPlaceInfo.id,
+        user_id: user.id,
+        total_reviews: typeof data.userRatingCount === 'number' ? data.userRatingCount : 0,
+        average_rating: typeof data.rating === 'number' ? data.rating : 0,
+        captured_at: new Date().toISOString(),
+      });
+
+    if (snapshotError) {
+      // Metrics must not make review import unavailable during a rolling deploy.
+      console.error('Error storing Google review snapshot:', snapshotError);
+    }
     
     // Delete existing cached reviews for this place
     if (upsertedPlaceInfo.id) {

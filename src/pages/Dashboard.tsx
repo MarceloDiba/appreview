@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import AttentionCenter from '@/components/dashboard/AttentionCenter';
-import { useInternalFeedback } from '@/hooks/useInternalFeedback';
-import { useAttentionInsights } from '@/hooks/useAttentionInsights';
+import GoogleOutcomeCard from '@/components/dashboard/GoogleOutcomeCard';
 import { useSetupStatus } from '@/hooks/useSetupStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { MessageSquare, QrCode, Settings as SettingsIcon } from 'lucide-react';
@@ -57,9 +55,6 @@ const Dashboard = () => {
   }, []);
 
   const setup = useSetupStatus(userId || undefined);
-  const { cases, loading: loadingCases } = useInternalFeedback(userId);
-  const insights = useAttentionInsights(cases);
-  const loading = loadingUser || (!!userId && loadingCases);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -108,7 +103,7 @@ const Dashboard = () => {
             </Card>
           )}
 
-          <AttentionCenter insights={insights} loading={loading} />
+          <GoogleOutcomeCard userId={userId || undefined} />
 
           <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
             {shortcuts.map(({ to, icon: Icon, titleKey, descKey }) => (

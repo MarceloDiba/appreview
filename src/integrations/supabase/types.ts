@@ -119,6 +119,41 @@ export type Database = {
         }
         Relationships: []
       }
+      google_review_snapshots: {
+        Row: {
+          average_rating: number
+          captured_at: string
+          external_place_id: string
+          id: string
+          total_reviews: number
+          user_id: string
+        }
+        Insert: {
+          average_rating: number
+          captured_at?: string
+          external_place_id: string
+          id?: string
+          total_reviews: number
+          user_id: string
+        }
+        Update: {
+          average_rating?: number
+          captured_at?: string
+          external_place_id?: string
+          id?: string
+          total_reviews?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_review_snapshots_external_place_id_fkey"
+            columns: ["external_place_id"]
+            isOneToOne: false
+            referencedRelation: "external_place_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       internal_feedback: {
         Row: {
           created_at: string | null
@@ -316,6 +351,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      review_funnel_events: {
+        Row: {
+          created_at: string
+          event_key: string
+          event_type: string
+          id: string
+          platform: string | null
+          qr_code_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_key: string
+          event_type: string
+          id?: string
+          platform?: string | null
+          qr_code_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_key?: string
+          event_type?: string
+          id?: string
+          platform?: string | null
+          qr_code_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_funnel_events_qr_code_id_fkey"
+            columns: ["qr_code_id"]
+            isOneToOne: false
+            referencedRelation: "qr_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {

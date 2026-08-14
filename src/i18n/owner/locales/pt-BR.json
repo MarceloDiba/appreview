@@ -170,15 +170,31 @@
   "dashboard": {
     "greetingNamed": "Olá, {{name}}",
     "greetingGeneric": "Seu painel",
-    "subtitle": "O que precisa da sua atenção hoje, antes de tudo.",
+    "subtitle": "Veja se o QR está levando clientes ao Google e como sua reputação está evoluindo.",
     "shortcuts": {
-      "reviewsTitle": "Casos para resolver",
-      "reviewsDesc": "Ler os relatos e registrar o que foi feito.",
+      "reviewsTitle": "Avaliações do Google",
+      "reviewsDesc": "Ler avaliações e preparar respostas.",
       "qrTitle": "QR Codes",
       "qrDesc": "Criar e imprimir códigos por mesa ou balcão.",
       "settingsTitle": "Configurações",
       "settingsDesc": "Conectar suas páginas do Google e do TripAdvisor.",
       "open": "Abrir"
+    },
+    "googleOutcome": {
+      "title": "Resultado no Google",
+      "loadError": "Não foi possível carregar os indicadores agora.",
+      "empty": "Conecte sua página do Google para acompanhar a nota e o total de avaliações reais.",
+      "configure": "Conectar Google",
+      "lastUpdate": "Google atualizado em {{date}}",
+      "googleTotal": "{{count}} avaliações no Google",
+      "qrOpens": "aberturas do QR em 30 dias",
+      "googleClicks": "cliques para o Google em 30 dias",
+      "change": "Variação no Google: {{reviews}} avaliações e {{rating}} ponto na média.",
+      "noBaseline": "Ainda não há histórico suficiente para comparar a evolução no Google.",
+      "clickRate": "{{rate}}% das aberturas avançaram para o Google.",
+      "noClickRate": "A taxa de avanço aparece após os primeiros acessos ao QR.",
+      "disclaimer": "Clique indica intenção, não confirma publicação. A variação de avaliações e nota vem do próprio Google e não é atribuída automaticamente ao AppReview.",
+      "openReviews": "Ver avaliações e preparar respostas"
     },
     "setupBanner": {
       "title": "Falta terminar a configuração",
@@ -283,11 +299,11 @@
   },
   "reviews": {
     "title": "Avaliações",
-    "subtitle": "Resolva os casos que chegam pelo Smiley e responda às avaliações públicas do seu negócio.",
+    "subtitle": "Acompanhe as avaliações reais do Google e prepare respostas melhores.",
     "refreshing": "Atualizando...",
     "refresh": "Atualizar",
     "refreshedToast": "Avaliações atualizadas com sucesso!",
-    "casesTab": "Casos para resolver",
+    "casesTab": "Comentários diretos",
     "loading": "Carregando...",
     "google": {
       "title": "Avaliações do Google",

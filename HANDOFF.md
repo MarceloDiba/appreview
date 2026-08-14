@@ -3,6 +3,29 @@
 Estado em 31/07/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
+## Frente local de produto — 14/08/2026 (ainda não publicada)
+
+- Branch `codex/gestor-assistente`: a primeira proposta de transformar feedback
+  numa fila operacional foi revertida. Decisão de Marcelo: o valor central é
+  aumentar e cuidar das avaliações no Google sem criar mais trabalho ao gestor.
+- O fluxo do QR passa a oferecer Google/TripAdvisor diretamente, sem perguntar
+  antes se a experiência foi boa, neutra ou ruim. O comentário privado continua
+  opcional e a avaliação pública nunca é condicionada à nota.
+- Nova medição passiva versionada localmente: abertura do QR, clique para a
+  plataforma pública e comentário privado. Clique indica intenção, não uma
+  avaliação publicada.
+- A importação do Google passa a guardar snapshots de nota e quantidade após
+  consultas novas. O painel compara a evolução observada no próprio Google sem
+  afirmar causalidade do AppReview.
+- Dashboard, página de avaliações, landing e demonstração foram reorientados
+  para resultado no Google e sugestões de resposta; casos internos ficaram
+  secundários.
+- Migration local: `20260814190000_google_outcome_metrics.sql`. Ela ainda não foi
+  aplicada remotamente. Nenhum deploy, chamada manual ao Google ou custo foi
+  gerado nesta frente.
+- Verificação local concluída por `npm run verify`. O lint continua não
+  bloqueante e falha apenas em cinco erros herdados, fora dos arquivos alterados.
+
 ## Produto e infra
 
 - Gestão de reputação para donos de negócio. QR na mesa → cliente avalia → nota

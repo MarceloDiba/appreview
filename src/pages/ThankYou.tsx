@@ -4,17 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CheckCircle, ExternalLink } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { trackReviewEvent } from '@/lib/reviewFunnel';
 
 interface ThankYouState {
   businessName?: string;
   googleReviewUrl?: string;
   tripAdvisorUrl?: string;
+  qrCodeId?: string;
+  userId?: string;
 }
 
 const ThankYou = () => {
   const location = useLocation();
   const { t } = useTranslation();
-  const { businessName, googleReviewUrl, tripAdvisorUrl } =
+  const { businessName, googleReviewUrl, tripAdvisorUrl, qrCodeId, userId } =
     (location.state as ThankYouState) || {};
 
   const hasPublicOption = !!googleReviewUrl || !!tripAdvisorUrl;
@@ -52,6 +55,14 @@ const ThankYou = () => {
                   href={googleReviewUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => {
+                    if (qrCodeId && userId) void trackReviewEvent({
+                      eventType: 'public_click',
+                      platform: 'google',
+                      qrCodeId,
+                      userId,
+                    });
+                  }}
                   className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                 >
                   {t('publicGoogle')}
@@ -63,6 +74,14 @@ const ThankYou = () => {
                   href={tripAdvisorUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => {
+                    if (qrCodeId && userId) void trackReviewEvent({
+                      eventType: 'public_click',
+                      platform: 'tripadvisor',
+                      qrCodeId,
+                      userId,
+                    });
+                  }}
                   className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                 >
                   {t('publicTripAdvisor')}

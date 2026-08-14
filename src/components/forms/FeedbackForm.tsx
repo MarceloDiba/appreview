@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { X, Send, ExternalLink } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { trackReviewEvent } from '@/lib/reviewFunnel';
 
 // Função para validar UUID
 function isUUID(value: string): boolean {
@@ -95,15 +96,28 @@ const FeedbackForm = ({
 
       if (error) throw error;
 
+      void trackReviewEvent({
+        eventType: 'private_feedback',
+        qrCodeId: businessId,
+        userId: idUsuario,
+      });
+
       toast.success('Feedback enviado! O estabelecimento já foi avisado.');
       // Carry the public review links forward so the option stays available
       // after submitting — the thank-you page is not a dead end.
       navigate('/thank-you', {
-        state: { businessName, googleReviewUrl, tripAdvisorUrl },
+        state: {
+          businessName,
+          googleReviewUrl,
+          tripAdvisorUrl,
+          qrCodeId: businessId,
+          userId: idUsuario,
+        },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao enviar feedback:', error);
-      toast.error(`Erro: ${error.message || 'Erro desconhecido ao enviar o feedback.'}`);
+      const message = error instanceof Error ? error.message : 'Erro desconhecido ao enviar o feedback.';
+      toast.error(`Erro: ${message}`);
     } finally {
       setEnviando(false);
     }
@@ -243,6 +257,14 @@ const FeedbackForm = ({
                   href={googleReviewUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => {
+                    if (userId) void trackReviewEvent({
+                      eventType: 'public_click',
+                      platform: 'google',
+                      qrCodeId: businessId,
+                      userId,
+                    });
+                  }}
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                 >
                   {t('publicGoogle')}
@@ -254,6 +276,14 @@ const FeedbackForm = ({
                   href={tripAdvisorUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => {
+                    if (userId) void trackReviewEvent({
+                      eventType: 'public_click',
+                      platform: 'tripadvisor',
+                      qrCodeId: businessId,
+                      userId,
+                    });
+                  }}
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                 >
                   {t('publicTripAdvisor')}

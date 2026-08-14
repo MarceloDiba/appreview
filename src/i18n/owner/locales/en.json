@@ -170,15 +170,31 @@
   "dashboard": {
     "greetingNamed": "Hello, {{name}}",
     "greetingGeneric": "Your dashboard",
-    "subtitle": "What needs your attention today, first.",
+    "subtitle": "See whether your QR is taking customers to Google and how your reputation is changing.",
     "shortcuts": {
-      "reviewsTitle": "Cases to handle",
-      "reviewsDesc": "Read the reports and record what you did.",
+      "reviewsTitle": "Google reviews",
+      "reviewsDesc": "Read reviews and prepare replies.",
       "qrTitle": "QR codes",
       "qrDesc": "Create and print codes per table or counter.",
       "settingsTitle": "Settings",
       "settingsDesc": "Connect your Google and TripAdvisor pages.",
       "open": "Open"
+    },
+    "googleOutcome": {
+      "title": "Google results",
+      "loadError": "The indicators could not be loaded right now.",
+      "empty": "Connect your Google page to track your real rating and review total.",
+      "configure": "Connect Google",
+      "lastUpdate": "Google updated on {{date}}",
+      "googleTotal": "{{count}} Google reviews",
+      "qrOpens": "QR opens in 30 days",
+      "googleClicks": "clicks to Google in 30 days",
+      "change": "Change on Google: {{reviews}} reviews and {{rating}} rating points.",
+      "noBaseline": "There is not enough history yet to compare your Google progress.",
+      "clickRate": "{{rate}}% of QR opens continued to Google.",
+      "noClickRate": "The continuation rate appears after the first QR visits.",
+      "disclaimer": "A click shows intent, not a published review. Rating and review-count changes come from Google and are not automatically attributed to AppReview.",
+      "openReviews": "View reviews and prepare replies"
     },
     "setupBanner": {
       "title": "Finish the setup",
@@ -283,11 +299,11 @@
   },
   "reviews": {
     "title": "Reviews",
-    "subtitle": "Resolve the cases that come in via the Smiley and reply to your business's public reviews.",
+    "subtitle": "Track real Google reviews and prepare better replies.",
     "refreshing": "Refreshing...",
     "refresh": "Refresh",
     "refreshedToast": "Reviews refreshed successfully!",
-    "casesTab": "Cases to handle",
+    "casesTab": "Private feedback",
     "loading": "Loading...",
     "google": {
       "title": "Google reviews",

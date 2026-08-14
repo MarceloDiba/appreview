@@ -3,6 +3,23 @@
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
+## Em validação local — 14 de agosto de 2026
+
+- [x] Reverter a proposta de fila operacional que exigia responsável,
+  providência, resultado e datas.
+- [x] Remover a pergunta de sentimento antes do acesso público e oferecer Google
+  diretamente, mantendo comentário privado opcional e sem review gating.
+- [x] Medir passivamente aberturas do QR, cliques para Google/TripAdvisor e
+  comentários privados, sem chamar clique de avaliação.
+- [x] Preparar snapshots de nota e total reais do Google e um painel de evolução
+  com ressalva explícita de não causalidade.
+- [x] Reorientar landing, demonstração, dashboard e Avaliações para resultado no
+  Google e apoio a respostas.
+- [x] `npm run verify` verde localmente.
+- [ ] Revisão de Marcelo no produto local antes de qualquer PR/publicação.
+- [ ] Aplicar migration e publicar somente depois de aprovação específica do
+  lote; não houve alteração remota nem chamada manual à API Google.
+
 ## Regra de produto que não pode regredir
 
 O AppReview é gestão de reputação para donos de negócio que não sabem de
