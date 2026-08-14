@@ -1,5 +1,33 @@
 # Design QA — painel do assessor de reputação
 
+## Extensão — caixa de entrada assistida
+
+- Verdade visual: direção aprovada do painel em `/Users/marcelodiba/.codex/generated_images/019fb619-4a08-7671-813d-70bbec4a7d20/exec-69a4632d-cfa8-4316-9536-ca486efe5d2f.png`.
+- Implementação inicial da fila: `/Users/marcelodiba/.codex/visualizations/2026/07/31/019fb619-4a08-7671-813d-70bbec4a7d20/appreview-review-queue-qa-2026-08-14/01-fila-inicial.png`.
+- Painel com entrada para a fila: `/Users/marcelodiba/.codex/visualizations/2026/07/31/019fb619-4a08-7671-813d-70bbec4a7d20/appreview-review-queue-qa-2026-08-14/02-painel-com-fila.png`.
+- Estado concluído: `/Users/marcelodiba/.codex/visualizations/2026/07/31/019fb619-4a08-7671-813d-70bbec4a7d20/appreview-review-queue-qa-2026-08-14/03-fila-concluida.png`.
+- Comparação conjunta de direção visual: `/Users/marcelodiba/.codex/visualizations/2026/07/31/019fb619-4a08-7671-813d-70bbec4a7d20/appreview-review-queue-qa-2026-08-14/04-comparacao-painel-fila.png`.
+- Rotas verificadas: `http://127.0.0.1:4178/demo?view=panel` e `http://127.0.0.1:4178/demo?view=queue`.
+- Viewport e densidade: implementação a 1280 CSS px, densidade 1. Capturas com 1280 × 1487 px para o painel/fila inicial e 1280 × 840 px para o encerramento. A comparação conjunta normaliza referência e implementação em quadros de 720 × 720 px com `contain`.
+- Estado: pt-BR, cinco avaliações ilustrativas, três pendentes, duas respondidas e nenhuma chamada externa.
+
+### Superfícies e interações
+
+- Tipografia, espaçamento, índigo, fundo mineral, cartões e estados semânticos preservam o sistema aprovado do painel.
+- Nenhum ativo raster novo é necessário. Todos os ícones vêm da biblioteca já usada no produto; não há SVG ou desenho CSS artesanal.
+- A entrada no painel reúne as três pendências numa única ação. A fila mantém uma avaliação por vez, rascunho editável e lista lateral com estados claros.
+- Foram testados: abertura pelo painel, edição do rascunho, duas respostas simuladas, um adiamento, avanço automático e resumo final de quatro respondidas e uma adiada.
+- A estrutura acessível expõe títulos, progressbar, textbox, botões, estados e rótulos de estrelas. As interações concluíram sem erro visível de execução.
+- O navegador integrado não expôs leitura de console nesta sessão; isso permanece uma lacuna de instrumentação P3. TypeScript, i18n e build são verificados separadamente.
+
+### Comparação e resultado da extensão
+
+- A referência não desenha uma tela de fila; ela é usada como verdade de linguagem e hierarquia, não como correspondência pixel a pixel do novo estado.
+- A inspeção conjunta confirmou continuidade de tipografia, tokens, densidade, cartões e prioridade. Não foram encontrados problemas P0, P1 ou P2 no desktop.
+- A captura móvel continua como lacuna P3 da sessão porque o override de viewport do navegador integrado não é aplicado.
+
+final result: passed
+
 ## Evidência e estado
 
 - Verdade visual: `/Users/marcelodiba/.codex/generated_images/019fb619-4a08-7671-813d-70bbec4a7d20/exec-69a4632d-cfa8-4316-9536-ca486efe5d2f.png`.

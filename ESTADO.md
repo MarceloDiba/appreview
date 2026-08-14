@@ -31,6 +31,10 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   a revisão ilustrativa em `/demo?view=panel`.
 - [x] Documentar em `PLANO_FUNCIONAL.md` o caminho até uma versão realmente
   funcional.
+- [x] Prototipar localmente uma fila assistida com cinco avaliações do dia,
+  edição de resposta, adiamento, avanço item a item e resumo final.
+- [x] Ligar a prioridade ilustrativa do painel à fila em `/demo?view=queue`,
+  sem publicar respostas ou inventar que o recurso já funciona com o Google.
 - [ ] Solicitar acesso às Google Business Profile APIs e implementar OAuth antes
   de exibir contagem real de respostas pendentes, idade de fotos ou dados do
   perfil.

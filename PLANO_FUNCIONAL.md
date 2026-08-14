@@ -20,6 +20,9 @@ reduz interpretação e trabalho; não cria uma operação paralela de casos.
 - Snapshots para comparar nota e volume ao longo do tempo.
 - Painel real com estados vazios honestos e demo reutilizando os mesmos
   componentes, sempre identificado como ilustrativo.
+- Protótipo local da sessão assistida com cinco avaliações: três pendentes,
+  duas respondidas, rascunho editável, adiamento e resumo final. Esta fila é
+  demonstrativa e não lê nem publica estados no Google.
 
 Limite atual: a Places API devolve no máximo cinco avaliações e não informa o
 conjunto completo de respostas do proprietário. Portanto, ela não sustenta uma
@@ -48,6 +51,10 @@ Entregas:
 - Seleção da conta e da localização administrada pelo cliente.
 - Lista paginada de todas as avaliações, incluindo `reviewReply`.
 - Contagem real de avaliações sem resposta e prioridade por nota/recência.
+- Caixa de entrada real com ordenação por insatisfação concreta, antiguidade e
+  depois avaliações positivas; cada resposta avança para o item seguinte.
+- Estado da resposta confirmado novamente no Google após a publicação; sem
+  transformar avaliações em casos operacionais paralelos.
 - Leitura de media para calcular a idade da última foto do negócio.
 - Leitura de horários, categorias, atributos e dados essenciais do perfil.
 - Atualização segura de respostas somente após ação explícita do gestor; nunca

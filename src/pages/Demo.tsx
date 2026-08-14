@@ -4,6 +4,7 @@ import { ExternalLink, MessageCircle, MessageSquareText, QrCode } from 'lucide-r
 import Navbar from '@/components/layout/Navbar';
 import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
 import ReputationAdvisorCard from '@/components/dashboard/ReputationAdvisorCard';
+import ReviewQueueDemo from '@/components/dashboard/ReviewQueueDemo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -47,7 +48,7 @@ const previewReview: AdvisorReview = {
 const AdvisorPanelPreview = ({ embedded = false }: { embedded?: boolean }) => (
   <div className={embedded ? 'rounded-2xl bg-[#f7f6f2] p-3 sm:p-5' : ''}>
     <GoogleOutcomeCard data={previewOutcome} illustrative />
-    <div className="mt-4"><ReputationAdvisorCard previewReview={previewReview} illustrative /></div>
+    <div className="mt-4"><ReputationAdvisorCard previewReview={previewReview} illustrative reviewQueueCount={3} reviewQueueHref="/demo?view=queue" /></div>
     <div className="mt-4"><GooglePathCard data={previewOutcome} illustrative /></div>
     <div className="mt-4 flex flex-col gap-3 rounded-xl border border-dashed border-stone-300 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-3"><MessageCircle className="h-6 w-6 text-stone-500" /><div><p className="font-semibold text-stone-900">Planejado: receber prioridades e resumo no WhatsApp</p><p className="text-sm text-stone-500">Depende de consentimento, provedor e aprovação de eventual custo.</p></div></div>
@@ -59,6 +60,16 @@ const AdvisorPanelPreview = ({ embedded = false }: { embedded?: boolean }) => (
 const Demo = () => {
   const [searchParams] = useSearchParams();
   const panelOnly = searchParams.get('view') === 'panel';
+  const queueOnly = searchParams.get('view') === 'queue';
+
+  if (queueOnly) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#f7f6f2]">
+        <Navbar userRole="business" businessName="Seu negócio · Exemplo ilustrativo" />
+        <ReviewQueueDemo />
+      </div>
+    );
+  }
 
   if (panelOnly) {
     return (

@@ -11,6 +11,8 @@ interface ReputationAdvisorCardProps {
   userId?: string;
   previewReview?: AdvisorReview;
   illustrative?: boolean;
+  reviewQueueCount?: number;
+  reviewQueueHref?: string;
 }
 
 const ExampleBadge = () => (
@@ -23,7 +25,7 @@ const ConnectionBadge = ({ children }: { children: React.ReactNode }) => (
   <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-medium text-stone-600">{children}</span>
 );
 
-const ReputationAdvisorCard = ({ userId, previewReview, illustrative = false }: ReputationAdvisorCardProps) => {
+const ReputationAdvisorCard = ({ userId, previewReview, illustrative = false, reviewQueueCount = 0, reviewQueueHref = '/reviews' }: ReputationAdvisorCardProps) => {
   const { t, i18n } = useOwnerTranslation();
   const live = useReputationAdvisor(illustrative ? undefined : userId);
   const review = previewReview || live.review;
@@ -59,6 +61,16 @@ const ReputationAdvisorCard = ({ userId, previewReview, illustrative = false }: 
             <h2 className="text-2xl font-semibold tracking-tight text-stone-950">{t('dashboard.advisor.attentionTitle')}</h2>
             {illustrative && <ExampleBadge />}
           </div>
+
+          {reviewQueueCount > 0 && (
+            <div className="mt-5 flex flex-col gap-3 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#102878]"><MessageSquareText className="h-5 w-5" /></span>
+                <div><p className="font-semibold text-stone-950">{t('dashboard.advisor.queueTitle', { count: reviewQueueCount })}</p><p className="mt-0.5 text-sm text-stone-600">{t('dashboard.advisor.queueSubtitle')}</p></div>
+              </div>
+              <Button asChild size="sm" className="shrink-0 bg-[#102878] hover:bg-[#0b1d5b]"><Link to={reviewQueueHref}>{t('dashboard.advisor.queueAction')}</Link></Button>
+            </div>
+          )}
 
           {error ? (
             <p className="mt-6 text-sm text-stone-600">{t('dashboard.advisor.error')}</p>
@@ -116,7 +128,7 @@ const ReputationAdvisorCard = ({ userId, previewReview, illustrative = false }: 
                   </div>
                 </div>
                 <Button asChild className="mt-3 w-full bg-[#102878] hover:bg-[#0b1d5b]">
-                  <Link to="/reviews"><MessageSquareText className="mr-2 h-4 w-4" />{t('dashboard.advisor.reviewReply')}</Link>
+                  <Link to={reviewQueueHref}><MessageSquareText className="mr-2 h-4 w-4" />{reviewQueueCount > 0 ? t('dashboard.advisor.queueAction') : t('dashboard.advisor.reviewReply')}</Link>
                 </Button>
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   {review.googleMapsUri ? (

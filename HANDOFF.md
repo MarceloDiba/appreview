@@ -44,6 +44,14 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   mostra “conecte para medir”, nunca números inventados.
 - `PLANO_FUNCIONAL.md` consolida as fases, ferramentas, dependências, critérios
   de funcionamento e gates de custo. Nada foi publicado ou contratado.
+- A demonstração local ganhou uma caixa de entrada assistida em
+  `/demo?view=queue`: cinco avaliações novas, três pendentes e duas já
+  respondidas. O gestor edita a sugestão, simula a resposta ou deixa para
+  depois e recebe um resumo ao concluir. A prioridade do painel abre essa
+  sessão. Todos os dados são ilustrativos e nenhuma ação chega ao Google.
+- Decisão de produto: a fila não cria casos, responsáveis, providências ou
+  datas. O estado útil é o do próprio Google — aguardando resposta ou
+  respondida — com adiamento apenas para organizar a sessão atual.
 
 ## Produto e infra
 
