@@ -1,9 +1,9 @@
 # Binno — documento de continuação (handoff)
 
-Estado em 31/07/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
+Estado atualizado em 15/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
-## Onboarding orientado ao Google — 15/08/2026 (em revisão local)
+## Onboarding orientado ao Google — 15/08/2026 (PR #27 pronto para revisão)
 
 - A passagem manual do Mania confirmou uma falha de produto: o ecrã oferecia
   “Conectar Google” mesmo sem OAuth oficial disponível, devolvia erro e deixava
@@ -21,6 +21,9 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - O cartão impresso agora diz “Conte como foi a sua experiência” e “A sua
   opinião ajuda-nos a melhorar” em Portugal (equivalentes em pt-BR/en), sem
   filtrar a opção pública por nota.
+- O PR [#27](https://github.com/MarceloDiba/appreview/pull/27) consolidou esse
+  onboarding e o snapshot experimental. O CI do commit `af6a922` terminou
+  verde no run 99; ainda não houve merge nem deploy.
 
 ## Teste experimental Apify — 15/08/2026
 

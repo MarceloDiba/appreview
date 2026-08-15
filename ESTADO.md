@@ -1,4 +1,4 @@
-# Estado do Binno — 31 de julho de 2026
+# Estado do Binno — 15 de agosto de 2026
 
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
@@ -36,6 +36,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   data, limite e ressalva de não ser integração oficial visíveis.
 - [x] Manter o arquivo de dados fora do Git, produção, Supabase e cache oficial;
   somente agregados sanitizados, sem dados de avaliadores ou textos.
+- [x] Consolidar o onboarding e o snapshot experimental no PR
+  [#27](https://github.com/MarceloDiba/appreview/pull/27); CI verde no commit
+  `af6a922` (run 99), sem merge ou deploy.
 - [ ] Aguardar aprovação Basic do Google antes de substituir essa amostra por
   OAuth, seleção de local e sincronização oficial completa.
 - [~] Configurar DNS de `binno.pro` no GoDaddy conforme instrução da Vercel.
