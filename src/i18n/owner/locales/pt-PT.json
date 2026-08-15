@@ -379,6 +379,17 @@
       "unavailable": "A ligação oficial ao Perfil de Empresa ainda está a ser configurada neste ambiente.",
       "startError": "Não foi possível iniciar a ligação ao Google. Tente novamente mais tarde."
     },
+    "apify": {
+      "title": "Teste experimental com uma amostra do Google",
+      "description": "Faça uma recolha manual e limitada para validar a leitura do painel enquanto a ligação oficial está em preparação.",
+      "safeguard": "Máximo de 50 avaliações do Google, sem dados de avaliadores, agenda ou publicação. A amostra nunca é tratada como fila completa.",
+      "openSample": "Abrir amostra local",
+      "collect": "Recolher amostra experimental",
+      "collecting": "A recolher amostra…",
+      "linkRequired": "Guarde primeiro o link público do Google em Links externos.",
+      "snapshotReady": "A amostra experimental está pronta para revisão.",
+      "collectionError": "Não foi possível concluir a recolha experimental agora."
+    },
     "googleLocation": {
       "title": "Escolha o negócio certo",
       "description": "Depois de autorizar o Google, procure as localizações disponíveis e escolha a que deve alimentar o seu painel.",

@@ -39,6 +39,12 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Consolidar o onboarding e o snapshot experimental no PR
   [#27](https://github.com/MarceloDiba/appreview/pull/27); CI verde no commit
   `af6a922` (run 99), sem merge ou deploy.
+- [x] Preparar localmente a coleta manual via Apify: máximo de 50 avaliações
+  Google, descarte de dados de avaliadores, auditoria sanitizada, intervalo de
+  24 h por negócio e limite mensal configurável. O botão público e a Edge
+  Function continuam desligados por padrão.
+- [ ] Autorizar teto financeiro, aplicar a migration e configurar o segredo
+  apenas no servidor antes de ativar o teste Apify em ambiente publicado.
 - [ ] Aguardar aprovação Basic do Google antes de substituir essa amostra por
   OAuth, seleção de local e sincronização oficial completa.
 - [~] Configurar DNS de `binno.pro` no GoDaddy conforme instrução da Vercel.

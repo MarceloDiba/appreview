@@ -37,6 +37,15 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - A rota local `/demo?view=snapshot` identifica a fonte Apify, o limite da
   amostra e que não é uma integração oficial do Google. Ela não sugere fila
   completa, pendências reais, Radar real ou publicação de respostas.
+- A branch local `codex/apify-experimental-pilot` prepara a coleta manual no
+  próprio produto: até 50 avaliações de origem Google, sem dados do avaliador,
+  sem agenda, limite de uma coleta por negócio a cada 24 horas e teto mensal
+  configurável. A saída é agregada e fica apenas no navegador; a tabela de
+  auditoria guarda status e resumo sanitizado, nunca a resposta bruta.
+- A função e o botão de produção ficam desligados por padrão. Antes de ativar
+  `APIFY_API_TOKEN`, a migration e a Edge Function, é necessário autorizar um
+  teto financeiro explícito. Procedimento e variáveis em
+  `docs/apify-experimental-rollout.md`.
 - `binno.pro` e `www.binno.pro` foram vinculados ao projeto Vercel, mas a
   configuração DNS ainda está pendente no registrador GoDaddy. Até o estado
   deixar de ser `misconfigured`, a referência pública continua sendo

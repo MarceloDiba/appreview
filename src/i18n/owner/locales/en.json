@@ -379,6 +379,17 @@
       "unavailable": "The official Business Profile connection is still being configured in this environment.",
       "startError": "Google connection could not be started. Please try again later."
     },
+    "apify": {
+      "title": "Experimental test with a Google sample",
+      "description": "Run a limited manual collection to validate the panel view while the official connection is being prepared.",
+      "safeguard": "At most 50 Google reviews, with no reviewer data, schedule, or publishing. The sample is never treated as a complete queue.",
+      "openSample": "Open local sample",
+      "collect": "Collect experimental sample",
+      "collecting": "Collecting sample…",
+      "linkRequired": "First save the public Google link under External links.",
+      "snapshotReady": "The experimental sample is ready for review.",
+      "collectionError": "We could not complete the experimental collection right now."
+    },
     "googleLocation": {
       "title": "Choose the right business",
       "description": "After authorizing Google, find the available locations and select the one that should feed your dashboard.",

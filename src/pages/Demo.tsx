@@ -11,33 +11,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GoogleOutcomeData } from '@/hooks/useGoogleOutcome';
 import { AdvisorReview } from '@/hooks/useReputationAdvisor';
+import { ExperimentalApifySnapshot, isExperimentalApifySnapshot, readExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
 
 const ExampleBadge = () => <span className="rounded-full bg-violet-50 px-3 py-1 text-xs text-primary">Exemplo ilustrativo</span>;
 
-type ExperimentalSnapshot = {
-  source: 'apify-experimental';
-  fetchedAt: string;
-  business: {
-    name: string;
-    address: string;
-    placeId: string;
-    googleRating: number;
-    googleReviewCount: number;
-  };
-  sample: {
-    reviewCount: number;
-    ratingBreakdown: Record<'1' | '2' | '3' | '4' | '5', number>;
-    ownerRepliesFound: number;
-  };
-};
-
 const ExperimentalSnapshotPanel = () => {
-  const [snapshot, setSnapshot] = useState<ExperimentalSnapshot | null>(null);
+  const [snapshot, setSnapshot] = useState<ExperimentalApifySnapshot | null>(null);
   const [status, setStatus] = useState<'loading' | 'missing' | 'invalid' | 'ready'>('loading');
 
   useEffect(() => {
     const loadSnapshot = async () => {
       try {
+        const localSnapshot = readExperimentalApifySnapshot();
+        if (localSnapshot) {
+          setSnapshot(localSnapshot);
+          setStatus('ready');
+          return;
+        }
         const response = await fetch('/experimental-snapshot.json', { cache: 'no-store' });
         if (response.status === 404) {
           setStatus('missing');
@@ -46,10 +36,10 @@ const ExperimentalSnapshotPanel = () => {
         if (!response.ok) throw new Error('Snapshot unavailable');
 
         const data: unknown = await response.json();
-        if (!data || typeof data !== 'object' || (data as { source?: string }).source !== 'apify-experimental') {
+        if (!isExperimentalApifySnapshot(data)) {
           throw new Error('Invalid snapshot');
         }
-        setSnapshot(data as ExperimentalSnapshot);
+        setSnapshot(data);
         setStatus('ready');
       } catch {
         setStatus('invalid');
