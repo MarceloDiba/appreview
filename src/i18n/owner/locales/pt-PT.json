@@ -313,6 +313,13 @@
       "title": "O que a sua reputação está a dizer",
       "subtitle": "Uma leitura curta do que mudou no Google — e só uma ação quando ela realmente importa.",
       "back": "Voltar ao painel",
+      "todayLabel": "Prioridade de hoje",
+      "allSignals": {
+        "title": "Tudo o que vale saber agora",
+        "subtitle": "Sem procurar em separadores: o resumo inteiro, com os detalhes quando quiser.",
+        "showEvidence": "Ver evidência",
+        "hideEvidence": "Fechar evidência"
+      },
       "statePicker": "Estados ilustrativos do Radar",
       "tabs": { "stable": "Tudo em dia", "risk": "Mudança a observar", "strength": "O que funciona", "opportunity": "Oportunidade" },
       "actionNote": "O Radar escolhe uma prioridade. Não cria uma lista de tarefas.",

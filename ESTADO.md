@@ -42,6 +42,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Construir o Radar de Reputação em `/demo?view=radar`: quatro estados
   ilustrativos (estável, risco, força e oportunidade), uma prioridade por vez e
   evidência, período e fonte visíveis.
+- [x] Consolidar o Radar numa única leitura: prioridade no topo e os quatro
+  sinais visíveis abaixo, sem depender de abas; a evidência só expande quando
+  o gestor quiser aprofundar.
 - [ ] Aprovar visualmente o Radar com Marcelo antes de ligar sinais reais do
   Google ou qualquer automação.
 - [x] Preparar localmente OAuth, armazenamento cifrado de token, seleção de

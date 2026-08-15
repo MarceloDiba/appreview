@@ -313,6 +313,13 @@
       "title": "What your reputation is saying",
       "subtitle": "A short reading of what changed on Google — and only one action when it genuinely matters.",
       "back": "Back to dashboard",
+      "todayLabel": "Today's priority",
+      "allSignals": {
+        "title": "Everything worth knowing now",
+        "subtitle": "No hunting through tabs: the full summary, with detail when you need it.",
+        "showEvidence": "View evidence",
+        "hideEvidence": "Hide evidence"
+      },
       "statePicker": "Illustrative Radar states",
       "tabs": { "stable": "All clear", "risk": "Change to watch", "strength": "What works", "opportunity": "Opportunity" },
       "actionNote": "The Radar selects one priority. It does not create a task list.",

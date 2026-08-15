@@ -62,8 +62,9 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   Ele apresenta, sempre como exemplo ilustrativo, quatro estados que poderão
   vir do Perfil da Empresa: situação estável, tema negativo recorrente, força
   reconhecida e uma oportunidade concreta. Cada estado exibe a evidência e o
-  período; o Radar escolhe uma única prioridade e não cria tarefas. Ainda não
-  lê, calcula nem notifica dados reais.
+  período; a prioridade fica no topo, mas o resumo dos quatro sinais aparece
+  de uma vez, sem abas. O Radar não cria tarefas. Ainda não lê, calcula nem
+  notifica dados reais.
 - A fundação da conexão oficial com o Perfil da Empresa foi preparada localmente
   no mesmo branch: migration `20260814193000_google_business_profile_connection.sql`,
   `start-google-business-oauth`, `google-business-oauth-callback` e
