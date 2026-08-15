@@ -104,20 +104,17 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - Nenhuma API Business Profile/Places foi ativada e nenhuma chamada ao Google,
   segredo, migration, Edge Function ou dado de cliente foi enviado/remotamente
   nesta etapa.
-- O formulário de cliente OAuth Web foi deixado sem submissão. A próxima
-  dependência é o pedido **Basic** da Business Profile API, que exige informar
-  um Perfil da Empresa verificado e ativo há pelo menos 60 dias e o site oficial
-  da empresa que o representa; não inventar nem usar um perfil de cliente sem
-  confirmação do titular.
+- O formulário de cliente OAuth Web permanece sem submissão. A candidatura
+  **Basic** da Business Profile API foi enviada em 15/08/2026 para o projeto
+  `app-review-505612`, protocolo Google `0-0755000041728`.
 - Marcelo indicou o Perfil da Empresa da **NOÁ** e `noadigital.com.br` como a
-  identidade que representa o AppReview. O formulário Basic foi aberto, mas
-  ainda não foi enviado. A tentativa com `diba@noadigital.com.br` confirmou no
-  próprio formulário que essa conta não tem Perfil da Empresa associado. A
-  documentação do Google exige que a conta que envia o pedido seja proprietária
-  ou gestora do Perfil; usar a conta que já administra a NOÁ ou atribuir gestão
-  a `diba@noadigital.com.br` antes de continuar. O projeto Cloud continua na
-  segunda conta e isso não prova gestão do Perfil. A verificação e os 60+ dias
-  do perfil continuam a ser requisito do Google, não inferência do AppReview.
+  identidade que representa o AppReview e atribuiu gestão a
+  `diba@noadigital.com.br`. O formulário reconheceu **Noá Agência Digital**
+  como perfil validado e permitiu o envio. O Google informou previsão de análise
+  de **7 a 10 dias úteis**; é informação dinâmica e não significa aprovação.
+- Até a resposta do Google, não ativar APIs, criar cliente OAuth, configurar
+  segredos no Supabase ou chamar as APIs. O pedido não gerou uso de API nem
+  alteração em dados de cliente.
 
 ## Produto e infra
 

@@ -59,17 +59,16 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [~] Criar projeto Google Cloud exclusivo e configuração OAuth externa:
   concluídos em 15/08 no projeto `app-review-505612`; nenhum cliente OAuth,
   segredo, API ou chamada Google foi criado/ativado.
-- [ ] Solicitar acesso Basic às Google Business Profile APIs com o Perfil da
-  Empresa verificado (ativo há ao menos 60 dias) e o site oficial da empresa que
-  representa o AppReview; depois criar o cliente OAuth Web, aplicar/publicar o
-  lote e só então exibir contagem real de respostas pendentes, idade de fotos ou
+- [~] Acesso Basic às Google Business Profile APIs solicitado em 15/08/2026
+  para `app-review-505612`; protocolo Google `0-0755000041728`.
+  - Identidade usada: Perfil validado **Noá Agência Digital** e
+    `noadigital.com.br`; Marcelo atribuiu gestão a `diba@noadigital.com.br`.
+  - O Google indicou previsão dinâmica de 7 a 10 dias úteis. Não ativar APIs,
+    criar cliente OAuth, configurar segredos ou publicar o lote antes da
+    aprovação explícita.
+- [ ] Após aprovação Basic, criar o cliente OAuth Web, aplicar/publicar o lote
+  e só então exibir contagem real de respostas pendentes, idade de fotos ou
   dados do perfil.
-  - Identidade indicada por Marcelo: Perfil da Empresa da NOÁ +
-    `noadigital.com.br`.
-  - Confirmado no formulário em 15/08: `diba@noadigital.com.br` **não** tem
-    Perfil da Empresa associado. Usar a conta que já administra o Perfil da NOÁ
-    ou atribuir-lhe gestão antes do envio. O projeto Cloud estar nessa conta não
-    substitui essa condição.
 - [ ] Com consentimento do dono, ligar uma localização piloto e sincronizar até
   ao fim da paginação; só então trocar a fila ilustrativa por dados reais.
 
