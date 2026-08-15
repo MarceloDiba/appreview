@@ -120,6 +120,10 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   comentário privado opcional e métricas de intenção. Ele não chama clique de
   avaliação, não simula uma fila completa e pode ser continuado pelo mesmo
   estabelecimento depois da aprovação OAuth.
+- Marcelo escolheu **Mania de Petiscos**, Lisboa, para esse piloto concierge.
+  O link curto Google veio do Marcelo, mas não foi resolvido pelo conector
+  público; validar o destino no QR físico antes da entrega e não o usar como
+  evidência de Place ID, avaliação ou configuração concluída.
 
 ## Produto e infra
 

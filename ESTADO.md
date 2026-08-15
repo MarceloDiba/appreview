@@ -77,6 +77,10 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [ ] Escolher o estabelecimento e obter o aceite do seu titular; depois
   publicar o lote de métricas e executar o piloto concierge sem atribuir ao
   AppReview avaliações que só o Google pode confirmar.
+  - Estabelecimento escolhido por Marcelo em 15/08: **Mania de Petiscos**,
+    Lisboa. O link curto do Google foi fornecido pelo Marcelo; a confirmação do
+    negócio, idioma e destino fica no teste do QR físico, não é inferida do
+    encurtador.
 
 ## Regra de produto que não pode regredir
 
