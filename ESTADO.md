@@ -45,6 +45,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Consolidar o Radar numa única leitura: prioridade no topo e os quatro
   sinais visíveis abaixo, sem depender de abas; a evidência só expande quando
   o gestor quiser aprofundar.
+- [x] Preparar o backend local do Radar para a conexão oficial: calcula fila
+  real sem resposta e só destaca temas recorrentes com evidência objetiva. Sem
+  conexão ou sincronização completa, não estima nem mostra números parciais.
 - [ ] Aprovar visualmente o Radar com Marcelo antes de ligar sinais reais do
   Google ou qualquer automação.
 - [x] Preparar localmente OAuth, armazenamento cifrado de token, seleção de

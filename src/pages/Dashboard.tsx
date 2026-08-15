@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
 import ReputationAdvisorCard, { ProfileHealthCard } from '@/components/dashboard/ReputationAdvisorCard';
+import ReputationRadarCard from '@/components/dashboard/ReputationRadarCard';
 import { useSetupStatus } from '@/hooks/useSetupStatus';
 import { useGoogleOutcome } from '@/hooks/useGoogleOutcome';
 import { supabase } from '@/integrations/supabase/client';
@@ -107,6 +108,7 @@ const Dashboard = () => {
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
             <section className="min-w-0 space-y-4">
               <GoogleOutcomeCard data={outcome.data} loading={outcome.loading} error={outcome.error} />
+              <ReputationRadarCard userId={userId || undefined} />
               <ReputationAdvisorCard userId={userId || undefined} showProfileHealth={false} />
               {outcome.data && <GooglePathCard data={outcome.data} />}
             </section>

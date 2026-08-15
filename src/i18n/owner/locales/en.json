@@ -341,6 +341,19 @@
       "sources": { "title": "How Radar got here", "subtitle": "Every recommendation must explain its evidence.", "period": "Period", "reviews": "Reviews read", "profile": "Google Profile", "profileValue": "Illustrative data" },
       "quiet": { "title": "Quiet by default", "body": "If there is no relevant risk or opportunity, AppReview simply confirms that everything is on track." }
     },
+    "radarLive": {
+      "title": "Reputation Radar",
+      "error": "The Radar could not be read right now. Please try again later.",
+      "connection": { "title": "Connect your Profile to activate the Radar", "body": "The Radar only calculates pending replies and patterns after every Business Profile review has been imported.", "action": "Connect Profile" },
+      "syncing": { "title": "The Radar is still finishing its reading", "body": "Until synchronization is complete, we do not show counts or patterns that might be incomplete.", "action": "View reviews" },
+      "priority": { "title_one": "1 review is awaiting a reply", "title_other": "{{count}} reviews are awaiting replies", "body": "{{count}} have a rating of 3 or lower. Start there to take care of what customers have already said.", "action": "Review reviews" },
+      "clear": { "title": "No review is awaiting a reply", "body": "The imported queue is up to date. The Radar keeps watching for new reviews and recurring changes." },
+      "source": "Source: {{count}} imported reviews",
+      "lastSynced": "updated {{date}}",
+      "noPatterns": "There is not yet a recurring pattern with enough evidence to highlight.",
+      "signals": { "concernLabel": "Change to watch", "strengthLabel": "What works", "concernTitle": "{{theme}} appears again in recent reviews", "strengthTitle": "{{theme}} is a recognized strength", "evidence": "{{count}} mentions in {{days}} days" },
+      "themes": { "service": "Service", "wait": "Wait time", "food": "Food", "cleanliness": "Cleanliness" }
+    },
     "setupBanner": {
       "title": "Finish the setup",
       "name": "your business name",

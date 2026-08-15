@@ -65,6 +65,12 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   período; a prioridade fica no topo, mas o resumo dos quatro sinais aparece
   de uma vez, sem abas. O Radar não cria tarefas. Ainda não lê, calcula nem
   notifica dados reais.
+- O cálculo local do Radar foi ligado ao painel real, mas só pode entrar no
+  estado `ready` quando a ligação oficial estiver conectada, uma localização
+  selecionada e a paginação de avaliações concluída. Nesse ponto, a prioridade
+  é a fila real sem resposta; termos recorrentes só viram sinal depois de no
+  mínimo duas menções negativas ou três positivas nos últimos 30 dias. O cache
+  público limitado nunca é usado para afirmar que a fila está completa.
 - A fundação da conexão oficial com o Perfil da Empresa foi preparada localmente
   no mesmo branch: migration `20260814193000_google_business_profile_connection.sql`,
   `start-google-business-oauth`, `google-business-oauth-callback` e

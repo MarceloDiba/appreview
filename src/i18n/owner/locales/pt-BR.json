@@ -341,6 +341,19 @@
       "sources": { "title": "Como o Radar chegou aqui", "subtitle": "Toda recomendação precisa explicar a própria evidência.", "period": "Período", "reviews": "Avaliações lidas", "profile": "Perfil do Google", "profileValue": "Dados ilustrativos" },
       "quiet": { "title": "Silencioso por padrão", "body": "Se não houver risco ou oportunidade relevante, o AppReview apenas confirma que está tudo em dia." }
     },
+    "radarLive": {
+      "title": "Radar de Reputação",
+      "error": "Não foi possível ler o Radar agora. Tente novamente mais tarde.",
+      "connection": { "title": "Conecte o Perfil para ativar o Radar", "body": "O Radar só calcula pendências e padrões quando todas as avaliações do Perfil da Empresa foram importadas.", "action": "Conectar Perfil" },
+      "syncing": { "title": "O Radar ainda está terminando a leitura", "body": "Enquanto a sincronização não chega ao fim, não mostramos contagens ou padrões que possam estar incompletos.", "action": "Ver avaliações" },
+      "priority": { "title_one": "1 avaliação aguarda resposta", "title_other": "{{count}} avaliações aguardam resposta", "body": "{{count}} com nota até 3. Comece por elas para cuidar do que seus clientes já disseram.", "action": "Revisar avaliações" },
+      "clear": { "title": "Nenhuma avaliação aguarda resposta", "body": "A fila importada está em dia. O Radar continua acompanhando novas avaliações e mudanças recorrentes." },
+      "source": "Base: {{count}} avaliações importadas",
+      "lastSynced": "atualizado {{date}}",
+      "noPatterns": "Ainda não há um padrão recorrente com evidência suficiente para destacar.",
+      "signals": { "concernLabel": "Mudança a observar", "strengthLabel": "O que funciona", "concernTitle": "{{theme}} reaparece em avaliações recentes", "strengthTitle": "{{theme}} é uma força reconhecida", "evidence": "{{count}} menções em {{days}} dias" },
+      "themes": { "service": "Atendimento", "wait": "Demora", "food": "Comida", "cleanliness": "Limpeza" }
+    },
     "setupBanner": {
       "title": "Falta terminar a configuração",
       "name": "o nome do seu negócio",

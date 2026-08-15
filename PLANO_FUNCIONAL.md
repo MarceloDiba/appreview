@@ -61,6 +61,10 @@ Objetivo: tornar reais os indicadores de saúde e permitir assessoria completa.
 - cada página de avaliações devolve `next_page_token`; enquanto ele existir,
   nenhuma interface pode dizer que a fila ou a contagem de pendências está
   completa;
+- o avaliador local do Radar só roda depois da paginação concluída: prioriza
+  avaliações reais sem resposta e só destaca um tema após evidência mínima
+  (duas menções negativas ou três positivas no período de 30 dias); o cache
+  Places limitado não entra nesse cálculo;
 - configuração de ambiente e passo a passo em
   `docs/google-business-profile-rollout.md`.
 
