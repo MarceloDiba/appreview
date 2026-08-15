@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ExternalLink, MessageCircle, MessageSquareText, QrCode } from 'lucide-react';
+import { ExternalLink, Info, MessageCircle, MessageSquareText, QrCode, Star } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
 import ReputationAdvisorCard, { ProfileHealthCard } from '@/components/dashboard/ReputationAdvisorCard';
@@ -13,6 +13,92 @@ import { GoogleOutcomeData } from '@/hooks/useGoogleOutcome';
 import { AdvisorReview } from '@/hooks/useReputationAdvisor';
 
 const ExampleBadge = () => <span className="rounded-full bg-violet-50 px-3 py-1 text-xs text-primary">Exemplo ilustrativo</span>;
+
+type ExperimentalSnapshot = {
+  source: 'apify-experimental';
+  fetchedAt: string;
+  business: {
+    name: string;
+    address: string;
+    placeId: string;
+    googleRating: number;
+    googleReviewCount: number;
+  };
+  sample: {
+    reviewCount: number;
+    ratingBreakdown: Record<'1' | '2' | '3' | '4' | '5', number>;
+    ownerRepliesFound: number;
+  };
+};
+
+const ExperimentalSnapshotPanel = () => {
+  const [snapshot, setSnapshot] = useState<ExperimentalSnapshot | null>(null);
+  const [status, setStatus] = useState<'loading' | 'missing' | 'invalid' | 'ready'>('loading');
+
+  useEffect(() => {
+    const loadSnapshot = async () => {
+      try {
+        const response = await fetch('/experimental-snapshot.json', { cache: 'no-store' });
+        if (response.status === 404) {
+          setStatus('missing');
+          return;
+        }
+        if (!response.ok) throw new Error('Snapshot unavailable');
+
+        const data: unknown = await response.json();
+        if (!data || typeof data !== 'object' || (data as { source?: string }).source !== 'apify-experimental') {
+          throw new Error('Invalid snapshot');
+        }
+        setSnapshot(data as ExperimentalSnapshot);
+        setStatus('ready');
+      } catch {
+        setStatus('invalid');
+      }
+    };
+
+    void loadSnapshot();
+  }, []);
+
+  if (status === 'loading') {
+    return <main className="flex flex-1 items-center justify-center px-4 pt-16"><p className="text-sm text-slate-500">A carregar fotografia experimental…</p></main>;
+  }
+
+  if (status !== 'ready' || !snapshot) {
+    return (
+      <main className="flex flex-1 items-center justify-center px-4 pt-24">
+        <Card className="max-w-xl border-amber-200 bg-amber-50/60 shadow-none"><CardContent className="p-6">
+          <p className="font-semibold text-slate-950">Nenhuma fotografia experimental local está disponível.</p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">Esta tela só lê um arquivo local não versionado. Ela não consulta o Google nem apresenta dados de clientes em produção.</p>
+        </CardContent></Card>
+      </main>
+    );
+  }
+
+  const ratingRows = ['5', '4', '3', '2', '1'] as const;
+  const sampleReplyRate = Math.round((snapshot.sample.ownerRepliesFound / snapshot.sample.reviewCount) * 100);
+
+  return (
+    <main className="flex-1 px-4 pb-12 pt-24">
+      <div className="container mx-auto max-w-5xl">
+        <header className="mb-6">
+          <div className="flex flex-wrap items-center gap-3"><span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">Snapshot experimental via Apify</span><span className="text-xs text-slate-500">Não é integração oficial do Google</span></div>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{snapshot.business.name}</h1>
+          <p className="mt-1 text-sm text-slate-500">{snapshot.business.address} · recolhido em {new Intl.DateTimeFormat('pt-PT', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(snapshot.fetchedAt))}</p>
+        </header>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="border-slate-200 shadow-none"><CardContent className="p-5"><p className="text-sm text-slate-500">Perfil público observado</p><div className="mt-3 flex items-center gap-2"><Star className="h-5 w-5 fill-amber-400 text-amber-400" /><strong className="text-3xl text-slate-950">{snapshot.business.googleRating.toFixed(1)}</strong></div><p className="mt-1 text-sm text-slate-600">{snapshot.business.googleReviewCount} avaliações no perfil</p></CardContent></Card>
+          <Card className="border-slate-200 shadow-none"><CardContent className="p-5"><p className="text-sm text-slate-500">Amostra recolhida</p><p className="mt-3 text-3xl font-semibold text-slate-950">{snapshot.sample.reviewCount}</p><p className="mt-1 text-sm text-slate-600">avaliações mais recentes, máximo da coleta</p></CardContent></Card>
+          <Card className="border-amber-200 bg-amber-50/50 shadow-none"><CardContent className="p-5"><p className="text-sm text-amber-900">Respostas vistas na amostra</p><p className="mt-3 text-3xl font-semibold text-slate-950">{snapshot.sample.ownerRepliesFound}/{snapshot.sample.reviewCount}</p><p className="mt-1 text-sm text-amber-900/80">{sampleReplyRate}% da amostra; não é fila completa</p></CardContent></Card>
+        </div>
+
+        <Card className="mt-4 border-slate-200 shadow-none"><CardContent className="p-5"><div className="flex items-start gap-3"><Info className="mt-0.5 h-5 w-5 shrink-0 text-[#6D43C0]" /><div><h2 className="font-semibold text-slate-950">O que este teste valida</h2><p className="mt-1 text-sm leading-relaxed text-slate-600">A leitura de uma fotografia real e limitada do perfil, sem confundir a amostra com todas as avaliações ou com uma ligação oficial. A fila completa, o Radar real e a publicação de respostas continuam bloqueados até OAuth e sincronização integral do Perfil da Empresa.</p></div></div></CardContent></Card>
+
+        <Card className="mt-4 border-slate-200 shadow-none"><CardContent className="p-5"><h2 className="font-semibold text-slate-950">Distribuição desta amostra</h2><div className="mt-5 space-y-3">{ratingRows.map((rating) => { const count = snapshot.sample.ratingBreakdown[rating]; const width = Math.round((count / snapshot.sample.reviewCount) * 100); return <div key={rating} className="grid grid-cols-[32px_1fr_48px] items-center gap-3 text-sm"><span className="font-medium text-slate-700">{rating} ★</span><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2457D6]" style={{ width: `${width}%` }} /></div><span className="text-right text-slate-500">{count}</span></div>; })}</div></CardContent></Card>
+      </div>
+    </main>
+  );
+};
 
 const previewOutcome: GoogleOutcomeData = {
   placeName: 'Seu negócio',
@@ -83,6 +169,16 @@ const Demo = () => {
   const panelOnly = searchParams.get('view') === 'panel';
   const queueOnly = searchParams.get('view') === 'queue';
   const radarOnly = searchParams.get('view') === 'radar';
+  const snapshotOnly = searchParams.get('view') === 'snapshot';
+
+  if (snapshotOnly) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#f5f7f9]">
+        <Navbar userRole="business" businessName="Teste local · fonte experimental" />
+        <ExperimentalSnapshotPanel />
+      </div>
+    );
+  }
 
   if (radarOnly) {
     return (

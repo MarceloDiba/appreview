@@ -3,6 +3,23 @@
 Estado em 31/07/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
+## Teste experimental Apify — 15/08/2026
+
+- A coleta manual autorizada para **Mania de Petiscos**, Lisboa, terminou às
+  16:03 WEST. O limite foi de 49 avaliações e o custo observado foi
+  **US$ 0,02945**. Não foi criada agenda nem nova execução automática.
+- O arquivo local ignorado `public/experimental-snapshot.json` contém somente
+  agregados sanitizados do perfil e da amostra. Não guarda autores, fotos,
+  URLs ou textos de avaliações; não entra no Git, Supabase, cache oficial ou
+  produção.
+- A rota local `/demo?view=snapshot` identifica a fonte Apify, o limite da
+  amostra e que não é uma integração oficial do Google. Ela não sugere fila
+  completa, pendências reais, Radar real ou publicação de respostas.
+- `binno.pro` e `www.binno.pro` foram vinculados ao projeto Vercel, mas a
+  configuração DNS ainda está pendente no registrador GoDaddy. Até o estado
+  deixar de ser `misconfigured`, a referência pública continua sendo
+  `https://appreview-flame.vercel.app`.
+
 ## Marca Binno — 15/08/2026
 
 - Marcelo fechou o nome **Binno** e adquiriu o domínio `binno.pro`.
