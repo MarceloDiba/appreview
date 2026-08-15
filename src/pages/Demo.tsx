@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ExternalLink, Info, MessageCircle, MessageSquareText, QrCode, Star } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, CircleAlert, ExternalLink, Info, LockKeyhole, MessageCircle, MessageSquareText, QrCode, Star } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
 import ReputationAdvisorCard, { ProfileHealthCard } from '@/components/dashboard/ReputationAdvisorCard';
@@ -66,25 +66,51 @@ const ExperimentalSnapshotPanel = () => {
 
   const ratingRows = ['5', '4', '3', '2', '1'] as const;
   const sampleReplyRate = Math.round((snapshot.sample.ownerRepliesFound / snapshot.sample.reviewCount) * 100);
+  const fiveStarRate = Math.round((snapshot.sample.ratingBreakdown['5'] / snapshot.sample.reviewCount) * 100);
+  const lowRatingCount = snapshot.sample.ratingBreakdown['1'] + snapshot.sample.ratingBreakdown['2'];
 
   return (
     <main className="flex-1 px-4 pb-12 pt-24">
-      <div className="container mx-auto max-w-5xl">
-        <header className="mb-6">
-          <div className="flex flex-wrap items-center gap-3"><span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">Snapshot experimental via Apify</span><span className="text-xs text-slate-500">Não é integração oficial do Google</span></div>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{snapshot.business.name}</h1>
-          <p className="mt-1 text-sm text-slate-500">{snapshot.business.address} · recolhido em {new Intl.DateTimeFormat('pt-PT', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(snapshot.fetchedAt))}</p>
+      <div className="container mx-auto max-w-7xl">
+        <header className="mb-6 flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-3"><span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">Fonte experimental · Apify</span><span className="text-xs text-slate-500">Não é ligação oficial do Google</span></div>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{snapshot.business.name}</h1>
+            <p className="mt-1 text-sm text-slate-500">{snapshot.business.address} · recolhido em {new Intl.DateTimeFormat('pt-PT', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(snapshot.fetchedAt))}</p>
+          </div>
+          <div className="rounded-xl border border-violet-200 bg-violet-50/70 px-4 py-3 text-sm text-violet-950">
+            <p className="font-semibold">Leitura para validar o piloto</p>
+            <p className="mt-0.5 text-xs text-violet-800">Mostra sinais observados; não mede uma fila completa.</p>
+          </div>
         </header>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-slate-200 shadow-none"><CardContent className="p-5"><p className="text-sm text-slate-500">Perfil público observado</p><div className="mt-3 flex items-center gap-2"><Star className="h-5 w-5 fill-amber-400 text-amber-400" /><strong className="text-3xl text-slate-950">{snapshot.business.googleRating.toFixed(1)}</strong></div><p className="mt-1 text-sm text-slate-600">{snapshot.business.googleReviewCount} avaliações no perfil</p></CardContent></Card>
-          <Card className="border-slate-200 shadow-none"><CardContent className="p-5"><p className="text-sm text-slate-500">Amostra recolhida</p><p className="mt-3 text-3xl font-semibold text-slate-950">{snapshot.sample.reviewCount}</p><p className="mt-1 text-sm text-slate-600">avaliações mais recentes, máximo da coleta</p></CardContent></Card>
-          <Card className="border-amber-200 bg-amber-50/50 shadow-none"><CardContent className="p-5"><p className="text-sm text-amber-900">Respostas vistas na amostra</p><p className="mt-3 text-3xl font-semibold text-slate-950">{snapshot.sample.ownerRepliesFound}/{snapshot.sample.reviewCount}</p><p className="mt-1 text-sm text-amber-900/80">{sampleReplyRate}% da amostra; não é fila completa</p></CardContent></Card>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
+          <section className="space-y-4">
+            <Card className="border-slate-200 shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
+              <CardContent className="p-5 sm:p-6">
+                <div className="flex flex-wrap items-start justify-between gap-4"><div><h2 className="font-semibold text-slate-950">Resumo da reputação observada</h2><p className="mt-1 text-sm text-slate-500">Dados públicos do perfil e uma fotografia limitada das avaliações recentes.</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">Leitura experimental</span></div>
+                <div className="mt-6 grid gap-5 sm:grid-cols-[180px_minmax(0,1fr)]">
+                  <div className="border-b border-slate-100 pb-5 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-6"><p className="text-sm text-slate-500">Nota pública atual</p><div className="mt-2 flex items-center gap-2"><strong className="text-5xl font-medium tracking-tight text-slate-950">{snapshot.business.googleRating.toFixed(1)}</strong><Star className="h-6 w-6 fill-amber-400 text-amber-400" /></div><p className="mt-2 text-sm text-slate-600">{snapshot.business.googleReviewCount} avaliações no perfil</p></div>
+                  <div><p className="text-xs font-medium uppercase tracking-wide text-slate-500">Distribuição da amostra</p><div className="mt-4 space-y-3">{ratingRows.map((rating) => { const count = snapshot.sample.ratingBreakdown[rating]; const width = Math.round((count / snapshot.sample.reviewCount) * 100); return <div key={rating} className="grid grid-cols-[34px_1fr_42px] items-center gap-3 text-sm"><span className="font-medium text-slate-700">{rating} ★</span><div className="h-2.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2457D6]" style={{ width: `${width}%` }} /></div><span className="text-right text-slate-500">{count}</span></div>; })}</div></div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card className="border-slate-200 shadow-none"><CardContent className="p-5"><p className="text-sm text-slate-500">Amostra recente</p><p className="mt-2 text-3xl font-semibold text-slate-950">{snapshot.sample.reviewCount}</p><p className="mt-1 text-xs leading-5 text-slate-500">Máximo da coleta manual; não representa todo o histórico.</p></CardContent></Card>
+              <Card className="border-emerald-200 bg-emerald-50/40 shadow-none"><CardContent className="p-5"><p className="text-sm text-emerald-900">Força vista agora</p><p className="mt-2 text-3xl font-semibold text-slate-950">{fiveStarRate}%</p><p className="mt-1 text-xs leading-5 text-emerald-900/80">das avaliações da amostra têm cinco estrelas.</p></CardContent></Card>
+              <Card className={lowRatingCount ? 'border-amber-200 bg-amber-50/50 shadow-none' : 'border-slate-200 shadow-none'}><CardContent className="p-5"><p className="text-sm text-slate-600">Atenção na amostra</p><p className="mt-2 text-3xl font-semibold text-slate-950">{lowRatingCount}</p><p className="mt-1 text-xs leading-5 text-slate-500">avaliações de uma ou duas estrelas observadas.</p></CardContent></Card>
+            </div>
+
+            <Card className="border-slate-200 shadow-none"><CardContent className="p-5 sm:p-6"><div className="flex items-start gap-3"><Info className="mt-0.5 h-5 w-5 shrink-0 text-[#6D43C0]" /><div><h2 className="font-semibold text-slate-950">O que esta leitura permite decidir</h2><p className="mt-1 text-sm leading-relaxed text-slate-600">Validar se o dono entende a nota pública, o volume de avaliações e a distribuição recente sem abrir o Google. Ela não afirma tendência, pendências ou impacto no ranking; essas conclusões ficam para a conexão oficial.</p></div></div></CardContent></Card>
+          </section>
+
+          <aside className="space-y-4">
+            <Card className="border-violet-200 bg-violet-50/45 shadow-none"><CardContent className="p-5"><div className="flex items-start justify-between gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-100"><CheckCircle2 className="h-5 w-5 text-violet-800" /></span><span className="text-xs font-medium text-violet-800">Disponível no teste</span></div><h2 className="mt-4 font-semibold text-slate-950">Uma leitura rápida, sem procura</h2><p className="mt-2 text-sm leading-relaxed text-slate-600">Nota pública, tamanho da amostra, estrelas e respostas observadas ficam reunidos em uma tela.</p><div className="mt-4 border-t border-violet-200 pt-4 text-xs text-violet-900"><span className="font-semibold">Respostas vistas:</span> {snapshot.sample.ownerRepliesFound}/{snapshot.sample.reviewCount} ({sampleReplyRate}%)</div></CardContent></Card>
+            <Card className="border-amber-200 bg-amber-50/45 shadow-none"><CardContent className="p-5"><div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100"><LockKeyhole className="h-5 w-5 text-amber-800" /></div><h2 className="mt-4 font-semibold text-slate-950">Ainda depende do Google oficial</h2><ul className="mt-3 space-y-2 text-sm leading-5 text-slate-600"><li className="flex gap-2"><CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />Fila completa e respostas pendentes</li><li className="flex gap-2"><CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />Radar, temas e evolução no tempo</li><li className="flex gap-2"><CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />Publicação confirmada de respostas</li></ul></CardContent></Card>
+            <Card className="border-slate-200 shadow-none"><CardContent className="p-5"><p className="text-xs font-medium uppercase tracking-wide text-slate-500">Próximo marco</p><p className="mt-2 font-semibold text-slate-950">Conectar o Perfil da Empresa</p><p className="mt-1 text-sm leading-relaxed text-slate-600">Quando o OAuth estiver aprovado, esta fotografia dá lugar à sincronização autorizada e completa.</p><span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#2457D6]">Entender a transição <ArrowUpRight className="h-4 w-4" /></span></CardContent></Card>
+          </aside>
         </div>
-
-        <Card className="mt-4 border-slate-200 shadow-none"><CardContent className="p-5"><div className="flex items-start gap-3"><Info className="mt-0.5 h-5 w-5 shrink-0 text-[#6D43C0]" /><div><h2 className="font-semibold text-slate-950">O que este teste valida</h2><p className="mt-1 text-sm leading-relaxed text-slate-600">A leitura de uma fotografia real e limitada do perfil, sem confundir a amostra com todas as avaliações ou com uma ligação oficial. A fila completa, o Radar real e a publicação de respostas continuam bloqueados até OAuth e sincronização integral do Perfil da Empresa.</p></div></div></CardContent></Card>
-
-        <Card className="mt-4 border-slate-200 shadow-none"><CardContent className="p-5"><h2 className="font-semibold text-slate-950">Distribuição desta amostra</h2><div className="mt-5 space-y-3">{ratingRows.map((rating) => { const count = snapshot.sample.ratingBreakdown[rating]; const width = Math.round((count / snapshot.sample.reviewCount) * 100); return <div key={rating} className="grid grid-cols-[32px_1fr_48px] items-center gap-3 text-sm"><span className="font-medium text-slate-700">{rating} ★</span><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2457D6]" style={{ width: `${width}%` }} /></div><span className="text-right text-slate-500">{count}</span></div>; })}</div></CardContent></Card>
       </div>
     </main>
   );

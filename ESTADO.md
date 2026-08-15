@@ -43,8 +43,14 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   Google, descarte de dados de avaliadores, auditoria sanitizada, intervalo de
   24 h por negócio e limite mensal configurável. O botão público e a Edge
   Function continuam desligados por padrão.
-- [ ] Autorizar teto financeiro, aplicar a migration e configurar o segredo
-  apenas no servidor antes de ativar o teste Apify em ambiente publicado.
+- [ ] Cadastrar `APIFY_API_TOKEN` por canal seguro, aplicar a migration e
+  configurar a função apenas no servidor antes de ativar o teste Apify em
+  ambiente publicado.
+- [~] Teto do piloto manual autorizado em 15/08 (recomendação: US$ 5/mês).
+  Falta cadastrar `APIFY_API_TOKEN` por canal seguro; sem esse segredo a
+  migration, a função e qualquer coleta continuam não publicadas.
+- [x] Reorganizar `/demo?view=snapshot` como dashboard da fonte experimental,
+  distinguindo fatos públicos observados de fila, Radar e respostas oficiais.
 - [ ] Aguardar aprovação Basic do Google antes de substituir essa amostra por
   OAuth, seleção de local e sincronização oficial completa.
 - [~] Configurar DNS de `binno.pro` no GoDaddy conforme instrução da Vercel.

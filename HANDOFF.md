@@ -46,6 +46,13 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   `APIFY_API_TOKEN`, a migration e a Edge Function, é necessário autorizar um
   teto financeiro explícito. Procedimento e variáveis em
   `docs/apify-experimental-rollout.md`.
+- Marcelo autorizou em 15/08 o piloto manual com teto recomendado de US$ 5/mês.
+  A inspeção do Supabase confirmou que ainda não há `APIFY_API_TOKEN`; nenhuma
+  migration, função, segredo ou chamada nova foi publicada. A ligação Composio
+  do Apify não revela tokens e o console local não tinha sessão autenticada.
+- A leitura em `/demo?view=snapshot` foi redesenhada como dashboard: resumo
+  público, distribuição da amostra, força e atenção observadas, respostas
+  vistas e uma coluna que separa claramente o que continua bloqueado até OAuth.
 - `binno.pro` e `www.binno.pro` foram vinculados ao projeto Vercel, mas a
   configuração DNS ainda está pendente no registrador GoDaddy. Até o estado
   deixar de ser `misconfigured`, a referência pública continua sendo
