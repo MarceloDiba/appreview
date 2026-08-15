@@ -204,7 +204,7 @@
       "advisorReading": "Leitura do assessor:",
       "progressReading": "mais pessoas avaliaram o negócio e a nota avançou.",
       "neutralReading": "ainda não há histórico suficiente para afirmar uma mudança.",
-      "causality": "As mudanças são observadas no Google e não atribuídas automaticamente ao AppReview.",
+      "causality": "As mudanças são observadas no Google e não atribuídas automaticamente ao Binno.",
       "pathTitle": "Caminho até ao Google",
       "pathDisclaimer": "Os cliques indicam intenção de avaliar, não avaliações publicadas.",
       "continuation": "continuidade",
@@ -215,7 +215,7 @@
       "noBaseline": "Ainda não há histórico suficiente para comparar a evolução no Google.",
       "clickRate": "{{rate}}% das aberturas avançaram para o Google.",
       "noClickRate": "A taxa de avanço aparece após os primeiros acessos ao QR.",
-      "disclaimer": "O clique indica intenção, não confirma publicação. A variação de avaliações e nota vem do próprio Google e não é atribuída automaticamente ao AppReview.",
+      "disclaimer": "O clique indica intenção, não confirma publicação. A variação de avaliações e nota vem do próprio Google e não é atribuída automaticamente ao Binno.",
       "openReviews": "Ver avaliações e preparar respostas"
     },
     "advisor": {
@@ -249,7 +249,7 @@
       "queueTitle": "{{count}} avaliações aguardam resposta",
       "queueSubtitle": "Resolva todas numa única sessão assistida.",
       "queueAction": "Responder a avaliações",
-      "disclaimer": "O rascunho é determinístico e editável. Você decide e publica no Google; o AppReview não publica automaticamente."
+      "disclaimer": "O rascunho é determinístico e editável. Você decide e publica no Google; o Binno não publica automaticamente."
     },
     "reviewQueue": {
       "back": "Voltar ao painel",
@@ -339,7 +339,7 @@
       "strengthEvidence": { "metric": "Menções positivas", "metricDetail": "sobre atendimento", "title": "O que os clientes mais reconhecem", "body": "O Radar agrupa termos recorrentes para revelar a perceção que já existe — sem inventar elogios nem chamar uma tendência de resultado definitivo.", "topics": { "cordialidade": "Cordialidade", "agilidade": "Agilidade", "atenção": "Atenção" } },
       "opportunityEvidence": { "title": "Porque esta é a única oportunidade agora", "body": "O perfil não precisa de uma reforma. Basta aproximar o que mostra do que os clientes já citam com entusiasmo.", "praise": "elogios ao prato executivo", "photos": "fotografias recentes desse item" },
       "sources": { "title": "Como o Radar chegou aqui", "subtitle": "Toda a recomendação precisa de explicar a sua própria evidência.", "period": "Período", "reviews": "Avaliações lidas", "profile": "Perfil do Google", "profileValue": "Dados ilustrativos" },
-      "quiet": { "title": "Silencioso por defeito", "body": "Se não houver risco ou oportunidade relevante, o AppReview apenas confirma que está tudo em dia." }
+      "quiet": { "title": "Silencioso por defeito", "body": "Se não houver risco ou oportunidade relevante, o Binno apenas confirma que está tudo em dia." }
     },
     "radarLive": {
       "title": "Radar de Reputação",
@@ -368,7 +368,7 @@
     "googleConnection": {
       "title": "Ligar Perfil de Empresa no Google",
       "description": "Ligue a localização que gere para trazer a fila completa de avaliações e identificar respostas pendentes com dados do próprio Google.",
-      "consent": "Autoriza o acesso diretamente no Google. O AppReview não vê a sua palavra-passe nem publica respostas automaticamente.",
+      "consent": "Autoriza o acesso diretamente no Google. O Binno não vê a sua palavra-passe nem publica respostas automaticamente.",
       "connect": "Ligar Google",
       "connecting": "A abrir Google…",
       "unavailable": "A ligação oficial ao Perfil de Empresa ainda está a ser configurada neste ambiente.",
@@ -469,7 +469,7 @@
     "pwError": "Não foi possível alterar a palavra-passe.",
     "billingTitle": "Assinatura",
     "billingDesc": "Como está a sua conta hoje.",
-    "billingBody1": "O AppReview custa {{price}} por mês por negócio. No arranque, a assinatura e a cobrança são tratadas diretamente connosco — não há cobrança automática dentro da aplicação nem cartão guardado aqui.",
+    "billingBody1": "O Binno custa {{price}} por mês por negócio. No arranque, a assinatura e a cobrança são tratadas diretamente connosco — não há cobrança automática dentro da aplicação nem cartão guardado aqui.",
     "billingContactPrefix": "Para mudar, pausar ou cancelar, escreva para",
     "billingContactSuffix": ". Respondemos no próprio dia.",
     "billingNoMinimum": "Sem período mínimo de fidelização."
@@ -611,7 +611,7 @@
     "emailSubject": "Sobre a sua mensagem — {{business}}",
     "emailSubjectGeneric": "Sobre a sua mensagem",
     "textareaLabel": "Texto sugerido: {{title}}",
-    "footerPublic": "O AppReview não publica respostas por si: a resposta pública tem de sair do seu perfil de empresa no Google. Copie, cole lá e ajuste o que só o dono do negócio sabe.",
+    "footerPublic": "O Binno não publica respostas por si: a resposta pública tem de sair do seu perfil de empresa no Google. Copie, cole lá e ajuste o que só o dono do negócio sabe.",
     "footerPrivate": "Esta mensagem vai diretamente para quem lhe escreveu. Nunca ofereça algo em troca de apagar ou mudar uma avaliação pública — isso é proibido pelo Google e pela lei."
   },
   "language": {

@@ -1,11 +1,11 @@
-# AppReview — plano funcional do assessor de reputação
+# Binno — plano funcional do assessor de reputação
 
 Fotografia em 14/08/2026. Este plano separa o que já funciona, o que depende de
 integração e o que só deve avançar após decisão de custo ou política.
 
 ## Resultado pretendido
 
-O gestor abre o AppReview e recebe uma leitura curta: como está a reputação no
+O gestor abre o Binno e recebe uma leitura curta: como está a reputação no
 Google, o que mudou, o que merece atenção e qual é a ação mais útil. O produto
 reduz interpretação e trabalho; não cria uma operação paralela de casos.
 
@@ -124,7 +124,7 @@ O WhatsApp deve entregar valor, não notificações genéricas:
 
 - resumo semanal da evolução observada;
 - alerta apenas para avaliação nova que mereça atenção;
-- ligação direta para revisar a resposta no AppReview;
+- ligação direta para revisar a resposta no Binno;
 - frequência e silêncio configuráveis;
 - opt-in, opt-out e histórico de consentimento.
 
@@ -151,7 +151,7 @@ Não há necessidade de IA paga para validar a proposta de valor do painel.
 - o total de avaliações sem resposta confere com o Perfil da Empresa;
 - a última foto e os horários exibidos têm origem e data visíveis;
 - uma nova avaliação chega ao painel dentro da janela definida;
-- o gestor revisa e publica uma resposta sem o AppReview agir sozinho;
+- o gestor revisa e publica uma resposta sem o Binno agir sozinho;
 - o briefing não cria alertas repetidos ou tarefas irrelevantes;
 - custos por conta e falhas de sincronização ficam observáveis.
 
@@ -164,4 +164,4 @@ Não há necessidade de IA paga para validar a proposta de valor do painel.
 5. Automatizar sincronização e briefing.
 6. Pilotar WhatsApp com orçamento aprovado.
 7. Só depois avaliar IA paga, múltiplas localizações e publicação de respostas
-   dentro do AppReview.
+   dentro do Binno.

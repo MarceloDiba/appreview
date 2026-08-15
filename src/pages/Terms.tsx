@@ -7,7 +7,7 @@ import { LEGAL } from '@/lib/legal';
  * Termos de Serviço.
  *
  * A cláusula que não pode desaparecer daqui é a da secção "Como o serviço tem
- * de ser usado": o cliente compromete-se a não usar o AppReview para filtrar
+ * de ser usado": o cliente compromete-se a não usar o Binno para filtrar
  * avaliações. O produto foi desenhado para tornar isso impossível, mas quem
  * assina tem de saber que também está proibido de tentar — é a mesma linha que
  * o código defende em `FeedbackForm`.

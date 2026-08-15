@@ -1,7 +1,17 @@
-# Estado do AppReview — 31 de julho de 2026
+# Estado do Binno — 31 de julho de 2026
 
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
+
+## Marca — 15 de agosto de 2026
+
+- [x] Definir **Binno** como novo nome do produto e adquirir `binno.pro`.
+- [x] Aplicar Binno na interface, metadados, documentos vivos e mensagens do
+  produto, preservando identificadores técnicos `appreview:*` por
+  compatibilidade.
+- [ ] Fazer pesquisa e registro marcários antes de divulgação ampla, campanha
+  ou mudança do nome no projeto Google Cloud. Domínio adquirido não prova
+  disponibilidade de marca.
 
 ## Em validação local — 14 de agosto de 2026
 
@@ -82,7 +92,7 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   métricas está aplicada; falta merge/deploy de produção antes de iniciar o
   piloto do Mania.
 - [ ] Com o aceite do titular do estabelecimento escolhido, executar o piloto
-  concierge sem atribuir ao AppReview avaliações que só o Google pode confirmar.
+  concierge sem atribuir ao Binno avaliações que só o Google pode confirmar.
   - Estabelecimento escolhido por Marcelo em 15/08: **Mania de Petiscos**,
     Lisboa. O link curto do Google foi fornecido pelo Marcelo; a confirmação do
     negócio, idioma e destino fica no teste do QR físico, não é inferida do
@@ -90,7 +100,7 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 
 ## Regra de produto que não pode regredir
 
-O AppReview é gestão de reputação para donos de negócio que não sabem de
+O Binno é gestão de reputação para donos de negócio que não sabem de
 tecnologia. A avaliação pública é sempre oferecida, qualquer que seja a nota.
 Condicionar a opção pública à nota é review gating e é proibido.
 

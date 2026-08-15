@@ -12,7 +12,7 @@ const sha256 = async (value: string) => {
 const redirectToApp = (result: "connected" | "cancelled" | "failed") => {
   const appUrl = (Deno.env.get("APP_URL") || "").replace(/\/$/, "");
   if (!appUrl) {
-    return new Response("Google authorization finished. Return to AppReview.", { status: 200 });
+    return new Response("Google authorization finished. Return to Binno.", { status: 200 });
   }
   return Response.redirect(`${appUrl}/settings?googleConnection=${result}`, 302);
 };

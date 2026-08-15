@@ -111,7 +111,7 @@ const AgentPreview = () => (
       </div>
       <p className="mt-4 flex items-center gap-2 text-xs text-gray-500">
         <LockKeyhole className="h-3.5 w-3.5" />
-        Você decide e publica no Google. O AppReview não publica automaticamente.
+        Você decide e publica no Google. O Binno não publica automaticamente.
       </p>
     </div>
   </div>
@@ -130,7 +130,7 @@ const Index = () => (
               <span className="text-primary">no Google</span>
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              O AppReview acompanha o que mudou, destaca o que merece atenção e ajuda você a
+              O Binno acompanha o que mudou, destaca o que merece atenção e ajuda você a
               responder — sem exigir que viva dentro do painel.
             </p>
 
@@ -154,14 +154,14 @@ const Index = () => (
             <div className="mt-7 rounded-xl border border-violet-200 bg-violet-50/60 p-4">
               <p className="flex gap-3 text-sm text-gray-700">
                 <ShieldCheck className="h-5 w-5 flex-shrink-0 text-primary" />
-                <span>Você decide o que responder e publicar. O AppReview nunca publica por você.</span>
+                <span>Você decide o que responder e publicar. O Binno nunca publica por você.</span>
               </p>
             </div>
 
             <p className="mt-6 flex gap-2 text-xs leading-relaxed text-gray-500">
               <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
               Cliques indicam intenção, não publicação. Mudanças observadas no Google não são
-              atribuídas automaticamente ao AppReview.
+              atribuídas automaticamente ao Binno.
             </p>
           </div>
 
@@ -200,7 +200,7 @@ const Index = () => (
         <div className="container mx-auto max-w-7xl">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Você não precisa vigiar o Google</h2>
-            <p className="mt-3 text-lg text-gray-600">O AppReview organiza os sinais e reduz o esforço para decidir.</p>
+            <p className="mt-3 text-lg text-gray-600">O Binno organiza os sinais e reduz o esforço para decidir.</p>
           </div>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -223,7 +223,7 @@ const Index = () => (
       <section className="px-4 pb-20 sm:px-6">
         <div className="container mx-auto max-w-7xl">
           <div className="mx-auto mb-8 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold">Google mostra. AppReview explica e orienta.</h2>
+            <h2 className="text-3xl font-bold">Google mostra. Binno explica e orienta.</h2>
             <p className="mt-3 text-gray-600">Dados brutos são só o começo. O diferencial está em transformar sinais em decisão.</p>
           </div>
           <div className="grid overflow-hidden rounded-2xl border md:grid-cols-2">
@@ -234,7 +234,7 @@ const Index = () => (
               </ul>
             </div>
             <div className="border-t bg-violet-50/50 p-6 md:border-l md:border-t-0 md:p-8">
-              <p className="font-semibold text-primary">O que o AppReview adiciona</p>
+              <p className="font-semibold text-primary">O que o Binno adiciona</p>
               <ul className="mt-5 space-y-3 text-sm text-gray-700">
                 {['Evolução comparável ao longo do tempo', 'Priorização do que merece leitura', 'Sugestões contextualizadas e editáveis'].map((item) => <li key={item} className="flex gap-2"><Check className="h-4 w-4 text-green-600" />{item}</li>)}
               </ul>
@@ -259,7 +259,7 @@ const Index = () => (
 
       <section className="px-4 py-16 sm:px-6">
         <div className="container mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 rounded-2xl bg-primary px-8 py-10 text-white md:flex-row">
-          <div><Sparkles className="h-7 w-7" /><h2 className="mt-3 text-3xl font-bold">Você decide. O AppReview organiza os sinais.</h2><p className="mt-2 text-white/80">Menos vigilância, mais clareza para agir.</p></div>
+          <div><Sparkles className="h-7 w-7" /><h2 className="mt-3 text-3xl font-bold">Você decide. O Binno organiza os sinais.</h2><p className="mt-2 text-white/80">Menos vigilância, mais clareza para agir.</p></div>
           <Button asChild size="lg" variant="secondary"><Link to="/signup">Conhecer meu painel</Link></Button>
         </div>
       </section>
@@ -267,7 +267,7 @@ const Index = () => (
 
     <footer className="bg-gray-950 px-4 py-10 text-gray-300 sm:px-6">
       <div className="container mx-auto flex max-w-7xl flex-col justify-between gap-4 sm:flex-row">
-        <div><p className="text-lg font-bold text-white">AppReview</p><p className="mt-2 text-sm text-gray-400">Assistência de reputação para negócios locais.</p></div>
+        <div><p className="text-lg font-bold text-white">Binno</p><p className="mt-2 text-sm text-gray-400">Assistência de reputação para negócios locais.</p></div>
         <div className="flex flex-wrap gap-5 text-sm"><Link to="/demo">Demonstração</Link><Link to="/termos">Termos</Link><Link to="/privacidade">Privacidade</Link></div>
       </div>
     </footer>

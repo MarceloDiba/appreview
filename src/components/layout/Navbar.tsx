@@ -52,7 +52,7 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0">
-              <span className="text-xl font-bold text-[#6D43C0]">AppReview</span>
+              <span className="text-xl font-bold text-[#6D43C0]">Binno</span>
             </Link>
 
             {userRole === 'business' && businessName && (

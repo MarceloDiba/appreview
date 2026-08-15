@@ -204,7 +204,7 @@
       "advisorReading": "Advisor reading:",
       "progressReading": "more people reviewed the business and the rating improved.",
       "neutralReading": "there is not enough history yet to state a change.",
-      "causality": "Changes are observed on Google and are not automatically attributed to AppReview.",
+      "causality": "Changes are observed on Google and are not automatically attributed to Binno.",
       "pathTitle": "Path to Google",
       "pathDisclaimer": "Clicks show intent to review, not published reviews.",
       "continuation": "continuation",
@@ -215,7 +215,7 @@
       "noBaseline": "There is not enough history yet to compare your Google progress.",
       "clickRate": "{{rate}}% of QR opens continued to Google.",
       "noClickRate": "The continuation rate appears after the first QR visits.",
-      "disclaimer": "A click shows intent, not a published review. Rating and review-count changes come from Google and are not automatically attributed to AppReview.",
+      "disclaimer": "A click shows intent, not a published review. Rating and review-count changes come from Google and are not automatically attributed to Binno.",
       "openReviews": "View reviews and prepare replies"
     },
     "advisor": {
@@ -249,7 +249,7 @@
       "queueTitle": "{{count}} reviews are awaiting a reply",
       "queueSubtitle": "Handle them all in one guided session.",
       "queueAction": "Reply to reviews",
-      "disclaimer": "The draft is deterministic and editable. You decide and publish on Google; AppReview never publishes automatically."
+      "disclaimer": "The draft is deterministic and editable. You decide and publish on Google; Binno never publishes automatically."
     },
     "reviewQueue": {
       "back": "Back to dashboard",
@@ -339,7 +339,7 @@
       "strengthEvidence": { "metric": "Positive mentions", "metricDetail": "about service", "title": "What customers recognise most", "body": "Radar groups recurring terms to reveal an existing perception — without inventing praise or calling a trend a definitive result.", "topics": { "cordialidade": "Kindness", "agilidade": "Speed", "atenção": "Care" } },
       "opportunityEvidence": { "title": "Why this is the one opportunity now", "body": "The profile does not need an overhaul. It just needs to show what customers already describe enthusiastically.", "praise": "praises for the lunch special", "photos": "recent photos of this item" },
       "sources": { "title": "How Radar got here", "subtitle": "Every recommendation must explain its evidence.", "period": "Period", "reviews": "Reviews read", "profile": "Google Profile", "profileValue": "Illustrative data" },
-      "quiet": { "title": "Quiet by default", "body": "If there is no relevant risk or opportunity, AppReview simply confirms that everything is on track." }
+      "quiet": { "title": "Quiet by default", "body": "If there is no relevant risk or opportunity, Binno simply confirms that everything is on track." }
     },
     "radarLive": {
       "title": "Reputation Radar",
@@ -368,7 +368,7 @@
     "googleConnection": {
       "title": "Connect Google Business Profile",
       "description": "Connect the location you manage to load the full review inbox and identify unanswered reviews using Google’s own data.",
-      "consent": "You authorize access directly with Google. AppReview never sees your password and never publishes replies automatically.",
+      "consent": "You authorize access directly with Google. Binno never sees your password and never publishes replies automatically.",
       "connect": "Connect Google",
       "connecting": "Opening Google…",
       "unavailable": "The official Business Profile connection is still being configured in this environment.",
@@ -469,7 +469,7 @@
     "pwError": "Couldn't change the password.",
     "billingTitle": "Subscription",
     "billingDesc": "How your account stands today.",
-    "billingBody1": "AppReview costs {{price}} per month per business. At the start, the subscription and billing are handled directly with us — there's no automatic charge inside the app and no card stored here.",
+    "billingBody1": "Binno costs {{price}} per month per business. At the start, the subscription and billing are handled directly with us — there's no automatic charge inside the app and no card stored here.",
     "billingContactPrefix": "To change, pause or cancel, write to",
     "billingContactSuffix": ". We reply the same day.",
     "billingNoMinimum": "No minimum commitment."
@@ -611,7 +611,7 @@
     "emailSubject": "About your message — {{business}}",
     "emailSubjectGeneric": "About your message",
     "textareaLabel": "Suggested text: {{title}}",
-    "footerPublic": "AppReview doesn't publish replies on your behalf: the public reply has to go out from your Google business profile. Copy it, paste it there, and adjust what only you know.",
+    "footerPublic": "Binno doesn't publish replies on your behalf: the public reply has to go out from your Google business profile. Copy it, paste it there, and adjust what only you know.",
     "footerPrivate": "This message goes straight to whoever wrote to you. Never offer anything in exchange for removing or changing a public review — that's against Google's rules and the law."
   },
   "language": {
