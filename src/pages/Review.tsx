@@ -5,10 +5,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { getQrOpenEventKey, trackReviewEvent } from '@/lib/reviewFunnel';
 
 type BusinessData = {
   id: string;
   name: string;
+  userId: string;
   externalLinks: Array<{
     platform: string;
     url: string;
@@ -38,7 +40,7 @@ const Review = () => {
       try {
         const qrQuery = supabase
           .from('qr_codes')
-          .select('id, name, user_id, times_scanned, slug')
+          .select('id, name, user_id, slug')
           .eq(isUuid(businessId) ? 'id' : 'slug', businessId);
 
         const { data: qrData, error: qrError } = await qrQuery.maybeSingle();
@@ -77,18 +79,17 @@ const Review = () => {
         setBusinessData({
           id: qrData.id,
           name: profileData?.business_name || qrData.name || 'Estabelecimento',
+          userId,
           externalLinks,
         });
 
-        const currentCount = qrData.times_scanned || 0;
-        const { error: updateError } = await supabase
-          .from('qr_codes')
-          .update({ times_scanned: currentCount + 1 })
-          .eq('id', qrData.id);
+        void trackReviewEvent({
+          eventKey: getQrOpenEventKey(qrData.id),
+          eventType: 'qr_open',
+          qrCodeId: qrData.id,
+          userId,
+        });
 
-        if (updateError) {
-          console.error('Error updating scan count:', updateError);
-        }
       } catch (error) {
         console.error('Error loading business data:', error);
         toast.error('Erro ao carregar os dados do estabelecimento.');
@@ -132,6 +133,7 @@ const Review = () => {
       <EmojiRating
         businessId={businessData.id}
         businessName={businessData.name}
+        userId={businessData.userId}
         externalLinks={businessData.externalLinks}
       />
     </div>

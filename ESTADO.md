@@ -3,6 +3,91 @@
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
+## Em validação local — 14 de agosto de 2026
+
+- [x] Reverter a proposta de fila operacional que exigia responsável,
+  providência, resultado e datas.
+- [x] Remover a pergunta de sentimento antes do acesso público e oferecer Google
+  diretamente, mantendo comentário privado opcional e sem review gating.
+- [x] Medir passivamente aberturas do QR, cliques para Google/TripAdvisor e
+  comentários privados, sem chamar clique de avaliação.
+- [x] Preparar snapshots de nota e total reais do Google e um painel de evolução
+  com ressalva explícita de não causalidade.
+- [x] Reorientar landing, demonstração, dashboard e Avaliações para resultado no
+  Google e apoio a respostas.
+- [x] `npm run verify` verde localmente.
+- [ ] Revisão de Marcelo no produto local antes de qualquer PR/publicação.
+- [x] Aplicar a migration `20260814190000_google_outcome_metrics.sql` no
+  Supabase: tabelas de eventos do QR e snapshots criadas em 15/08 com RLS e
+  políticas verificadas. Não houve chamada manual à API Google.
+- [ ] Fazer o merge do PR #24 e confirmar o deploy automático em produção antes
+  de iniciar a recolha do piloto concierge.
+- [x] Reposicionar localmente a experiência como assessor de reputação, com
+  landing e demonstração aprovadas visualmente.
+- [x] Criar briefing no painel a partir do cache Google e do gerador
+  determinístico de respostas, sem custo externo.
+- [ ] Definir provedor, consentimento, frequência e custo antes de implementar
+  relatórios ou notas proativas por WhatsApp.
+- [x] Redesenhar localmente o painel como assessor: reputação, prioridade do
+  dia, saúde do Perfil Google e caminho do QR.
+- [x] Fazer o demo reutilizar os mesmos componentes do painel e disponibilizar
+  a revisão ilustrativa em `/demo?view=panel`.
+- [x] Documentar em `PLANO_FUNCIONAL.md` o caminho até uma versão realmente
+  funcional.
+- [x] Prototipar localmente uma fila assistida com cinco avaliações do dia,
+  edição de resposta, adiamento, avanço item a item e resumo final.
+- [x] Ligar a prioridade ilustrativa do painel à fila em `/demo?view=queue`,
+  sem publicar respostas ou inventar que o recurso já funciona com o Google.
+- [x] Aplicar localmente a direção visual aprovada: painel mais compacto,
+  coluna lateral, fundo neutro, azul para ação e violeta como assinatura.
+- [x] Levar a mesma paleta, cartões e hierarquia para a fila assistida e validar
+  o fluxo completo na demonstração local.
+- [x] Construir o Radar de Reputação em `/demo?view=radar`: quatro estados
+  ilustrativos (estável, risco, força e oportunidade), uma prioridade por vez e
+  evidência, período e fonte visíveis.
+- [x] Consolidar o Radar numa única leitura: prioridade no topo e os quatro
+  sinais visíveis abaixo, sem depender de abas; a evidência só expande quando
+  o gestor quiser aprofundar.
+- [x] Preparar o backend local do Radar para a conexão oficial: calcula fila
+  real sem resposta e só destaca temas recorrentes com evidência objetiva. Sem
+  conexão ou sincronização completa, não estima nem mostra números parciais.
+- [ ] Aprovar visualmente o Radar com Marcelo antes de ligar sinais reais do
+  Google ou qualquer automação.
+- [x] Preparar localmente OAuth, armazenamento cifrado de token, seleção de
+  localização, importação paginada e publicação explícita de respostas para o
+  Perfil da Empresa no Google. Nada foi aplicado ou chamado remotamente.
+- [x] Ligar localmente Configurações → consentimento → escolha da localização →
+  fila real, com fallback honesto para o cache público enquanto a conexão não
+  existe.
+- [~] Criar projeto Google Cloud exclusivo e configuração OAuth externa:
+  concluídos em 15/08 no projeto `app-review-505612`; nenhum cliente OAuth,
+  segredo, API ou chamada Google foi criado/ativado.
+- [~] Acesso Basic às Google Business Profile APIs solicitado em 15/08/2026
+  para `app-review-505612`; protocolo Google `0-0755000041728`.
+  - Identidade usada: Perfil validado **Noá Agência Digital** e
+    `noadigital.com.br`; Marcelo atribuiu gestão a `diba@noadigital.com.br`.
+  - O Google indicou previsão dinâmica de 7 a 10 dias úteis. Não ativar APIs,
+    criar cliente OAuth, configurar segredos ou publicar o lote antes da
+    aprovação explícita.
+- [ ] Após aprovação Basic, criar o cliente OAuth Web, aplicar/publicar o lote
+  e só então exibir contagem real de respostas pendentes, idade de fotos ou
+  dados do perfil.
+- [ ] Com consentimento do dono, ligar uma localização piloto e sincronizar até
+  ao fim da paginação; só então trocar a fila ilustrativa por dados reais.
+- [x] Preparar o piloto concierge de sete dias sem a API Business Profile:
+  QR, links públicos, comentário privado opcional e medição de intenção, com
+  limites explícitos em `docs/piloto-concierge-sem-api-google.md`.
+- [~] PR [#24](https://github.com/MarceloDiba/appreview/pull/24) publicado;
+  CI verde no run 84 e preview da Vercel `READY` para `e0402ed`. A migration de
+  métricas está aplicada; falta merge/deploy de produção antes de iniciar o
+  piloto do Mania.
+- [ ] Com o aceite do titular do estabelecimento escolhido, executar o piloto
+  concierge sem atribuir ao AppReview avaliações que só o Google pode confirmar.
+  - Estabelecimento escolhido por Marcelo em 15/08: **Mania de Petiscos**,
+    Lisboa. O link curto do Google foi fornecido pelo Marcelo; a confirmação do
+    negócio, idioma e destino fica no teste do QR físico, não é inferida do
+    encurtador.
+
 ## Regra de produto que não pode regredir
 
 O AppReview é gestão de reputação para donos de negócio que não sabem de

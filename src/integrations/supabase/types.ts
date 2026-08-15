@@ -119,6 +119,182 @@ export type Database = {
         }
         Relationships: []
       }
+      google_review_snapshots: {
+        Row: {
+          average_rating: number
+          captured_at: string
+          external_place_id: string
+          id: string
+          total_reviews: number
+          user_id: string
+        }
+        Insert: {
+          average_rating: number
+          captured_at?: string
+          external_place_id: string
+          id?: string
+          total_reviews: number
+          user_id: string
+        }
+        Update: {
+          average_rating?: number
+          captured_at?: string
+          external_place_id?: string
+          id?: string
+          total_reviews?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_review_snapshots_external_place_id_fkey"
+            columns: ["external_place_id"]
+            isOneToOne: false
+            referencedRelation: "external_place_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_business_connections: {
+        Row: {
+          created_at: string
+          granted_scopes: string[]
+          last_error: string | null
+          last_synced_at: string | null
+          refresh_token_secret_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_scopes?: string[]
+          last_error?: string | null
+          last_synced_at?: string | null
+          refresh_token_secret_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_scopes?: string[]
+          last_error?: string | null
+          last_synced_at?: string | null
+          refresh_token_secret_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      google_business_locations: {
+        Row: {
+          account_name: string
+          created_at: string
+          id: string
+          is_selected: boolean
+          last_synced_at: string | null
+          location_name: string
+          place_id: string | null
+          review_sync_completed_at: string | null
+          review_sync_cursor: string | null
+          store_code: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_name: string
+          created_at?: string
+          id?: string
+          is_selected?: boolean
+          last_synced_at?: string | null
+          location_name: string
+          place_id?: string | null
+          review_sync_completed_at?: string | null
+          review_sync_cursor?: string | null
+          store_code?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_name?: string
+          created_at?: string
+          id?: string
+          is_selected?: boolean
+          last_synced_at?: string | null
+          location_name?: string
+          place_id?: string | null
+          review_sync_completed_at?: string | null
+          review_sync_cursor?: string | null
+          store_code?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      google_business_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          google_review_name: string
+          id: string
+          is_anonymous: boolean
+          location_id: string
+          rating: number
+          reply_state: string | null
+          reply_text: string | null
+          reply_updated_at: string | null
+          review_created_at: string | null
+          review_updated_at: string | null
+          reviewer_name: string | null
+          reviewer_photo_url: string | null
+          synced_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          google_review_name: string
+          id?: string
+          is_anonymous?: boolean
+          location_id: string
+          rating: number
+          reply_state?: string | null
+          reply_text?: string | null
+          reply_updated_at?: string | null
+          review_created_at?: string | null
+          review_updated_at?: string | null
+          reviewer_name?: string | null
+          reviewer_photo_url?: string | null
+          synced_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          google_review_name?: string
+          id?: string
+          is_anonymous?: boolean
+          location_id?: string
+          rating?: number
+          reply_state?: string | null
+          reply_text?: string | null
+          reply_updated_at?: string | null
+          review_created_at?: string | null
+          review_updated_at?: string | null
+          reviewer_name?: string | null
+          reviewer_photo_url?: string | null
+          synced_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       internal_feedback: {
         Row: {
           created_at: string | null
@@ -316,6 +492,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      review_funnel_events: {
+        Row: {
+          created_at: string
+          event_key: string
+          event_type: string
+          id: string
+          platform: string | null
+          qr_code_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_key: string
+          event_type: string
+          id?: string
+          platform?: string | null
+          qr_code_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_key?: string
+          event_type?: string
+          id?: string
+          platform?: string | null
+          qr_code_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_funnel_events_qr_code_id_fkey"
+            columns: ["qr_code_id"]
+            isOneToOne: false
+            referencedRelation: "qr_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {

@@ -38,8 +38,10 @@ const DICTIONARY = {
     ariaRatingOk: 'Avaliação neutra',
     ariaRatingGood: 'Avaliação positiva',
 
-    chooserTitle: 'Onde você prefere avaliar?',
-    chooserSubtitle: 'Escolha a plataforma para continuar sua avaliação de {business}.',
+    chooserTitle: 'Compartilhe sua experiência',
+    chooserSubtitle: 'Escolha como continuar com {business}.',
+    privateFeedback: 'Enviar comentário direto',
+    choicePrivacy: 'O comentário direto vai apenas para o estabelecimento. A avaliação pública nunca é filtrada.',
 
     formTitle: 'Conte o que aconteceu',
     formSubtitle: '{business} recebe seu comentário na hora e pode entrar em contato.',
@@ -80,8 +82,10 @@ const DICTIONARY = {
     ariaRatingOk: 'Avaliação neutra',
     ariaRatingGood: 'Avaliação positiva',
 
-    chooserTitle: 'Onde prefere avaliar?',
-    chooserSubtitle: 'Escolha a plataforma para continuar a sua avaliação de {business}.',
+    chooserTitle: 'Partilhe a sua experiência',
+    chooserSubtitle: 'Escolha como continuar com {business}.',
+    privateFeedback: 'Enviar comentário directo',
+    choicePrivacy: 'O comentário directo vai apenas para o estabelecimento. A avaliação pública nunca é filtrada.',
 
     formTitle: 'Conte o que aconteceu',
     formSubtitle: '{business} recebe o seu relato na hora e pode entrar em contacto.',
@@ -122,8 +126,10 @@ const DICTIONARY = {
     ariaRatingOk: 'Neutral rating',
     ariaRatingGood: 'Positive rating',
 
-    chooserTitle: 'Where would you like to review?',
-    chooserSubtitle: 'Choose a platform to continue your review of {business}.',
+    chooserTitle: 'Share your experience',
+    chooserSubtitle: 'Choose how to continue with {business}.',
+    privateFeedback: 'Send private feedback',
+    choicePrivacy: 'Private feedback goes only to the business. The public review option is never filtered.',
 
     formTitle: 'Tell us what happened',
     formSubtitle: '{business} gets your message straight away and may get in touch.',
