@@ -25,10 +25,12 @@ import {
   slugFilename,
 } from '@/lib/qr';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import { printQrCard } from '@/lib/qrCard';
 
 interface QRCodeGeneratorProps {
   baseUrl: string;
   businessName?: string;
+  businessPhone?: string;
 }
 
 interface SavedQR {
@@ -51,7 +53,7 @@ interface SavedQR {
  * partir dele. O endereço deixou de ser editável de propósito: um endereço
  * escrito à mão quebra a atribuição do caso ao negócio.
  */
-const QRCodeGenerator = ({ baseUrl, businessName }: QRCodeGeneratorProps) => {
+const QRCodeGenerator = ({ baseUrl, businessName, businessPhone }: QRCodeGeneratorProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { t } = useOwnerTranslation();
@@ -179,15 +181,15 @@ const QRCodeGenerator = ({ baseUrl, businessName }: QRCodeGeneratorProps) => {
     });
   };
 
-  /**
-   * Cartão de mesa pronto a imprimir. Trilingue de propósito: quem escaneia
-   * pode ser turista, e o texto na mesa é a única parte do fluxo que não se
-   * adapta ao telemóvel de quem lê.
-   */
+  /** Cartão de mesa pronto a imprimir, no idioma do estabelecimento. */
   const printCard = async (qr: SavedQR) => {
-    const highRes = await qrDataUrl(qr.url, QR_PRINT_SIZE);
-    const win = window.open('', '_blank', 'width=800,height=1000');
-    if (!win) {
+    const printed = await printQrCard({
+      qrName: qr.name,
+      qrUrl: qr.url,
+      businessName,
+      businessPhone,
+    });
+    if (!printed) {
       toast({
         title: t('qrcodes.popupBlocked'),
         description: t('qrcodes.popupHint'),
@@ -195,41 +197,6 @@ const QRCodeGenerator = ({ baseUrl, businessName }: QRCodeGeneratorProps) => {
       });
       return;
     }
-
-    const safeName = (businessName || '').replace(/[<>&]/g, '');
-
-    win.document.write(`<!doctype html>
-<html lang="pt"><head><meta charset="utf-8" />
-<title>Cartao ${qr.name}</title>
-<style>
-  @page { size: A6; margin: 8mm; }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-         display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  .card { text-align: center; padding: 10mm 6mm; }
-  .biz { font-size: 11pt; font-weight: 600; color: #333; margin: 0 0 3mm; }
-  .ask { font-size: 15pt; font-weight: 700; margin: 0 0 5mm; line-height: 1.25; }
-  img { width: 52mm; height: 52mm; display: block; margin: 0 auto 5mm; }
-  .langs { font-size: 9.5pt; color: #555; line-height: 1.5; margin: 0; }
-  .tag { margin: 6mm 0 0; font-size: 7.5pt; color: #999; }
-  @media print { .hint { display: none; } }
-  .hint { margin-top: 8mm; font-size: 9pt; color: #888; }
-</style></head><body>
-  <div class="card">
-    ${safeName ? `<p class="biz">${safeName}</p>` : ''}
-    <p class="ask">Como foi a sua experiência?</p>
-    <img src="${highRes}" alt="QR Code" />
-    <p class="langs">
-      Aponte a câmara do telemóvel<br />
-      <em>Apunta la cámara de tu móvil</em><br />
-      <em>Point your phone camera here</em>
-    </p>
-    <p class="tag">${qr.name}</p>
-    <p class="hint">Use Ficheiro &gt; Imprimir, ou Cmd/Ctrl + P</p>
-  </div>
-  <script>window.onload = function () { setTimeout(function () { window.print(); }, 300); };</script>
-</body></html>`);
-    win.document.close();
   };
 
   return (

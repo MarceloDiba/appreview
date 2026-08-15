@@ -13,6 +13,20 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   ou mudança do nome no projeto Google Cloud. Domínio adquirido não prova
   disponibilidade de marca.
 
+## Onboarding e QR — 15 de agosto de 2026
+
+- [x] Identificar na passagem do Mania que a ligação oficial ao Google não pode
+  ser apresentada como ação disponível antes da aprovação Basic/OAuth.
+- [x] Reordenar localmente a configuração: link público do Google obrigatório
+  primeiro, dados do negócio e telefone por país depois, QR por último.
+- [x] Adicionar telefone internacional com bandeira, código e formatação;
+  usar o país do estabelecimento para a cópia do cartão QR.
+- [x] Atualizar o cartão QR para convidar a partilhar a experiência e ajudar o
+  negócio a melhorar, sem review gating e sem atribuir idioma pela tela do dono.
+- [ ] Revisar visualmente o fluxo atualizado no navegador antes de publicar.
+- [ ] Aguardar a aprovação Basic do Google para habilitar a conexão oficial,
+  a fila completa e o Radar com dados autorizados.
+
 ## Em validação local — 14 de agosto de 2026
 
 - [x] Reverter a proposta de fila operacional que exigia responsável,

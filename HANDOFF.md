@@ -3,6 +3,25 @@
 Estado em 31/07/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
+## Onboarding orientado ao Google — 15/08/2026 (em revisão local)
+
+- A passagem manual do Mania confirmou uma falha de produto: o ecrã oferecia
+  “Conectar Google” mesmo sem OAuth oficial disponível, devolvia erro e deixava
+  o dono sem saber como avançar.
+- O fluxo local passa a começar pelo **link público do Google**, obrigatório
+  para criar o QR e enviar qualquer cliente para a página certa. Nome/telefone
+  ficam no segundo passo; não há mais “fazer depois” para o Google.
+- A ligação oficial (fila completa, Radar e publicação explícita) fica num
+  estado de preparação honesto, sem botão que falha. Continua dependente da
+  aprovação Basic do Google; não foram criadas APIs, credenciais ou chamadas.
+- Telefone passa a ter seletor de país com bandeira e formatação internacional.
+  O país persistido no telefone define a cópia do cartão QR: pt-BR para Brasil,
+  pt-PT para Portugal e inglês nos demais casos. A tela pública do QR continua
+  usando o idioma do telemóvel de quem escaneia.
+- O cartão impresso agora diz “Conte como foi a sua experiência” e “A sua
+  opinião ajuda-nos a melhorar” em Portugal (equivalentes em pt-BR/en), sem
+  filtrar a opção pública por nota.
+
 ## Marca Binno — 15/08/2026
 
 - Marcelo fechou o nome **Binno** e adquiriu o domínio `binno.pro`.

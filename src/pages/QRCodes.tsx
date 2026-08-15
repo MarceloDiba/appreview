@@ -10,6 +10,7 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 const QRCodes = () => {
   const { t } = useOwnerTranslation();
   const [businessName, setBusinessName] = useState<string>('');
+  const [businessPhone, setBusinessPhone] = useState<string>('');
   const baseUrl = window.location.origin;
 
   useEffect(() => {
@@ -21,11 +22,14 @@ const QRCodes = () => {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('business_name')
+        .select('business_name, phone')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (active && profile?.business_name) setBusinessName(profile.business_name);
+      if (active) {
+        setBusinessName(profile?.business_name || '');
+        setBusinessPhone(profile?.phone || '');
+      }
     };
 
     load();
@@ -43,7 +47,7 @@ const QRCodes = () => {
             <p className="text-gray-600 mt-1">{t('qrcodes.subtitle')}</p>
           </header>
 
-          <QRCodeGenerator baseUrl={baseUrl} businessName={businessName} />
+          <QRCodeGenerator baseUrl={baseUrl} businessName={businessName} businessPhone={businessPhone} />
 
           <div className="mt-8">
             <Card>
