@@ -13,6 +13,21 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   ou mudança do nome no projeto Google Cloud. Domínio adquirido não prova
   disponibilidade de marca.
 
+## Teste experimental local — 15 de agosto de 2026
+
+- [x] Recolher manualmente uma amostra limitada e autorizada do perfil público
+  **Mania de Petiscos** via Apify: 49 avaliações, custo observado de
+  **US$ 0,02945**, sem agenda e sem nova chamada automática.
+- [x] Preparar `/demo?view=snapshot` para a leitura local da amostra, com fonte,
+  data, limite e ressalva de não ser integração oficial visíveis.
+- [x] Manter o arquivo de dados fora do Git, produção, Supabase e cache oficial;
+  somente agregados sanitizados, sem dados de avaliadores ou textos.
+- [ ] Aguardar aprovação Basic do Google antes de substituir essa amostra por
+  OAuth, seleção de local e sincronização oficial completa.
+- [~] Configurar DNS de `binno.pro` no GoDaddy conforme instrução da Vercel.
+  Os domínios já estão associados ao projeto, mas ainda aparecem como
+  `misconfigured`; não anunciar como site público até a verificação concluir.
+
 ## Em validação local — 14 de agosto de 2026
 
 - [x] Reverter a proposta de fila operacional que exigia responsável,
