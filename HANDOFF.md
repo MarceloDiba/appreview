@@ -109,6 +109,14 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   um Perfil da Empresa verificado e ativo há pelo menos 60 dias e o site oficial
   da empresa que o representa; não inventar nem usar um perfil de cliente sem
   confirmação do titular.
+- Marcelo indicou o Perfil da Empresa da **NOÁ** e `noadigital.com.br` como a
+  identidade que representa o AppReview. O formulário Basic foi aberto, mas
+  ainda não foi confirmado/enviado: ele está autenticado em
+  `falecomdiba@gmail.com`, enquanto o projeto Cloud foi criado por
+  `diba@noadigital.com.br`. A documentação do Google exige que a conta que
+  envia o pedido seja proprietária ou gestora do Perfil; confirmar qual das duas
+  contas tem esse vínculo antes de continuar. A verificação e os 60+ dias do
+  perfil continuam a ser requisito do Google, não inferência do AppReview.
 
 ## Produto e infra
 

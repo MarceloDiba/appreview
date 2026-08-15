@@ -64,6 +64,12 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   representa o AppReview; depois criar o cliente OAuth Web, aplicar/publicar o
   lote e só então exibir contagem real de respostas pendentes, idade de fotos ou
   dados do perfil.
+  - Identidade indicada por Marcelo: Perfil da Empresa da NOÁ +
+    `noadigital.com.br`.
+  - Antes do envio, confirmar se `falecomdiba@gmail.com` (conta atual do
+    formulário) ou `diba@noadigital.com.br` é proprietário/gestor do Perfil. O
+    projeto Cloud está na segunda conta; não assumir que isso prova a gestão do
+    Perfil.
 - [ ] Com consentimento do dono, ligar uma localização piloto e sincronizar até
   ao fim da paginação; só então trocar a fila ilustrativa por dados reais.
 
