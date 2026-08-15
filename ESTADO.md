@@ -56,9 +56,14 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Ligar localmente Configurações → consentimento → escolha da localização →
   fila real, com fallback honesto para o cache público enquanto a conexão não
   existe.
-- [ ] Solicitar acesso Basic às Google Business Profile APIs, configurar OAuth
-  no Google Cloud e aplicar/publicar o lote antes de exibir contagem real de
-  respostas pendentes, idade de fotos ou dados do perfil.
+- [~] Criar projeto Google Cloud exclusivo e configuração OAuth externa:
+  concluídos em 15/08 no projeto `app-review-505612`; nenhum cliente OAuth,
+  segredo, API ou chamada Google foi criado/ativado.
+- [ ] Solicitar acesso Basic às Google Business Profile APIs com o Perfil da
+  Empresa verificado (ativo há ao menos 60 dias) e o site oficial da empresa que
+  representa o AppReview; depois criar o cliente OAuth Web, aplicar/publicar o
+  lote e só então exibir contagem real de respostas pendentes, idade de fotos ou
+  dados do perfil.
 - [ ] Com consentimento do dono, ligar uma localização piloto e sincronizar até
   ao fim da paginação; só então trocar a fila ilustrativa por dados reais.
 

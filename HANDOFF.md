@@ -80,8 +80,8 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   leitura de confirmação no Google.
 - A nova chamada de Configurações é honesta: inicia o consentimento quando os
   segredos e a Edge Function estiverem publicados; sem essa configuração mostra
-  que a conexão oficial ainda não está disponível. Nenhuma credencial, migration,
-  função ou chamada Google foi criada/remota nesta frente.
+  que a conexão oficial ainda não está disponível. Nenhuma credencial OAuth,
+  migration, função ou chamada Google foi criada/remota nesta frente.
 - `src/pages/Reviews.tsx` já prefere `GoogleBusinessReviewQueue` quando houver
   ligação e localização selecionada. A fila só permite publicar depois de
   editar/confirmar; durante uma sincronização com páginas pendentes, não exibe
@@ -90,6 +90,25 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - O gate que resta é externo: o projeto Google Cloud precisa de aprovação Basic
   para as Business Profile APIs, OAuth Web e consentimento do proprietário.
   Procedimento completo em `docs/google-business-profile-rollout.md`.
+
+### Configuração Google Cloud — 15/08/2026
+
+- Projeto exclusivo criado: **App Review** (`app-review-505612`, número
+  `288079352399`) na organização `noadigital.com.br`.
+- A configuração OAuth externa foi criada com o nome AppReview, e-mails de
+  suporte/contato `diba@noadigital.com.br` e aceite explícito da política pelo
+  Marcelo. Ainda não existe cliente OAuth.
+- A consola mostrava estimativa acumulada de **R$ 0,00** para 1–15/08; há uma
+  conta de faturamento vinculada. Esta é só uma fotografia do console, não uma
+  garantia de custo futuro.
+- Nenhuma API Business Profile/Places foi ativada e nenhuma chamada ao Google,
+  segredo, migration, Edge Function ou dado de cliente foi enviado/remotamente
+  nesta etapa.
+- O formulário de cliente OAuth Web foi deixado sem submissão. A próxima
+  dependência é o pedido **Basic** da Business Profile API, que exige informar
+  um Perfil da Empresa verificado e ativo há pelo menos 60 dias e o site oficial
+  da empresa que o representa; não inventar nem usar um perfil de cliente sem
+  confirmação do titular.
 
 ## Produto e infra
 
