@@ -6,11 +6,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
 import ReputationAdvisorCard, { ProfileHealthCard } from '@/components/dashboard/ReputationAdvisorCard';
 import ReputationRadarCard from '@/components/dashboard/ReputationRadarCard';
+import ExperimentalApifySnapshotDashboard from '@/components/dashboard/ExperimentalApifySnapshotDashboard';
 import { useSetupStatus } from '@/hooks/useSetupStatus';
 import { useGoogleOutcome } from '@/hooks/useGoogleOutcome';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight, MessageCircle, MessageSquare, QrCode, Settings as SettingsIcon } from 'lucide-react';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import { ExperimentalApifySnapshot, loadExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
 
 const shortcuts = [
   { to: '/reviews', icon: MessageSquare, titleKey: 'dashboard.shortcuts.reviewsTitle', descKey: 'dashboard.shortcuts.reviewsDesc' },
@@ -23,6 +25,8 @@ const Dashboard = () => {
   const [userId, setUserId] = useState<string>('');
   const [businessName, setBusinessName] = useState<string>('');
   const [loadingUser, setLoadingUser] = useState(true);
+  const [experimentalSnapshot, setExperimentalSnapshot] = useState<ExperimentalApifySnapshot | null>(null);
+  const [loadingExperimentalSnapshot, setLoadingExperimentalSnapshot] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -55,6 +59,18 @@ const Dashboard = () => {
     return () => {
       active = false;
     };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      const snapshot = await loadExperimentalApifySnapshot({ allowLocalFixture: import.meta.env.DEV });
+      if (!active) return;
+      setExperimentalSnapshot(snapshot);
+      setLoadingExperimentalSnapshot(false);
+    };
+    void load();
+    return () => { active = false; };
   }, []);
 
   const setup = useSetupStatus(userId || undefined);
@@ -105,7 +121,11 @@ const Dashboard = () => {
             </Card>
           )}
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
+          {loadingExperimentalSnapshot ? (
+            <Card className="h-72 animate-pulse border-slate-200 bg-white" />
+          ) : experimentalSnapshot ? (
+            <ExperimentalApifySnapshotDashboard snapshot={experimentalSnapshot} />
+          ) : <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
             <section className="min-w-0 space-y-4">
               <GoogleOutcomeCard data={outcome.data} loading={outcome.loading} error={outcome.error} />
               <ReputationRadarCard userId={userId || undefined} />
@@ -142,7 +162,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </aside>
-          </div>
+          </div>}
         </div>
       </main>
     </div>

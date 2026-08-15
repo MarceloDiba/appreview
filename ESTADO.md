@@ -51,6 +51,10 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   migration, a função e qualquer coleta continuam não publicadas.
 - [x] Reorganizar `/demo?view=snapshot` como dashboard da fonte experimental,
   distinguindo fatos públicos observados de fila, Radar e respostas oficiais.
+- [x] Levar a mesma leitura experimental ao Painel autenticado durante a
+  validação local: o retrato do Mania substitui os cartões vazios apenas quando
+  a amostra está disponível, identifica Apify e nunca se apresenta como
+  conexão oficial ou fila completa.
 - [ ] Aguardar aprovação Basic do Google antes de substituir essa amostra por
   OAuth, seleção de local e sincronização oficial completa.
 - [~] Configurar DNS de `binno.pro` no GoDaddy conforme instrução da Vercel.

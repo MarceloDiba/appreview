@@ -356,6 +356,24 @@
       "signals": { "concernLabel": "Mudança a observar", "strengthLabel": "O que funciona", "concernTitle": "{{theme}} reaparece em avaliações recentes", "strengthTitle": "{{theme}} é uma força reconhecida", "evidence": "{{count}} menções em {{days}} dias" },
       "themes": { "service": "Atendimento", "wait": "Demora", "food": "Comida", "cleanliness": "Limpeza" }
     },
+    "experimental": {
+      "source": "Fonte experimental · Apify",
+      "notOfficial": "Não é uma conexão oficial do Google",
+      "title": "Leitura experimental da reputação",
+      "subtitle": "Uma fotografia pública limitada de {{business}} para validar o painel.",
+      "collectedAt": "Coletado em {{date}}",
+      "rating": "Nota pública atual",
+      "ratingAria": "{{rating}} estrelas",
+      "profileTotal": "{{count}} avaliações no perfil",
+      "sample": "Amostra analisada",
+      "sampleLimit": "Leitura limitada, não é todo o histórico.",
+      "distribution": "Distribuição da amostra",
+      "disclaimer": "Mostra dados públicos observados e uma amostra limitada. Não mede fila completa, tendências, ranking ou respostas pendentes.",
+      "available": { "title": "O painel já ganha contexto", "body": "Nota, volume, distribuição e respostas vistas ficam reunidos sem abrir o Google." },
+      "attention": { "title": "Atenção na amostra", "body": "{{count}} avaliações de uma ou duas estrelas foram observadas." },
+      "replies": { "title": "Respostas vistas", "body": "{{count}} respostas do dono na amostra ({{rate}}%)." },
+      "official": { "title": "O próximo nível depende da conexão oficial", "body": "A aprovação do Perfil da Empresa libera fila completa, Radar com evidência e publicação confirmada de respostas. Até lá, o Binno não inventa esses dados." }
+    },
     "setupBanner": {
       "title": "Falta terminar a configuração",
       "name": "o nome do seu negócio",

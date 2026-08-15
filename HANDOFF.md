@@ -53,6 +53,13 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - A leitura em `/demo?view=snapshot` foi redesenhada como dashboard: resumo
   público, distribuição da amostra, força e atenção observadas, respostas
   vistas e uma coluna que separa claramente o que continua bloqueado até OAuth.
+- O mesmo snapshot local agora alimenta o **Painel** autenticado durante a
+  revisão local. Com a leitura do Mania disponível, o dono vê nota 4,9, total
+  de 456, amostra de 49, distribuição e 2 respostas observadas, sempre com a
+  fonte Apify e o limite explícitos. A leitura do ficheiro ignorado só ocorre
+  em desenvolvimento; em produção o painel só aceita uma coleta experimental
+  explicitamente guardada no navegador. Assim não substitui a ligação oficial
+  nem mostra a amostra de forma global a outros negócios.
 - `binno.pro` e `www.binno.pro` foram vinculados ao projeto Vercel, mas a
   configuração DNS ainda está pendente no registrador GoDaddy. Até o estado
   deixar de ser `misconfigured`, a referência pública continua sendo

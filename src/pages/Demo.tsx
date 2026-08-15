@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GoogleOutcomeData } from '@/hooks/useGoogleOutcome';
 import { AdvisorReview } from '@/hooks/useReputationAdvisor';
-import { ExperimentalApifySnapshot, isExperimentalApifySnapshot, readExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
+import { ExperimentalApifySnapshot, loadExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
 
 const ExampleBadge = () => <span className="rounded-full bg-violet-50 px-3 py-1 text-xs text-primary">Exemplo ilustrativo</span>;
 
@@ -22,24 +22,12 @@ const ExperimentalSnapshotPanel = () => {
   useEffect(() => {
     const loadSnapshot = async () => {
       try {
-        const localSnapshot = readExperimentalApifySnapshot();
-        if (localSnapshot) {
-          setSnapshot(localSnapshot);
-          setStatus('ready');
-          return;
-        }
-        const response = await fetch('/experimental-snapshot.json', { cache: 'no-store' });
-        if (response.status === 404) {
+        const availableSnapshot = await loadExperimentalApifySnapshot({ allowLocalFixture: import.meta.env.DEV });
+        if (!availableSnapshot) {
           setStatus('missing');
           return;
         }
-        if (!response.ok) throw new Error('Snapshot unavailable');
-
-        const data: unknown = await response.json();
-        if (!isExperimentalApifySnapshot(data)) {
-          throw new Error('Invalid snapshot');
-        }
-        setSnapshot(data);
+        setSnapshot(availableSnapshot);
         setStatus('ready');
       } catch {
         setStatus('invalid');

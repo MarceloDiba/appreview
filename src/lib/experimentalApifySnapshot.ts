@@ -50,6 +50,28 @@ export const readExperimentalApifySnapshot = (): ExperimentalApifySnapshot | nul
   }
 };
 
+/**
+ * The browser can hold an explicitly collected experimental reading. During
+ * local review we also allow the ignored fixture file so the pilot can be
+ * inspected without any API call. That file is never fetched in production.
+ */
+export const loadExperimentalApifySnapshot = async ({
+  allowLocalFixture = false,
+}: { allowLocalFixture?: boolean } = {}): Promise<ExperimentalApifySnapshot | null> => {
+  const localSnapshot = readExperimentalApifySnapshot();
+  if (localSnapshot) return localSnapshot;
+  if (!allowLocalFixture) return null;
+
+  try {
+    const response = await fetch('/experimental-snapshot.json', { cache: 'no-store' });
+    if (!response.ok) return null;
+    const value: unknown = await response.json();
+    return isExperimentalApifySnapshot(value) ? value : null;
+  } catch {
+    return null;
+  }
+};
+
 export const saveExperimentalApifySnapshot = (snapshot: ExperimentalApifySnapshot) => {
   window.localStorage.setItem(EXPERIMENTAL_APIFY_SNAPSHOT_KEY, JSON.stringify(snapshot));
 };

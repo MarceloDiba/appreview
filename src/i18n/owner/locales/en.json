@@ -356,6 +356,24 @@
       "signals": { "concernLabel": "Change to watch", "strengthLabel": "What works", "concernTitle": "{{theme}} appears again in recent reviews", "strengthTitle": "{{theme}} is a recognized strength", "evidence": "{{count}} mentions in {{days}} days" },
       "themes": { "service": "Service", "wait": "Wait time", "food": "Food", "cleanliness": "Cleanliness" }
     },
+    "experimental": {
+      "source": "Experimental source · Apify",
+      "notOfficial": "Not an official Google connection",
+      "title": "Experimental reputation reading",
+      "subtitle": "A limited public snapshot of {{business}} to validate the dashboard.",
+      "collectedAt": "Collected {{date}}",
+      "rating": "Current public rating",
+      "ratingAria": "{{rating}} stars",
+      "profileTotal": "{{count}} reviews on the profile",
+      "sample": "Reviewed sample",
+      "sampleLimit": "A limited reading, not the full history.",
+      "distribution": "Sample distribution",
+      "disclaimer": "Shows observed public data and a limited sample. It does not measure a complete queue, trends, ranking, or unanswered reviews.",
+      "available": { "title": "The dashboard already has context", "body": "Rating, volume, distribution, and observed owner replies are together without opening Google." },
+      "attention": { "title": "Attention in the sample", "body": "{{count}} one- or two-star reviews were observed." },
+      "replies": { "title": "Observed owner replies", "body": "{{count}} owner replies in the sample ({{rate}}%)." },
+      "official": { "title": "The next level needs the official connection", "body": "Business Profile approval unlocks the full queue, evidence-based Radar, and confirmed reply publication. Until then, Binno does not invent those data points." }
+    },
     "setupBanner": {
       "title": "Finish the setup",
       "name": "your business name",
