@@ -9,7 +9,7 @@ import { LEGAL, SUBCONTRATANTES } from '@/lib/legal';
  * coisas que não podem sair daqui, porque são as que nos expõem a sério:
  *
  * 1. A distinção de papéis. Nos dados dos clientes finais, quem manda é o
- *    estabelecimento (responsável) e o AppReview é subcontratante. É isso que
+ *    estabelecimento (responsável) e o Binno é subcontratante. É isso que
  *    determina quem responde perante as autoridades (ANPD no Brasil, CNPD na UE).
  * 2. A empresa é brasileira e os dados ficam no Brasil, mas o piloto é em
  *    Portugal — por isso valem LGPD e RGPD ao mesmo tempo. Esconder a

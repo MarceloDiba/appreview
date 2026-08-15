@@ -382,7 +382,7 @@ serve(async (req) => {
     }
 
     // Preserve an honest history of Google's own totals. This measures change
-    // observed on Google; it does not claim AppReview caused that change.
+    // observed on Google; it does not claim Binno caused that change.
     const { error: snapshotError } = await supabase
       .from('google_review_snapshots')
       .insert({

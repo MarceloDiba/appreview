@@ -27,7 +27,7 @@ const LegalLayout: React.FC<LegalLayoutProps> = ({ title, updatedAt, children })
     <header className="border-b border-gray-200">
       <div className="container mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
         <Link to="/" className="font-bold text-gray-900">
-          AppReview
+          Binno
         </Link>
         <Link to="/" className="text-sm text-gray-500 hover:text-gray-900">
           Voltar ao início

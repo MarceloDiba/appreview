@@ -77,7 +77,7 @@ const Login = () => {
           <LanguageSwitcher />
         </div>
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-primary">AppReview</h1>
+          <h1 className="text-2xl font-bold text-primary">Binno</h1>
           <p className="text-gray-600 mt-2">{t('auth.loginSubtitle')}</p>
         </div>
 

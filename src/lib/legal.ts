@@ -18,7 +18,7 @@ export const isPendente = (value: string): boolean => value === PENDENTE;
 
 export const LEGAL = {
   /** Nome comercial do serviço. */
-  servico: 'AppReview',
+  servico: 'Binno',
   /** Entidade que presta o serviço e assina os contratos. */
   entidade: 'MDR Propaganda Ltda. ME',
   /** NIPC/CNPJ ou equivalente da entidade acima. */

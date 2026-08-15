@@ -1,6 +1,6 @@
 # Piloto concierge sem a API Business Profile
 
-Objetivo: testar o valor do AppReview com um negócio real antes da aprovação da
+Objetivo: testar o valor do Binno com um negócio real antes da aprovação da
 API Business Profile, sem inventar dados nem tratar um clique como avaliação
 publicada.
 
@@ -19,8 +19,8 @@ publicada.
 - total completo de avaliações sem resposta;
 - idade da última foto, horários ou dados completos do Perfil da Empresa;
 - que um clique no Google virou uma avaliação;
-- que a AppReview causou uma alteração na nota ou no total do Google;
-- publicação de respostas no Google pelo AppReview.
+- que o Binno causou uma alteração na nota ou no total do Google;
+- publicação de respostas no Google pelo Binno.
 
 Esses pontos só entram depois da aprovação Basic, consentimento OAuth do
 titular e sincronização integral da localização.
@@ -47,7 +47,7 @@ titular e sincronização integral da localização.
 | Dia 0 | Entregar QR e explicar em uma frase: “leva o cliente ao seu perfil no Google; o painel mostra os sinais que merecem atenção”. | cartão impresso e teste de leitura no telemóvel |
 | Dias 1–6 | Deixar o QR no ponto combinado. O dono só abre o painel quando houver comentário privado ou no check-in combinado. | aberturas, cliques e comentários registados; não chamar clique de review |
 | Dia 3 | Check-in curto com o titular: QR está acessível? O link abre o perfil certo? Alguma resposta precisa de revisão? | relato do titular e qualquer sinal recebido |
-| Dia 7 | Comparar a fotografia manual inicial com o Perfil da Empresa atual e rever o uso do QR no painel. | duas observações datadas do próprio Google e eventos do AppReview |
+| Dia 7 | Comparar a fotografia manual inicial com o Perfil da Empresa atual e rever o uso do QR no painel. | duas observações datadas do próprio Google e eventos do Binno |
 
 ## Critério de decisão do piloto
 

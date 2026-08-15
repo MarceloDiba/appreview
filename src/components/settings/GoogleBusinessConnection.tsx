@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 /**
- * This starts Google OAuth only. AppReview never asks for a Google password,
+ * This starts Google OAuth only. Binno never asks for a Google password,
  * and it does not publish a reply as a side effect of this connection.
  */
 const GoogleBusinessConnection = () => {

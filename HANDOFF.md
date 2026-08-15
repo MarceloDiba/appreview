@@ -1,7 +1,21 @@
-# AppReview — documento de continuação (handoff)
+# Binno — documento de continuação (handoff)
 
 Estado em 31/07/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
+
+## Marca Binno — 15/08/2026
+
+- Marcelo fechou o nome **Binno** e adquiriu o domínio `binno.pro`.
+- A marca substitui AppReview na interface, metadados, textos do produto e
+  documentação viva. Registros históricos preservam o nome usado à época.
+- Assinatura aprovada: **Seu assessor de reputação.** A promessa é interpretar
+  sinais do Google e orientar uma ação concreta, sem prometer ranking nem
+  publicar automaticamente pelo gestor.
+- `docs/marca-binno.md` é a fonte da base verbal e visual. Identificadores
+  técnicos `appreview:*` permanecem por compatibilidade.
+- A disponibilidade marcária ainda não foi verificada; a compra do domínio não
+  constitui liberação jurídica para divulgação ampla ou alteração do projeto
+  Google Cloud.
 
 ## Frente local de produto — 14/08/2026 (ainda não publicada)
 

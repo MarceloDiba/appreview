@@ -19,7 +19,7 @@ para afirmar que a fila está completa.
 
 ## Ordem de rollout autorizável
 
-1. Criar ou escolher o projeto Google Cloud que representa o AppReview.
+1. Criar ou escolher o projeto Google Cloud que representa o Binno.
 2. Solicitar acesso Basic às Google Business Profile APIs no projeto. O Google
    exige um Perfil da Empresa verificado e ativo há pelo menos 60 dias e um site
    representando o negócio.
