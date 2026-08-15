@@ -71,6 +71,12 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   dados do perfil.
 - [ ] Com consentimento do dono, ligar uma localização piloto e sincronizar até
   ao fim da paginação; só então trocar a fila ilustrativa por dados reais.
+- [x] Preparar o piloto concierge de sete dias sem a API Business Profile:
+  QR, links públicos, comentário privado opcional e medição de intenção, com
+  limites explícitos em `docs/piloto-concierge-sem-api-google.md`.
+- [ ] Escolher o estabelecimento e obter o aceite do seu titular; depois
+  publicar o lote de métricas e executar o piloto concierge sem atribuir ao
+  AppReview avaliações que só o Google pode confirmar.
 
 ## Regra de produto que não pode regredir
 

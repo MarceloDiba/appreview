@@ -115,6 +115,11 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - Até a resposta do Google, não ativar APIs, criar cliente OAuth, configurar
   segredos no Supabase ou chamar as APIs. O pedido não gerou uso de API nem
   alteração em dados de cliente.
+- Para não adiar a validação comercial, `docs/piloto-concierge-sem-api-google.md`
+  define um teste real de sete dias que depende só do QR, links públicos,
+  comentário privado opcional e métricas de intenção. Ele não chama clique de
+  avaliação, não simula uma fila completa e pode ser continuado pelo mesmo
+  estabelecimento depois da aprovação OAuth.
 
 ## Produto e infra
 
