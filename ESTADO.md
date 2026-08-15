@@ -66,10 +66,10 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   dados do perfil.
   - Identidade indicada por Marcelo: Perfil da Empresa da NOÁ +
     `noadigital.com.br`.
-  - Antes do envio, confirmar se `falecomdiba@gmail.com` (conta atual do
-    formulário) ou `diba@noadigital.com.br` é proprietário/gestor do Perfil. O
-    projeto Cloud está na segunda conta; não assumir que isso prova a gestão do
-    Perfil.
+  - Confirmado no formulário em 15/08: `diba@noadigital.com.br` **não** tem
+    Perfil da Empresa associado. Usar a conta que já administra o Perfil da NOÁ
+    ou atribuir-lhe gestão antes do envio. O projeto Cloud estar nessa conta não
+    substitui essa condição.
 - [ ] Com consentimento do dono, ligar uma localização piloto e sincronizar até
   ao fim da paginação; só então trocar a fila ilustrativa por dados reais.
 

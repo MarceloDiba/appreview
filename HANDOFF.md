@@ -111,12 +111,13 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   confirmação do titular.
 - Marcelo indicou o Perfil da Empresa da **NOÁ** e `noadigital.com.br` como a
   identidade que representa o AppReview. O formulário Basic foi aberto, mas
-  ainda não foi confirmado/enviado: ele está autenticado em
-  `falecomdiba@gmail.com`, enquanto o projeto Cloud foi criado por
-  `diba@noadigital.com.br`. A documentação do Google exige que a conta que
-  envia o pedido seja proprietária ou gestora do Perfil; confirmar qual das duas
-  contas tem esse vínculo antes de continuar. A verificação e os 60+ dias do
-  perfil continuam a ser requisito do Google, não inferência do AppReview.
+  ainda não foi enviado. A tentativa com `diba@noadigital.com.br` confirmou no
+  próprio formulário que essa conta não tem Perfil da Empresa associado. A
+  documentação do Google exige que a conta que envia o pedido seja proprietária
+  ou gestora do Perfil; usar a conta que já administra a NOÁ ou atribuir gestão
+  a `diba@noadigital.com.br` antes de continuar. O projeto Cloud continua na
+  segunda conta e isso não prova gestão do Perfil. A verificação e os 60+ dias
+  do perfil continuam a ser requisito do Google, não inferência do AppReview.
 
 ## Produto e infra
 
