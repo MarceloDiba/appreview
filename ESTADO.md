@@ -74,6 +74,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Preparar o piloto concierge de sete dias sem a API Business Profile:
   QR, links públicos, comentário privado opcional e medição de intenção, com
   limites explícitos em `docs/piloto-concierge-sem-api-google.md`.
+- [~] PR [#24](https://github.com/MarceloDiba/appreview/pull/24) publicado em
+  rascunho; CI verde no run 83. Aguardar revisão/merge do Marcelo antes de
+  aplicar a migration de métricas ou iniciar o piloto do Mania.
 - [ ] Escolher o estabelecimento e obter o aceite do seu titular; depois
   publicar o lote de métricas e executar o piloto concierge sem atribuir ao
   AppReview avaliações que só o Google pode confirmar.

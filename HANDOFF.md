@@ -124,6 +124,10 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   O link curto Google veio do Marcelo, mas não foi resolvido pelo conector
   público; validar o destino no QR físico antes da entrega e não o usar como
   evidência de Place ID, avaliação ou configuração concluída.
+- PR [#24](https://github.com/MarceloDiba/appreview/pull/24) aberto em rascunho
+  para o lote completo do assessor e piloto concierge. O CI do commit
+  `48b421f` terminou verde (run 83). Não houve merge, deploy, migration remota,
+  chamada Google ou automação WhatsApp.
 
 ## Produto e infra
 
