@@ -39,7 +39,9 @@ com o Perfil da Empresa no Google aguarda aprovação.
 }
 ```
 
-3. Abrir localmente `/demo?view=snapshot`.
+3. Executar `npm run dev`. O preview local usa sempre a porta `4173` e falha
+   explicitamente se ela já estiver ocupada.
+4. Abrir `http://127.0.0.1:4173/demo?view=snapshot`.
 
 Se o arquivo estiver ausente, a tela mostra um estado vazio explícito. Em
 produção, a ausência desse arquivo é obrigatória.
