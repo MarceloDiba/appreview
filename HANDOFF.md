@@ -58,6 +58,12 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   atualizados com essa linguagem sem copiar conteúdo, marca ou dados do anexo.
 - A implementação preserva os mesmos dados, estados honestos e fluxo assistido;
   nenhuma integração, publicação ou custo foi acionado nesta mudança visual.
+- O Radar de Reputação está pronto para revisão local em `/demo?view=radar`.
+  Ele apresenta, sempre como exemplo ilustrativo, quatro estados que poderão
+  vir do Perfil da Empresa: situação estável, tema negativo recorrente, força
+  reconhecida e uma oportunidade concreta. Cada estado exibe a evidência e o
+  período; o Radar escolhe uma única prioridade e não cria tarefas. Ainda não
+  lê, calcula nem notifica dados reais.
 - A fundação da conexão oficial com o Perfil da Empresa foi preparada localmente
   no mesmo branch: migration `20260814193000_google_business_profile_connection.sql`,
   `start-google-business-oauth`, `google-business-oauth-callback` e

@@ -307,6 +307,33 @@
       "fallbackName": "Your business",
       "subtitle": "Your Google reputation workspace, organized so you can decide and act."
     },
+    "radar": {
+      "eyebrow": "Reputation Radar",
+      "exampleBadge": "Illustrative example",
+      "title": "What your reputation is saying",
+      "subtitle": "A short reading of what changed on Google — and only one action when it genuinely matters.",
+      "back": "Back to dashboard",
+      "statePicker": "Illustrative Radar states",
+      "tabs": { "stable": "All clear", "risk": "Change to watch", "strength": "What works", "opportunity": "Opportunity" },
+      "actionNote": "The Radar selects one priority. It does not create a task list.",
+      "disclaimer": "Demo with illustrative data. In the product, every signal will show source, period and last synchronization time.",
+      "states": {
+        "stable": { "eyebrow": "This week's status", "title": "Your reputation is stable", "body": "There are no unanswered reviews or relevant changes in this period. You do not need to open Google today.", "action": "View dashboard", "detail": "94 reviews read · no priority found" },
+        "risk": { "eyebrow": "Change to watch", "title": "Waiting time reappeared in 3 reviews", "body": "The same theme appeared in recent reviews. It does not prove a cause yet, but deserves a read before it becomes a pattern.", "action": "Review replies", "detail": "3 mentions in 12 days · none in the comparable prior period" },
+        "strength": { "eyebrow": "What works", "title": "Service is your most visible strength", "body": "Customers mentioned kindness and care positively more than once. It is a real sign of what the business delivers well.", "action": "View dashboard", "detail": "18 positive mentions in 30 days · base: 94 reviews read" },
+        "opportunity": { "eyebrow": "One concrete opportunity", "title": "Your lunch special is praised but absent from the profile", "body": "This item is praised repeatedly and no recent photo shows it. Adding one photo brings Business Profile closer to what customers already value.", "action": "View dashboard", "detail": "A suggestion based on praise and profile data — not a ranking promise" }
+      },
+      "riskEvidence": {
+        "title": "Where the signal came from", "subtitle": "Recent review excerpts that mention waiting time.",
+        "mariana": { "name": "Mariana Souza", "date": "Aug 12", "quote": "I waited quite a while to be served." },
+        "ricardo": { "name": "Ricardo Lima", "date": "Aug 08", "quote": "The order took longer than expected." },
+        "bia": { "name": "Bia Martins", "date": "Aug 02", "quote": "Good food, but the wait was long." }
+      },
+      "strengthEvidence": { "metric": "Positive mentions", "metricDetail": "about service", "title": "What customers recognise most", "body": "Radar groups recurring terms to reveal an existing perception — without inventing praise or calling a trend a definitive result.", "topics": { "cordialidade": "Kindness", "agilidade": "Speed", "atenção": "Care" } },
+      "opportunityEvidence": { "title": "Why this is the one opportunity now", "body": "The profile does not need an overhaul. It just needs to show what customers already describe enthusiastically.", "praise": "praises for the lunch special", "photos": "recent photos of this item" },
+      "sources": { "title": "How Radar got here", "subtitle": "Every recommendation must explain its evidence.", "period": "Period", "reviews": "Reviews read", "profile": "Google Profile", "profileValue": "Illustrative data" },
+      "quiet": { "title": "Quiet by default", "body": "If there is no relevant risk or opportunity, AppReview simply confirms that everything is on track." }
+    },
     "setupBanner": {
       "title": "Finish the setup",
       "name": "your business name",

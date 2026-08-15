@@ -307,6 +307,33 @@
       "fallbackName": "Seu negócio",
       "subtitle": "Seu painel de reputação no Google, organizado para decidir e agir."
     },
+    "radar": {
+      "eyebrow": "Radar de Reputação",
+      "exampleBadge": "Exemplo ilustrativo",
+      "title": "O que sua reputação está dizendo",
+      "subtitle": "Uma leitura curta do que mudou no Google — e só uma ação quando ela realmente importa.",
+      "back": "Voltar ao painel",
+      "statePicker": "Estados ilustrativos do Radar",
+      "tabs": { "stable": "Tudo em dia", "risk": "Mudança a observar", "strength": "O que funciona", "opportunity": "Oportunidade" },
+      "actionNote": "O Radar escolhe uma prioridade. Ele não cria uma lista de tarefas.",
+      "disclaimer": "Demonstração com dados ilustrativos. No produto, cada sinal mostrará fonte, período e data da última sincronização.",
+      "states": {
+        "stable": { "eyebrow": "Situação da semana", "title": "Sua reputação está estável", "body": "Não há avaliação sem resposta nem mudança relevante no período. Você não precisa abrir o Google hoje.", "action": "Ver painel", "detail": "94 avaliações lidas · nenhuma prioridade encontrada" },
+        "risk": { "eyebrow": "Mudança a observar", "title": "Demora reapareceu em 3 avaliações", "body": "O mesmo tema apareceu em avaliações recentes. Ainda não prova uma causa, mas vale uma leitura antes que vire padrão.", "action": "Revisar respostas", "detail": "3 menções em 12 dias · antes disso, nenhuma no período comparável" },
+        "strength": { "eyebrow": "O que funciona", "title": "Atendimento é sua força mais percebida", "body": "Clientes mencionaram cordialidade e atenção de forma positiva repetidas vezes. É um sinal real do que o negócio entrega bem.", "action": "Ver painel", "detail": "18 menções positivas em 30 dias · base: 94 avaliações lidas" },
+        "opportunity": { "eyebrow": "Uma oportunidade concreta", "title": "O prato executivo é elogiado, mas não aparece no perfil", "body": "Há elogios recorrentes a esse item e nenhuma foto recente que o mostre. Atualizar uma foto aproxima o Perfil da Empresa do que os clientes já valorizam.", "action": "Ver painel", "detail": "Uma sugestão baseada em elogios e dados do perfil — não uma promessa de ranking" }
+      },
+      "riskEvidence": {
+        "title": "De onde veio o sinal", "subtitle": "Trechos de avaliações recentes que mencionam demora.",
+        "mariana": { "name": "Mariana Souza", "date": "12 ago", "quote": "Esperei bastante para ser atendida." },
+        "ricardo": { "name": "Ricardo Lima", "date": "08 ago", "quote": "O pedido demorou mais do que o esperado." },
+        "bia": { "name": "Bia Martins", "date": "02 ago", "quote": "Boa comida, mas a espera foi longa." }
+      },
+      "strengthEvidence": { "metric": "Menções positivas", "metricDetail": "sobre atendimento", "title": "O que os clientes mais reconhecem", "body": "O Radar agrupa termos recorrentes para revelar a percepção que já existe — sem inventar elogios nem chamar uma tendência de resultado definitivo.", "topics": { "cordialidade": "Cordialidade", "agilidade": "Agilidade", "atenção": "Atenção" } },
+      "opportunityEvidence": { "title": "Por que esta é a única oportunidade agora", "body": "O perfil não precisa de uma reforma. Basta aproximar o que ele mostra do que os clientes já citam com entusiasmo.", "praise": "elogios ao prato executivo", "photos": "fotos recentes desse item" },
+      "sources": { "title": "Como o Radar chegou aqui", "subtitle": "Toda recomendação precisa explicar a própria evidência.", "period": "Período", "reviews": "Avaliações lidas", "profile": "Perfil do Google", "profileValue": "Dados ilustrativos" },
+      "quiet": { "title": "Silencioso por padrão", "body": "Se não houver risco ou oportunidade relevante, o AppReview apenas confirma que está tudo em dia." }
+    },
     "setupBanner": {
       "title": "Falta terminar a configuração",
       "name": "o nome do seu negócio",

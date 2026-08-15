@@ -20,6 +20,9 @@ reduz interpretação e trabalho; não cria uma operação paralela de casos.
 - Snapshots para comparar nota e volume ao longo do tempo.
 - Painel real com estados vazios honestos e demo reutilizando os mesmos
   componentes, sempre identificado como ilustrativo.
+- Radar de Reputação demonstrativo com estados de estabilidade, risco, força e
+  oportunidade; cada exemplo revela período, fonte e evidência. A tela ainda
+  não calcula sinais nem usa dados de clientes.
 - Protótipo local da sessão assistida com cinco avaliações: três pendentes,
   duas respondidas, rascunho editável, adiamento e resumo final. Esta fila é
   demonstrativa e não lê nem publica estados no Google.

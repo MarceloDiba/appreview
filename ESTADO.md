@@ -39,6 +39,11 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   coluna lateral, fundo neutro, azul para ação e violeta como assinatura.
 - [x] Levar a mesma paleta, cartões e hierarquia para a fila assistida e validar
   o fluxo completo na demonstração local.
+- [x] Construir o Radar de Reputação em `/demo?view=radar`: quatro estados
+  ilustrativos (estável, risco, força e oportunidade), uma prioridade por vez e
+  evidência, período e fonte visíveis.
+- [ ] Aprovar visualmente o Radar com Marcelo antes de ligar sinais reais do
+  Google ou qualquer automação.
 - [x] Preparar localmente OAuth, armazenamento cifrado de token, seleção de
   localização, importação paginada e publicação explícita de respostas para o
   Perfil da Empresa no Google. Nada foi aplicado ou chamado remotamente.

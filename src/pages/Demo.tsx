@@ -5,6 +5,7 @@ import Navbar from '@/components/layout/Navbar';
 import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
 import ReputationAdvisorCard, { ProfileHealthCard } from '@/components/dashboard/ReputationAdvisorCard';
 import ReviewQueueDemo from '@/components/dashboard/ReviewQueueDemo';
+import ReputationRadarDemo from '@/components/dashboard/ReputationRadarDemo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -81,6 +82,16 @@ const Demo = () => {
   const [searchParams] = useSearchParams();
   const panelOnly = searchParams.get('view') === 'panel';
   const queueOnly = searchParams.get('view') === 'queue';
+  const radarOnly = searchParams.get('view') === 'radar';
+
+  if (radarOnly) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#f5f7f9]">
+        <Navbar userRole="business" businessName="Seu negócio · Exemplo ilustrativo" />
+        <ReputationRadarDemo />
+      </div>
+    );
+  }
 
   if (queueOnly) {
     return (
@@ -157,7 +168,7 @@ const Demo = () => {
           </TabsContent>
         </Tabs>
 
-        <div className="mt-10 text-center"><Button asChild size="lg"><Link to="/signup">Criar minha conta</Link></Button></div>
+        <div className="mt-10 flex flex-wrap justify-center gap-3"><Button asChild variant="outline" size="lg"><Link to="/demo?view=radar">Ver Radar de Reputação</Link></Button><Button asChild size="lg"><Link to="/signup">Criar minha conta</Link></Button></div>
       </div>
     </main>
   </div>
