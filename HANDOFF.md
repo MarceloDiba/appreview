@@ -20,9 +20,11 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - Dashboard, página de avaliações, landing e demonstração foram reorientados
   para resultado no Google e sugestões de resposta; casos internos ficaram
   secundários.
-- Migration local: `20260814190000_google_outcome_metrics.sql`. Ela ainda não foi
-  aplicada remotamente. Nenhum deploy, chamada manual ao Google ou custo foi
-  gerado nesta frente.
+- Migration `20260814190000_google_outcome_metrics.sql` aplicada no Supabase em
+  15/08. Ela acrescenta apenas as tabelas versionadas de eventos do funil e
+  snapshots; não alterou nem removeu registros existentes. As duas tabelas têm
+  RLS ativo e as políticas verificadas. Não houve chamada manual ao Google nem
+  custo de API nesta frente.
 - Verificação local concluída por `npm run verify`. O lint continua não
   bloqueante e falha apenas em cinco erros herdados, fora dos arquivos alterados.
 - Direção visual aprovada por Marcelo: “Seu assessor de reputação no Google”. A
@@ -124,10 +126,11 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   O link curto Google veio do Marcelo, mas não foi resolvido pelo conector
   público; validar o destino no QR físico antes da entrega e não o usar como
   evidência de Place ID, avaliação ou configuração concluída.
-- PR [#24](https://github.com/MarceloDiba/appreview/pull/24) aberto em rascunho
-  para o lote completo do assessor e piloto concierge. O CI do commit
-  `48b421f` terminou verde (run 83). Não houve merge, deploy, migration remota,
-  chamada Google ou automação WhatsApp.
+- PR [#24](https://github.com/MarceloDiba/appreview/pull/24) aberto para o lote
+  completo do assessor e piloto concierge. O CI do commit `e0402ed` terminou
+  verde (run 84), e o preview da Vercel desse mesmo commit está `READY`.
+  A migration de métricas já está aplicada no Supabase; ainda não houve merge,
+  deploy de produção, chamada Google ou automação WhatsApp.
 
 ## Produto e infra
 

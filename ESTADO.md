@@ -17,8 +17,11 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   Google e apoio a respostas.
 - [x] `npm run verify` verde localmente.
 - [ ] Revisão de Marcelo no produto local antes de qualquer PR/publicação.
-- [ ] Aplicar migration e publicar somente depois de aprovação específica do
-  lote; não houve alteração remota nem chamada manual à API Google.
+- [x] Aplicar a migration `20260814190000_google_outcome_metrics.sql` no
+  Supabase: tabelas de eventos do QR e snapshots criadas em 15/08 com RLS e
+  políticas verificadas. Não houve chamada manual à API Google.
+- [ ] Fazer o merge do PR #24 e confirmar o deploy automático em produção antes
+  de iniciar a recolha do piloto concierge.
 - [x] Reposicionar localmente a experiência como assessor de reputação, com
   landing e demonstração aprovadas visualmente.
 - [x] Criar briefing no painel a partir do cache Google e do gerador
@@ -74,12 +77,12 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Preparar o piloto concierge de sete dias sem a API Business Profile:
   QR, links públicos, comentário privado opcional e medição de intenção, com
   limites explícitos em `docs/piloto-concierge-sem-api-google.md`.
-- [~] PR [#24](https://github.com/MarceloDiba/appreview/pull/24) publicado em
-  rascunho; CI verde no run 83. Aguardar revisão/merge do Marcelo antes de
-  aplicar a migration de métricas ou iniciar o piloto do Mania.
-- [ ] Escolher o estabelecimento e obter o aceite do seu titular; depois
-  publicar o lote de métricas e executar o piloto concierge sem atribuir ao
-  AppReview avaliações que só o Google pode confirmar.
+- [~] PR [#24](https://github.com/MarceloDiba/appreview/pull/24) publicado;
+  CI verde no run 84 e preview da Vercel `READY` para `e0402ed`. A migration de
+  métricas está aplicada; falta merge/deploy de produção antes de iniciar o
+  piloto do Mania.
+- [ ] Com o aceite do titular do estabelecimento escolhido, executar o piloto
+  concierge sem atribuir ao AppReview avaliações que só o Google pode confirmar.
   - Estabelecimento escolhido por Marcelo em 15/08: **Mania de Petiscos**,
     Lisboa. O link curto do Google foi fornecido pelo Marcelo; a confirmação do
     negócio, idioma e destino fica no teste do QR físico, não é inferida do
