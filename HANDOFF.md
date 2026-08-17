@@ -1,7 +1,29 @@
 # Binno — documento de continuação (handoff)
 
-Estado atualizado em 15/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
+Estado atualizado em 17/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
+
+## Cockpit demonstrativo Binno — 17/08/2026 (local, não publicado)
+
+- Marcelo escolheu como referência a arquitetura de
+  `biz-buddy-assist-16.lovable.app`: painel compacto de duas colunas, prioridade
+  de respostas, volume, boas práticas, Perfil no Google e WhatsApp.
+- A rota local `http://127.0.0.1:4173/demo?view=panel` agora reproduz essa
+  organização com a identidade Binno e sem copiar marca, textos ou promessas
+  não sustentadas da referência. A rota legada `?view=radar` abre a mesma visão
+  geral, onde forças, fragilidades e temas estão visíveis sem exigir outra aba.
+- A primeira dobra prioriza fila de respostas editáveis, forças e fragilidades,
+  queda de volume, temas, prontidão do perfil e resumo WhatsApp. Todas as
+  métricas são identificadas como demonstrativas; o QR não recebe atribuição
+  individual de avaliação, respostas não são publicadas e WhatsApp não envia.
+- As abas de Avaliações, Volume, Boas práticas, Perfil no Google e WhatsApp
+  possuem estados locais navegáveis. Fila completa, Radar oficial, publicação
+  e envio real continuam dependentes da conexão oficial/integrações aprovadas.
+- `npm run verify` passou; console sem erro nas interações principais.
+  Comparação visual e evidências em `design-qa.md` (`final result: passed`).
+- O trabalho continua não commitado, não publicado e sem alteração remota. A
+  próxima decisão é aprovar visualmente esta direção antes de levar os mesmos
+  componentes ao painel autenticado com dados oficiais.
 
 ## Onboarding orientado ao Google — 15/08/2026 (PR #27 pronto para revisão)
 
@@ -328,6 +350,23 @@ npm run verify
 
 H5 Texas Burger (Avenida) e Mania de Petiscos, ambos em Lisboa. Marcelo no Brasil
 (Aracaju) até dezembro → arranque remoto.
+
+### WhatsApp temporário — validação local (17/08/2026)
+
+- OpenWA foi executado somente em `127.0.0.1`, fora do repositório e sem
+  webhook, agendamento, importação de conversas ou integração publicada.
+- A primeira tentativa via Baileys não concluiu o vínculo. O piloto foi
+  recriado com `whatsapp-web.js` e o Chrome local; o vínculo foi confirmado
+  pelo estado `ready` da sessão.
+- Uma única mensagem manual aprovada por Marcelo foi enviada ao próprio número
+  e recebida. Isso valida vínculo e envio pontual, não notificações do Binno,
+  entrega recorrente, consentimento, agendamento ou operação de produção.
+- Não usar OpenWA como base de produção sem decisão explícita sobre provedor,
+  número dedicado, preferências, logs, falhas e risco operacional.
+- O painel autenticado local ganhou a aba **WhatsApp** funcional para o piloto:
+  detecta somente a sessão local `binno-piloto`, não expõe a chave ao navegador,
+  pede número internacional e confirmação explícita a cada envio. Não oferece
+  agenda, webhook ou histórico persistido. Ver `docs/openwa-local-pilot.md`.
 
 - Marcelo executou em 31/07 a passagem com a conta existente da Noá. Passaram:
   QR físico e idioma, nota baixa mantendo avaliação pública, Central de Atenção,

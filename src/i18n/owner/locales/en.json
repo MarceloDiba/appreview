@@ -364,15 +364,53 @@
       "collectedAt": "Collected {{date}}",
       "rating": "Current public rating",
       "ratingAria": "{{rating}} stars",
+      "publicProfile": "Public profile data",
       "profileTotal": "{{count}} reviews on the profile",
       "sample": "Reviewed sample",
       "sampleLimit": "A limited reading, not the full history.",
       "distribution": "Sample distribution",
+      "sampleDistribution": "{{count}} reviews observed in the collection",
+      "summarySubtitle": "How the business appears on Google, with a limited experimental reading.",
+      "summaryDisclaimer": "The rating and total are public. The distribution comes from a limited sample and does not replace history, a queue, or the official Radar.",
       "disclaimer": "Shows observed public data and a limited sample. It does not measure a complete queue, trends, ranking, or unanswered reviews.",
       "available": { "title": "The dashboard already has context", "body": "Rating, volume, distribution, and observed owner replies are together without opening Google." },
       "attention": { "title": "Attention in the sample", "body": "{{count}} one- or two-star reviews were observed." },
       "replies": { "title": "Observed owner replies", "body": "{{count}} owner replies in the sample ({{rate}}%)." },
+      "priority": {
+        "title": "{{count}} low-rated reviews appear in the sample",
+        "body": "It is a signal to follow, but the collection does not keep author or text. For safety, Binno does not suggest or publish a reply without the official connection.",
+        "safeTitle": "No blind work",
+        "safeBody": "Samples help explain the scenario; replies require the official queue and the owner's review.",
+        "observedTitle": "Observed owner replies",
+        "observedBody": "{{count}} owner replies were seen in the sample ({{rate}}%).",
+        "disclaimer": "An individual priority appears only when complete reviews are authorized through Business Profile.",
+        "action": "View connection status"
+      },
+      "sidebar": {
+        "title": "What this pilot already validates",
+        "body": "Binno can organize the business's public reading without calling a sample a complete queue.",
+        "action": "See how the connection progresses"
+      },
+      "path": {
+        "disclaimer": "Clicks indicate intent to review, not published reviews.",
+        "waitingTitle": "Waiting for the first visits",
+        "waitingBody": "Once the QR code is in use, Binno shows how people move on to Google.",
+        "action": "View QR codes"
+      },
       "official": { "title": "The next level needs the official connection", "body": "Business Profile approval unlocks the full queue, evidence-based Radar, and confirmed reply publication. Until then, Binno does not invent those data points." }
+    },
+    "cockpit": {
+      "tabs": { "overview": "Overview", "reviews": "Reviews", "questions": "Questions", "photos": "Photos", "performance": "Performance", "whatsapp": "WhatsApp" },
+      "locked": { "title": "This module needs the official connection", "body": "The experimental source shows only an aggregated reading. Queue, questions, photos, and detailed performance arrive after Business Profile authorization.", "action": "View connection status" },
+      "summary": { "title": "Reputation summary", "subtitle": "How your business appears today to people searching on Google.", "observed": "Experimental reading", "profileCount": "{{count}} reviews", "sampleDistribution": "Sample distribution · {{count}}", "trend": "Observed trend", "trendWaiting": "Waiting for the next reading", "trendBody": "A second collection is needed to show change without inventing a trend." },
+      "metrics": { "lowRatings": "Low ratings in sample", "lowRatingsDetail": "in {{count}} observed reviews", "observedReplies": "Observed replies", "observedRepliesDetail": "{{rate}}% of sample", "sampleRating": "Sample rating", "sampleRatingDetail": "not a full-period result", "newReviews": "New reviews this month", "connectionRequired": "Official connection required" },
+      "reviews": { "title": "Latest reviews", "subtitle": "Most recent first, with each reply status.", "lockedBadge": "Connection required", "lockedTitle": "The individual queue is not available yet", "lockedBody": "The experimental collection does not keep review authors, text, or links. Once Business Profile is authorized, the queue appears here with editable replies.", "action": "View connection" },
+      "path": { "title": "How people reach you", "subtitle": "From the QR code in store to the business page on Google.", "opens": "QR code opened", "clicks": "Clicked to review on Google", "published": "Published reviews", "waiting": "Waiting for the first visits", "officialOnly": "Confirmation depends on Google", "action": "View QR codes" },
+      "topics": { "title": "What customers mention most", "subtitle": "Topics appearing in recent reviews.", "body": "Topics are highlighted only after official sync, when complete reviews and enough context exist to avoid drawing conclusions from a sample." },
+      "attention": { "title": "Needs you now", "body": "There are {{count}} one- or two-star reviews in the sample. Without text and author, suggesting a specific reply would not be responsible.", "action": "View connection status" },
+      "health": { "title": "Your Google profile", "subtitle": "Presence and service signals worth monitoring.", "responses": "Review replies", "photos": "Recent photos", "info": "Business information", "connection": "Business Profile connection required", "review": "Review hours and details" },
+      "changes": { "title": "What changed in this reading", "snapshot": "An experimental profile reading was loaded.", "lowRatings": "{{count}} low ratings appeared in the sample.", "official": "Queue, Radar, and replies await the official connection." },
+      "whatsapp": { "title": "WhatsApp summary and priorities", "body": "Connect the channel to choose what reaches the owner and when.", "notConnected": "Not connected", "scheduled": "Local schedule ready", "connect": "Configure WhatsApp", "manage": "Manage delivery", "workspaceTitle": "Owner WhatsApp", "workspaceBody": "Choose when the summary should arrive. Actual delivery starts only after provider, consent, and verified number.", "frequency": "Frequency", "time": "Time", "schedule": { "monday": "Every Monday", "friday": "Every Friday" }, "previewTitle": "Message preview", "previewBody": "Good morning! When the integration is active, you will receive a short reputation reading and what needs attention here.", "saveLocal": "Save local schedule", "save": "Update local schedule", "localDisclaimer": "This schedule is only a local preview. No message was sent or will be sent without the provider connection and your consent.", "historyTitle": "Sent messages", "historyEmpty": "No message has been sent. History starts only after a real WhatsApp connection.", "connectionTitle": "Pilot limits", "connectionBody": "This channel is temporary, local, and manual. There is no schedule, webhook, conversation import, or recurring delivery.", "status": { "checking": "Checking local channel", "ready": "Local channel connected", "not-connected": "Local channel not linked", "unavailable": "Temporary channel unavailable" }, "localCardReady": "The temporary channel is ready for one confirmed manual send.", "openTest": "Open delivery test", "localTitle": "Local delivery test", "localBody": "Validate manual sending from the dashboard without enabling scheduling, automation, or a published integration.", "refresh": "Refresh status", "readyBody": "The local session is linked. The send below still requires a number and explicit confirmation.", "unavailableBody": "Start local OpenWA and the development proxy to test this channel.", "recipient": "Test number", "recipientHint": "Use international format, for example +351 911 056 526. Binno does not save this number.", "message": "Message", "defaultMessage": "Binno: manual test sent from the local dashboard. No automation was enabled.", "confirmation": "I confirm this is a single manual send to the number entered.", "sendTest": "Send test message", "sending": "Sending…", "sendError": "The test message could not be sent.", "sent": "Test message sent at {{time}} to {{recipient}}.", "historyLive": "One manual send was recorded in this local session.", "historyEmpty": "No message was sent by this dashboard in this session." }
     },
     "setupBanner": {
       "title": "Finish the setup",

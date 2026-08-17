@@ -364,15 +364,53 @@
       "collectedAt": "Recolhido em {{date}}",
       "rating": "Classificação pública atual",
       "ratingAria": "{{rating}} estrelas",
+      "publicProfile": "Dado público do perfil",
       "profileTotal": "{{count}} avaliações no perfil",
       "sample": "Amostra analisada",
       "sampleLimit": "Leitura limitada, não é todo o histórico.",
       "distribution": "Distribuição da amostra",
+      "sampleDistribution": "{{count}} avaliações observadas na recolha",
+      "summarySubtitle": "Como o negócio aparece no Google, com uma leitura experimental limitada.",
+      "summaryDisclaimer": "A classificação e o total são públicos. A distribuição vem de uma amostra limitada e não substitui histórico, fila ou Radar oficial.",
       "disclaimer": "Mostra dados públicos observados e uma amostra limitada. Não mede fila completa, tendências, ranking ou respostas pendentes.",
       "available": { "title": "O painel já ganha contexto", "body": "Classificação, volume, distribuição e respostas vistas ficam reunidos sem abrir o Google." },
       "attention": { "title": "Atenção na amostra", "body": "Foram observadas {{count}} avaliações de uma ou duas estrelas." },
       "replies": { "title": "Respostas vistas", "body": "{{count}} respostas do dono na amostra ({{rate}}%)." },
+      "priority": {
+        "title": "{{count}} avaliações de classificação baixa aparecem na amostra",
+        "body": "É um sinal a acompanhar, mas a recolha não guarda autor ou texto. Por segurança, o Binno não sugere nem publica uma resposta sem a ligação oficial.",
+        "safeTitle": "Sem trabalho às cegas",
+        "safeBody": "As amostras ajudam a entender o cenário; as respostas exigem a fila oficial e a revisão do dono.",
+        "observedTitle": "Resposta observada",
+        "observedBody": "Foram vistas {{count}} respostas do proprietário na amostra ({{rate}}%).",
+        "disclaimer": "A prioridade individual só aparece quando as avaliações completas forem autorizadas pelo Perfil da Empresa.",
+        "action": "Ver estado da ligação"
+      },
+      "sidebar": {
+        "title": "O que este piloto já valida",
+        "body": "O Binno consegue organizar a leitura pública do negócio sem chamar a uma amostra uma fila completa.",
+        "action": "Ver como a ligação evolui"
+      },
+      "path": {
+        "disclaimer": "Os cliques indicam intenção de avaliar, não avaliações publicadas.",
+        "waitingTitle": "À espera dos primeiros acessos",
+        "waitingBody": "Assim que o QR estiver em uso, o Binno mostra como as pessoas avançam até ao Google.",
+        "action": "Ver QR Codes"
+      },
       "official": { "title": "O próximo nível depende da ligação oficial", "body": "A aprovação do Perfil da Empresa desbloqueia a fila completa, o Radar com evidência e a publicação confirmada de respostas. Até lá, o Binno não inventa esses dados." }
+    },
+    "cockpit": {
+      "tabs": { "overview": "Visão geral", "reviews": "Avaliações", "questions": "Perguntas", "photos": "Fotos", "performance": "Desempenho", "whatsapp": "WhatsApp" },
+      "locked": { "title": "Este módulo precisa da ligação oficial", "body": "A fonte experimental mostra apenas uma leitura agregada. Fila, perguntas, fotos e desempenho detalhado entram depois da autorização do Perfil da Empresa.", "action": "Ver estado da ligação" },
+      "summary": { "title": "Resumo da reputação", "subtitle": "Como a sua empresa aparece hoje para quem procura no Google.", "observed": "Leitura experimental", "profileCount": "{{count}} avaliações", "sampleDistribution": "Distribuição da amostra · {{count}}", "trend": "Tendência observada", "trendWaiting": "A aguardar a próxima leitura", "trendBody": "É necessária uma segunda recolha para mostrar evolução sem inventar tendência." },
+      "metrics": { "lowRatings": "Classificações baixas na amostra", "lowRatingsDetail": "em {{count}} avaliações observadas", "observedReplies": "Respostas observadas", "observedRepliesDetail": "{{rate}}% da amostra", "sampleRating": "Classificação da amostra", "sampleRatingDetail": "não representa o período completo", "newReviews": "Novas avaliações no mês", "connectionRequired": "Requer ligação oficial" },
+      "reviews": { "title": "Últimas avaliações", "subtitle": "As mais recentes primeiro, com o estado de resposta de cada uma.", "lockedBadge": "Ligação necessária", "lockedTitle": "A fila individual ainda não está disponível", "lockedBody": "A recolha experimental não guarda autores, textos ou links de avaliações. Assim que o Perfil da Empresa for autorizado, a fila aparece aqui com respostas editáveis.", "action": "Ver ligação" },
+      "path": { "title": "Como as pessoas chegam até si", "subtitle": "Do QR code na loja até à página da empresa no Google.", "opens": "QR code aberto", "clicks": "Clicaram para avaliar no Google", "published": "Avaliações publicadas", "waiting": "A aguardar os primeiros acessos", "officialOnly": "A confirmação depende do Google", "action": "Ver QR Codes" },
+      "topics": { "title": "O que os clientes mais comentam", "subtitle": "Assuntos que aparecem nas avaliações recentes.", "body": "Os temas só serão destacados depois da sincronização oficial, quando houver avaliações completas e contexto suficiente para não tirar conclusões de uma amostra." },
+      "attention": { "title": "Precisa de si agora", "body": "Há {{count}} avaliações de uma ou duas estrelas na amostra. Sem o texto e o autor, não seria responsável sugerir uma resposta específica.", "action": "Ver estado da ligação" },
+      "health": { "title": "O seu perfil no Google", "subtitle": "Sinais de presença e atendimento que merecem acompanhamento.", "responses": "Respostas a avaliações", "photos": "Fotos recentes", "info": "Informações do negócio", "connection": "Requer ligação ao Perfil da Empresa", "review": "Rever horários e dados" },
+      "changes": { "title": "O que mudou nesta leitura", "snapshot": "Foi carregada uma leitura experimental do perfil.", "lowRatings": "{{count}} classificações baixas apareceram na amostra.", "official": "Fila, Radar e respostas aguardam a ligação oficial." },
+      "whatsapp": { "title": "Resumo e prioridades no WhatsApp", "body": "Ligue o canal para definir o que chega ao gestor e quando.", "notConnected": "Não ligado", "scheduled": "Agenda local pronta", "connect": "Configurar WhatsApp", "manage": "Gerir envio", "workspaceTitle": "WhatsApp do gestor", "workspaceBody": "Escolha quando o resumo deve chegar. A entrega real só é ativada depois do fornecedor, consentimento e número verificado.", "frequency": "Frequência", "time": "Hora", "schedule": { "monday": "Todas as segundas-feiras", "friday": "Todas as sextas-feiras" }, "previewTitle": "Prévia da mensagem", "previewBody": "Bom dia! Quando a integração estiver ativa, receberá aqui uma leitura curta da reputação e do que merece atenção.", "saveLocal": "Guardar programação local", "save": "Atualizar programação local", "localDisclaimer": "Esta programação é apenas uma prévia local. Nenhuma mensagem foi enviada nem será enviada sem a ligação do fornecedor e o seu consentimento.", "historyTitle": "Mensagens enviadas", "historyEmpty": "Nenhuma mensagem foi enviada. O histórico começa somente depois da ligação real do WhatsApp.", "connectionTitle": "Limites deste piloto", "connectionBody": "O canal é temporário, local e manual. Não existe agenda, webhook, importação de conversas nem entrega recorrente.", "status": { "checking": "A verificar canal local", "ready": "Canal local ligado", "not-connected": "Canal local não ligado", "unavailable": "Canal temporário indisponível" }, "localCardReady": "Canal temporário pronto para um envio manual e confirmado.", "openTest": "Abrir teste de entrega", "localTitle": "Teste de entrega local", "localBody": "Valide o envio manual no painel sem ativar agenda, automação ou integração publicada.", "refresh": "Atualizar estado", "readyBody": "A sessão local está ligada. O envio abaixo continua a exigir número e confirmação explícita.", "unavailableBody": "Inicie o OpenWA local e o proxy de desenvolvimento para testar este canal.", "recipient": "Número para teste", "recipientHint": "Use formato internacional, por exemplo +351 911 056 526. O número não é guardado pelo Binno.", "message": "Mensagem", "defaultMessage": "Binno: teste manual enviado pelo painel local. Nenhuma automação foi ativada.", "confirmation": "Confirmo que este é um envio único e manual para o número indicado.", "sendTest": "Enviar mensagem de teste", "sending": "A enviar…", "sendError": "Não foi possível enviar a mensagem de teste.", "sent": "Mensagem de teste enviada em {{time}} para {{recipient}}.", "historyLive": "Um envio manual foi registado nesta sessão local.", "historyEmpty": "Nenhuma mensagem foi enviada por este painel nesta sessão." }
     },
     "setupBanner": {
       "title": "Falta terminar a configuração",

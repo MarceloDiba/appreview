@@ -95,3 +95,106 @@ final result: passed
 Não restam diferenças P0, P1 ou P2 no alvo desktop. A captura móvel é uma lacuna de teste P3 e não altera o alvo visual desktop selecionado.
 
 final result: passed
+
+---
+
+# Design QA — cockpit demonstrativo Binno
+
+Data: 2026-08-17
+Escopo: `/demo?view=panel` (visão geral, dados demonstrativos)
+
+## Evidências comparadas
+
+- Referência selecionada: `https://biz-buddy-assist-16.lovable.app`, captura em
+  `/private/tmp/biz-buddy-assist-first-fold-current.png`.
+- Implementação local: `http://127.0.0.1:4173/demo?view=panel`, captura em
+  `/private/tmp/binno-advisor-cockpit-comparable.png`.
+- As duas capturas da primeira dobra foram abertas no mesmo input visual desta
+  revisão. Ambas têm raster de `2560 × 1440`. A referência informou viewport
+  CSS `1280 × 720` em `devicePixelRatio 2`; o navegador local informou
+  `2560 × 1440` em `devicePixelRatio 1`. A comparação foi feita pela saída
+  raster de igual dimensão, sem atribuir diferença de densidade a um desvio de
+  layout.
+
+## Resultado da comparação
+
+### P0 / P1 / P2
+
+Nenhum desvio bloqueante encontrado.
+
+- **Arquitetura e hierarquia:** o Binno preserva a estrutura compacta de duas
+  colunas, com alerta de resposta, fila assistida, leitura de assessor, volume
+  e coluna de reputação/WhatsApp/prontidão na primeira dobra. A prioridade é
+  agir, não apenas consultar a nota do Google.
+- **Tipografia e espaçamento:** barra superior, navegação secundária, cartões,
+  separadores, espaçamento vertical e CTAs mantêm a mesma leitura limpa e
+  densa da referência.
+- **Cores e tokens:** base neutra, azul para ação, estados semânticos
+  verde/âmbar/vermelho e violeta apenas como assinatura foram mantidos com
+  contraste legível.
+- **Ícones e imagens:** não há imagens decorativas no alvo. Os ícones usam a
+  biblioteca do produto; a linha de volume usa o componente `LineChart` da
+  biblioteca já instalada, não um desenho SVG manual.
+- **Conteúdo:** Binno substitui a marca e as afirmações não verificáveis da
+  referência por dados marcados como demonstrativos. A passagem QR → Google
+  mede abertura e clique, mas não atribui individualmente uma avaliação.
+  WhatsApp informa que não há conexão nem envio real; respostas são rascunhos
+  editáveis e não são publicadas.
+
+## Interações verificadas
+
+- Navegação para **Boas práticas**, **Avaliações** e **WhatsApp**.
+- Abertura da fila, preparação de resposta e confirmação visível de que nada
+  foi publicado no Google.
+- A rota legada `/demo?view=radar` abre a visão geral que contém a leitura de
+  forças, fragilidades e temas, em vez de deixar uma tela vazia.
+- Console do painel: nenhum erro.
+
+## Notas de iteração futura (P3)
+
+- Quando houver dados oficiais, substituir os exemplos por uma camada de
+  origem, período e completude por cartão; sem dados completos, continuar a
+  mostrar a limitação em vez de inventar fila ou tendências.
+- A tela demonstrativa permanece em português para revisão visual. A versão
+  autenticada deve continuar usando os catálogos do painel ao receber estes
+  componentes de produto.
+
+## Checklist final
+
+- [x] Referência visual e implementação renderizada comparadas.
+- [x] Primeira dobra, navegação e estados de resposta verificados.
+- [x] Dados demonstrativos e limites de integração visíveis.
+- [x] `npm run verify` concluído com sucesso.
+
+**final result: passed**
+
+---
+
+# QA funcional — canal local de WhatsApp
+
+Data: 2026-08-17
+Escopo: painel autenticado local em `/dashboard`, com fonte experimental Apify
+e sessão OpenWA temporária em `127.0.0.1`.
+
+## Verificado
+
+- O proxy de desenvolvimento respondeu à sessão `binno-piloto` sem expor a
+  chave do OpenWA ao navegador; o estado observado foi `ready`.
+- O card da primeira dobra exibe **Canal local conectado** e abre a aba
+  WhatsApp sem afirmar agenda ou entrega recorrente.
+- A aba mostra número internacional, mensagem editável e uma caixa de
+  confirmação; o botão de envio permanece desativado sem esses três requisitos.
+- O console do painel não apresentou erros.
+- A entrega real do canal foi validada antes pela API local: uma única mensagem
+  manual aprovada por Marcelo chegou ao seu próprio número. Esta revisão de UI
+  não enviou uma segunda mensagem.
+
+## Limites preservados
+
+- O piloto não persiste destinatário, agenda, preferências, mensagens ou
+  conversas no Binno.
+- O build de produção não configura proxy nem chama o OpenWA local.
+- Uma nova mensagem pelo painel continuará a depender da ação explícita do
+  operador no próprio formulário.
+
+**resultado local: aprovado para teste manual; não é integração de produção.**

@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
 import ReputationAdvisorCard, { ProfileHealthCard } from '@/components/dashboard/ReputationAdvisorCard';
 import ReputationRadarCard from '@/components/dashboard/ReputationRadarCard';
-import ExperimentalApifySnapshotDashboard from '@/components/dashboard/ExperimentalApifySnapshotDashboard';
+import ExperimentalCockpitDashboard from '@/components/dashboard/ExperimentalCockpitDashboard';
 import { useSetupStatus } from '@/hooks/useSetupStatus';
 import { useGoogleOutcome } from '@/hooks/useGoogleOutcome';
 import { supabase } from '@/integrations/supabase/client';
@@ -124,7 +124,7 @@ const Dashboard = () => {
           {loadingExperimentalSnapshot ? (
             <Card className="h-72 animate-pulse border-slate-200 bg-white" />
           ) : experimentalSnapshot ? (
-            <ExperimentalApifySnapshotDashboard snapshot={experimentalSnapshot} />
+            <ExperimentalCockpitDashboard snapshot={experimentalSnapshot} />
           ) : <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
             <section className="min-w-0 space-y-4">
               <GoogleOutcomeCard data={outcome.data} loading={outcome.loading} error={outcome.error} />

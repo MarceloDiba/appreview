@@ -63,6 +63,15 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 
 ## Em validação local — 14 de agosto de 2026
 
+- [x] Consolidar em 17/08 o cockpit demonstrativo Binno no layout/arquitetura
+  escolhidos por Marcelo: fila de respostas, leitura de forças e fragilidades,
+  volume, boas práticas, Perfil no Google e WhatsApp na mesma visão compacta.
+  A demo em `/demo?view=panel` passou em `npm run verify` e em `design-qa.md`;
+  permanece local, ilustrativa e sem integrar ou publicar respostas/mensagens.
+- [ ] Aprovar visualmente o cockpit demonstrativo e então portar os módulos
+  aprovados ao painel autenticado apenas onde houver origem, período e
+  completude de dados suficientes.
+
 - [x] Reverter a proposta de fila operacional que exigia responsável,
   providência, resultado e datas.
 - [x] Remover a pergunta de sentimento antes do acesso público e oferecer Google
@@ -236,6 +245,21 @@ em cache) foram preservados. Evidência completa em
 
 H5 Texas Burger — Avenida e Mania de Petiscos, ambos em Lisboa. Marcelo está em
 Aracaju até dezembro; o arranque será remoto.
+
+### WhatsApp temporário — confirmado em 17/08/2026
+
+O piloto local OpenWA, restrito a `127.0.0.1`, confirmou vínculo de um número
+de Marcelo e entrega de uma única mensagem manual para esse mesmo número. Não
+há webhook, agenda, preferências, importação de conversas, integração com o
+Binno ou publicação. A primeira tentativa Baileys falhou; a validação aprovada
+ocorreu com `whatsapp-web.js` e Chrome local. Isto é prova de viabilidade
+técnica pontual, não prontidão de produção.
+
+O painel autenticado local agora detecta essa sessão por um proxy de
+desenvolvimento em `127.0.0.1`, sem expor a chave no navegador. A aba WhatsApp
+permite um envio manual, exige destinatário em formato internacional e uma
+confirmação por envio. Agenda, automação, webhook e persistência de preferências
+continuam fora do escopo. Procedimento em `docs/openwa-local-pilot.md`.
 
 A passagem manual de 31/07 validou QR físico, idioma, nota baixa sem gating,
 Central de Atenção, persistência do caso tratado e logout. O primeiro defeito da

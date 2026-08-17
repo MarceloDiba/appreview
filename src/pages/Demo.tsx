@@ -5,7 +5,7 @@ import Navbar from '@/components/layout/Navbar';
 import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
 import ReputationAdvisorCard, { ProfileHealthCard } from '@/components/dashboard/ReputationAdvisorCard';
 import ReviewQueueDemo from '@/components/dashboard/ReviewQueueDemo';
-import ReputationRadarDemo from '@/components/dashboard/ReputationRadarDemo';
+import AdvisorCockpitDemo from '@/components/dashboard/AdvisorCockpitDemo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -187,8 +187,7 @@ const Demo = () => {
   if (radarOnly) {
     return (
       <div className="flex min-h-screen flex-col bg-[#f5f7f9]">
-        <Navbar userRole="business" businessName="Seu negócio · Exemplo ilustrativo" />
-        <ReputationRadarDemo />
+        <AdvisorCockpitDemo />
       </div>
     );
   }
@@ -205,10 +204,7 @@ const Demo = () => {
   if (panelOnly) {
     return (
       <div className="flex min-h-screen flex-col bg-[#f5f7f9]">
-        <Navbar userRole="business" businessName="Seu negócio · Exemplo ilustrativo" />
-        <main className="flex-1 px-4 pb-12 pt-24">
-          <div className="container mx-auto max-w-7xl"><AdvisorPanelPreview /></div>
-        </main>
+        <AdvisorCockpitDemo />
       </div>
     );
   }
