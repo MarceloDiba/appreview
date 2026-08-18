@@ -12,9 +12,10 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - O botão deixa de tratar o perfil do negócio como se fosse a avaliação: abre
   a URL individual quando existir; sem ela, assume explicitamente o fallback
   para o perfil público do Google.
-- O painel autenticado volta a ter **Orientação do dia** logo após a fila e na
-  nova aba Boas práticas. Mostra uma ação por vez, alterna de forma estável no
-  dia e prioriza resposta quando a coleta observou texto sem resposta.
+- O painel autenticado volta a ter **Boas práticas** como um box próprio na
+  coluna lateral da Visão geral e na respetiva aba. Mostra uma ação por vez,
+  alterna de forma estável no dia e prioriza resposta quando a coleta observou
+  texto sem resposta.
 - Falta publicar a nova versão da Edge Function e fazer uma coleta manual para
   validar nomes e links reais; essa coleta continua sujeita ao limite do piloto.
 

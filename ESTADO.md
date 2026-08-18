@@ -10,8 +10,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   acima de 14 dias no navegador autenticado.
 - [x] Corrigir o destino de “Abrir Google”: URL individual da avaliação quando
   a coleta disponibilizar; fallback identificado para o perfil do negócio.
-- [x] Reintroduzir Boas práticas como **Orientação do dia**: uma dica por vez,
-  rotação estável e prioridade para resposta quando houver evidência na fila.
+- [x] Reintroduzir **Boas práticas** como box próprio na Visão geral e na aba:
+  uma dica por vez, rotação estável e prioridade para resposta quando houver
+  evidência na fila.
 - [ ] Publicar a função atualizada e executar uma única coleta manual do Mania
   para validar o nome e o deep link reais antes de apresentar a melhoria como
   concluída.
