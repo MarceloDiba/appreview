@@ -17,9 +17,11 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Preparar a coleta Apify para ler mais variações de nome público/link
   individual e devolver histórico sanitizado de 12 semanas para volume,
   notas e respostas observadas.
-- [ ] Publicar a nova versão da Edge Function somente com autorização e fazer
-  uma coleta manual permitida após o intervalo de 24 h. Ela é necessária para
-  validar nome, deep link e preenchimento real dos cartões históricos.
+- [x] Publicar a nova versão da Edge Function no Supabase com autorização.
+- [ ] Fazer uma coleta manual permitida após o intervalo de 24 h. A primeira
+  tentativa foi corretamente bloqueada antes de chamar o Apify, sem custo. A
+  nova leitura validará nome, deep link e preenchimento real dos cartões
+  históricos.
 
 ## Arquitetura do dashboard — 17 de agosto de 2026
 

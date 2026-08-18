@@ -19,10 +19,11 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   persistido permanece agregado; nome, texto e URL continuam restritos ao
   navegador autenticado por 14 dias.
 - A leitura que está no navegador é anterior a essa alteração e não contém
-  nome/URL nem a série agregada. A próxima coleta permitida deve confirmar os
-  campos do actor e preencher os cartões. Enquanto isso, o painel mostra `—`
-  onde a fonte não comprova a métrica e não afirma queda, tendência ou
-  completude fictícia.
+  nome/URL nem a série agregada. O painel usa os dados atuais que ela comprova
+  (49 avaliações, distribuição, temas, fila, 115 h e +11 nos últimos 30 dias)
+  e transforma os cartões sem histórico em estado curto e útil, sem afirmar
+  queda, tendência ou completude fictícia. A próxima coleta permitida deve
+  confirmar os campos do actor e preencher as curvas de 12 semanas.
 - `npm run verify` passou. A interação local validou avanço da fila, edição e
   abertura da configuração completa do WhatsApp. A captura visual automática
   da superfície disponível não preserva a escala de desktop da referência;
@@ -44,8 +45,9 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - A nova versão da Edge Function foi publicada no projeto Supabase
   `tjbznhwdjyabuacrfqie`. A primeira tentativa de coleta posterior foi
   corretamente bloqueada pelo intervalo de 24 horas da leitura anterior do
-  Mania; falta executar uma única coleta manual depois desse intervalo para
-  validar nomes e links reais. O limite do piloto continua em vigor.
+  Mania, antes de qualquer chamada ao actor Apify; não houve novo custo. Falta
+  executar uma única coleta manual depois desse intervalo para validar nomes,
+  links reais e a série histórica. O limite do piloto continua em vigor.
 
 ## Piloto assistido — 17/08/2026 (local, não publicado)
 
