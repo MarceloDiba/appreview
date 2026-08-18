@@ -705,6 +705,23 @@
     "pt-PT": "Portuguese (Portugal)",
     "en": "English"
   },
+  "whatsappPilot": {
+    "interestsTitle": "What would you like to receive?",
+    "interestsBody": "Select only the alerts that are useful to your routine.",
+    "weeklyTitle": "Weekly summary",
+    "weeklyBody": "Rating, volume, replies, topics, and the week's priority.",
+    "repliesTitle": "Reviews needing a reply",
+    "repliesBody": "An alert when an observed review does not show a reply yet.",
+    "reputationTitle": "Reputation changes",
+    "reputationBody": "Volume or rating changes when enough history exists.",
+    "profileTitle": "Google Business Profile",
+    "profileBody": "Reminders about hours, photos, and profile information after the official connection is active.",
+    "notificationRecipient": "Owner's WhatsApp for notifications",
+    "notificationRecipientHint": "Enter the business owner's number. Future summaries and alerts will go there.",
+    "testRecipient": "Your WhatsApp for the preview",
+    "testRecipientHint": "Enter your own number or a team member's. This test is never sent to a customer.",
+    "weeklyChangeEmpty": "No change has been confirmed this week."
+  },
   "localWhatsApp": {
     "proxyUnavailable": "The local OpenWA proxy is unavailable. Start the preview with BINNO_ENABLE_OPENWA_PROXY=true and configure the local key.",
     "apiKeyRequired": "The local OpenWA key is not configured on this computer. Sending remains blocked."

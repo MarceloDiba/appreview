@@ -17,6 +17,11 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Preparar a coleta Apify para ler mais variações de nome público/link
   individual e devolver histórico sanitizado de 12 semanas para volume,
   notas e respostas observadas.
+- [x] Restaurar a composição visual aprovada, sem substituir gráficos por
+  barras quando a fonte ainda não oferece histórico; corrigir a leitura semanal
+  para não afirmar mudança inexistente.
+- [x] Clarificar o WhatsApp: número do gestor para avisos, número próprio/equipa
+  para prévia manual e quatro preferências de conteúdo salvas localmente.
 - [x] Publicar a nova versão da Edge Function no Supabase com autorização.
 - [ ] Fazer uma coleta manual permitida após o intervalo de 24 h. A primeira
   tentativa foi corretamente bloqueada antes de chamar o Apify, sem custo. A

@@ -705,6 +705,23 @@
     "pt-PT": "Português (Portugal)",
     "en": "English"
   },
+  "whatsappPilot": {
+    "interestsTitle": "O que você quer receber?",
+    "interestsBody": "Marque somente os avisos úteis para a sua rotina.",
+    "weeklyTitle": "Resumo semanal",
+    "weeklyBody": "Nota, volume, respostas, temas e a prioridade da semana.",
+    "repliesTitle": "Avaliações que pedem resposta",
+    "repliesBody": "Aviso quando uma avaliação observada ainda não mostra resposta.",
+    "reputationTitle": "Mudanças na reputação",
+    "reputationBody": "Variações de volume ou nota, quando houver histórico suficiente.",
+    "profileTitle": "Perfil do Google",
+    "profileBody": "Lembretes sobre horários, fotos e informações do perfil quando a conexão oficial estiver ativa.",
+    "notificationRecipient": "WhatsApp do gestor que receberá os avisos",
+    "notificationRecipientHint": "Informe o número do responsável pelo negócio. Os resumos e alertas futuros chegarão nele.",
+    "testRecipient": "Seu WhatsApp para receber a prévia",
+    "testRecipientHint": "Informe o seu número ou o de alguém da equipe. Este teste nunca é enviado a um cliente.",
+    "weeklyChangeEmpty": "Nenhuma mudança confirmada nesta semana."
+  },
   "localWhatsApp": {
     "proxyUnavailable": "O proxy local do OpenWA não está disponível. Inicie a prévia com BINNO_ENABLE_OPENWA_PROXY=true e configure a chave local.",
     "apiKeyRequired": "A chave local do OpenWA não está configurada neste computador. O envio permanece bloqueado."

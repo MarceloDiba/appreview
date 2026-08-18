@@ -28,6 +28,16 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   abertura da configuração completa do WhatsApp. A captura visual automática
   da superfície disponível não preserva a escala de desktop da referência;
   `design-qa.md` registra a pendência de comparação visual final.
+- A composição visual aprovada foi restaurada sem os atalhos visuais que
+  substituíam gráficos por barras. Enquanto a fonte ainda não devolve a série,
+  os módulos mantêm as áreas de gráfico e não simulam linhas. “O que mudou na
+  semana” agora afirma somente “Nenhuma mudança confirmada nesta semana.”
+- A aba WhatsApp passou a separar o **WhatsApp do gestor que receberá os
+  avisos** do **WhatsApp para receber a prévia manual**. O gestor escolhe e
+  salva localmente os quatro interesses: resumo semanal, avaliações que pedem
+  resposta, mudanças na reputação e Perfil do Google. O teste manual continua
+  explícito: vai apenas para o próprio gestor ou alguém da equipa, nunca para
+  um cliente.
 
 ## Fila assistida identificável e orientação diária — 18/08/2026 (função publicada; coleta pendente)
 
