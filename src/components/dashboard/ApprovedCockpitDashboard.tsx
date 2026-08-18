@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ChevronLeft, ChevronRight, Copy, ExternalLink, Lightbulb, MessageCircle, QrCode, Star } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { useReviewFunnelMetrics } from '@/hooks/useReviewFunnelMetrics';
 import { buildReplySuggestions } from '@/lib/replySuggestions';
 import { LocalWhatsAppState, useLocalWhatsApp } from '@/hooks/useLocalWhatsApp';
 import { WhatsAppNotificationWorkspace } from '@/components/dashboard/WhatsAppNotificationWorkspace';
+import { supabase } from '@/integrations/supabase/client';
 
 type CockpitTab = 'overview' | 'reviews' | 'whatsapp';
 type QueueReview = {
@@ -55,6 +56,21 @@ const ApprovedCockpitDashboard = ({ snapshot, userId }: { snapshot: Experimental
   const official = useGoogleBusinessReviewQueue(import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined);
   const funnel = useReviewFunnelMetrics(userId);
   const whatsApp = useLocalWhatsApp();
+  const [onboardingPhone, setOnboardingPhone] = useState('');
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    const loadPhone = async () => {
+      try {
+        const { data } = await supabase.from('profiles').select('phone').eq('id', userId).maybeSingle();
+        if (active) setOnboardingPhone(data?.phone || '');
+      } catch {
+        if (active) setOnboardingPhone('');
+      }
+    };
+    void loadPhone();
+    return () => { active = false; };
+  }, [userId]);
   const observed = (snapshot.sample.observedReviews?.items || []).map(normalizeObserved);
   const queue: QueueReview[] = official.syncComplete
     ? official.reviews.map((review) => ({ id: review.id, rating: review.rating, comment: review.comment || '', publishedAt: review.review_updated_at, reviewerName: review.reviewer_name || undefined, responseObserved: Boolean(review.reply_text) }))
@@ -70,7 +86,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId }: { snapshot: Experimental
     <nav className="flex gap-1 overflow-x-auto border-b border-slate-200" aria-label={t('dashboard.cockpit.layout.navigation')}>
       {tabs.map((item) => <button key={item.id} type="button" onClick={() => setTab(item.id)} className={`shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors ${tab === item.id ? 'border-[#2457D6] text-[#2457D6]' : 'border-transparent text-slate-500 hover:text-slate-900'}`}>{item.label}</button>)}
     </nav>
-    {tab === 'whatsapp' ? <WhatsAppNotificationWorkspace snapshot={snapshot} localWhatsApp={whatsApp} /> : tab === 'reviews' ? <ResponseQueue reviews={queue} snapshot={snapshot} /> : <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+    {tab === 'whatsapp' ? <WhatsAppNotificationWorkspace snapshot={snapshot} localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} /> : tab === 'reviews' ? <ResponseQueue reviews={queue} snapshot={snapshot} /> : <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <section className="min-w-0 space-y-5">
         <ResponseQueue reviews={queue} snapshot={snapshot} />
         <VolumeCard weeks={history} />

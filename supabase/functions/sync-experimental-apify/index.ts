@@ -154,7 +154,10 @@ const nestedPublicString = (item: Record<string, unknown>, keys: string[]) => {
 };
 
 const publicReviewerName = (review: Record<string, unknown>) =>
-  stringFrom(review, ['reviewerName', 'authorName', 'reviewerDisplayName'])
+  // Compass returns the reviewer's public display name as `name`. It is safe
+  // here because this function is scoped to that review record; the place
+  // itself is exposed separately as `title`.
+  stringFrom(review, ['reviewerName', 'authorName', 'reviewerDisplayName', 'name'])
   || nestedPublicString(review, ['reviewer', 'author', 'user']);
 
 const publicReviewUrl = (review: Record<string, unknown>) => {

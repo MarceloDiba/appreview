@@ -718,6 +718,7 @@
     "profileBody": "Lembretes sobre horários, fotos e informações do perfil quando a conexão oficial estiver ativa.",
     "notificationRecipient": "WhatsApp do gestor que receberá os avisos",
     "notificationRecipientHint": "Informe o número do responsável pelo negócio. Os resumos e alertas futuros chegarão nele.",
+    "onboardingPhoneHint": "Preenchido no onboarding. Edite aqui apenas se os avisos precisarem ir para outro responsável.",
     "testRecipient": "Seu WhatsApp para receber a prévia",
     "testRecipientHint": "Informe o seu número ou o de alguém da equipe. Este teste nunca é enviado a um cliente.",
     "weeklyChangeEmpty": "Nenhuma mudança confirmada nesta semana."

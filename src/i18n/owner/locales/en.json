@@ -718,6 +718,7 @@
     "profileBody": "Reminders about hours, photos, and profile information after the official connection is active.",
     "notificationRecipient": "Owner's WhatsApp for notifications",
     "notificationRecipientHint": "Enter the business owner's number. Future summaries and alerts will go there.",
+    "onboardingPhoneHint": "Filled in during onboarding. Edit it only if notifications should go to another owner.",
     "testRecipient": "Your WhatsApp for the preview",
     "testRecipientHint": "Enter your own number or a team member's. This test is never sent to a customer.",
     "weeklyChangeEmpty": "No change has been confirmed this week."

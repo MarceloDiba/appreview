@@ -38,6 +38,11 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   resposta, mudanças na reputação e Perfil do Google. O teste manual continua
   explícito: vai apenas para o próprio gestor ou alguém da equipa, nunca para
   um cliente.
+- O telefone salvo no onboarding (`profiles.phone`) preenche ambos os campos
+  do WhatsApp por padrão, sem sobrescrever uma edição que o gestor já tenha
+  feito. A coleta Compass foi corrigida e publicada para ler o nome público no
+  campo `name` e a URL direta no campo `reviewUrl`; a leitura atual é anterior
+  a isso e só poderá ser renovada depois do limite de 24 horas.
 
 ## Fila assistida identificável e orientação diária — 18/08/2026 (função publicada; coleta pendente)
 

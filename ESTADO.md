@@ -22,6 +22,11 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   para não afirmar mudança inexistente.
 - [x] Clarificar o WhatsApp: número do gestor para avisos, número próprio/equipa
   para prévia manual e quatro preferências de conteúdo salvas localmente.
+- [x] Reutilizar o telefone salvo no onboarding como padrão dos dois campos de
+  WhatsApp, mantendo a edição manual do gestor.
+- [x] Corrigir a coleta Compass para ler o nome público (`name`) e a URL direta
+  (`reviewUrl`) da avaliação; a nova função está publicada e aguarda a próxima
+  coleta permitida para preencher a fila atual.
 - [x] Publicar a nova versão da Edge Function no Supabase com autorização.
 - [ ] Fazer uma coleta manual permitida após o intervalo de 24 h. A primeira
   tentativa foi corretamente bloqueada antes de chamar o Apify, sem custo. A
