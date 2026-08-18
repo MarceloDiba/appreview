@@ -9,7 +9,7 @@ import { Check, Printer } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { QR_PRINT_SIZE, QR_SCREEN_SIZE, downloadDataUrl, publicReviewUrl, qrDataUrl, slugFilename } from '@/lib/qr';
+import { QR_PRINT_SIZE, QR_SCREEN_SIZE, downloadDataUrl, isLoopbackPublicOrigin, publicAppOrigin, publicReviewUrl, qrDataUrl, slugFilename } from '@/lib/qr';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { extractPlaceIdFromUrl } from '@/utils/googlePlaceUtils';
@@ -45,7 +45,7 @@ const Onboarding = () => {
   const navigate = useNavigate();
   const { t } = useOwnerTranslation();
   const { user, loading: authLoading } = useAuth();
-  const baseUrl = window.location.origin;
+  const baseUrl = publicAppOrigin();
 
   const [step, setStep] = useState<Step>(1);
   const [saving, setSaving] = useState(false);
@@ -181,6 +181,10 @@ const Onboarding = () => {
 
   const createQr = async () => {
     if (!user || !qrName.trim()) return;
+    if (isLoopbackPublicOrigin(baseUrl)) {
+      toast.error(t('onboarding.errQrLocal'));
+      return;
+    }
     setSaving(true);
     try {
       // O slug primeiro, a imagem depois — a ordem que corrigiu o QR impresso

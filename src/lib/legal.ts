@@ -64,4 +64,9 @@ export const SUBCONTRATANTES = [
     funcao: 'Leitura das avaliações públicas do estabelecimento',
     local: 'Estados Unidos e União Europeia',
   },
+  {
+    nome: 'Apify (piloto experimental)',
+    funcao: 'Leitura manual limitada de avaliações públicas do Google',
+    local: 'União Europeia e Estados Unidos, conforme a execução',
+  },
 ] as const;

@@ -35,8 +35,12 @@ automáticas.
 2. Inicie o Binno com a chave somente no ambiente do processo:
 
    ```bash
-   OPENWA_LOCAL_API_KEY='<chave-local-do-openwa>' npm run dev
+   BINNO_ENABLE_OPENWA_PROXY=true OPENWA_LOCAL_API_KEY='<chave-local-do-openwa>' npm run dev
    ```
+
+   O proxy só é ativado com essa segunda variável explícita. Não a use numa
+   prévia exposta à rede local: o teste QR em rede usa `npm run dev:lan` e não
+   encaminha qualquer pedido ao OpenWA.
 
 3. Abra `/dashboard`, vá para a aba **WhatsApp** e confirme o selo **Canal
    local conectado**.

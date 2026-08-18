@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 4173 --strictPort",
+    "dev:lan": "vite --host 0.0.0.0 --port 4173 --strictPort",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "check:i18n-owner": "node scripts/check-owner-i18n.mjs",

@@ -3,6 +3,99 @@
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
+## Arquitetura do dashboard — 17 de agosto de 2026
+
+- [x] Preparar localmente a fila pública observada para nome público e link
+  individual da avaliação, sem foto, ID, perfil, banco de dados ou retenção
+  acima de 14 dias no navegador autenticado.
+- [x] Corrigir o destino de “Abrir Google”: URL individual da avaliação quando
+  a coleta disponibilizar; fallback identificado para o perfil do negócio.
+- [x] Reintroduzir Boas práticas como **Orientação do dia**: uma dica por vez,
+  rotação estável e prioridade para resposta quando houver evidência na fila.
+- [ ] Publicar a função atualizada e executar uma única coleta manual do Mania
+  para validar o nome e o deep link reais antes de apresentar a melhoria como
+  concluída.
+
+- [x] Reaplicar no painel autenticado a referência compacta aprovada por
+  Marcelo: prioridade e fila, volume, notas, QR e temas; reputação, WhatsApp,
+  completude e alteração numa coluna lateral.
+- [x] Preencher os módulos dessa referência somente com o que a origem já
+  permite: volume da amostra (49), distribuição de cada nota, eventos reais do
+  QR nos últimos 30 dias e estado explícito para temas sem texto/histórico sem
+  segunda leitura. Não há valores ilustrativos no painel autenticado.
+- [x] Tornar visíveis na fila parcial os totais observados (49 na amostra, 47
+  sem resposta observada e 2 respostas observadas), sem chamar isso de fila
+  completa nem atribuir clientes inexistentes.
+- [x] Repor a distribuição de estrelas no cartão de reputação e manter tempo
+  médio de resposta e novas avaliações em 30 dias com estado explícito quando
+  a fonte não disponibilizar datas.
+- [x] Criar na aba WhatsApp preferências locais para resumo semanal, alertas,
+  número, dia, hora e consentimento, sem programação ou envio automático.
+- [~] Confirmar a aprovação Basic do Google no projeto correto **App Review**
+  (`app-review-505612`) com `diba@noadigital.com.br`: em 17/08, a conta e o
+  projeto foram confirmados no Console, mas a API Business Profile continua
+  desativada, não há cliente OAuth e não há sinal de aprovação. Com
+  `diba@noadigital.com.br` ativo, a Central OAuth apenas confirma que o app
+  está em teste e não exige verificação OAuth; a página da Business Information
+  API ainda oferece **Ativar** e informa que, sem acesso GBP, a quota pode ficar
+  em zero. Portanto, o estado do protocolo `0-0755000041728` segue **não
+  confirmado**, não recusado.
+- [x] Reconhecer a amostra existente do Mania como leitura **Apify
+  experimental concluída** (4,9, 456, 49, 2 respostas observadas), sem a
+  apresentar como ligação oficial nem como falha de leitura.
+- [x] Auditar localmente painel, Configurações, QR, rotas de demo e proxy
+  OpenWA; `npm run verify` verde e botão de envio manual protegido por
+  destinatário, texto e confirmação.
+- [x] Corrigir a cópia dos QR Codes para atribuir apenas abertura e clique,
+  nunca a avaliação publicada.
+- [ ] Criar um QR de piloto a partir da conta do Mania e validar destino,
+  idioma e evento no telemóvel; o QR **Piloto Mania — 17/08** (slug
+  `cc6e12c5`) foi criado com destino de rede local correto. Falta apenas a
+  passagem no telemóvel conectado à mesma rede Wi-Fi.
+- [x] Corrigir a origem do QR em prévia local: `VITE_PUBLIC_APP_URL` substitui
+  `127.0.0.1` e a criação em loopback é bloqueada para não gerar um cartão que
+  só abre no próprio Mac.
+- [x] Isolar o proxy OpenWA: ele exige `BINNO_ENABLE_OPENWA_PROXY=true`; a
+  prévia LAN do QR não expõe o canal local.
+- [ ] Reexecutar QA visual conjunto da referência e painel autenticado numa
+  superfície de navegador que permita a comparação; a política atual bloqueou
+  o ficheiro temporário de comparação.
+- [x] Tornar obrigatória no painel autenticado a ordem aprovada: Prioridade
+  agora, Forças e fragilidades, Plano de melhoria do Perfil Google, Métricas
+  de apoio e Resumo WhatsApp.
+- [x] Quando a origem é a amostra agregada Apify, mostrar a fila e a sugestão
+  de resposta como indisponíveis por falta de texto/autoria, sem completar esse
+  estado com dados inventados.
+- [x] Preparar o modo **fila pública observada** para a próxima leitura Apify:
+  texto sem autor somente no navegador autenticado por 14 dias, resposta
+  editável/copiável e estados distintos de rascunho, marca do gestor e resposta
+  observada. O resumo persistido continua agregado e não identifica avaliadores.
+- [x] Preparar briefing WhatsApp a partir da leitura experimental; a entrega
+  continua manual e confirmada, sem agenda ou automação.
+- [x] Validar uma nova leitura pública manual do Mania via Apify: 49 itens do
+  Place ID confirmado, 33 comentários com texto, 49 datas, 2 respostas
+  observadas e custo de US$ 0,02945. O resumo local usa apenas agregados
+  (11 avaliações nos últimos 30 dias, média de 115,4 h e temas), sem persistir
+  texto ou identificadores.
+- [x] Corrigir a normalização de links `share.google` antes do actor Apify e
+  reaproveitar no painel os agregados reais de temas, datas e resposta.
+- [x] Auditar e configurar o proxy OpenWA local: a chave de bootstrap já
+  existente foi aplicada somente ao processo de prévia, fora do repositório;
+  a sessão `binno-piloto` aparece conectada e o envio continua protegido por
+  destinatário, texto e confirmação explícita.
+- [x] Cadastrar pelo canal seguro o segredo Apify dedicado, aplicar a migration
+  e publicar a função do piloto. A coleta real do Mania em 17/08 concluiu com
+  49 avaliações e 2 respostas públicas observadas; a fila com textos fica só
+  no navegador autenticado por 14 dias e o banco reteve apenas agregados.
+  Mantidos uma coleta bem-sucedida por negócio a cada 24 h e teto de 10
+  execuções mensais.
+- [x] Limitar o funil do QR a abertura e clique para o Google; avaliação
+  publicada não é inferida nem atribuída individualmente.
+- [x] Mostrar WhatsApp apenas como resumo futuro condicionado a dados
+  suficientes e consentimento; o canal local continua somente manual.
+- [ ] Levar a mesma arquitetura para a fila real após OAuth oficial, seleção da
+  localização e sincronização paginada completa do Perfil da Empresa.
+
 ## Marca — 15 de agosto de 2026
 
 - [x] Definir **Binno** como novo nome do produto e adquirir `binno.pro`.

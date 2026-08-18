@@ -38,6 +38,22 @@ export const qrDataUrl = (url: string, width = QR_SCREEN_SIZE): Promise<string> 
 export const publicReviewUrl = (baseUrl: string, slug: string): string =>
   `${baseUrl.replace(/\/$/, '')}/review/${slug}`;
 
+/**
+ * A origem pública pode ser definida no ambiente da prévia local. Sem isto,
+ * um QR criado em 127.0.0.1 só abre no próprio computador e não serve para um
+ * ensaio com telemóvel na mesma rede.
+ */
+export const publicAppOrigin = (): string =>
+  (import.meta.env.VITE_PUBLIC_APP_URL?.trim() || window.location.origin).replace(/\/$/, '');
+
+export const isLoopbackPublicOrigin = (origin: string): boolean => {
+  try {
+    return ['127.0.0.1', 'localhost', '::1'].includes(new URL(origin).hostname);
+  } catch {
+    return true;
+  }
+};
+
 /** Dispara o download de um data URL como ficheiro. */
 export const downloadDataUrl = (dataUrl: string, filename: string): void => {
   const a = document.createElement('a');

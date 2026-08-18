@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
-import { Printer, Download, Trash2 } from 'lucide-react';
+import { AlertCircle, Printer, Download, Trash2 } from 'lucide-react';
 import {
   QR_PRINT_SIZE,
   QR_SCREEN_SIZE,
@@ -31,6 +31,7 @@ interface QRCodeGeneratorProps {
   baseUrl: string;
   businessName?: string;
   businessPhone?: string;
+  canCreate?: boolean;
 }
 
 interface SavedQR {
@@ -53,7 +54,7 @@ interface SavedQR {
  * partir dele. O endereço deixou de ser editável de propósito: um endereço
  * escrito à mão quebra a atribuição do caso ao negócio.
  */
-const QRCodeGenerator = ({ baseUrl, businessName, businessPhone }: QRCodeGeneratorProps) => {
+const QRCodeGenerator = ({ baseUrl, businessName, businessPhone, canCreate = true }: QRCodeGeneratorProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { t } = useOwnerTranslation();
@@ -107,7 +108,7 @@ const QRCodeGenerator = ({ baseUrl, businessName, businessPhone }: QRCodeGenerat
   }, [user, fetchSavedQRCodes]);
 
   const createQRCode = async () => {
-    if (!user || !qrName.trim()) return;
+    if (!user || !qrName.trim() || !canCreate) return;
     setCreating(true);
 
     try {
@@ -215,6 +216,7 @@ const QRCodeGenerator = ({ baseUrl, businessName, businessPhone }: QRCodeGenerat
             <CardDescription>{t('qrcodes.createDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {!canCreate && <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-800" aria-hidden="true" /><p><strong>{t('qrcodes.previewOnlyTitle')}</strong><br />{t('qrcodes.previewOnlyBody')}</p></div>}
             <div className="space-y-2">
               <Label htmlFor="qr-name">{t('qrcodes.nameLabel')}</Label>
               <Input
@@ -226,7 +228,7 @@ const QRCodeGenerator = ({ baseUrl, businessName, businessPhone }: QRCodeGenerat
             </div>
 
             <div className="flex justify-center pt-2">
-              <Button onClick={createQRCode} disabled={creating || !qrName.trim()}>
+              <Button onClick={createQRCode} disabled={creating || !qrName.trim() || !canCreate}>
                 {creating ? t('qrcodes.creating') : t('qrcodes.create')}
               </Button>
             </div>

@@ -48,7 +48,8 @@ const ExperimentalApifySnapshot = ({ googleReviewUrl }: ExperimentalApifySnapsho
 
       saveExperimentalApifySnapshot(snapshot as ExperimentalApifySnapshotData);
       toast.success(t('settings.apify.snapshotReady'));
-      navigate('/demo?view=snapshot');
+      // A real collection belongs in the authenticated product, not in the illustrative demo.
+      navigate('/dashboard');
     } catch (collectionError) {
       console.error('Could not collect experimental Apify snapshot:', collectionError);
       toast.error(collectionError instanceof Error ? collectionError.message : t('settings.apify.collectionError'));

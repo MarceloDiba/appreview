@@ -198,3 +198,84 @@ e sessão OpenWA temporária em `127.0.0.1`.
   operador no próprio formulário.
 
 **resultado local: aprovado para teste manual; não é integração de produção.**
+
+---
+
+# QA funcional — painel autenticado com leitura Apify
+
+Data: 2026-08-17
+Escopo: `/dashboard` do perfil Mania de Petiscos Lisboa, com a fonte pública
+experimental e o canal OpenWA local.
+
+## Auditoria executada
+
+- A primeira dobra foi refeita na arquitetura compacta aprovada: alerta e fila
+  à esquerda; reputação, WhatsApp, completude e mudança à direita; volume,
+  distribuição, QR e temas continuam abaixo.
+- A leitura local existente respondeu com origem `apify-experimental`, coleta
+  em 15/08/2026, nota pública 4,9, total público 456, amostra sanitizada de
+  49 e duas respostas observadas. O painel agora mostra isto como **Google
+  lido via Apify**, sem chamar a leitura de ligação oficial.
+- A fila individual e a resposta sugerida ficaram explicitamente indisponíveis:
+  a amostra não preserva autor, texto, link ou estado de resposta. Não há
+  nomes, comentários, tendências, temas ou respostas inventados.
+- A aba WhatsApp reconheceu a sessão local `binno-piloto` como pronta; número
+  e texto estão editáveis, e o botão de envio ficou desativado até destinatário,
+  mensagem e confirmação. Esta auditoria não enviou nova mensagem.
+- A aba Google Reviews de Configurações apresenta a preparação honesta da
+  ligação oficial, sem botão OAuth que falhe. QR Codes abre com a criação real
+  disponível; a cópia foi corrigida para medir apenas abertura e clique, sem
+  atribuir uma avaliação ao QR.
+- Rotas locais verificadas: `/dashboard`, `/demo?view=panel`,
+  `/demo?view=snapshot`, `/review/test`, `/settings` e `/qrcodes` retornaram
+  200. Console do painel: sem erro de aplicação.
+
+## Evidência visual e comparação
+
+- Verdade visual atual: `/var/folders/jy/f70jwlvs5pv08dc69m_yfpr40000gn/T/codex-clipboard-9fdd2612-b290-43fd-9d18-ae2a09b2ff83.png`
+  (1280 × 1800 px, layout de referência aprovado).
+- Implementação renderizada:
+  `/private/tmp/binno-dashboard-2026-08-17.png` (viewport CSS 1163 × 654,
+  densidade exposta pelo navegador não disponível).
+- A inspeção de layout confirmou a grelha desktop de 707,656 px + 340 px,
+  separada por 20 px; não há overflow horizontal. Tipografia sans-serif,
+  fundo mineral, cartões brancos, azul de ação, violeta de origem e estados
+  semânticos seguem a direção visual.
+- A comparação conjunta obrigatória não pôde ser concluída: o navegador local
+  bloqueou a abertura do ficheiro temporário de comparação por política de URL.
+  Não foi usada outra superfície para contornar essa política. Portanto, a
+  fidelidade pixel a pixel deste estado autenticado permanece pendente, embora
+  o layout e as interações principais tenham sido renderizados e auditados.
+
+## Pendências reais para o teste de ponta a ponta
+
+1. Criar um QR de piloto a partir da conta do Mania e validar o destino no
+   telemóvel; isto escreve um registo real e por isso não foi disparado pela
+   auditoria.
+2. Fazer uma nova coleta Apify somente se for desejado atualizar a fotografia.
+   Ela tem custo variável e não é necessária para usar a leitura existente.
+3. OAuth/Perfil da Empresa continua bloqueado pela aprovação Basic do Google;
+   ele é o único caminho responsável para fila completa, comentários, temas,
+   tendência e publicação confirmada de respostas.
+
+final result: blocked
+
+---
+
+# QA funcional — QR público do Mania na rede local
+
+Data: 2026-08-17
+
+- A causa do QR não escaneável foi corrigida: `publicAppOrigin()` usa
+  `VITE_PUBLIC_APP_URL` quando definido, e criação a partir de uma origem de
+  loopback fica bloqueada para evitar um cartão inválido.
+- A prévia LAN foi iniciada em `http://192.168.15.10:4173`; o OpenWA não foi
+  encaminhado nessa superfície. O proxy exige agora
+  `BINNO_ENABLE_OPENWA_PROXY=true`, e o endpoint LAN não devolveu a sessão.
+- Foi criado o QR de teste `Piloto Mania — 17/08`, slug `cc6e12c5`, com URL
+  `http://192.168.15.10:4173/review/cc6e12c5`.
+- A rota pública renderizou o negócio Mania de Petisco Lisboa e o link Google
+  fornecido. Ao abrir o comentário direto, o Google continuou visível; nenhuma
+  nota, comentário ou avaliação foi enviada nesta auditoria.
+- O único passo humano pendente é escanear este QR a partir de um telemóvel na
+  mesma rede Wi-Fi. A ligação oficial do Google continua fora desse teste.

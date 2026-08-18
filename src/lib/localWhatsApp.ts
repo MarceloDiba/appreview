@@ -40,7 +40,13 @@ const requestGateway = async <T>(path: string, init?: RequestInit): Promise<T> =
   });
 
   if (!response.ok) {
-    throw new Error(await messageFromResponse(response));
+    const detail = await messageFromResponse(response);
+    if (response.status === 401) throw new Error('OPENWA_API_KEY_REQUIRED');
+    throw new Error(detail);
+  }
+
+  if (!response.headers.get('content-type')?.includes('application/json')) {
+    throw new Error('OPENWA_PROXY_UNAVAILABLE');
   }
 
   return response.json() as Promise<T>;

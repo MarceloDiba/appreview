@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getLocalWhatsAppSession, isReadyLocalWhatsAppSession, LocalWhatsAppSession } from '@/lib/localWhatsApp';
+import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 export type LocalWhatsAppState = {
   status: 'checking' | 'ready' | 'not-connected' | 'unavailable';
@@ -9,6 +10,7 @@ export type LocalWhatsAppState = {
 };
 
 export const useLocalWhatsApp = (): LocalWhatsAppState => {
+  const { t } = useOwnerTranslation();
   const [status, setStatus] = useState<LocalWhatsAppState['status']>(import.meta.env.DEV ? 'checking' : 'unavailable');
   const [session, setSession] = useState<LocalWhatsAppSession | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
@@ -32,9 +34,13 @@ export const useLocalWhatsApp = (): LocalWhatsAppState => {
     } catch (error) {
       setSession(null);
       setStatus('unavailable');
-      setDetail(error instanceof Error ? error.message : 'Não foi possível consultar o canal local.');
+      setDetail(error instanceof Error && error.message === 'OPENWA_PROXY_UNAVAILABLE'
+        ? t('localWhatsApp.proxyUnavailable')
+        : error instanceof Error && error.message === 'OPENWA_API_KEY_REQUIRED'
+          ? t('localWhatsApp.apiKeyRequired')
+        : error instanceof Error ? error.message : 'Não foi possível consultar o canal local.');
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void refresh();

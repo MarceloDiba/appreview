@@ -6,12 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import { isLoopbackPublicOrigin, publicAppOrigin } from '@/lib/qr';
 
 const QRCodes = () => {
   const { t } = useOwnerTranslation();
   const [businessName, setBusinessName] = useState<string>('');
   const [businessPhone, setBusinessPhone] = useState<string>('');
-  const baseUrl = window.location.origin;
+  const baseUrl = publicAppOrigin();
 
   useEffect(() => {
     let active = true;
@@ -47,7 +48,7 @@ const QRCodes = () => {
             <p className="text-gray-600 mt-1">{t('qrcodes.subtitle')}</p>
           </header>
 
-          <QRCodeGenerator baseUrl={baseUrl} businessName={businessName} businessPhone={businessPhone} />
+          <QRCodeGenerator baseUrl={baseUrl} businessName={businessName} businessPhone={businessPhone} canCreate={ !isLoopbackPublicOrigin(baseUrl) } />
 
           <div className="mt-8">
             <Card>
