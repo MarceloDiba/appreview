@@ -9,9 +9,13 @@ substitui OAuth, a fila oficial, o Radar real nem a publicação de respostas.
 - O dono informa um link público do Google; o botão é manual, não há agenda.
 - A coleta pede no máximo 50 avaliações, ordenadas pelas mais recentes e com
   origem `google`.
-- `personalData: false`; o Binno descarta a resposta bruta e devolve somente
-  nome/endereço públicos do local, Place ID, nota/total públicos, distribuição
-  por estrelas e quantidade de respostas do proprietário na amostra.
+- A coleta solicita o nome público e a URL pública direta da avaliação apenas
+  para a fila temporária do navegador autenticado. Foto, ID e perfil do
+  avaliador são descartados. Nome, texto e URL expiram em 14 dias, não entram
+  em Supabase, exportações ou WhatsApp.
+- O resumo persistido contém somente nome/endereço públicos do local, Place ID,
+  nota/total públicos, distribuição por estrelas e quantidade de respostas do
+  proprietário na amostra.
 - A tabela de auditoria não guarda avaliadores, textos, fotos, URLs de
   avaliações ou saída bruta. Ela existe para aplicar uma coleta por negócio a
   cada 24 horas e o teto mensal configurado.

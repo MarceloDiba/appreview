@@ -13,9 +13,10 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Reintroduzir **Boas práticas** como box próprio na Visão geral e na aba:
   uma dica por vez, rotação estável e prioridade para resposta quando houver
   evidência na fila.
-- [ ] Publicar a função atualizada e executar uma única coleta manual do Mania
-  para validar o nome e o deep link reais antes de apresentar a melhoria como
-  concluída.
+- [~] A função atualizada foi publicada no Supabase em 18/08. A coleta manual
+  do Mania foi bloqueada corretamente pelo intervalo de 24 horas da leitura
+  anterior; executar uma única coleta após esse intervalo para validar o nome
+  e o deep link reais antes de apresentar a melhoria como concluída.
 
 - [x] Reaplicar no painel autenticado a referência compacta aprovada por
   Marcelo: prioridade e fila, volume, notas, QR e temas; reputação, WhatsApp,

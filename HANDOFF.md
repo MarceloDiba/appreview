@@ -3,7 +3,7 @@
 Estado atualizado em 17/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
-## Fila assistida identificável e orientação diária — 18/08/2026 (local, não publicada)
+## Fila assistida identificável e orientação diária — 18/08/2026 (função publicada; coleta pendente)
 
 - A fila pública observada foi preparada para incluir somente o **nome público**
   e a **URL pública da avaliação** que o actor Apify devolver. Ambos ficam
@@ -16,8 +16,11 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   coluna lateral da Visão geral e na respetiva aba. Mostra uma ação por vez,
   alterna de forma estável no dia e prioriza resposta quando a coleta observou
   texto sem resposta.
-- Falta publicar a nova versão da Edge Function e fazer uma coleta manual para
-  validar nomes e links reais; essa coleta continua sujeita ao limite do piloto.
+- A nova versão da Edge Function foi publicada no projeto Supabase
+  `tjbznhwdjyabuacrfqie`. A primeira tentativa de coleta posterior foi
+  corretamente bloqueada pelo intervalo de 24 horas da leitura anterior do
+  Mania; falta executar uma única coleta manual depois desse intervalo para
+  validar nomes e links reais. O limite do piloto continua em vigor.
 
 ## Piloto assistido — 17/08/2026 (local, não publicado)
 

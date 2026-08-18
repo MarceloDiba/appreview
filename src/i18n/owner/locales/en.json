@@ -447,7 +447,7 @@
     "apify": {
       "title": "Experimental test with a Google sample",
       "description": "Run a limited manual collection to validate the panel view while the official connection is being prepared.",
-      "safeguard": "At most 50 Google reviews, with no reviewer data, schedule, or publishing. The sample is never treated as a complete queue.",
+      "safeguard": "At most 50 reviews. Public name, text, and direct link stay only in this browser for 14 days; there is no schedule, publishing, or complete queue.",
       "openSample": "Open local sample",
       "collect": "Collect experimental sample",
       "collecting": "Collecting sample…",

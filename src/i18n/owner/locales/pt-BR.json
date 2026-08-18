@@ -447,7 +447,7 @@
     "apify": {
       "title": "Teste experimental com uma amostra do Google",
       "description": "Faça uma coleta manual e limitada para validar a leitura do painel enquanto a conexão oficial está em preparação.",
-      "safeguard": "Máximo de 50 avaliações do Google, sem dados de avaliadores, agenda ou publicação. A amostra nunca é tratada como fila completa.",
+      "safeguard": "Máximo de 50 avaliações. Nome público, texto e link direto ficam só neste navegador por 14 dias; não há agenda, publicação ou fila completa.",
       "openSample": "Abrir amostra local",
       "collect": "Coletar amostra experimental",
       "collecting": "Coletando amostra…",
