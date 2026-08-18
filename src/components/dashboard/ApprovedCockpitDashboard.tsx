@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Check, ChevronLeft, ChevronRight, Copy, ExternalLink, Lightbulb, MessageCircle, QrCode, Star } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, Copy, ExternalLink, Lightbulb, MessageCircle, QrCode, Star } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -30,21 +30,12 @@ type Week = { start: string; reviewCount: number; ratingBreakdown: Record<Rating
 const ratings: Rating[] = ['5', '4', '3', '2', '1'];
 const actionStorageKey = 'binno.approved-cockpit-actions';
 
-const emptyBreakdown = (): Record<Rating, number> => ({ '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 });
-
 const readActions = (): Record<string, ActionState> => {
   try {
     return JSON.parse(window.localStorage.getItem(actionStorageKey) || '{}') as Record<string, ActionState>;
   } catch {
     return {};
   }
-};
-
-const startOfWeek = (value: Date) => {
-  const date = new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
-  const weekday = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() - weekday + 1);
-  return date;
 };
 
 const Stars = ({ rating, medium = false }: { rating: number; medium?: boolean }) => (

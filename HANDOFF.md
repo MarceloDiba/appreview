@@ -221,8 +221,10 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - As abas de Avaliações, Volume, Boas práticas, Perfil no Google e WhatsApp
   possuem estados locais navegáveis. Fila completa, Radar oficial, publicação
   e envio real continuam dependentes da conexão oficial/integrações aprovadas.
-- `npm run verify` passou; console sem erro nas interações principais.
-  Comparação visual e evidências em `design-qa.md` (`final result: passed`).
+- `npm run verify` passou; console sem erro nas interações principais. A
+  comparação visual desta referência é histórica; para o painel autenticado
+  atual, `design-qa.md` mantém a comparação pixel a pixel como pendente até
+  existir uma captura desktop sem distorção.
 - O trabalho continua não commitado, não publicado e sem alteração remota. A
   próxima decisão é aprovar visualmente esta direção antes de levar os mesmos
   componentes ao painel autenticado com dados oficiais.
