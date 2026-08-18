@@ -3,6 +3,24 @@
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
+## Painel aprovado — 18 de agosto de 2026
+
+- [x] Reaplicar no painel autenticado as quatro referências aprovadas: fila
+  individual, volume, leitura por nota e cartões laterais de reputação,
+  WhatsApp, completude e mudança semanal.
+- [x] Reduzir a navegação da visão principal para Visão geral, Avaliações e
+  WhatsApp; preservar nesta última as preferências completas de resumo,
+  alertas, número, dia, hora, consentimento e teste manual.
+- [x] Remover da Visão geral os avisos técnicos e explicações repetidas de
+  origem, retenção, coleta e limitações. Onde a fonte não comprova o dado, o
+  módulo usa estado neutro, sem tendência ou percentual inventado.
+- [x] Preparar a coleta Apify para ler mais variações de nome público/link
+  individual e devolver histórico sanitizado de 12 semanas para volume,
+  notas e respostas observadas.
+- [ ] Publicar a nova versão da Edge Function somente com autorização e fazer
+  uma coleta manual permitida após o intervalo de 24 h. Ela é necessária para
+  validar nome, deep link e preenchimento real dos cartões históricos.
+
 ## Arquitetura do dashboard — 17 de agosto de 2026
 
 - [x] Preparar localmente a fila pública observada para nome público e link

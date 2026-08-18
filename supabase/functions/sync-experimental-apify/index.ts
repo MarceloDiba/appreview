@@ -106,10 +106,9 @@ const observedReviewsForBrowser = (reviews: Array<Record<string, unknown>>, now:
       rating,
       comment,
       publishedAt: publishedAt?.toISOString() || null,
-      reviewerName: stringFrom(review, ['name', 'reviewerName', 'authorName']) || undefined,
+      reviewerName: publicReviewerName(review) || undefined,
       reviewUrl: (() => {
-        const candidate = stringFrom(review, ['reviewUrl', 'reviewURL']);
-        return candidate && parseGoogleUrl(candidate) ? candidate : undefined;
+        return publicReviewUrl(review);
       })(),
       responseObserved: Boolean(stringFrom(review, ['responseFromOwnerText', 'ownerReplyText', 'responseText'])),
     }];
@@ -142,11 +141,72 @@ const stringFrom = (item: Record<string, unknown>, keys: string[]) => {
   return null;
 };
 
+const nestedPublicString = (item: Record<string, unknown>, keys: string[]) => {
+  for (const key of keys) {
+    const value = item[key];
+    if (!value || typeof value !== 'object') continue;
+    const nested = value as Record<string, unknown>;
+    for (const candidate of ['displayName', 'name', 'fullName']) {
+      if (typeof nested[candidate] === 'string' && nested[candidate].trim()) return nested[candidate].trim();
+    }
+  }
+  return null;
+};
+
+const publicReviewerName = (review: Record<string, unknown>) =>
+  stringFrom(review, ['reviewerName', 'authorName', 'reviewerDisplayName'])
+  || nestedPublicString(review, ['reviewer', 'author', 'user']);
+
+const publicReviewUrl = (review: Record<string, unknown>) => {
+  const candidate = stringFrom(review, ['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri', 'url']);
+  return candidate && parseGoogleUrl(candidate) ? candidate : undefined;
+};
+
 const dateFrom = (item: Record<string, unknown>, keys: string[]) => {
   const value = stringFrom(item, keys);
   if (!value) return null;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const startOfWeek = (value: Date) => {
+  const date = new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
+  const weekday = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() - weekday + 1);
+  return date;
+};
+
+const collectWeeklyHistory = (reviews: Array<Record<string, unknown>>, now: Date) => {
+  const currentWeek = startOfWeek(now);
+  const weeks = Array.from({ length: 12 }, (_, index) => {
+    const start = new Date(currentWeek);
+    start.setUTCDate(start.getUTCDate() - ((11 - index) * 7));
+    return {
+      start: start.toISOString(),
+      reviewCount: 0,
+      ratingBreakdown: { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 },
+      ownerReplies: 0,
+    };
+  });
+  const byWeek = new Map(weeks.map((week) => [week.start.slice(0, 10), week]));
+
+  for (const review of reviews) {
+    const reviewDate = dateFrom(review, ['publishedAtDate', 'reviewDate', 'reviewDateTime', 'date']);
+    const stars = numberInRange(review.stars);
+    if (reviewDate && stars >= 1 && stars <= 5 && Number.isInteger(stars)) {
+      const target = byWeek.get(startOfWeek(reviewDate).toISOString().slice(0, 10));
+      if (target) {
+        target.reviewCount += 1;
+        target.ratingBreakdown[String(stars) as keyof typeof target.ratingBreakdown] += 1;
+      }
+    }
+    const replyDate = dateFrom(review, ['responseFromOwnerDate', 'responseDate', 'ownerReplyDate']);
+    if (replyDate) {
+      const target = byWeek.get(startOfWeek(replyDate).toISOString().slice(0, 10));
+      if (target) target.ownerReplies += 1;
+    }
+  }
+  return { weeks };
 };
 
 const collectInsights = (reviews: Array<Record<string, unknown>>, now: Date) => {
@@ -193,6 +253,7 @@ const collectInsights = (reviews: Array<Record<string, unknown>>, now: Date) => 
   return {
     reviewsLast30Days: datedReviews ? reviewsLast30Days : null,
     averageResponseHours: responseHours.length ? Math.round((responseHours.reduce((sum, hours) => sum + hours, 0) / responseHours.length) * 10) / 10 : null,
+    history: collectWeeklyHistory(reviews, now),
     topics: topicSignals,
   };
 };

@@ -40,6 +40,14 @@ export type ExperimentalApifySnapshot = {
     insights?: {
       reviewsLast30Days: number | null;
       averageResponseHours: number | null;
+      history?: {
+        weeks: Array<{
+          start: string;
+          reviewCount: number;
+          ratingBreakdown: Record<'1' | '2' | '3' | '4' | '5', number>;
+          ownerReplies: number;
+        }>;
+      };
       topics: Array<{
         id: 'service' | 'wait' | 'food' | 'cleanliness' | 'price' | 'atmosphere' | 'delivery';
         count: number;
@@ -54,12 +62,23 @@ const isRatingBreakdown = (value: unknown): value is ExperimentalApifySnapshot['
   return ['1', '2', '3', '4', '5'].every((rating) => typeof (value as Record<string, unknown>)[rating] === 'number');
 };
 
+const isHistory = (value: unknown): boolean => {
+  if (!value || typeof value !== 'object') return false;
+  const weeks = (value as Record<string, unknown>).weeks;
+  return Array.isArray(weeks) && weeks.every((week) => week && typeof week === 'object'
+    && typeof (week as Record<string, unknown>).start === 'string'
+    && typeof (week as Record<string, unknown>).reviewCount === 'number'
+    && typeof (week as Record<string, unknown>).ownerReplies === 'number'
+    && isRatingBreakdown((week as Record<string, unknown>).ratingBreakdown));
+};
+
 const isInsights = (value: unknown): value is NonNullable<ExperimentalApifySnapshot['sample']['insights']> => {
   if (value === undefined) return true;
   if (!value || typeof value !== 'object') return false;
   const insights = value as Record<string, unknown>;
   return (insights.reviewsLast30Days === null || typeof insights.reviewsLast30Days === 'number')
     && (insights.averageResponseHours === null || typeof insights.averageResponseHours === 'number')
+    && (insights.history === undefined || isHistory(insights.history))
     && Array.isArray(insights.topics)
     && insights.topics.every((topic) => topic && typeof topic === 'object'
       && typeof (topic as Record<string, unknown>).id === 'string'

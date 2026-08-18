@@ -3,6 +3,31 @@
 Estado atualizado em 17/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
+## Painel aprovado e leitura experimental — 18/08/2026 (local; aguarda nova coleta)
+
+- A Visão geral foi refeita segundo as quatro referências aprovadas: **fila de
+  respostas**, **volume em 12 semanas**, **cada nota separada**, e a coluna
+  lateral com reputação, WhatsApp, boas práticas, completude e alteração da
+  semana. A navegação ficou reduzida a Visão geral, Avaliações e WhatsApp.
+- A fila mostra um item por vez, resposta sugerida, edição, cópia, avanço e
+  seleção rápida. Um link para Google só é exibido quando a leitura devolve a
+  URL pública individual; o painel não redireciona mais silenciosamente para
+  o perfil do negócio como se fosse a avaliação selecionada.
+- A função de coleta passou a aceitar os campos alternativos públicos de nome
+  e URL que o actor possa devolver e a produzir uma série sanitizada de 12
+  semanas (volume, distribuição por nota e respostas observadas). O resumo
+  persistido permanece agregado; nome, texto e URL continuam restritos ao
+  navegador autenticado por 14 dias.
+- A leitura que está no navegador é anterior a essa alteração e não contém
+  nome/URL nem a série agregada. A próxima coleta permitida deve confirmar os
+  campos do actor e preencher os cartões. Enquanto isso, o painel mostra `—`
+  onde a fonte não comprova a métrica e não afirma queda, tendência ou
+  completude fictícia.
+- `npm run verify` passou. A interação local validou avanço da fila, edição e
+  abertura da configuração completa do WhatsApp. A captura visual automática
+  da superfície disponível não preserva a escala de desktop da referência;
+  `design-qa.md` registra a pendência de comparação visual final.
+
 ## Fila assistida identificável e orientação diária — 18/08/2026 (função publicada; coleta pendente)
 
 - A fila pública observada foi preparada para incluir somente o **nome público**
