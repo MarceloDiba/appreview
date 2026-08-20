@@ -66,10 +66,12 @@ forças, fragilidades e próximo passo são o centro do produto.
   autenticado a renderizar a arquitetura legada. Quando só houver resumo já
   confirmado do negócio, o mesmo cockpit aprovado é exibido com `—` nos
   módulos sem evidência; a tela antiga não é um fallback permitido.
-- O **Radar do Binno** é uma faixa adicional antes desses módulos e só aparece
-  com risco ou oportunidade evidenciados. O **Plano de hoje** é um cartão
-  adicional na coluna lateral. O **Resultado observado** fica após “O que
-  mudou na semana”.
+- O **Radar do Binno** é uma faixa adicional antes desses módulos e permanece
+  visível. Com evidência, mostra risco, oportunidade ou força observada; sem
+  evidência suficiente, usa um estado curto de acompanhamento e não inventa
+  uma fragilidade. O **Plano de hoje** é um cartão adicional na coluna lateral
+  e também permanece visível, levando à próxima revisão útil. O **Resultado
+  observado** fica após “O que mudou na semana”.
 - Ação marcada pelo gestor é um toque local, não cria caso, responsável, prazo
   ou burocracia. A leitura seguinte só pode dizer que o sinal voltou ou não
   voltou a aparecer; nunca confirma sozinho uma melhoria operacional.

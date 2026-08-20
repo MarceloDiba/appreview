@@ -15,6 +15,10 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Adicionar a camada aprovada de assessoria sem substituir os módulos do
   painel: Radar do Binno, Plano de hoje, Resultado observado e oportunidade
   positiva nas Boas práticas.
+- [x] Manter Radar do Binno e Plano de hoje visíveis entre coletas: força
+  positiva agregada quando houver evidência; estado curto de acompanhamento
+  quando não houver alerta nem oportunidade específica. Alertas e WhatsApp
+  proativo continuam restritos a anomalias com critério conservador.
 - [x] Preparar alerta conservador da coleta manual Apify e entrega automática
   **somente** após essa ação explícita, com consentimento, número e OpenWA
   local. Sem agenda, gasto recorrente, retry ou entrega de produção.

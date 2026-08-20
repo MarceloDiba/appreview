@@ -13,6 +13,12 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   blocos consolidados do painel. A hierarquia agora recebe três módulos
   adicionais: faixa **Radar do Binno**, cartão lateral **Plano de hoje** e
   cartão lateral **Resultado observado**.
+- O Radar e o Plano não podem desaparecer só porque uma coleta não atingiu o
+  limiar de alerta severo. Com dados reais disponíveis, o painel exibe a força
+  agregada mais sustentada (por exemplo, tema positivo e quantidade de
+  menções); sem sinal suficiente, mostra apenas o estado curto de
+  acompanhamento. Alertas operacionais e mensagens proativas continuam
+  dependentes do critério conservador de anomalia.
 - A coleta Apify manual passa a calcular um alerta conservador somente quando
   há período comparável, duas ou mais notas baixas recentes e causa recorrente
   em ao menos dois comentários. O resultado também pode propor uma expressão

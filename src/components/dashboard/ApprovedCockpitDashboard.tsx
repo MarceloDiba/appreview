@@ -13,6 +13,7 @@ import { LocalWhatsAppState, useLocalWhatsApp } from '@/hooks/useLocalWhatsApp';
 import { WhatsAppNotificationWorkspace } from '@/components/dashboard/WhatsAppNotificationWorkspace';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdvisorObservedResult, markAdvisorAction } from '@/lib/advisorPilot';
+import { getAdvisorReading } from '@/lib/advisorReading';
 
 type CockpitTab = 'overview' | 'reviews' | 'whatsapp';
 type QueueReview = {
@@ -98,7 +99,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId }: { snapshot: Experimental
         <div className="grid gap-5 md:grid-cols-2"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
       </section>
       <aside className="space-y-5">
-        <TodayPlan snapshot={snapshot} onMarked={() => setAdvisorActionVersion((current) => current + 1)} />
+        <TodayPlan snapshot={snapshot} onMarked={() => setAdvisorActionVersion((current) => current + 1)} onOpenReviews={() => setTab('reviews')} />
         <ReputationCard snapshot={snapshot} />
         <WhatsAppCard localWhatsApp={whatsApp} onOpen={() => setTab('whatsapp')} />
         <DailyPractice snapshot={snapshot} onOpenReviews={() => setTab('reviews')} />
@@ -113,28 +114,38 @@ const ApprovedCockpitDashboard = ({ snapshot, userId }: { snapshot: Experimental
 
 const RadarNow = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
-  const alert = snapshot.sample.advisor?.alert;
-  const opportunity = snapshot.sample.advisor?.opportunity;
-  if (!alert && !opportunity) return null;
-  const topic = alert ? t(`dashboard.cockpit.topicLabels.${alert.topic}`) : null;
-  return <Card className={`shadow-[0_1px_3px_rgba(15,23,42,0.08)] ${alert ? 'border-red-200 bg-red-50/60' : 'border-violet-200 bg-violet-50/50'}`}><CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-    <div className="flex min-w-0 items-start gap-3"><span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${alert ? 'bg-red-100 text-red-700' : 'bg-violet-100 text-violet-800'}`}>{alert ? <AlertTriangle className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}</span><div><p className="text-sm font-semibold text-slate-950">{t('dashboard.advisorPilot.radarTitle')}</p>{alert ? <><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.alertTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.alertBody', { low: alert.lowRatingCount, topic, mentions: alert.topicMentions })}</p></> : opportunity ? <><p className="mt-1 text-sm font-medium text-slate-800">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.opportunityBody', { phrase: opportunity.phrase, mentions: opportunity.mentions })}</p></> : null}</div></div>
-    <span className="shrink-0 text-xs font-medium text-slate-500">{t('dashboard.advisorPilot.experimental')}</span>
-  </CardContent></Card>;
+  const reading = getAdvisorReading(snapshot);
+  const topic = reading.kind === 'alert' || reading.kind === 'strength' ? t(`dashboard.cockpit.topicLabels.${reading.topic}`) : null;
+  const urgent = reading.kind === 'alert';
+  const content = reading.kind === 'alert'
+    ? <><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.alertTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.alertBody', { low: reading.lowRatingCount, topic, mentions: reading.mentions })}</p></>
+    : reading.kind === 'opportunity'
+      ? <><p className="mt-1 text-sm font-medium text-slate-800">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.opportunityBody', { phrase: reading.phrase, mentions: reading.mentions })}</p></>
+      : reading.kind === 'strength'
+        ? <><p className="mt-1 text-sm font-medium text-slate-800">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.strengthBody', { topic, mentions: reading.mentions })}</p></>
+        : <><p className="mt-1 text-sm font-medium text-slate-800">{t('dashboard.advisorPilot.monitorTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.monitorBody')}</p></>;
+  return <Card className={`shadow-[0_1px_3px_rgba(15,23,42,0.08)] ${urgent ? 'border-red-200 bg-red-50/60' : 'border-violet-200 bg-violet-50/50'}`}><CardContent className="flex items-start gap-3 p-4"><span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${urgent ? 'bg-red-100 text-red-700' : 'bg-violet-100 text-violet-800'}`}>{urgent ? <AlertTriangle className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}</span><div><p className="text-sm font-semibold text-slate-950">{t('dashboard.advisorPilot.radarTitle')}</p>{content}</div></CardContent></Card>;
 };
 
-const TodayPlan = ({ snapshot, onMarked }: { snapshot: ExperimentalApifySnapshot; onMarked: () => void }) => {
+const TodayPlan = ({ snapshot, onMarked, onOpenReviews }: { snapshot: ExperimentalApifySnapshot; onMarked: () => void; onOpenReviews: () => void }) => {
   const { t } = useOwnerTranslation();
-  const alert = snapshot.sample.advisor?.alert;
-  const opportunity = snapshot.sample.advisor?.opportunity;
-  if (!alert && !opportunity) return null;
-  const topic = alert ? t(`dashboard.cockpit.topicLabels.${alert.topic}`) : null;
+  const reading = getAdvisorReading(snapshot);
+  const topic = reading.kind === 'alert' || reading.kind === 'strength' ? t(`dashboard.cockpit.topicLabels.${reading.topic}`) : null;
   const mark = () => {
+    if (reading.kind !== 'alert') return;
+    const alert = snapshot.sample.advisor?.alert;
     if (!alert) return;
     markAdvisorAction(snapshot, alert);
     onMarked();
   };
-  return <Card className="border-violet-200 bg-violet-50/40 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.planTitle')}</h2></div>{alert ? <><p className="mt-4 text-sm font-medium text-slate-900">{t('dashboard.advisorPilot.planBody', { topic })}</p><Button onClick={mark} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><CheckCircle2 className="mr-2 h-4 w-4" />{t('dashboard.advisorPilot.markDone')}</Button></> : opportunity ? <><p className="mt-4 text-sm font-medium text-slate-900">{t('dashboard.advisorPilot.opportunityAction')}</p><p className="mt-2 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.opportunityBody', { phrase: opportunity.phrase, mentions: opportunity.mentions })}</p></> : null}</CardContent></Card>;
+  const body = reading.kind === 'alert'
+    ? t('dashboard.advisorPilot.planBody', { topic })
+    : reading.kind === 'opportunity'
+      ? t('dashboard.advisorPilot.opportunityAction')
+      : reading.kind === 'strength'
+        ? t('dashboard.advisorPilot.strengthAction', { topic })
+        : t('dashboard.advisorPilot.monitorAction');
+  return <Card className="border-violet-200 bg-violet-50/40 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.planTitle')}</h2></div><p className="mt-4 text-sm font-medium leading-5 text-slate-900">{body}</p>{reading.kind === 'alert' ? <Button onClick={mark} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><CheckCircle2 className="mr-2 h-4 w-4" />{t('dashboard.advisorPilot.markDone')}</Button> : <Button variant="outline" onClick={onOpenReviews} className="mt-4">{t('dashboard.advisorPilot.reviewEvidence')}</Button>}</CardContent></Card>;
 };
 
 const ResponseQueue = ({ reviews, snapshot }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot }) => {
@@ -215,10 +226,12 @@ const WhatsAppCard = ({ localWhatsApp, onOpen }: { localWhatsApp: LocalWhatsAppS
 
 const DailyPractice = ({ snapshot, onOpenReviews }: { snapshot: ExperimentalApifySnapshot; onOpenReviews: () => void }) => {
   const { t } = useOwnerTranslation();
-  const opportunity = snapshot.sample.advisor?.opportunity;
+  const reading = getAdvisorReading(snapshot);
   const unresolved = (snapshot.sample.observedReviews?.items || []).filter((review) => !review.responseObserved).length;
-  const practice = opportunity
-    ? { title: t('dashboard.advisorPilot.opportunityBody', { phrase: opportunity.phrase, mentions: opportunity.mentions }), body: t('dashboard.advisorPilot.opportunityAction'), action: t('dashboard.advisorPilot.planTitle') }
+  const practice = reading.kind === 'opportunity'
+    ? { title: t('dashboard.advisorPilot.opportunityBody', { phrase: reading.phrase, mentions: reading.mentions }), body: t('dashboard.advisorPilot.opportunityAction'), action: t('dashboard.advisorPilot.planTitle') }
+    : reading.kind === 'strength'
+      ? { title: t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions }), body: t('dashboard.advisorPilot.strengthAction', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`) }), action: t('dashboard.advisorPilot.reviewEvidence') }
     : unresolved ? { title: `${unresolved} avaliações com texto ainda não mostram resposta`, body: 'Revise uma resposta e publique quando estiver satisfeito.', action: 'Revisar fila' } : { title: 'Planeje uma foto recente da experiência', body: 'Mostre o que o cliente encontra hoje.', action: 'Ver QR Codes' };
   return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">Boas práticas</h2></div><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button variant="link" className="mt-2 h-auto px-0 text-[#2457D6]" onClick={onOpenReviews}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></Button></CardContent></Card>;
 };
@@ -249,9 +262,15 @@ const QrCard = ({ funnel }: { funnel: { qrOpens: number; googleClicks: number } 
 const TopicsCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
   const topics = snapshot.sample.insights?.topics || [];
-  const alert = snapshot.sample.advisor?.alert;
-  const opportunity = snapshot.sample.advisor?.opportunity;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.topicsTitle')}</h2>{topics.length ? <div className="mt-5 flex flex-wrap gap-2">{topics.map((topic) => <span key={topic.id} className={`rounded-full px-3 py-1.5 text-xs font-medium ${topic.sentiment === 'negative' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>{t(`dashboard.cockpit.topicLabels.${topic.id}`)} · {topic.count}</span>)}</div> : <p className="mt-4 text-sm text-slate-500">—</p>}{(alert || opportunity) && <div className="mt-5 grid gap-3 border-t border-slate-200 pt-4"><div>{opportunity && <><p className="text-xs font-semibold text-emerald-700">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.opportunityBody', { phrase: opportunity.phrase, mentions: opportunity.mentions })}</p></>}</div><div>{alert && <><p className="text-xs font-semibold text-red-700">{t('dashboard.advisorPilot.alertTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.alertBody', { low: alert.lowRatingCount, topic: t(`dashboard.cockpit.topicLabels.${alert.topic}`), mentions: alert.topicMentions })}</p></>}</div></div>}</CardContent></Card>;
+  const reading = getAdvisorReading(snapshot);
+  const detail = reading.kind === 'alert'
+    ? <><p className="text-xs font-semibold text-red-700">{t('dashboard.advisorPilot.alertTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.alertBody', { low: reading.lowRatingCount, topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions })}</p></>
+    : reading.kind === 'opportunity'
+      ? <><p className="text-xs font-semibold text-emerald-700">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.opportunityBody', { phrase: reading.phrase, mentions: reading.mentions })}</p></>
+      : reading.kind === 'strength'
+        ? <><p className="text-xs font-semibold text-emerald-700">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions })}</p></>
+        : null;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.topicsTitle')}</h2>{topics.length ? <div className="mt-5 flex flex-wrap gap-2">{topics.map((topic) => <span key={topic.id} className={`rounded-full px-3 py-1.5 text-xs font-medium ${topic.sentiment === 'negative' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>{t(`dashboard.cockpit.topicLabels.${topic.id}`)} · {topic.count}</span>)}</div> : <p className="mt-4 text-sm text-slate-500">—</p>}{detail && <div className="mt-5 border-t border-slate-200 pt-4">{detail}</div>}</CardContent></Card>;
 };
 
 export default ApprovedCockpitDashboard;
