@@ -82,6 +82,13 @@ const Privacy = () => (
           <strong>Avaliações públicas:</strong> lemos as avaliações que já são públicas no perfil do
           Google do estabelecimento, através da API do Google Places, para as mostrar no painel.
         </li>
+        <li>
+          <strong>Leitura experimental de avaliações públicas:</strong> durante o piloto assistido,
+          podemos mostrar ao titular do perfil o nome público, o texto, a nota, a data e a ligação
+          pública de uma avaliação do Google. Estes dados não são guardados na nossa base de dados:
+          ficam apenas no navegador autenticado do titular por até 14 dias, para que possa preparar
+          e publicar a própria resposta no Google.
+        </li>
       </ul>
       <p>
         Não usamos cookies de publicidade nem ferramentas de análise de tráfego. O único
@@ -161,6 +168,11 @@ const Privacy = () => (
         </li>
         <li>
           <strong>Registos de facturação:</strong> o prazo exigido por lei.
+        </li>
+        <li>
+          <strong>Leitura experimental de avaliações públicas:</strong> nome público, texto e ligação
+          da avaliação ficam apenas no navegador autenticado por até 14 dias. O registo técnico no
+          servidor conserva somente data, estado e métricas agregadas, sem identificar avaliadores.
         </li>
       </ul>
     </Seccao>

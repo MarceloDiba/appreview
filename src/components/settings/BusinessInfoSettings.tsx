@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import InternationalPhoneField from '@/components/forms/InternationalPhoneField';
 
 export interface BusinessInfo {
   /** Nome do negócio. Aparece a quem avalia e assina as respostas. */
@@ -16,6 +17,7 @@ export interface BusinessInfo {
 interface BusinessInfoSettingsProps {
   businessInfo: BusinessInfo;
   onBusinessInfoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onPhoneChange: (value: string) => void;
   onSaveBusinessInfo: () => void;
   onCancel: () => void;
   saving?: boolean;
@@ -36,6 +38,7 @@ interface BusinessInfoSettingsProps {
 const BusinessInfoSettings: React.FC<BusinessInfoSettingsProps> = ({
   businessInfo,
   onBusinessInfoChange,
+  onPhoneChange,
   onSaveBusinessInfo,
   onCancel,
   saving = false,
@@ -73,13 +76,15 @@ const BusinessInfoSettings: React.FC<BusinessInfoSettingsProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="phone">{t('settings.business.phoneLabel')}</Label>
-            <Input
+            <InternationalPhoneField
               id="phone"
-              name="phone"
               value={businessInfo.phone}
-              onChange={onBusinessInfoChange}
+              onChange={onPhoneChange}
               placeholder={t('settings.business.phonePlaceholder')}
+              ariaLabel={t('settings.business.phoneCountryLabel')}
+              disabled={saving}
             />
+            <p className="text-xs text-muted-foreground">{t('settings.business.phoneHelp')}</p>
           </div>
         </div>
       </CardContent>

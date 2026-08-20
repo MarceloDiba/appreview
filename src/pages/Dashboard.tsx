@@ -1,28 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import GoogleOutcomeCard, { GooglePathCard } from '@/components/dashboard/GoogleOutcomeCard';
-import ReputationAdvisorCard, { ProfileHealthCard } from '@/components/dashboard/ReputationAdvisorCard';
-import ReputationRadarCard from '@/components/dashboard/ReputationRadarCard';
+import ExperimentalCockpitDashboard from '@/components/dashboard/ExperimentalCockpitDashboard';
 import { useSetupStatus } from '@/hooks/useSetupStatus';
 import { useGoogleOutcome } from '@/hooks/useGoogleOutcome';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight, MessageCircle, MessageSquare, QrCode, Settings as SettingsIcon } from 'lucide-react';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import { ExperimentalApifySnapshot, loadExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
 
-const shortcuts = [
-  { to: '/reviews', icon: MessageSquare, titleKey: 'dashboard.shortcuts.reviewsTitle', descKey: 'dashboard.shortcuts.reviewsDesc' },
-  { to: '/qrcodes', icon: QrCode, titleKey: 'dashboard.shortcuts.qrTitle', descKey: 'dashboard.shortcuts.qrDesc' },
-  { to: '/settings', icon: SettingsIcon, titleKey: 'dashboard.shortcuts.settingsTitle', descKey: 'dashboard.shortcuts.settingsDesc' },
-];
+const emptyBreakdown = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 } as const;
 
 const Dashboard = () => {
   const { t } = useOwnerTranslation();
   const [userId, setUserId] = useState<string>('');
   const [businessName, setBusinessName] = useState<string>('');
   const [loadingUser, setLoadingUser] = useState(true);
+  const [experimentalSnapshot, setExperimentalSnapshot] = useState<ExperimentalApifySnapshot | null>(null);
+  const [loadingExperimentalSnapshot, setLoadingExperimentalSnapshot] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -57,8 +53,43 @@ const Dashboard = () => {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      const snapshot = await loadExperimentalApifySnapshot({ allowLocalFixture: import.meta.env.DEV });
+      if (!active) return;
+      setExperimentalSnapshot(snapshot);
+      setLoadingExperimentalSnapshot(false);
+    };
+    void load();
+    return () => { active = false; };
+  }, []);
+
   const setup = useSetupStatus(userId || undefined);
   const outcome = useGoogleOutcome(userId || undefined);
+  const approvedFallbackSnapshot = useMemo<ExperimentalApifySnapshot | null>(() => {
+    if (!outcome.data) return null;
+    return {
+      // This is built only from the authenticated business record already on
+      // screen. It deliberately leaves queue, history, themes and rating
+      // distribution empty instead of making an Apify or official claim.
+      source: 'owner-dashboard-summary',
+      fetchedAt: outcome.data.lastUpdatedAt,
+      business: {
+        name: outcome.data.placeName || businessName || t('dashboard.workspace.fallbackName'),
+        address: '',
+        placeId: '',
+        googleRating: outcome.data.averageRating,
+        googleReviewCount: outcome.data.totalReviews,
+      },
+      sample: {
+        reviewCount: 0,
+        ratingBreakdown: emptyBreakdown,
+        ownerRepliesFound: 0,
+        insights: { reviewsLast30Days: null, averageResponseHours: null, topics: [] },
+      },
+    };
+  }, [businessName, outcome.data, t]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f7f9]">
@@ -105,44 +136,13 @@ const Dashboard = () => {
             </Card>
           )}
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
-            <section className="min-w-0 space-y-4">
-              <GoogleOutcomeCard data={outcome.data} loading={outcome.loading} error={outcome.error} />
-              <ReputationRadarCard userId={userId || undefined} />
-              <ReputationAdvisorCard userId={userId || undefined} showProfileHealth={false} />
-              {outcome.data && <GooglePathCard data={outcome.data} />}
-            </section>
-
-            <aside className="space-y-4">
-              <ProfileHealthCard />
-
-              <Card className="rounded-xl border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50"><MessageCircle className="h-4 w-4 text-emerald-700" aria-hidden="true" /></span>
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">{t('dashboard.whatsapp.planned')}</span>
-                  </div>
-                  <p className="mt-4 font-semibold text-slate-950">{t('dashboard.whatsapp.title')}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-500">{t('dashboard.whatsapp.subtitle')}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-xl border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
-                <CardContent className="p-5">
-                  <h2 className="text-base font-semibold text-slate-950">{t('dashboard.shortcuts.title')}</h2>
-                  <div className="mt-3 divide-y divide-slate-200 rounded-lg border border-slate-200">
-                    {shortcuts.map(({ to, icon: Icon, titleKey, descKey }) => (
-                      <Link key={to} to={to} className="flex items-center gap-3 p-3 transition-colors hover:bg-slate-50">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50"><Icon className="h-4 w-4 text-[#2457D6]" aria-hidden="true" /></span>
-                        <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-slate-900">{t(titleKey)}</span><span className="block truncate text-xs text-slate-500">{t(descKey)}</span></span>
-                        <ArrowRight className="h-4 w-4 text-slate-400" />
-                      </Link>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </aside>
-          </div>
+          {loadingExperimentalSnapshot || outcome.loading ? (
+            <Card className="h-72 animate-pulse border-slate-200 bg-white" />
+          ) : experimentalSnapshot || approvedFallbackSnapshot ? (
+            <ExperimentalCockpitDashboard snapshot={experimentalSnapshot || approvedFallbackSnapshot} userId={userId || undefined} />
+          ) : (
+            <Card className="border-slate-200 bg-white"><CardContent className="p-6"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.googleOutcome.emptyTitle')}</h2><p className="mt-2 text-sm text-slate-600">{t('dashboard.googleOutcome.empty')}</p><Button asChild className="mt-5"><Link to="/settings">{t('dashboard.googleOutcome.configure')}</Link></Button></CardContent></Card>
+          )}
         </div>
       </main>
     </div>

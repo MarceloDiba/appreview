@@ -6,8 +6,9 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import BusinessInfoSettings, { type BusinessInfo } from '@/components/settings/BusinessInfoSettings';
 import ExternalLinksSettings from '@/components/settings/ExternalLinksSettings';
-import GoogleBusinessConnection from '@/components/settings/GoogleBusinessConnection';
+import GoogleBusinessConnection, { isOfficialGoogleConnectionAvailable } from '@/components/settings/GoogleBusinessConnection';
 import GoogleBusinessLocationPicker from '@/components/settings/GoogleBusinessLocationPicker';
+import ExperimentalApifySnapshot from '@/components/settings/ExperimentalApifySnapshot';
 import { useExternalLinks } from '@/hooks/useExternalLinks';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
 import { supabase } from '@/integrations/supabase/client';
@@ -132,6 +133,8 @@ const Settings = () => {
     );
   }
 
+  const googleReviewUrl = externalLinks.find((link) => link.platform.toLowerCase() === 'google reviews')?.url;
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar userRole="business" businessName={businessInfo.name || undefined} />
@@ -160,6 +163,7 @@ const Settings = () => {
               <BusinessInfoSettings
                 businessInfo={businessInfo}
                 onBusinessInfoChange={handleBusinessInfoChange}
+                onPhoneChange={(phone) => setBusinessInfo((current) => ({ ...current, phone }))}
                 onSaveBusinessInfo={handleSaveBusinessInfo}
                 onCancel={() => navigate(-1)}
                 saving={savingProfile}
@@ -184,8 +188,9 @@ const Settings = () => {
 
             <TabsContent value="google-reviews">
               <GoogleBusinessConnection />
-              <GoogleBusinessLocationPicker />
-              <GoogleReviews userId={userId} />
+              <ExperimentalApifySnapshot googleReviewUrl={googleReviewUrl} />
+              {isOfficialGoogleConnectionAvailable && <GoogleBusinessLocationPicker />}
+              {isOfficialGoogleConnectionAvailable && <GoogleReviews userId={userId} />}
             </TabsContent>
           </Tabs>
         </div>

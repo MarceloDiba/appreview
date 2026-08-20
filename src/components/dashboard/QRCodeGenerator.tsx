@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
-import { Printer, Download, Trash2 } from 'lucide-react';
+import { AlertCircle, Printer, Download, Trash2 } from 'lucide-react';
 import {
   QR_PRINT_SIZE,
   QR_SCREEN_SIZE,
@@ -25,10 +25,13 @@ import {
   slugFilename,
 } from '@/lib/qr';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import { printQrCard } from '@/lib/qrCard';
 
 interface QRCodeGeneratorProps {
   baseUrl: string;
   businessName?: string;
+  businessPhone?: string;
+  canCreate?: boolean;
 }
 
 interface SavedQR {
@@ -51,7 +54,7 @@ interface SavedQR {
  * partir dele. O endereço deixou de ser editável de propósito: um endereço
  * escrito à mão quebra a atribuição do caso ao negócio.
  */
-const QRCodeGenerator = ({ baseUrl, businessName }: QRCodeGeneratorProps) => {
+const QRCodeGenerator = ({ baseUrl, businessName, businessPhone, canCreate = true }: QRCodeGeneratorProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { t } = useOwnerTranslation();
@@ -105,7 +108,7 @@ const QRCodeGenerator = ({ baseUrl, businessName }: QRCodeGeneratorProps) => {
   }, [user, fetchSavedQRCodes]);
 
   const createQRCode = async () => {
-    if (!user || !qrName.trim()) return;
+    if (!user || !qrName.trim() || !canCreate) return;
     setCreating(true);
 
     try {
@@ -179,15 +182,15 @@ const QRCodeGenerator = ({ baseUrl, businessName }: QRCodeGeneratorProps) => {
     });
   };
 
-  /**
-   * Cartão de mesa pronto a imprimir. Trilingue de propósito: quem escaneia
-   * pode ser turista, e o texto na mesa é a única parte do fluxo que não se
-   * adapta ao telemóvel de quem lê.
-   */
+  /** Cartão de mesa pronto a imprimir, no idioma do estabelecimento. */
   const printCard = async (qr: SavedQR) => {
-    const highRes = await qrDataUrl(qr.url, QR_PRINT_SIZE);
-    const win = window.open('', '_blank', 'width=800,height=1000');
-    if (!win) {
+    const printed = await printQrCard({
+      qrName: qr.name,
+      qrUrl: qr.url,
+      businessName,
+      businessPhone,
+    });
+    if (!printed) {
       toast({
         title: t('qrcodes.popupBlocked'),
         description: t('qrcodes.popupHint'),
@@ -195,41 +198,6 @@ const QRCodeGenerator = ({ baseUrl, businessName }: QRCodeGeneratorProps) => {
       });
       return;
     }
-
-    const safeName = (businessName || '').replace(/[<>&]/g, '');
-
-    win.document.write(`<!doctype html>
-<html lang="pt"><head><meta charset="utf-8" />
-<title>Cartao ${qr.name}</title>
-<style>
-  @page { size: A6; margin: 8mm; }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-         display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  .card { text-align: center; padding: 10mm 6mm; }
-  .biz { font-size: 11pt; font-weight: 600; color: #333; margin: 0 0 3mm; }
-  .ask { font-size: 15pt; font-weight: 700; margin: 0 0 5mm; line-height: 1.25; }
-  img { width: 52mm; height: 52mm; display: block; margin: 0 auto 5mm; }
-  .langs { font-size: 9.5pt; color: #555; line-height: 1.5; margin: 0; }
-  .tag { margin: 6mm 0 0; font-size: 7.5pt; color: #999; }
-  @media print { .hint { display: none; } }
-  .hint { margin-top: 8mm; font-size: 9pt; color: #888; }
-</style></head><body>
-  <div class="card">
-    ${safeName ? `<p class="biz">${safeName}</p>` : ''}
-    <p class="ask">Como foi a sua experiência?</p>
-    <img src="${highRes}" alt="QR Code" />
-    <p class="langs">
-      Aponte a câmara do telemóvel<br />
-      <em>Apunta la cámara de tu móvil</em><br />
-      <em>Point your phone camera here</em>
-    </p>
-    <p class="tag">${qr.name}</p>
-    <p class="hint">Use Ficheiro &gt; Imprimir, ou Cmd/Ctrl + P</p>
-  </div>
-  <script>window.onload = function () { setTimeout(function () { window.print(); }, 300); };</script>
-</body></html>`);
-    win.document.close();
   };
 
   return (
@@ -248,6 +216,7 @@ const QRCodeGenerator = ({ baseUrl, businessName }: QRCodeGeneratorProps) => {
             <CardDescription>{t('qrcodes.createDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {!canCreate && <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-800" aria-hidden="true" /><p><strong>{t('qrcodes.previewOnlyTitle')}</strong><br />{t('qrcodes.previewOnlyBody')}</p></div>}
             <div className="space-y-2">
               <Label htmlFor="qr-name">{t('qrcodes.nameLabel')}</Label>
               <Input
@@ -259,7 +228,7 @@ const QRCodeGenerator = ({ baseUrl, businessName }: QRCodeGeneratorProps) => {
             </div>
 
             <div className="flex justify-center pt-2">
-              <Button onClick={createQRCode} disabled={creating || !qrName.trim()}>
+              <Button onClick={createQRCode} disabled={creating || !qrName.trim() || !canCreate}>
                 {creating ? t('qrcodes.creating') : t('qrcodes.create')}
               </Button>
             </div>
