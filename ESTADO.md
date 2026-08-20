@@ -18,6 +18,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Preparar alerta conservador da coleta manual Apify e entrega automática
   **somente** após essa ação explícita, com consentimento, número e OpenWA
   local. Sem agenda, gasto recorrente, retry ou entrega de produção.
+- [x] Bloquear por contrato o retorno ao layout legado quando o navegador não
+  tiver snapshot Apify: o cockpit aprovado passa a renderizar os fatos já
+  confirmados e `—` onde ainda não há leitura.
 
 ## Painel aprovado — 18 de agosto de 2026
 

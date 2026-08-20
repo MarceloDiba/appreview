@@ -22,6 +22,10 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   alerta ao WhatsApp do gestor quando número, consentimento e OpenWA local
   estiverem prontos. Não existe agenda, job de fundo, retry ou envio realizado
   por esta implementação sem uma nova coleta iniciada pelo gestor.
+- O Dashboard não pode mais voltar para `GoogleOutcomeCard`/
+  `ReputationAdvisorCard` quando faltar o snapshot no navegador. A rota deve
+  manter o cockpit aprovado e mostrar somente os dados confirmados; ausência
+  de fila, distribuição, temas ou histórico é `—`, não um layout alternativo.
 
 ## Fechamento de decisões e fila real — 20/08/2026
 

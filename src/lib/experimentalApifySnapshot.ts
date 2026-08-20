@@ -15,7 +15,8 @@ export type ExperimentalObservedReview = {
 };
 
 export type ExperimentalApifySnapshot = {
-  source: 'apify-experimental';
+  /** The local pilot snapshot or a neutral summary built from an existing owner record. */
+  source: 'apify-experimental' | 'owner-dashboard-summary';
   fetchedAt: string;
   business: {
     name: string;

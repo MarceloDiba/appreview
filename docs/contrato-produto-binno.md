@@ -62,6 +62,10 @@ forças, fragilidades e próximo passo são o centro do produto.
 - A fila de respostas, volume, notas, QR, temas, reputação, WhatsApp,
   completude e alteração semanal permanecem módulos consolidados. Uma evolução
   de assessoria não autoriza redesenhá-los, fundi-los ou reduzir o seu conteúdo.
+- A ausência de uma coleta Apify no navegador **não** autoriza o painel
+  autenticado a renderizar a arquitetura legada. Quando só houver resumo já
+  confirmado do negócio, o mesmo cockpit aprovado é exibido com `—` nos
+  módulos sem evidência; a tela antiga não é um fallback permitido.
 - O **Radar do Binno** é uma faixa adicional antes desses módulos e só aparece
   com risco ou oportunidade evidenciados. O **Plano de hoje** é um cartão
   adicional na coluna lateral. O **Resultado observado** fica após “O que
