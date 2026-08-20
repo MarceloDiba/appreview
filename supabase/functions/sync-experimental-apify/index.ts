@@ -161,7 +161,10 @@ const publicReviewerName = (review: Record<string, unknown>) =>
   || nestedPublicString(review, ['reviewer', 'author', 'user']);
 
 const publicReviewUrl = (review: Record<string, unknown>) => {
-  const candidate = stringFrom(review, ['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri', 'url']);
+  // `url` can identify the place rather than this individual review. Only
+  // accept fields documented as a review permalink so the action never opens
+  // the business profile while claiming to open the selected review.
+  const candidate = stringFrom(review, ['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']);
   return candidate && parseGoogleUrl(candidate) ? candidate : undefined;
 };
 

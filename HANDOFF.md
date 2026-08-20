@@ -270,6 +270,12 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Teste experimental Apify — 15/08/2026
 
+- Em 20/08, a coleta manual do Mania foi renovada com sucesso. A fila local
+  passou a exibir os nomes públicos retornados pela fonte e o link individual
+  de cada avaliação. O botão **Copiar e abrir esta avaliação** copia o
+  rascunho e aponta somente para esse permalink; quando a fonte não entrega
+  permalink, o Binno oferece apenas a cópia e não substitui pelo perfil geral.
+
 - A coleta manual autorizada para **Mania de Petiscos**, Lisboa, terminou às
   16:03 WEST. O limite foi de 49 avaliações e o custo observado foi
   **US$ 0,02945**. Não foi criada agenda nem nova execução automática.

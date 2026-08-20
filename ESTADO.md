@@ -352,6 +352,10 @@ em cache) foram preservados. Evidência completa em
 
 ## Próximos temas
 
+- [x] Renovar a leitura Apify do Mania após corrigir nome público e permalink
+  individual; a fila agora mostra os dados devolvidos pela fonte e oferece
+  copiar + abrir somente quando há URL específica da avaliação.
+
 1. **Notificações:** a interface sem efeito foi removida no PR #18. Para
    reintroduzir, definir eventos, canais, provedor, consentimento e tratamento
    de falhas; só então implementar entrega real e preferências persistidas.
