@@ -19,6 +19,10 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   positiva agregada quando houver evidência; estado curto de acompanhamento
   quando não houver alerta nem oportunidade específica. Alertas e WhatsApp
   proativo continuam restritos a anomalias com critério conservador.
+- [x] Congelar a composição aprovada como base de evolução: fila, volume,
+  leitura por nota, QR, temas, reputação, WhatsApp, boas práticas, completude,
+  mudança semanal, Radar, Plano e Resultado. Novos módulos são aditivos e
+  dependem de aprovação visual explícita quando alterarem hierarquia.
 - [x] Preparar alerta conservador da coleta manual Apify e entrega automática
   **somente** após essa ação explícita, com consentimento, número e OpenWA
   local. Sem agenda, gasto recorrente, retry ou entrega de produção.

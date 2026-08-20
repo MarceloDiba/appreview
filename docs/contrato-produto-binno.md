@@ -5,6 +5,10 @@
 ou da prioridade visual exige aprovação explícita de Marcelo. Uma refatoração
 técnica não autoriza reduzir, ocultar ou substituir estes elementos.
 
+**Posição consolidada em 20/08/2026:** esta é a base aprovada para evolução.
+Novas capacidades entram de forma aditiva; não se troca fila, gráficos, QR,
+temas, cartões laterais ou a camada de assessoria por uma tela simplificada.
+
 Este documento é a referência de produto do Binno. `HANDOFF.md` registra o
 estado operacional; `ESTADO.md` registra o backlog. Nenhum deles substitui
 este contrato.
@@ -72,6 +76,10 @@ forças, fragilidades e próximo passo são o centro do produto.
   uma fragilidade. O **Plano de hoje** é um cartão adicional na coluna lateral
   e também permanece visível, levando à próxima revisão útil. O **Resultado
   observado** fica após “O que mudou na semana”.
+- Esta camada é obrigatoriamente adicional: Radar acima da grade; Plano de hoje
+  na coluna lateral; Resultado observado depois da mudança semanal. Eles não
+  podem deslocar, esconder ou substituir fila, volume, notas, QR, temas,
+  reputação, WhatsApp, boas práticas ou completude.
 - Ação marcada pelo gestor é um toque local, não cria caso, responsável, prazo
   ou burocracia. A leitura seguinte só pode dizer que o sinal voltou ou não
   voltou a aparecer; nunca confirma sozinho uma melhoria operacional.
@@ -95,6 +103,12 @@ forças, fragilidades e próximo passo são o centro do produto.
 
 - O Radar deve responder de modo evidenciado: **o que ajuda o negócio** e **o
   que o deixa mais frágil agora**.
+- Uma **fragilidade/alerta** só existe com período comparável, aumento relevante
+  de notas baixas e causa repetida nos comentários. Uma **oportunidade** só
+  existe com frase repetida em elogios reais. Uma **força observada** pode usar
+  somente tema positivo agregado com quantidade de menções. Sem qualquer um
+  desses critérios, o Radar informa que segue acompanhando: não inventa risco,
+  tendência, causa ou oportunidade.
 - Temas recorrentes só viram oportunidade ou alerta com comentários e contexto
   suficientes; comentário → tema → ação operacional.
 - Boas práticas aparecem como um box na Visão geral, uma orientação por vez,
@@ -112,8 +126,11 @@ forças, fragilidades e próximo passo são o centro do produto.
 - A tela distingue sem ambiguidade: WhatsApp do gestor para avisos e WhatsApp
   próprio/equipa para teste manual; nunca usa o número de um cliente para teste.
 - O gestor escolhe o que quer receber: resumo semanal, avaliações que pedem
-  resposta, mudanças na reputação e melhorias do Perfil do Google, além de
+  resposta, **Alertas do Radar** e melhorias do Perfil do Google, além de
   dia, hora e consentimento.
+- Alertas do Radar comunicam somente anomalia elegível e a causa recorrente
+  observada. Forças e boas práticas são mostradas no painel e entram no resumo
+  apenas quando o conteúdo correspondente tiver evidência suficiente.
 - OpenWA atual é somente um piloto local. Depois de uma **coleta manual**
   iniciada pelo gestor, pode enviar um alerta ao próprio número configurado se
   houver consentimento, sinal elegível e sessão local ligada. Continua sem
@@ -152,8 +169,9 @@ forças, fragilidades e próximo passo são o centro do produto.
 ## 7. Guarda de regressão
 
 `npm run verify` executa `npm run check:product-contract`. Ele protege os
-trechos verificáveis deste contrato: a composição do painel, a integração do
-telefone de onboarding, a ação de resposta com permalink individual, a coleta
-de nome público e a rejeição do URL genérico. O teste não substitui revisão de
-produto: qualquer mudança visual ou de fluxo ainda deve ser comparada com este
-documento antes de ser aceita.
+trechos verificáveis deste contrato: composição consolidada, presença
+permanente do Radar/Plano/Resultado, integração do telefone de onboarding,
+ação de resposta com permalink individual, coleta de nome público e rejeição
+do URL genérico. O teste não substitui revisão de produto: qualquer mudança
+visual ou de fluxo ainda deve ser comparada com este documento antes de ser
+aceita.

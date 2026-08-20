@@ -7,6 +7,11 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 > é a referência aprovada de produto e não pode ser alterado por refatoração ou
 > simplificação visual sem nova aprovação explícita de Marcelo.
 
+> **Base visual consolidada em 20/08/2026:** commit local `c62f6f9` tornou
+> visível a assessoria na leitura atual sem alterar os blocos aprovados. Toda
+> evolução futura é aditiva a esta composição; não há autorização para voltar a
+> telas resumidas, remover gráficos ou ocultar Radar/Plano por conveniência.
+
 ## Radar, Plano de hoje e resultado observado — 20/08/2026
 
 - Marcelo aprovou que o Binno evolua de leitura para assessoria, sem alterar os
