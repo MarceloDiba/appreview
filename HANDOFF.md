@@ -12,6 +12,27 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 > evolução futura é aditiva a esta composição; não há autorização para voltar a
 > telas resumidas, remover gráficos ou ocultar Radar/Plano por conveniência.
 
+## Página oficial e demonstração pública — 20/08/2026 (local; aguarda PR)
+
+- A página `/` foi reconstruída como a página oficial de vendas do Binno, com a
+  mensagem central **“Seu assessor de reputação no Google.”**. A narrativa
+  explica contexto do Maps, monitoramento, WhatsApp, fila assistida, leitura
+  por estrela, Radar, plano do perfil e preço de **€49/mês**.
+- A rota `/demo` agora contém apenas um cenário fictício marcado em toda a
+  interface como **Demonstração ilustrativa**. Ela reutiliza a hierarquia do
+  cockpit consolidado: Radar, fila, volume, notas, QR, temas, plano,
+  completude e WhatsApp. Não há dados de cliente nem variações públicas por
+  query string.
+- Na demonstração, **Usar resposta** copia o rascunho e confirma o estado. A
+  mensagem explica que, em conta conectada, o passo abre somente o permalink
+  individual da avaliação. Não há publicação automática nem link fictício.
+- O conteúdo novo público está em pt-BR, pt-PT e inglês no dicionário leve
+  `src/i18n/marketing.ts`. Os textos novos não usam travessão. O painel
+  autenticado não foi modificado por este pacote.
+- Validação local concluída: desktop e mobile sem overflow horizontal,
+  navegação do demo, cópia de resposta, preferências do WhatsApp e
+  `npm run verify` verde. Não houve deploy.
+
 ## Radar, Plano de hoje e resultado observado — 20/08/2026
 
 - Marcelo aprovou que o Binno evolua de leitura para assessoria, sem alterar os
