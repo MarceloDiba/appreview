@@ -9,46 +9,17 @@ import type { ExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot'
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import type { LocalWhatsAppState } from '@/hooks/useLocalWhatsApp';
 import { maskInternationalPhone, sendLocalWhatsAppText } from '@/lib/localWhatsApp';
-
-type NotificationPreferences = {
-  weeklyEnabled: boolean;
-  repliesEnabled: boolean;
-  reputationEnabled: boolean;
-  profileEnabled: boolean;
-  recipient: string;
-  day: 'monday' | 'friday';
-  time: string;
-  consented: boolean;
-};
-
-const storageKey = 'binno.local-whatsapp-preferences';
-const defaults: NotificationPreferences = {
-  weeklyEnabled: true,
-  repliesEnabled: true,
-  reputationEnabled: true,
-  profileEnabled: true,
-  recipient: '',
-  day: 'monday',
-  time: '09:00',
-  consented: false,
-};
-
-const readPreferences = (): NotificationPreferences => {
-  try {
-    return { ...defaults, ...JSON.parse(window.localStorage.getItem(storageKey) || '{}') };
-  } catch {
-    return defaults;
-  }
-};
+import { defaultPilotNotificationPreferences, type PilotNotificationPreferences, readLatestPilotNotificationDelivery, readPilotNotificationPreferences, savePilotNotificationPreferences } from '@/lib/pilotNotificationPreferences';
 
 export const WhatsAppNotificationWorkspace = ({ localWhatsApp, snapshot, onboardingPhone }: { localWhatsApp: LocalWhatsAppState; snapshot: ExperimentalApifySnapshot; onboardingPhone?: string }) => {
   const { t, i18n } = useOwnerTranslation();
-  const [preferences, setPreferences] = useState<NotificationPreferences>(defaults);
+  const [preferences, setPreferences] = useState<PilotNotificationPreferences>(defaultPilotNotificationPreferences);
   const [testRecipient, setTestRecipient] = useState('');
   const [message, setMessage] = useState(t('dashboard.cockpit.whatsapp.defaultMessage'));
   const [confirmed, setConfirmed] = useState(false);
   const [saved, setSaved] = useState(false);
   const [sendState, setSendState] = useState<{ status: 'idle' | 'sending' | 'sent' | 'error'; detail?: string; sentAt?: string; recipient?: string }>({ status: 'idle' });
+  const [latestAdvisorDelivery, setLatestAdvisorDelivery] = useState(() => readLatestPilotNotificationDelivery());
   const ready = localWhatsApp.status === 'ready' && localWhatsApp.session;
   const lowRatings = snapshot.sample.ratingBreakdown['1'] + snapshot.sample.ratingBreakdown['2'];
   const unanswered = (snapshot.sample.observedReviews?.items || []).filter((review) => !review.responseObserved).length;
@@ -61,13 +32,17 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, snapshot, onboard
   });
 
   useEffect(() => {
-    const stored = readPreferences();
+    const stored = readPilotNotificationPreferences();
     setPreferences({ ...stored, recipient: stored.recipient || onboardingPhone || '' });
     if (onboardingPhone) setTestRecipient((current) => current || onboardingPhone);
   }, [onboardingPhone]);
 
+  useEffect(() => {
+    setLatestAdvisorDelivery(readLatestPilotNotificationDelivery());
+  }, []);
+
   const savePreferences = () => {
-    window.localStorage.setItem(storageKey, JSON.stringify(preferences));
+    savePilotNotificationPreferences(preferences);
     setSaved(true);
   };
 
@@ -83,8 +58,8 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, snapshot, onboard
     }
   };
 
-  const setChoice = (key: keyof Pick<NotificationPreferences, 'weeklyEnabled' | 'repliesEnabled' | 'reputationEnabled' | 'profileEnabled'>, checked: boolean) => setPreferences((current) => ({ ...current, [key]: checked }));
-  const choices: Array<{ key: keyof Pick<NotificationPreferences, 'weeklyEnabled' | 'repliesEnabled' | 'reputationEnabled' | 'profileEnabled'>; title: string; body: string }> = [
+  const setChoice = (key: keyof Pick<PilotNotificationPreferences, 'weeklyEnabled' | 'repliesEnabled' | 'reputationEnabled' | 'profileEnabled'>, checked: boolean) => setPreferences((current) => ({ ...current, [key]: checked }));
+  const choices: Array<{ key: keyof Pick<PilotNotificationPreferences, 'weeklyEnabled' | 'repliesEnabled' | 'reputationEnabled' | 'profileEnabled'>; title: string; body: string }> = [
     { key: 'weeklyEnabled', title: t('whatsappPilot.weeklyTitle'), body: t('whatsappPilot.weeklyBody') },
     { key: 'repliesEnabled', title: t('whatsappPilot.repliesTitle'), body: t('whatsappPilot.repliesBody') },
     { key: 'reputationEnabled', title: t('whatsappPilot.reputationTitle'), body: t('whatsappPilot.reputationBody') },
@@ -95,14 +70,15 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, snapshot, onboard
     <section className="space-y-5">
       <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-6">
         <h2 className="text-xl font-semibold text-slate-950">{t('dashboard.cockpit.whatsapp.notificationsTitle')}</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-600">{t('dashboard.cockpit.whatsapp.notificationsBody')}</p>
+        <p className="mt-1 text-sm leading-6 text-slate-600">{t('dashboard.advisorPilot.notificationsBody')}</p>
         <h3 className="mt-6 text-sm font-semibold text-slate-950">{t('whatsappPilot.interestsTitle')}</h3>
         <p className="mt-1 text-sm text-slate-600">{t('whatsappPilot.interestsBody')}</p>
         <div className="mt-4 space-y-3">{choices.map((choice) => <label key={choice.key} className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm leading-5 text-slate-700"><Checkbox checked={preferences[choice.key]} onCheckedChange={(checked) => setChoice(choice.key, checked === true)} /><span><strong className="block text-slate-950">{choice.title}</strong>{choice.body}</span></label>)}</div>
         <div className="mt-5 grid gap-4 sm:grid-cols-3"><label className="text-sm font-medium text-slate-700 sm:col-span-2">{t('whatsappPilot.notificationRecipient')}<Input value={preferences.recipient} onChange={(event) => setPreferences((current) => ({ ...current, recipient: event.target.value }))} placeholder="+351 911 056 526" className="mt-2" inputMode="tel" /><span className="mt-1 block text-xs font-normal leading-5 text-slate-500">{onboardingPhone ? t('whatsappPilot.onboardingPhoneHint') : t('whatsappPilot.notificationRecipientHint')}</span></label><label className="text-sm font-medium text-slate-700">{t('dashboard.cockpit.whatsapp.time')}<Input type="time" value={preferences.time} onChange={(event) => setPreferences((current) => ({ ...current, time: event.target.value }))} className="mt-2" /></label></div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-sm font-medium text-slate-700">{t('dashboard.cockpit.whatsapp.frequency')}<select value={preferences.day} onChange={(event) => setPreferences((current) => ({ ...current, day: event.target.value as NotificationPreferences['day'] }))} className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="monday">{t('dashboard.cockpit.whatsapp.schedule.monday')}</option><option value="friday">{t('dashboard.cockpit.whatsapp.schedule.friday')}</option></select></label></div>
-        <label className="mt-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-sm leading-5 text-amber-950"><Checkbox checked={preferences.consented} onCheckedChange={(checked) => setPreferences((current) => ({ ...current, consented: checked === true }))} /><span>{t('dashboard.cockpit.whatsapp.notificationsConsent')}</span></label>
-        <Button onClick={savePreferences} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><Send className="mr-2 h-4 w-4" />{t('dashboard.cockpit.whatsapp.saveLocal')}</Button>{saved && <p className="mt-3 text-sm text-emerald-700">{t('dashboard.cockpit.whatsapp.preferencesSaved')}</p>}
+        <div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-sm font-medium text-slate-700">{t('dashboard.cockpit.whatsapp.frequency')}<select value={preferences.day} onChange={(event) => setPreferences((current) => ({ ...current, day: event.target.value as PilotNotificationPreferences['day'] }))} className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="monday">{t('dashboard.cockpit.whatsapp.schedule.monday')}</option><option value="friday">{t('dashboard.cockpit.whatsapp.schedule.friday')}</option></select></label></div>
+        <label className="mt-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-sm leading-5 text-amber-950"><Checkbox checked={preferences.consented} onCheckedChange={(checked) => setPreferences((current) => ({ ...current, consented: checked === true }))} /><span>{t('dashboard.advisorPilot.notificationsConsent')}</span></label>
+        <Button onClick={savePreferences} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><Send className="mr-2 h-4 w-4" />{t('dashboard.cockpit.whatsapp.saveLocal')}</Button>{saved && <p className="mt-3 text-sm text-emerald-700">{t('dashboard.advisorPilot.preferencesSaved')}</p>}
+        <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-5 text-slate-700"><p className="font-semibold text-slate-950">{t('dashboard.cockpit.whatsapp.historyTitle')}</p><p className="mt-1">{latestAdvisorDelivery?.status === 'sent' ? t('dashboard.advisorPilot.whatsappSent') : latestAdvisorDelivery?.status === 'failed' ? t('dashboard.advisorPilot.whatsappFailed') : t('dashboard.cockpit.whatsapp.historyEmpty')}</p></div>
       </CardContent></Card>
       <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-6">
         <div className="flex items-start justify-between gap-3"><div><h2 className="text-xl font-semibold text-slate-950">{t('dashboard.cockpit.whatsapp.localTitle')}</h2><p className="mt-1 text-sm leading-6 text-slate-600">{t('dashboard.cockpit.whatsapp.localBody')}</p></div><Button variant="outline" size="sm" onClick={() => void localWhatsApp.refresh()}>{t('dashboard.cockpit.whatsapp.refresh')}</Button></div>

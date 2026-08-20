@@ -30,6 +30,24 @@ export type ExperimentalApifySnapshot = {
     ratingBreakdown: Record<'1' | '2' | '3' | '4' | '5', number>;
     ownerRepliesFound: number;
     /**
+     * A leitura do assessor é calculada durante a coleta e fica apenas neste
+     * retrato autenticado. Não contém nome, texto ou URL de avaliadores.
+     */
+    advisor?: {
+      alert?: {
+        fingerprint: string;
+        topic: 'service' | 'wait' | 'food' | 'cleanliness' | 'price' | 'atmosphere' | 'delivery';
+        lowRatingCount: number;
+        topicMentions: number;
+        recentLowShare: number;
+        baselineLowShare: number;
+      };
+      opportunity?: {
+        phrase: string;
+        mentions: number;
+      };
+    };
+    /**
      * Temporary browser-only queue used by the assisted pilot. It is never
      * written to Supabase audit records and expires automatically.
      */
@@ -86,6 +104,25 @@ const isInsights = (value: unknown): value is NonNullable<ExperimentalApifySnaps
       && typeof (topic as Record<string, unknown>).sentiment === 'string');
 };
 
+const isAdvisor = (value: unknown): boolean => {
+  if (value === undefined) return true;
+  if (!value || typeof value !== 'object') return false;
+  const advisor = value as Record<string, unknown>;
+  const alert = advisor.alert;
+  const opportunity = advisor.opportunity;
+  const validAlert = alert === undefined || (alert && typeof alert === 'object'
+    && typeof (alert as Record<string, unknown>).fingerprint === 'string'
+    && ['service', 'wait', 'food', 'cleanliness', 'price', 'atmosphere', 'delivery'].includes(String((alert as Record<string, unknown>).topic))
+    && typeof (alert as Record<string, unknown>).lowRatingCount === 'number'
+    && typeof (alert as Record<string, unknown>).topicMentions === 'number'
+    && typeof (alert as Record<string, unknown>).recentLowShare === 'number'
+    && typeof (alert as Record<string, unknown>).baselineLowShare === 'number');
+  const validOpportunity = opportunity === undefined || (opportunity && typeof opportunity === 'object'
+    && typeof (opportunity as Record<string, unknown>).phrase === 'string'
+    && typeof (opportunity as Record<string, unknown>).mentions === 'number');
+  return Boolean(validAlert && validOpportunity);
+};
+
 const isObservedReviews = (value: unknown): value is NonNullable<ExperimentalApifySnapshot['sample']['observedReviews']> => {
   if (value === undefined) return true;
   if (!value || typeof value !== 'object') return false;
@@ -117,6 +154,7 @@ export const isExperimentalApifySnapshot = (value: unknown): value is Experiment
     && typeof snapshot.sample.reviewCount === 'number'
     && typeof snapshot.sample.ownerRepliesFound === 'number'
     && isRatingBreakdown(snapshot.sample.ratingBreakdown)
+    && isAdvisor(snapshot.sample.advisor)
     && isInsights(snapshot.sample.insights)
     && isObservedReviews(snapshot.sample.observedReviews);
 };

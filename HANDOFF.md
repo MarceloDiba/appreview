@@ -7,6 +7,22 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 > é a referência aprovada de produto e não pode ser alterado por refatoração ou
 > simplificação visual sem nova aprovação explícita de Marcelo.
 
+## Radar, Plano de hoje e resultado observado — 20/08/2026
+
+- Marcelo aprovou que o Binno evolua de leitura para assessoria, sem alterar os
+  blocos consolidados do painel. A hierarquia agora recebe três módulos
+  adicionais: faixa **Radar do Binno**, cartão lateral **Plano de hoje** e
+  cartão lateral **Resultado observado**.
+- A coleta Apify manual passa a calcular um alerta conservador somente quando
+  há período comparável, duas ou mais notas baixas recentes e causa recorrente
+  em ao menos dois comentários. O resultado também pode propor uma expressão
+  positiva repetida em pelo menos três elogios. Nome, texto e URL de avaliador
+  continuam fora do resumo persistido e do WhatsApp.
+- No piloto local, uma coleta manual elegível pode enviar automaticamente o
+  alerta ao WhatsApp do gestor quando número, consentimento e OpenWA local
+  estiverem prontos. Não existe agenda, job de fundo, retry ou envio realizado
+  por esta implementação sem uma nova coleta iniciada pelo gestor.
+
 ## Fechamento de decisões e fila real — 20/08/2026
 
 - O [Contrato de produto Binno](docs/contrato-produto-binno.md) consolida e

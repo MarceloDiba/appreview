@@ -57,6 +57,22 @@ O painel não pode regredir para uma primeira dobra composta apenas por nota,
 total de avaliações e gráficos genéricos do Google. Fila, resposta sugerida,
 forças, fragilidades e próximo passo são o centro do produto.
 
+### Camada de assessoria adicionada
+
+- A fila de respostas, volume, notas, QR, temas, reputação, WhatsApp,
+  completude e alteração semanal permanecem módulos consolidados. Uma evolução
+  de assessoria não autoriza redesenhá-los, fundi-los ou reduzir o seu conteúdo.
+- O **Radar do Binno** é uma faixa adicional antes desses módulos e só aparece
+  com risco ou oportunidade evidenciados. O **Plano de hoje** é um cartão
+  adicional na coluna lateral. O **Resultado observado** fica após “O que
+  mudou na semana”.
+- Ação marcada pelo gestor é um toque local, não cria caso, responsável, prazo
+  ou burocracia. A leitura seguinte só pode dizer que o sinal voltou ou não
+  voltou a aparecer; nunca confirma sozinho uma melhoria operacional.
+- Uma oportunidade positiva pode complementar Boas práticas com uma expressão
+  repetida em elogios reais. Nunca cria uma prova social a partir de texto ou
+  nome de avaliador sem aprovação explícita do gestor.
+
 ### Fila e resposta sugerida
 
 - Exibir o nome público real retornado pela fonte. Se a fonte não o devolver,
@@ -92,8 +108,10 @@ forças, fragilidades e próximo passo são o centro do produto.
 - O gestor escolhe o que quer receber: resumo semanal, avaliações que pedem
   resposta, mudanças na reputação e melhorias do Perfil do Google, além de
   dia, hora e consentimento.
-- OpenWA atual é somente um piloto local: sem agenda, webhook, histórico,
-  importação de conversas ou operação de produção.
+- OpenWA atual é somente um piloto local. Depois de uma **coleta manual**
+  iniciada pelo gestor, pode enviar um alerta ao próprio número configurado se
+  houver consentimento, sinal elegível e sessão local ligada. Continua sem
+  agenda, webhook, retry, importação de conversas ou operação de produção.
 
 ## 5. Fontes de dados e integrações
 

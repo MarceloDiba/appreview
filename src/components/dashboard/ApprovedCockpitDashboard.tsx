@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ChevronLeft, ChevronRight, Copy, ExternalLink, Lightbulb, MessageCircle, QrCode, Star } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Copy, ExternalLink, Lightbulb, MessageCircle, QrCode, Sparkles, Star } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { buildReplySuggestions } from '@/lib/replySuggestions';
 import { LocalWhatsAppState, useLocalWhatsApp } from '@/hooks/useLocalWhatsApp';
 import { WhatsAppNotificationWorkspace } from '@/components/dashboard/WhatsAppNotificationWorkspace';
 import { supabase } from '@/integrations/supabase/client';
+import { getAdvisorObservedResult, markAdvisorAction } from '@/lib/advisorPilot';
 
 type CockpitTab = 'overview' | 'reviews' | 'whatsapp';
 type QueueReview = {
@@ -57,6 +58,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId }: { snapshot: Experimental
   const funnel = useReviewFunnelMetrics(userId);
   const whatsApp = useLocalWhatsApp();
   const [onboardingPhone, setOnboardingPhone] = useState('');
+  const [advisorActionVersion, setAdvisorActionVersion] = useState(0);
   useEffect(() => {
     if (!userId) return;
     let active = true;
@@ -86,7 +88,9 @@ const ApprovedCockpitDashboard = ({ snapshot, userId }: { snapshot: Experimental
     <nav className="flex gap-1 overflow-x-auto border-b border-slate-200" aria-label={t('dashboard.cockpit.layout.navigation')}>
       {tabs.map((item) => <button key={item.id} type="button" onClick={() => setTab(item.id)} className={`shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors ${tab === item.id ? 'border-[#2457D6] text-[#2457D6]' : 'border-transparent text-slate-500 hover:text-slate-900'}`}>{item.label}</button>)}
     </nav>
-    {tab === 'whatsapp' ? <WhatsAppNotificationWorkspace snapshot={snapshot} localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} /> : tab === 'reviews' ? <ResponseQueue reviews={queue} snapshot={snapshot} /> : <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+    {tab === 'whatsapp' ? <WhatsAppNotificationWorkspace snapshot={snapshot} localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} /> : tab === 'reviews' ? <ResponseQueue reviews={queue} snapshot={snapshot} /> : <div className="space-y-5">
+      <RadarNow snapshot={snapshot} />
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <section className="min-w-0 space-y-5">
         <ResponseQueue reviews={queue} snapshot={snapshot} />
         <VolumeCard weeks={history} />
@@ -94,14 +98,43 @@ const ApprovedCockpitDashboard = ({ snapshot, userId }: { snapshot: Experimental
         <div className="grid gap-5 md:grid-cols-2"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
       </section>
       <aside className="space-y-5">
+        <TodayPlan snapshot={snapshot} onMarked={() => setAdvisorActionVersion((current) => current + 1)} />
         <ReputationCard snapshot={snapshot} />
         <WhatsAppCard localWhatsApp={whatsApp} onOpen={() => setTab('whatsapp')} />
         <DailyPractice snapshot={snapshot} onOpenReviews={() => setTab('reviews')} />
         <ProfileCompleteness connected={official.syncComplete} />
         <WeeklyChange weeks={history} />
+        <ObservedResult snapshot={snapshot} version={advisorActionVersion} />
       </aside>
+      </div>
     </div>}
   </div>;
+};
+
+const RadarNow = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
+  const { t } = useOwnerTranslation();
+  const alert = snapshot.sample.advisor?.alert;
+  const opportunity = snapshot.sample.advisor?.opportunity;
+  if (!alert && !opportunity) return null;
+  const topic = alert ? t(`dashboard.cockpit.topicLabels.${alert.topic}`) : null;
+  return <Card className={`shadow-[0_1px_3px_rgba(15,23,42,0.08)] ${alert ? 'border-red-200 bg-red-50/60' : 'border-violet-200 bg-violet-50/50'}`}><CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex min-w-0 items-start gap-3"><span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${alert ? 'bg-red-100 text-red-700' : 'bg-violet-100 text-violet-800'}`}>{alert ? <AlertTriangle className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}</span><div><p className="text-sm font-semibold text-slate-950">{t('dashboard.advisorPilot.radarTitle')}</p>{alert ? <><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.alertTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.alertBody', { low: alert.lowRatingCount, topic, mentions: alert.topicMentions })}</p></> : opportunity ? <><p className="mt-1 text-sm font-medium text-slate-800">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.opportunityBody', { phrase: opportunity.phrase, mentions: opportunity.mentions })}</p></> : null}</div></div>
+    <span className="shrink-0 text-xs font-medium text-slate-500">{t('dashboard.advisorPilot.experimental')}</span>
+  </CardContent></Card>;
+};
+
+const TodayPlan = ({ snapshot, onMarked }: { snapshot: ExperimentalApifySnapshot; onMarked: () => void }) => {
+  const { t } = useOwnerTranslation();
+  const alert = snapshot.sample.advisor?.alert;
+  const opportunity = snapshot.sample.advisor?.opportunity;
+  if (!alert && !opportunity) return null;
+  const topic = alert ? t(`dashboard.cockpit.topicLabels.${alert.topic}`) : null;
+  const mark = () => {
+    if (!alert) return;
+    markAdvisorAction(snapshot, alert);
+    onMarked();
+  };
+  return <Card className="border-violet-200 bg-violet-50/40 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.planTitle')}</h2></div>{alert ? <><p className="mt-4 text-sm font-medium text-slate-900">{t('dashboard.advisorPilot.planBody', { topic })}</p><Button onClick={mark} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><CheckCircle2 className="mr-2 h-4 w-4" />{t('dashboard.advisorPilot.markDone')}</Button></> : opportunity ? <><p className="mt-4 text-sm font-medium text-slate-900">{t('dashboard.advisorPilot.opportunityAction')}</p><p className="mt-2 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.opportunityBody', { phrase: opportunity.phrase, mentions: opportunity.mentions })}</p></> : null}</CardContent></Card>;
 };
 
 const ResponseQueue = ({ reviews, snapshot }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot }) => {
@@ -179,8 +212,12 @@ const Metric = ({ label, value, tone }: { label: string; value: string; tone?: '
 const WhatsAppCard = ({ localWhatsApp, onOpen }: { localWhatsApp: LocalWhatsAppState; onOpen: () => void }) => <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">Resumo no WhatsApp</h2><MessageCircle className="h-5 w-5 text-emerald-700" /></div><div className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm leading-5 text-emerald-950">{localWhatsApp.status === 'ready' ? 'Canal conectado para o seu resumo.' : 'Configure quando quer receber o resumo.'}</div><Button variant="link" className="mt-2 h-auto px-0 text-[#2457D6]" onClick={onOpen}>Configurar WhatsApp<ChevronRight className="ml-1 h-4 w-4" /></Button></CardContent></Card>;
 
 const DailyPractice = ({ snapshot, onOpenReviews }: { snapshot: ExperimentalApifySnapshot; onOpenReviews: () => void }) => {
+  const { t } = useOwnerTranslation();
+  const opportunity = snapshot.sample.advisor?.opportunity;
   const unresolved = (snapshot.sample.observedReviews?.items || []).filter((review) => !review.responseObserved).length;
-  const practice = unresolved ? { title: `${unresolved} avaliações com texto ainda não mostram resposta`, body: 'Revise uma resposta e publique quando estiver satisfeito.', action: 'Revisar fila' } : { title: 'Planeje uma foto recente da experiência', body: 'Mostre o que o cliente encontra hoje.', action: 'Ver QR Codes' };
+  const practice = opportunity
+    ? { title: t('dashboard.advisorPilot.opportunityBody', { phrase: opportunity.phrase, mentions: opportunity.mentions }), body: t('dashboard.advisorPilot.opportunityAction'), action: t('dashboard.advisorPilot.planTitle') }
+    : unresolved ? { title: `${unresolved} avaliações com texto ainda não mostram resposta`, body: 'Revise uma resposta e publique quando estiver satisfeito.', action: 'Revisar fila' } : { title: 'Planeje uma foto recente da experiência', body: 'Mostre o que o cliente encontra hoje.', action: 'Ver QR Codes' };
   return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">Boas práticas</h2></div><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button variant="link" className="mt-2 h-auto px-0 text-[#2457D6]" onClick={onOpenReviews}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></Button></CardContent></Card>;
 };
 
@@ -192,12 +229,27 @@ const WeeklyChange = ({ weeks }: { weeks: Week[] }) => {
   return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">O que mudou na semana</h2><span className="text-xs text-slate-500">7 dias</span></div><div className="mt-4 flex items-center gap-3"><div className="h-8 w-20">{weeks.length > 0 && <ResponsiveContainer width="100%" height="100%"><LineChart data={weeks}><Line type="monotone" dataKey="ownerReplies" stroke="#2457D6" strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><p className="text-sm leading-5 text-slate-600">{weeks.length ? (current ? `Você respondeu ${current} avaliações nos últimos 7 dias.` : t('whatsappPilot.weeklyChangeEmpty')) : t('whatsappPilot.weeklyChangeEmpty')}</p></div></CardContent></Card>;
 };
 
+const ObservedResult = ({ snapshot, version }: { snapshot: ExperimentalApifySnapshot; version: number }) => {
+  const { t } = useOwnerTranslation();
+  // version intentionally refreshes local action state after the owner marks it.
+  void version;
+  const result = getAdvisorObservedResult(snapshot);
+  const copy = result === 'persisting'
+    ? t('dashboard.advisorPilot.resultPersisting')
+    : result === 'not-repeated'
+      ? t('dashboard.advisorPilot.resultNotRepeated')
+      : t('dashboard.advisorPilot.resultWaiting');
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.resultTitle')}</h2></div><p className="mt-3 text-sm leading-5 text-slate-600">{copy}</p></CardContent></Card>;
+};
+
 const QrCard = ({ funnel }: { funnel: { qrOpens: number; googleClicks: number } | null }) => <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="text-lg font-semibold text-slate-950">Do QR ao Google</h2><QrCode className="h-5 w-5 text-[#2457D6]" /></div><dl className="mt-5 space-y-3"><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">QR aberto</dt><dd className="font-semibold text-slate-950">{funnel?.qrOpens ?? '—'}</dd></div><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">Clicou no Google</dt><dd className="font-semibold text-slate-950">{funnel?.googleClicks ?? '—'}</dd></div></dl></CardContent></Card>;
 
 const TopicsCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
   const topics = snapshot.sample.insights?.topics || [];
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.topicsTitle')}</h2><div className="mt-5 flex flex-wrap gap-2">{topics.map((topic) => <span key={topic.id} className={`rounded-full px-3 py-1.5 text-xs font-medium ${topic.sentiment === 'negative' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>{t(`dashboard.cockpit.topicLabels.${topic.id}`)} · {topic.count}</span>)}</div></CardContent></Card>;
+  const alert = snapshot.sample.advisor?.alert;
+  const opportunity = snapshot.sample.advisor?.opportunity;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.topicsTitle')}</h2><div className="mt-5 flex flex-wrap gap-2">{topics.map((topic) => <span key={topic.id} className={`rounded-full px-3 py-1.5 text-xs font-medium ${topic.sentiment === 'negative' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>{t(`dashboard.cockpit.topicLabels.${topic.id}`)} · {topic.count}</span>)}</div>{(alert || opportunity) && <div className="mt-5 grid gap-3 border-t border-slate-200 pt-4"><div>{opportunity && <><p className="text-xs font-semibold text-emerald-700">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.opportunityBody', { phrase: opportunity.phrase, mentions: opportunity.mentions })}</p></>}</div><div>{alert && <><p className="text-xs font-semibold text-red-700">{t('dashboard.advisorPilot.alertTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.alertBody', { low: alert.lowRatingCount, topic: t(`dashboard.cockpit.topicLabels.${alert.topic}`), mentions: alert.topicMentions })}</p></>}</div></div>}</CardContent></Card>;
 };
 
 export default ApprovedCockpitDashboard;

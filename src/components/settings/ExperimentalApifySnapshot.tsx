@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { supabase } from '@/integrations/supabase/client';
 import { isExperimentalApifySnapshot, saveExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
 import type { ExperimentalApifySnapshot as ExperimentalApifySnapshotData } from '@/lib/experimentalApifySnapshot';
+import { deliverAdvisorPilotAfterCollection } from '@/lib/pilotNotificationPreferences';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 /**
@@ -47,7 +48,28 @@ const ExperimentalApifySnapshot = ({ googleReviewUrl }: ExperimentalApifySnapsho
       }
 
       saveExperimentalApifySnapshot(snapshot as ExperimentalApifySnapshotData);
+      const delivery = await deliverAdvisorPilotAfterCollection(snapshot as ExperimentalApifySnapshotData, (kind, advisorSnapshot) => {
+        const alert = advisorSnapshot.sample.advisor?.alert;
+        const opportunity = advisorSnapshot.sample.advisor?.opportunity;
+        if (kind === 'alert' && alert) return [
+          t('dashboard.advisorPilot.messageAlertTitle'),
+          t('dashboard.advisorPilot.messageAlertRating', { business: advisorSnapshot.business.name, low: alert.lowRatingCount }),
+          t('dashboard.advisorPilot.messageAlertCause', { topic: t(`dashboard.cockpit.topicLabels.${alert.topic}`), mentions: alert.topicMentions }),
+          t('dashboard.advisorPilot.messageAlertAction'),
+          t('dashboard.advisorPilot.experimental'),
+        ].join('\n');
+        if (kind === 'weekly') return [
+          t('dashboard.advisorPilot.messageWeeklyTitle'),
+          t('dashboard.advisorPilot.messageWeeklySnapshot', { business: advisorSnapshot.business.name, rating: advisorSnapshot.business.googleRating, total: advisorSnapshot.business.googleReviewCount }),
+          ...(opportunity ? [t('dashboard.advisorPilot.messageWeeklyOpportunity', { business: advisorSnapshot.business.name, phrase: opportunity.phrase, mentions: opportunity.mentions }), t('dashboard.advisorPilot.opportunityAction')] : []),
+          t('dashboard.advisorPilot.experimental'),
+        ].join('\n');
+        return null;
+      });
       toast.success(t('settings.apify.snapshotReady'));
+      if (delivery.status === 'sent') toast.success(t('dashboard.advisorPilot.whatsappSent'));
+      if (delivery.status === 'skipped' && delivery.detail !== 'no-eligible-advisor-message') toast.message(t('dashboard.advisorPilot.whatsappSkipped'));
+      if (delivery.status === 'failed') toast.error(t('dashboard.advisorPilot.whatsappFailed'));
       // A real collection belongs in the authenticated product, not in the illustrative demo.
       navigate('/dashboard');
     } catch (collectionError) {

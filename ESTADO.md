@@ -12,6 +12,12 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Adicionar guarda ao `npm run verify` para os itens verificáveis do
   contrato. Qualquer alteração estrutural intencional deve atualizar o contrato
   e receber aprovação explícita de Marcelo antes de ser aceita.
+- [x] Adicionar a camada aprovada de assessoria sem substituir os módulos do
+  painel: Radar do Binno, Plano de hoje, Resultado observado e oportunidade
+  positiva nas Boas práticas.
+- [x] Preparar alerta conservador da coleta manual Apify e entrega automática
+  **somente** após essa ação explícita, com consentimento, número e OpenWA
+  local. Sem agenda, gasto recorrente, retry ou entrega de produção.
 
 ## Painel aprovado — 18 de agosto de 2026
 

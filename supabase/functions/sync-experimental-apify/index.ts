@@ -122,6 +122,16 @@ const observedReviewsForBrowser = (reviews: Array<Record<string, unknown>>, now:
 
 type TopicId = 'service' | 'wait' | 'food' | 'cleanliness' | 'price' | 'atmosphere' | 'delivery';
 type TopicSignal = { id: TopicId; count: number; sentiment: 'positive' | 'negative' | 'mixed' };
+type AdvisorAlert = {
+  fingerprint: string;
+  topic: TopicId;
+  lowRatingCount: number;
+  topicMentions: number;
+  recentLowShare: number;
+  baselineLowShare: number;
+};
+type AdvisorOpportunity = { phrase: string; mentions: number };
+type AdvisorReport = { alert?: AdvisorAlert; opportunity?: AdvisorOpportunity };
 
 const topicMatchers: Array<{ id: TopicId; words: string[] }> = [
   { id: 'service', words: ['atendimento', 'atencao', 'atencion', 'service', 'staff', 'waiter', 'friendly'] },
@@ -264,6 +274,94 @@ const collectInsights = (reviews: Array<Record<string, unknown>>, now: Date) => 
   };
 };
 
+const topicIdsInText = (text: string) => {
+  const normalized = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return topicMatchers.filter((topic) => topic.words.some((word) => normalized.includes(word))).map((topic) => topic.id);
+};
+
+const phraseStopWords = new Set([
+  'muito', 'mais', 'menos', 'para', 'com', 'sem', 'que', 'uma', 'um', 'the', 'and', 'was', 'were', 'very',
+  'bom', 'boa', 'good', 'great', 'excelente', 'amazing', 'atendimento', 'service', 'comida', 'food', 'ambiente',
+  'espera', 'wait', 'tempo', 'price', 'preco', 'limpeza', 'clean', 'delivery', 'entrega',
+]);
+
+const opportunityPhrases = (text: string) => {
+  const words = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().match(/[a-z]{3,}/g) || [];
+  const phrases = new Set<string>();
+  for (let index = 0; index < words.length - 1; index += 1) {
+    const pair = words.slice(index, index + 2);
+    if (pair.length < 2 || pair.some((word) => phraseStopWords.has(word))) continue;
+    phrases.add(pair.join(' '));
+  }
+  return [...phrases];
+};
+
+/**
+ * Conservative experimental advisor: a message only exists when dated public
+ * reviews give both a quality shift and a repeated operational cause. It is a
+ * signal from this public sample, never a statement about the full Google
+ * profile. Reviewer identity and raw text leave this function only in the
+ * browser-only queue.
+ */
+const collectAdvisor = (reviews: Array<Record<string, unknown>>, now: Date): AdvisorReport => {
+  const recentStart = now.getTime() - 7 * 24 * 60 * 60 * 1_000;
+  const baselineStart = now.getTime() - 35 * 24 * 60 * 60 * 1_000;
+  const opportunityStart = now.getTime() - 30 * 24 * 60 * 60 * 1_000;
+  const recent: Array<Record<string, unknown>> = [];
+  const baseline: Array<Record<string, unknown>> = [];
+  const positiveRecent: Array<Record<string, unknown>> = [];
+
+  for (const review of reviews) {
+    const date = dateFrom(review, ['publishedAtDate', 'reviewDate', 'reviewDateTime', 'date']);
+    if (!date) continue;
+    const time = date.getTime();
+    if (time >= recentStart) recent.push(review);
+    else if (time >= baselineStart && time < recentStart) baseline.push(review);
+    if (time >= opportunityStart && numberInRange(review.stars) >= 4) positiveRecent.push(review);
+  }
+
+  const lowCount = (items: Array<Record<string, unknown>>) => items.filter((review) => numberInRange(review.stars) <= 2).length;
+  const recentLow = lowCount(recent);
+  const baselineLow = lowCount(baseline);
+  const recentLowShare = recent.length ? recentLow / recent.length : 0;
+  const baselineLowShare = baseline.length ? baselineLow / baseline.length : 0;
+  let alert: AdvisorAlert | undefined;
+
+  if (recent.length >= 3 && baseline.length >= 8 && recentLow >= 2 && recentLowShare - baselineLowShare >= 0.15) {
+    const counts = new Map<TopicId, number>();
+    for (const review of recent) {
+      if (numberInRange(review.stars) > 2) continue;
+      const text = stringFrom(review, ['text', 'reviewText', 'reviewContent', 'comment']);
+      if (!text) continue;
+      for (const topic of topicIdsInText(text)) counts.set(topic, (counts.get(topic) || 0) + 1);
+    }
+    const match = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+    if (match && match[1] >= 2) {
+      alert = {
+        fingerprint: `${match[0]}:${recentLow}:${Math.round(recentLowShare * 100)}:${Math.round(baselineLowShare * 100)}`,
+        topic: match[0],
+        lowRatingCount: recentLow,
+        topicMentions: match[1],
+        recentLowShare: Math.round(recentLowShare * 100),
+        baselineLowShare: Math.round(baselineLowShare * 100),
+      };
+    }
+  }
+
+  const phrases = new Map<string, number>();
+  for (const review of positiveRecent) {
+    const text = stringFrom(review, ['text', 'reviewText', 'reviewContent', 'comment']);
+    if (!text) continue;
+    for (const phrase of opportunityPhrases(text)) phrases.set(phrase, (phrases.get(phrase) || 0) + 1);
+  }
+  const phrase = [...phrases.entries()].filter(([, count]) => count >= 3).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+
+  return {
+    ...(alert ? { alert } : {}),
+    ...(phrase ? { opportunity: { phrase: phrase[0], mentions: phrase[1] } } : {}),
+  };
+};
+
 serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
@@ -357,6 +455,7 @@ serve(async (request) => {
     if (!reviews.length) throw new Error('APIFY_NO_GOOGLE_REVIEWS');
 
     const first = reviews[0];
+    const advisor = collectAdvisor(reviews, now);
     const aggregateSnapshot = {
       source: 'apify-experimental' as const,
       fetchedAt: now.toISOString(),
@@ -373,12 +472,14 @@ serve(async (request) => {
         ratingBreakdown: ratingBreakdown(reviews),
         ownerRepliesFound: reviews.filter((review) => typeof review.responseFromOwnerText === 'string' && review.responseFromOwnerText.trim().length > 0).length,
         insights: collectInsights(reviews, now),
+        ...(advisor.alert ? { advisor: { alert: advisor.alert } } : {}),
       },
     };
     const browserSnapshot = {
       ...aggregateSnapshot,
       sample: {
         ...aggregateSnapshot.sample,
+        ...(Object.keys(advisor).length ? { advisor } : {}),
         observedReviews: observedReviewsForBrowser(reviews, now),
       },
     };
