@@ -1,7 +1,17 @@
-# Estado do Binno — 15 de agosto de 2026
+# Estado do Binno — 20 de agosto de 2026
 
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
+
+## Contrato de produto — 20 de agosto de 2026
+
+- [x] Consolidar as decisões aprovadas no
+  [Contrato de produto Binno](docs/contrato-produto-binno.md): papel de
+  assessor, arquitetura do painel, fila, QR, WhatsApp, fontes de dados e
+  limites de apresentação.
+- [x] Adicionar guarda ao `npm run verify` para os itens verificáveis do
+  contrato. Qualquer alteração estrutural intencional deve atualizar o contrato
+  e receber aprovação explícita de Marcelo antes de ser aceita.
 
 ## Painel aprovado — 18 de agosto de 2026
 
@@ -28,10 +38,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   (`reviewUrl`) da avaliação; a nova função está publicada e aguarda a próxima
   coleta permitida para preencher a fila atual.
 - [x] Publicar a nova versão da Edge Function no Supabase com autorização.
-- [ ] Fazer uma coleta manual permitida após o intervalo de 24 h. A primeira
-  tentativa foi corretamente bloqueada antes de chamar o Apify, sem custo. A
-  nova leitura validará nome, deep link e preenchimento real dos cartões
-  históricos.
+- [x] Fazer uma coleta manual permitida após o intervalo de 24 h. Em 20/08, a
+  leitura do Mania retornou nomes públicos, deep links individuais e histórico
+  real para os cartões, sem criar agenda automática.
 
 ## Arquitetura do dashboard — 17 de agosto de 2026
 
@@ -43,10 +52,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Reintroduzir **Boas práticas** como box próprio na Visão geral e na aba:
   uma dica por vez, rotação estável e prioridade para resposta quando houver
   evidência na fila.
-- [~] A função atualizada foi publicada no Supabase em 18/08. A coleta manual
-  do Mania foi bloqueada corretamente pelo intervalo de 24 horas da leitura
-  anterior; executar uma única coleta após esse intervalo para validar o nome
-  e o deep link reais antes de apresentar a melhoria como concluída.
+- [x] A função atualizada foi publicada no Supabase e a coleta manual do Mania
+  foi renovada em 20/08: a fila mostra nome público e deep link individual
+  quando devolvidos pela fonte; sem link específico, ela oferece somente cópia.
 
 - [x] Reaplicar no painel autenticado a referência compacta aprovada por
   Marcelo: prioridade e fila, volume, notas, QR e temas; reputação, WhatsApp,

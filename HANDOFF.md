@@ -1,7 +1,30 @@
 # Binno — documento de continuação (handoff)
 
-Estado atualizado em 17/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
+Estado atualizado em 20/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
+
+> **Contrato vigente:** [docs/contrato-produto-binno.md](docs/contrato-produto-binno.md)
+> é a referência aprovada de produto e não pode ser alterado por refatoração ou
+> simplificação visual sem nova aprovação explícita de Marcelo.
+
+## Fechamento de decisões e fila real — 20/08/2026
+
+- O [Contrato de produto Binno](docs/contrato-produto-binno.md) consolida e
+  fecha as decisões aprovadas: papel de assessor, ordem e módulos da Visão
+  geral, fila assistida, regras de integridade, WhatsApp, QR e fontes de dados.
+  É a referência obrigatória para toda continuação.
+- `npm run verify` passou a executar `check:product-contract`, com nove guardas
+  verificáveis contra regressão: arquitetura do painel, módulos essenciais,
+  telefone do onboarding, ação com permalink individual, nome público e coleta
+  Apify limitada. O contrato continua sendo a autoridade para decisões que não
+  podem ser provadas por uma checagem estática.
+- A coleta manual autorizada do Mania foi renovada com sucesso neste dia. A fila
+  do navegador autenticado mostrou **32 comentários** com nome público e URLs
+  específicas de avaliações, além das métricas agregadas renovadas. Não existe
+  agenda nem coleta automática.
+- **Copiar e abrir esta avaliação** copia o rascunho e aponta para o permalink
+  da avaliação selecionada. O fallback genérico de perfil foi removido: sem
+  permalink, a interface oferece somente cópia.
 
 ## Painel aprovado e leitura experimental — 18/08/2026 (local; aguarda nova coleta)
 
@@ -41,8 +64,8 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - O telefone salvo no onboarding (`profiles.phone`) preenche ambos os campos
   do WhatsApp por padrão, sem sobrescrever uma edição que o gestor já tenha
   feito. A coleta Compass foi corrigida e publicada para ler o nome público no
-  campo `name` e a URL direta no campo `reviewUrl`; a leitura atual é anterior
-  a isso e só poderá ser renovada depois do limite de 24 horas.
+  campo `name` e a URL direta no campo `reviewUrl`; a leitura foi renovada em
+  20/08 com nomes e permalinks reais.
 
 ## Fila assistida identificável e orientação diária — 18/08/2026 (função publicada; coleta pendente)
 
