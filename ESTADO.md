@@ -12,8 +12,10 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   alteração de quota.
 - [~] Transformar OpenWA local em entrega operacional intercambiável: branch
   `codex/openwa-operational-pilot` contém migration, fila, funções e relay
-  privado. Faltam aplicar migration/funções, provisionar host persistente sem
-  expor segredos e executar o teste de estados de entrega.
+  privado. A VPS Hostinger foi auditada e preparada com Docker, Compose, UFW e
+  `relay.binno.pro` apontando para ela. Faltam aplicar migration/funções,
+  iniciar o stack isolado, criar a sessão e chave de operador, guardar segredos
+  privados e executar o teste real de estados de entrega.
 - [x] Manter Apify como leitura temporária autorizada, com limites e fonte
   explícita, até a Basic API ficar disponível. Ela não é apresentada como
   conexão oficial do Perfil da Empresa.

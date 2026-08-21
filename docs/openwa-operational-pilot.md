@@ -42,11 +42,12 @@ as preferências, as regras de consentimento, a UI e o histórico permanecem.
    versão atualizada de `sync-experimental-apify`.
 3. Definir `BINNO_WORKER_SECRET` somente no Supabase e no relay.
 4. Subir o relay em uma instância privada e persistente com as variáveis de
-   `services/openwa-relay/.env.example`.
+   `services/openwa-relay/.env.example`. `OPENWA_SESSION_ID` é o UUID retornado
+   ao criar a sessão, não o nome legível dela.
 5. Manter OpenWA em uma sessão e número dedicados ao piloto. O URL e a chave do
    OpenWA ficam apenas no relay, nunca no Vite, Supabase público ou navegador.
 6. Configurar o webhook do OpenWA para
-   `/webhook/openwa/<OPENWA_WEBHOOK_SECRET>` do relay e validar o ciclo de
+   `/webhook/openwa` do relay, com o mesmo `OPENWA_WEBHOOK_SECRET`, e validar o ciclo de
    teste: `na fila` -> `aceito` -> `entregue` ou `lido`, quando o OpenWA emitir
    o evento.
 

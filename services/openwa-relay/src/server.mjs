@@ -1,6 +1,7 @@
 import http from 'node:http';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 
-const required = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'OPENWA_BASE_URL', 'OPENWA_LOCAL_API_KEY', 'OPENWA_SESSION_NAME', 'BINNO_WORKER_SECRET'];
+const required = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'OPENWA_BASE_URL', 'OPENWA_LOCAL_API_KEY', 'OPENWA_SESSION_ID', 'BINNO_WORKER_SECRET', 'OPENWA_WEBHOOK_SECRET'];
 const missing = required.filter((key) => !process.env[key]);
 if (missing.length) throw new Error(`Missing required variables: ${missing.join(', ')}`);
 
@@ -9,7 +10,7 @@ const config = {
   serviceRole: process.env.SUPABASE_SERVICE_ROLE_KEY,
   openwaUrl: process.env.OPENWA_BASE_URL.replace(/\/$/, ''),
   openwaKey: process.env.OPENWA_LOCAL_API_KEY,
-  session: process.env.OPENWA_SESSION_NAME,
+  sessionId: process.env.OPENWA_SESSION_ID,
   workerSecret: process.env.BINNO_WORKER_SECRET,
   webhookSecret: process.env.OPENWA_WEBHOOK_SECRET || '',
   port: Number(process.env.PORT || 8788),
@@ -41,14 +42,15 @@ const claim = () => supabase('/rest/v1/rpc/claim_whatsapp_outbox', { method: 'PO
 
 const send = async (item) => {
   try {
-    const response = await fetch(`${config.openwaUrl}/sessions/${encodeURIComponent(config.session)}/messages/send-text`, {
+    const response = await fetch(`${config.openwaUrl}/api/sessions/${encodeURIComponent(config.sessionId)}/messages/send-text`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-API-Key': config.openwaKey },
       body: JSON.stringify({ chatId: `${item.recipient_e164.slice(1)}@c.us`, text: item.body, linkPreview: false }),
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok) throw new Error(`OpenWA ${response.status}`);
-    const messageId = typeof payload?.messageId === 'string' ? payload.messageId : null;
+    const messageId = [payload?.messageId, payload?.id, payload?.message?.id, payload?.data?.id]
+      .find((value) => typeof value === 'string') || null;
     await updateOutbox(item.id, { status: 'accepted', provider_message_id: messageId, last_error_code: null });
     await addEvent(item.id, 'accepted', messageId, { source: 'openwa-relay' });
   } catch (error) {
@@ -67,32 +69,52 @@ const dispatch = async () => {
   await Promise.all((items || []).map(send));
 };
 
-const statusFromWebhook = (payload) => {
-  const event = String(payload?.event || payload?.type || payload?.status || '').toLowerCase();
+const runDispatch = () => dispatch().catch((error) => {
+  console.error('Binno OpenWA dispatch failed', error instanceof Error ? error.message : error);
+});
+
+const statusFromWebhook = (payload, eventHeader) => {
+  const event = String(eventHeader || payload?.event || payload?.type || payload?.status || '').toLowerCase();
   if (event.includes('read')) return 'read';
   if (event.includes('deliver')) return 'delivered';
   if (event.includes('fail')) return 'failed';
   return null;
 };
 
-const receiveBody = (request) => new Promise((resolve, reject) => {
-  let raw = '';
-  request.on('data', (chunk) => { raw += chunk; if (raw.length > 262144) request.destroy(); });
-  request.on('end', () => { try { resolve(JSON.parse(raw || '{}')); } catch (error) { reject(error); } });
+const receiveRawBody = (request) => new Promise((resolve, reject) => {
+  const chunks = [];
+  let size = 0;
+  request.on('data', (chunk) => {
+    size += chunk.length;
+    if (size > 262144) { request.destroy(); return; }
+    chunks.push(chunk);
+  });
+  request.on('end', () => resolve(Buffer.concat(chunks)));
   request.on('error', reject);
 });
+
+const validWebhookSignature = (raw, signature) => {
+  if (typeof signature !== 'string' || !config.webhookSecret) return false;
+  const expected = `sha256=${createHmac('sha256', config.webhookSecret).update(raw).digest('hex')}`;
+  const given = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expected);
+  return given.length === expectedBuffer.length && timingSafeEqual(given, expectedBuffer);
+};
 
 http.createServer(async (request, response) => {
   if (request.method === 'GET' && request.url === '/health') {
     response.writeHead(200, { 'content-type': 'application/json' }); response.end(JSON.stringify({ ok: true })); return;
   }
-  if (request.method !== 'POST' || !request.url?.startsWith('/webhook/openwa/')) { response.writeHead(404); response.end(); return; }
-  const providedSecret = request.url.split('/').at(-1);
-  if (!config.webhookSecret || providedSecret !== config.webhookSecret) { response.writeHead(401); response.end(); return; }
+  if (request.method !== 'POST' || request.url !== '/webhook/openwa') { response.writeHead(404); response.end(); return; }
   try {
-    const payload = await receiveBody(request);
-    const providerMessageId = payload?.messageId || payload?.id || payload?.data?.id;
-    const status = statusFromWebhook(payload);
+    const raw = await receiveRawBody(request);
+    const signature = request.headers['x-openwa-signature'];
+    if (!validWebhookSignature(raw, signature)) { response.writeHead(401); response.end(); return; }
+    const payload = JSON.parse(raw.toString('utf8') || '{}');
+    const eventName = request.headers['x-openwa-event'];
+    const providerMessageId = [payload?.messageId, payload?.id, payload?.data?.id, payload?.message?.id]
+      .find((value) => typeof value === 'string');
+    const status = statusFromWebhook(payload, eventName);
     if (typeof providerMessageId === 'string' && status) {
       const rows = await supabase(`/rest/v1/whatsapp_outbox?provider_message_id=eq.${encodeURIComponent(providerMessageId)}&select=id`, { method: 'GET' });
       for (const row of rows || []) {
@@ -106,6 +128,6 @@ http.createServer(async (request, response) => {
   }
 }).listen(config.port, '0.0.0.0', () => {
   console.log(`Binno OpenWA relay listening on ${config.port}`);
-  void dispatch();
-  setInterval(() => void dispatch(), 60_000);
+  runDispatch();
+  setInterval(runDispatch, 60_000);
 });
