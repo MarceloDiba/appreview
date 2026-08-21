@@ -5,20 +5,20 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 
 ## Prontidão para venda — 21 de agosto de 2026
 
-- [~] Executar o Lote 1 do plano em
+- [x] Executar o Lote 1 do plano em
   [docs/plano-prontidao-venda-binno.md](docs/plano-prontidao-venda-binno.md):
-  endurecer a superfície pública do QR sem alterar o cockpit aprovado. A
-  migration e a troca das leituras públicas estão no
-  [PR #30](https://github.com/MarceloDiba/appreview/pull/30), com CI e preview
-  verdes; faltam merge autorizado e aplicação em produção.
-- [ ] Aplicar e verificar a fundação oficial do Google somente após o acesso
-  Basic/credenciais: migration de conexão, três Edge Functions, OAuth,
-  localização selecionada e sincronização paginada completa.
-- [~] Preparar histórico agregado do assessor a partir de leituras oficiais:
-  a migration de snapshots por localização e a gravação no fim da paginação
-  estão no [PR #30](https://github.com/MarceloDiba/appreview/pull/30), sem
-  texto ou identidade de avaliador. Alertas, Radar e resultado observado
-  continuam dependentes da primeira e segunda leituras oficiais comparáveis.
+  [PR #30](https://github.com/MarceloDiba/appreview/pull/30) foi mergeado,
+  Vercel está saudável e a migration de QR mínimo foi aplicada no Supabase.
+- [~] Aplicar e verificar a fundação oficial do Google: as migrations de
+  conexão e snapshots já estão no Supabase, com a função do Vault limitada a
+  `service_role`. Em 21/08, a API Business Information está desativada, o
+  OAuth está em Teste e não há cliente específico do Binno. Faltam acesso
+  Basic/quota, APIs, credenciais, três Edge Functions, localização e a
+  sincronização paginada completa.
+- [~] Preparar histórico agregado do assessor: a tabela de snapshots por
+  localização já está aplicada sem texto ou identidade de avaliador. Alertas,
+  Radar e resultado observado continuam dependentes da publicação da função e
+  da primeira e segunda leituras oficiais comparáveis.
 - [ ] Escolher fornecedor, custo e operação de WhatsApp Business antes de
   transformar as preferências locais em envio de produção.
 - [ ] Confirmar cobrança, termos, privacidade, suporte e playbook de piloto

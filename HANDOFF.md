@@ -1,6 +1,6 @@
 # Binno — documento de continuação (handoff)
 
-Estado atualizado em 20/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
+Estado atualizado em 21/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Prontidão para venda — 21/08/2026 (em execução)
@@ -10,21 +10,30 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   Ele separa a fundação segura, Google oficial, histórico do assessor,
   WhatsApp, cobrança e liberação controlada, com os portões que exigem decisão
   externa ou financeira.
-- Auditoria de produção confirmou que a página oficial e a demo estão no ar,
-  mas o produto ainda não está pronto para venda autônoma: faltam conexão
-  oficial aplicada, histórico verificável, WhatsApp de produção e cobrança.
-- A política pública de `profiles` expõe colunas além do necessário para o QR.
-  O [PR #30](https://github.com/MarceloDiba/appreview/pull/30) substitui as
-  leituras públicas diretas por uma função limitada a QR ativo e restringe
-  `profiles`, `platform_links` e `qr_codes` ao dono. CI e preview Vercel estão
-  verdes. Falta merge autorizado e aplicação da migration no Supabase.
-  Não alterar o cockpit aprovado neste pacote.
-- O mesmo PR passou a preparar a base do histórico oficial do assessor:
+- A página oficial e a demo estão no ar, mas o produto ainda não está pronto
+  para venda autônoma: faltam API e credenciais oficiais do Google, WhatsApp
+  de produção e cobrança.
+- O [PR #30](https://github.com/MarceloDiba/appreview/pull/30) foi mergeado e
+  o deploy automático está saudável. As migrations de QR mínimo, conexão do
+  Google e snapshots foram aplicadas no projeto Supabase de produção. A
+  política pública ampla de `profiles` foi removida; `profiles`,
+  `platform_links` e `qr_codes` agora leem apenas pelo dono, exceto a função
+  pública limitada do QR. Não alterar o cockpit aprovado neste pacote.
+- A migration corretiva `20260821103000_restrict_google_token_function_execution`
+  também foi aplicada: apenas `service_role` executa as funções que acessam o
+  Vault. A leitura pós-aplicação confirmou `anon=false`,
+  `authenticated=false` e `service_role=true` para o token de atualização.
+- O mesmo pacote passou a preparar a base do histórico oficial do assessor:
   `google_business_reputation_snapshots` guarda uma leitura agregada por
   localização quando a paginação oficial termina. Não contém comentário,
   nome ou URL de avaliador. A importação da fila segue funcional mesmo se a
   persistência analítica falhar; alertas, Radar e resultado observado só serão
   ativados após leituras oficiais comparáveis.
+- Consulta ao projeto `app-review-505612`, em 21/08: a My Business Business
+  Information API está desativada; o app OAuth está em publicação **Teste**;
+  não existe cliente OAuth específico do Binno. Há um cliente Web de outro
+  produto da NOÁ, que não deve ser reutilizado. Não habilitar API, pedir
+  acesso/quota, criar cliente ou registrar segredos sem autorização explícita.
 
 > **Contrato vigente:** [docs/contrato-produto-binno.md](docs/contrato-produto-binno.md)
 > é a referência aprovada de produto e não pode ser alterado por refatoração ou
