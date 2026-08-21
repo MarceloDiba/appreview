@@ -70,7 +70,8 @@ segura para publicar uma resposta após confirmação explícita do gestor.
 
 ### Lote 3. Histórico e inteligência do assessor
 
-**Pode começar depois que o Lote 2 tiver uma primeira sincronização real.**
+**Base local preparada nesta branch. A primeira leitura só será criada depois
+que o Lote 2 concluir uma sincronização oficial.**
 
 1. Persistir leituras datadas por localização, com fonte, período, contagem,
    distribuição por estrelas, resposta observada e temas agregados.
@@ -81,6 +82,13 @@ segura para publicar uma resposta após confirmação explícita do gestor.
    operacional sugerida.
 5. Registrar o resultado observado somente a partir de uma leitura posterior,
    sem atribuir causalidade automática.
+
+A migration local cria `google_business_reputation_snapshots`: uma leitura
+imutável por localização, com nota, volume, distribuição, pendências, tempo de
+resposta e temas agregados. Ela não replica texto, nome ou URL de avaliador.
+Ao finalizar a paginação oficial, a função de sincronização grava essa leitura
+sem tornar a importação de avaliações indisponível caso a camada analítica
+falhe. Alertas e Radar continuam bloqueados até existir comparação suficiente.
 
 **Resultado:** o Binno deixa de apenas mostrar dados e passa a explicar o que
 mudou, por que importa e o que o gestor pode fazer.

@@ -19,6 +19,12 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   `profiles`, `platform_links` e `qr_codes` ao dono. CI e preview Vercel estão
   verdes. Falta merge autorizado e aplicação da migration no Supabase.
   Não alterar o cockpit aprovado neste pacote.
+- O mesmo PR passou a preparar a base do histórico oficial do assessor:
+  `google_business_reputation_snapshots` guarda uma leitura agregada por
+  localização quando a paginação oficial termina. Não contém comentário,
+  nome ou URL de avaliador. A importação da fila segue funcional mesmo se a
+  persistência analítica falhar; alertas, Radar e resultado observado só serão
+  ativados após leituras oficiais comparáveis.
 
 > **Contrato vigente:** [docs/contrato-produto-binno.md](docs/contrato-produto-binno.md)
 > é a referência aprovada de produto e não pode ser alterado por refatoração ou

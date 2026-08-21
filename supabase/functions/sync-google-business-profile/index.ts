@@ -14,6 +14,88 @@ const json = (body: Record<string, unknown>, status = 200) =>
 
 const rating = (value?: string) => ({ ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5 }[value || ""] || 0);
 
+type StoredReview = {
+  rating: number;
+  comment: string | null;
+  review_created_at: string | null;
+  reply_text: string | null;
+  reply_updated_at: string | null;
+};
+
+type TopicId = 'service' | 'wait' | 'food' | 'cleanliness' | 'price' | 'atmosphere' | 'delivery';
+
+const topicMatchers: Array<{ id: TopicId; words: string[] }> = [
+  { id: 'service', words: ['atendimento', 'atencao', 'atencion', 'service', 'staff', 'waiter', 'friendly'] },
+  { id: 'wait', words: ['espera', 'demora', 'wait', 'waiting', 'slow', 'lento'] },
+  { id: 'food', words: ['comida', 'prato', 'food', 'meal', 'dish', 'cozinha', 'kitchen'] },
+  { id: 'cleanliness', words: ['limpeza', 'limpio', 'clean', 'dirty', 'higiene', 'hygiene'] },
+  { id: 'price', words: ['preco', 'price', 'caro', 'expensive', 'valor'] },
+  { id: 'atmosphere', words: ['ambiente', 'atmosphere', 'barulho', 'noise', 'musica', 'music'] },
+  { id: 'delivery', words: ['entrega', 'delivery', 'pedido', 'order', 'takeaway'] },
+];
+
+const validDate = (value: string | null) => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+/**
+ * Keep the historic reading aggregate-only. The raw review table is already
+ * owner-only, but snapshots must never duplicate review text or reviewer data.
+ */
+const summarizeOfficialReviews = (reviews: StoredReview[], now: Date) => {
+  const breakdown: Record<'1' | '2' | '3' | '4' | '5', number> = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+  const topics = new Map<TopicId, { positive: number; negative: number }>();
+  const responseHours: number[] = [];
+  const since = now.getTime() - 30 * 24 * 60 * 60 * 1_000;
+  let reviewsLast30Days = 0;
+  let unansweredReviewCount = 0;
+
+  for (const review of reviews) {
+    if (review.rating >= 1 && review.rating <= 5) {
+      breakdown[String(review.rating) as keyof typeof breakdown] += 1;
+    }
+    if (!review.reply_text?.trim()) unansweredReviewCount += 1;
+
+    const reviewDate = validDate(review.review_created_at);
+    const replyDate = validDate(review.reply_updated_at);
+    if (reviewDate && reviewDate.getTime() >= since) reviewsLast30Days += 1;
+    if (reviewDate && replyDate && replyDate.getTime() >= reviewDate.getTime()) {
+      responseHours.push((replyDate.getTime() - reviewDate.getTime()) / 3_600_000);
+    }
+
+    if (!review.comment) continue;
+    const normalized = review.comment.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    for (const topic of topicMatchers) {
+      if (!topic.words.some((word) => normalized.includes(word))) continue;
+      const current = topics.get(topic.id) || { positive: 0, negative: 0 };
+      if (review.rating >= 4) current.positive += 1;
+      else current.negative += 1;
+      topics.set(topic.id, current);
+    }
+  }
+
+  const topicSummary = [...topics.entries()]
+    .map(([id, counts]) => ({
+      id,
+      count: counts.positive + counts.negative,
+      sentiment: counts.positive > counts.negative ? 'positive' : counts.negative > counts.positive ? 'negative' : 'mixed',
+    }))
+    .sort((left, right) => right.count - left.count || left.id.localeCompare(right.id))
+    .slice(0, 6);
+
+  return {
+    ratingBreakdown: breakdown,
+    unansweredReviewCount,
+    reviewsLast30Days,
+    averageResponseHours: responseHours.length
+      ? Math.round((responseHours.reduce((sum, hours) => sum + hours, 0) / responseHours.length) * 10) / 10
+      : null,
+    topics: topicSummary,
+  };
+};
+
 const googleError = async (response: Response) => {
   const body = await response.json().catch(() => ({})) as { error?: { message?: string } };
   return body.error?.message || "Google Business Profile request failed";
@@ -185,12 +267,54 @@ serve(async (request) => {
       last_synced_at: new Date().toISOString(),
     }).eq("id", location.id);
     await admin.from("google_business_connections").update({ last_synced_at: new Date().toISOString(), last_error: null }).eq("user_id", user.id);
+
+    // Only a completed pagination can establish an official reading. Store a
+    // compact snapshot once the queue is complete, never on a partial page.
+    let snapshotWarning: string | null = null;
+    if (!nextPageToken) {
+      const { data: storedReviews, error: storedReviewsError } = await admin
+        .from("google_business_reviews")
+        .select("rating, comment, review_created_at, reply_text, reply_updated_at")
+        .eq("location_id", location.id);
+      if (storedReviewsError) {
+        snapshotWarning = "Could not summarize the reputation snapshot";
+      } else {
+
+        const now = new Date();
+        const summary = summarizeOfficialReviews((storedReviews || []) as StoredReview[], now);
+        const reviewCount = (storedReviews || []).length;
+        const calculatedAverage = reviewCount
+          ? Math.round(((storedReviews || []).reduce((sum, review) => sum + review.rating, 0) / reviewCount) * 10) / 10
+          : 0;
+        const totalReviews = typeof payload.totalReviewCount === 'number'
+          ? Math.max(0, Math.trunc(payload.totalReviewCount))
+          : reviewCount;
+        const averageRating = typeof payload.averageRating === 'number' && payload.averageRating >= 0 && payload.averageRating <= 5
+          ? Math.round(payload.averageRating * 10) / 10
+          : calculatedAverage;
+        const { error: snapshotError } = await admin.from("google_business_reputation_snapshots").insert({
+          user_id: user.id,
+          location_id: location.id,
+          captured_at: now.toISOString(),
+          total_reviews: totalReviews,
+          average_rating: averageRating,
+          rating_breakdown: summary.ratingBreakdown,
+          unanswered_review_count: summary.unansweredReviewCount,
+          reviews_last_30_days: summary.reviewsLast30Days,
+          average_response_hours: summary.averageResponseHours,
+          topics: summary.topics,
+        });
+        if (snapshotError) snapshotWarning = "Could not store the reputation snapshot";
+      }
+    }
+
     return json({
       imported: rows.length,
       next_page_token: nextPageToken,
       complete: !nextPageToken,
       total_review_count: payload.totalReviewCount ?? null,
       average_rating: payload.averageRating ?? null,
+      snapshot_warning: snapshotWarning,
     });
   }
 

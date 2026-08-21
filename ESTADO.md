@@ -14,8 +14,11 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [ ] Aplicar e verificar a fundação oficial do Google somente após o acesso
   Basic/credenciais: migration de conexão, três Edge Functions, OAuth,
   localização selecionada e sincronização paginada completa.
-- [ ] Construir histórico e alerta do assessor a partir de leituras oficiais
-  comparáveis, com critério conservador e evidência de tema recorrente.
+- [~] Preparar histórico agregado do assessor a partir de leituras oficiais:
+  a migration de snapshots por localização e a gravação no fim da paginação
+  estão no [PR #30](https://github.com/MarceloDiba/appreview/pull/30), sem
+  texto ou identidade de avaliador. Alertas, Radar e resultado observado
+  continuam dependentes da primeira e segunda leituras oficiais comparáveis.
 - [ ] Escolher fornecedor, custo e operação de WhatsApp Business antes de
   transformar as preferências locais em envio de produção.
 - [ ] Confirmar cobrança, termos, privacidade, suporte e playbook de piloto
