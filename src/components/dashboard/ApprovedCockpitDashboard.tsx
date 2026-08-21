@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type { ExperimentalApifySnapshot, ExperimentalObservedReview } from '@/lib/experimentalApifySnapshot';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import { useGoogleBusinessReviewQueue } from '@/hooks/useGoogleBusinessReviewQueue';
-import { useReviewFunnelMetrics } from '@/hooks/useReviewFunnelMetrics';
+import { useReviewFunnelMetrics, type ReviewFunnelMetrics } from '@/hooks/useReviewFunnelMetrics';
 import { buildReplySuggestions } from '@/lib/replySuggestions';
 import { LocalWhatsAppState, useLocalWhatsApp } from '@/hooks/useLocalWhatsApp';
 import { WhatsAppNotificationWorkspace } from '@/components/dashboard/WhatsAppNotificationWorkspace';
@@ -52,12 +52,16 @@ const formatAge = (value: string | null, locale: string) => value
 
 const normalizeObserved = (review: ExperimentalObservedReview): QueueReview => review;
 
-const ApprovedCockpitDashboard = ({ snapshot, userId }: { snapshot: ExperimentalApifySnapshot; userId?: string }) => {
+const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }: { snapshot: ExperimentalApifySnapshot; userId?: string; demo?: boolean; demoFunnel?: ReviewFunnelMetrics }) => {
   const { t, i18n } = useOwnerTranslation();
   const [tab, setTab] = useState<CockpitTab>('overview');
   const official = useGoogleBusinessReviewQueue(import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined);
-  const funnel = useReviewFunnelMetrics(userId);
-  const whatsApp = useLocalWhatsApp();
+  const liveFunnel = useReviewFunnelMetrics(userId);
+  const funnel = demoFunnel ? { ...liveFunnel, data: demoFunnel } : liveFunnel;
+  const liveWhatsApp = useLocalWhatsApp();
+  const whatsApp: LocalWhatsAppState = demo
+    ? { status: 'unavailable', session: null, detail: null, refresh: async () => {} }
+    : liveWhatsApp;
   const [onboardingPhone, setOnboardingPhone] = useState('');
   const [advisorActionVersion, setAdvisorActionVersion] = useState(0);
   useEffect(() => {
@@ -89,11 +93,11 @@ const ApprovedCockpitDashboard = ({ snapshot, userId }: { snapshot: Experimental
     <nav className="flex gap-1 overflow-x-auto border-b border-slate-200" aria-label={t('dashboard.cockpit.layout.navigation')}>
       {tabs.map((item) => <button key={item.id} type="button" onClick={() => setTab(item.id)} className={`shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors ${tab === item.id ? 'border-[#2457D6] text-[#2457D6]' : 'border-transparent text-slate-500 hover:text-slate-900'}`}>{item.label}</button>)}
     </nav>
-    {tab === 'whatsapp' ? <WhatsAppNotificationWorkspace snapshot={snapshot} localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} /> : tab === 'reviews' ? <ResponseQueue reviews={queue} snapshot={snapshot} /> : <div className="space-y-5">
+    {tab === 'whatsapp' ? <WhatsAppNotificationWorkspace snapshot={snapshot} localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} demoPhone={demo ? '+351 911 000 000' : undefined} demo={demo} /> : tab === 'reviews' ? <ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} /> : <div className="space-y-5">
       <RadarNow snapshot={snapshot} />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <section className="min-w-0 space-y-5">
-        <ResponseQueue reviews={queue} snapshot={snapshot} />
+        <ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />
         <VolumeCard weeks={history} />
         <RatingTrends weeks={history} snapshot={snapshot} />
         <div className="grid gap-5 md:grid-cols-2"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
@@ -103,7 +107,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId }: { snapshot: Experimental
         <ReputationCard snapshot={snapshot} />
         <WhatsAppCard localWhatsApp={whatsApp} onOpen={() => setTab('whatsapp')} />
         <DailyPractice snapshot={snapshot} onOpenReviews={() => setTab('reviews')} />
-        <ProfileCompleteness connected={official.syncComplete} />
+        {demo ? <ProfileCompleteness connected={official.syncComplete} demo /> : <ProfileCompleteness connected={official.syncComplete} />}
         <WeeklyChange weeks={history} />
         <ObservedResult snapshot={snapshot} version={advisorActionVersion} />
       </aside>
@@ -148,14 +152,17 @@ const TodayPlan = ({ snapshot, onMarked, onOpenReviews }: { snapshot: Experiment
   return <Card className="border-violet-200 bg-violet-50/40 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.planTitle')}</h2></div><p className="mt-4 text-sm font-medium leading-5 text-slate-900">{body}</p>{reading.kind === 'alert' ? <Button onClick={mark} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><CheckCircle2 className="mr-2 h-4 w-4" />{t('dashboard.advisorPilot.markDone')}</Button> : <Button variant="outline" onClick={onOpenReviews} className="mt-4">{t('dashboard.advisorPilot.reviewEvidence')}</Button>}</CardContent></Card>;
 };
 
-const ResponseQueue = ({ reviews, snapshot }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot }) => {
+const ResponseQueue = ({ reviews, snapshot, demo = false }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean }) => {
   const { t, i18n } = useOwnerTranslation();
   const [selectedId, setSelectedId] = useState<string | null>(reviews[0]?.id || null);
   const [editing, setEditing] = useState(false);
   const [actions, setActions] = useState<Record<string, ActionState>>(readActions);
   const selected = reviews.find((review) => review.id === selectedId) || reviews[0];
   const index = selected ? reviews.findIndex((review) => review.id === selected.id) : 0;
-  const suggestion = selected ? buildReplySuggestions({ rating: selected.rating, text: selected.comment, customerName: selected.reviewerName, businessName: snapshot.business.name, channel: 'public' })[0]?.body || '' : '';
+  const baseSuggestion = selected ? buildReplySuggestions({ rating: selected.rating, text: selected.comment, customerName: selected.reviewerName, businessName: snapshot.business.name, channel: 'public' })[0]?.body || '' : '';
+  const suggestion = demo
+    ? baseSuggestion.replace(/\.\s*—\s*/g, '. ').replace(/\s*—\s*/g, ', ')
+    : baseSuggestion;
   const currentAction = selected ? actions[selected.id] || { draft: suggestion } : { draft: '' };
   const save = (next: ActionState) => {
     if (!selected) return;
@@ -236,7 +243,11 @@ const DailyPractice = ({ snapshot, onOpenReviews }: { snapshot: ExperimentalApif
   return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">Boas práticas</h2></div><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button variant="link" className="mt-2 h-auto px-0 text-[#2457D6]" onClick={onOpenReviews}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></Button></CardContent></Card>;
 };
 
-const ProfileCompleteness = ({ connected }: { connected: boolean }) => <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">Completude do perfil</h2><span className="text-sm text-slate-500">{connected ? '—' : '—'}</span></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full w-0 rounded-full bg-[#2457D6]" /></div></CardContent></Card>;
+const ProfileCompleteness = ({ connected, demo = false }: { connected: boolean; demo?: boolean }) => {
+  const percentage = demo ? 68 : undefined;
+
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">Completude do perfil</h2><span className="text-sm text-slate-500">{percentage ? `${percentage}%` : '—'}</span></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2457D6]" style={{ width: `${percentage ?? 0}%` }} /></div>{demo && <p className="mt-3 text-sm leading-5 text-slate-600">Falta: horário de funcionamento, duas fotos e a descrição do negócio.</p>}{connected && !demo ? <p className="mt-3 text-sm leading-5 text-slate-600">Os dados do Perfil da Empresa estão disponíveis para acompanhamento.</p> : null}</CardContent></Card>;
+};
 
 const WeeklyChange = ({ weeks }: { weeks: Week[] }) => {
   const current = weeks.at(-1)?.ownerReplies || 0;

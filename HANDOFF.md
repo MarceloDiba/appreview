@@ -23,6 +23,10 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   cockpit consolidado: Radar, fila, volume, notas, QR, temas, plano,
   completude e WhatsApp. Não há dados de cliente nem variações públicas por
   query string.
+- O demo e o recorte no topo não mantêm mais um cockpit paralelo: ambos
+  renderizam `ApprovedCockpitDashboard` em modo demonstrativo, com
+  `ILLUSTRATIVE_DEMO_SNAPSHOT` e eventos QR fictícios isolados. Esse modo não
+  lê número, preferências, histórico de envio ou ligação OpenWA local.
 - Na demonstração, **Usar resposta** copia o rascunho e confirma o estado. A
   mensagem explica que, em conta conectada, o passo abre somente o permalink
   individual da avaliação. Não há publicação automática nem link fictício.
