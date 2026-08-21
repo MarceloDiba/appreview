@@ -41,7 +41,6 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   hierarquia ou os dois cartões de força e fragilidade. A página oficial foi
   verificada em 390 px, 768 px e desktop, e o `/demo` também em 390 px, todos
   sem rolagem horizontal nem erros de console.
-
 ## Radar, Plano de hoje e resultado observado — 20/08/2026
 
 - Marcelo aprovou que o Binno evolua de leitura para assessoria, sem alterar os

@@ -17,7 +17,6 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   explícita para merge/deploy.
   O ajuste local de contraste do Radar e a QA responsiva em 390 px, 768 px e
   desktop foram concluídos em 20/08; falta somente a aprovação visual.
-
 - [x] Consolidar as decisões aprovadas no
   [Contrato de produto Binno](docs/contrato-produto-binno.md): papel de
   assessor, arquitetura do painel, fila, QR, WhatsApp, fontes de dados e
