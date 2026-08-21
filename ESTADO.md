@@ -5,10 +5,11 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 
 ## Prontidão para venda — 21 de agosto de 2026
 
-- [~] Enviar candidatura oficial de Basic access do Google: o formulário está
-  aberto em `diba@noadigital.com.br` para o projeto `app-review-505612`. A
-  evidência atual é quota de Account Management em 0 QPM, portanto não há
-  aprovação confirmada nem pedido enviado.
+- [~] Acompanhar candidatura oficial de Basic access do Google: Marcelo
+  informou a submissão pelo formulário em `diba@noadigital.com.br` para o
+  projeto `app-review-505612` em 21/08. A reabertura do workflow não devolveu
+  recibo; a quota de Account Management segue em 0 QPM. A candidatura ainda
+  depende de confirmação do Google por e-mail ou alteração de quota.
 - [~] Transformar OpenWA local em entrega operacional intercambiável: branch
   `codex/openwa-operational-pilot` contém migration, fila, funções e relay
   privado. Faltam aplicar migration/funções, provisionar host persistente sem
