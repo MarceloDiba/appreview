@@ -3,6 +3,29 @@
 Estado atualizado em 20/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
+## Prontidão para venda — 21/08/2026 (em execução)
+
+- O plano consolidado por lotes está em
+  [docs/plano-prontidao-venda-binno.md](docs/plano-prontidao-venda-binno.md).
+  Ele separa a fundação segura, Google oficial, histórico do assessor,
+  WhatsApp, cobrança e liberação controlada, com os portões que exigem decisão
+  externa ou financeira.
+- Auditoria de produção confirmou que a página oficial e a demo estão no ar,
+  mas o produto ainda não está pronto para venda autônoma: faltam conexão
+  oficial aplicada, histórico verificável, WhatsApp de produção e cobrança.
+- A política pública de `profiles` expõe colunas além do necessário para o QR.
+  O [PR #30](https://github.com/MarceloDiba/appreview/pull/30) substitui as
+  leituras públicas diretas por uma função limitada a QR ativo e restringe
+  `profiles`, `platform_links` e `qr_codes` ao dono. CI e preview Vercel estão
+  verdes. Falta merge autorizado e aplicação da migration no Supabase.
+  Não alterar o cockpit aprovado neste pacote.
+- O mesmo PR passou a preparar a base do histórico oficial do assessor:
+  `google_business_reputation_snapshots` guarda uma leitura agregada por
+  localização quando a paginação oficial termina. Não contém comentário,
+  nome ou URL de avaliador. A importação da fila segue funcional mesmo se a
+  persistência analítica falhar; alertas, Radar e resultado observado só serão
+  ativados após leituras oficiais comparáveis.
+
 > **Contrato vigente:** [docs/contrato-produto-binno.md](docs/contrato-produto-binno.md)
 > é a referência aprovada de produto e não pode ser alterado por refatoração ou
 > simplificação visual sem nova aprovação explícita de Marcelo.

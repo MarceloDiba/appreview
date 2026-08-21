@@ -531,6 +531,59 @@ export type Database = {
           },
         ]
       }
+      google_business_reputation_snapshots: {
+        Row: {
+          average_rating: number
+          average_response_hours: number | null
+          captured_at: string
+          id: string
+          location_id: string
+          rating_breakdown: Json
+          reviews_last_30_days: number
+          source: string
+          topics: Json
+          total_reviews: number
+          unanswered_review_count: number
+          user_id: string
+        }
+        Insert: {
+          average_rating: number
+          average_response_hours?: number | null
+          captured_at?: string
+          id?: string
+          location_id: string
+          rating_breakdown?: Json
+          reviews_last_30_days?: number
+          source?: string
+          topics?: Json
+          total_reviews: number
+          unanswered_review_count?: number
+          user_id: string
+        }
+        Update: {
+          average_rating?: number
+          average_response_hours?: number | null
+          captured_at?: string
+          id?: string
+          location_id?: string
+          rating_breakdown?: Json
+          reviews_last_30_days?: number
+          source?: string
+          topics?: Json
+          total_reviews?: number
+          unanswered_review_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_business_reputation_snapshots_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "google_business_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancel_at: string | null
@@ -584,7 +637,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_qr_business: {
+        Args: {
+          p_identifier: string
+        }
+        Returns: {
+          business_name: string
+          google_review_url: string | null
+          qr_code_id: string
+          qr_name: string
+          tripadvisor_review_url: string | null
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

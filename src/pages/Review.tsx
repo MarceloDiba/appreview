@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import EmojiRating from '@/components/emoji-review/EmojiRating';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { getQrOpenEventKey, trackReviewEvent } from '@/lib/reviewFunnel';
+import { loadPublicQrBusiness } from '@/lib/publicQrBusiness';
 
 type BusinessData = {
   id: string;
@@ -18,10 +18,6 @@ type BusinessData = {
 };
 
 import { toPublicReviewUrl } from '@/utils/tripAdvisorUtils';
-
-const normalizePlatform = (platform: string) => platform.trim().toLowerCase();
-const isUuid = (value: string) =>
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 
 const Review = () => {
   const { businessId = '' } = useParams<{ businessId: string }>();
@@ -38,56 +34,28 @@ const Review = () => {
       }
 
       try {
-        const qrQuery = supabase
-          .from('qr_codes')
-          .select('id, name, user_id, slug')
-          .eq(isUuid(businessId) ? 'id' : 'slug', businessId);
-
-        const { data: qrData, error: qrError } = await qrQuery.maybeSingle();
-
-        if (qrError) {
-          throw qrError;
-        }
-
-        if (!qrData) {
+        const publicBusiness = await loadPublicQrBusiness(businessId);
+        if (!publicBusiness) {
           setNotFound(true);
           return;
         }
-
-        const userId = qrData.user_id;
-
-        const [{ data: profileData, error: profileError }, { data: linksData, error: linksError }] = await Promise.all([
-          supabase.from('profiles').select('business_name').eq('id', userId).maybeSingle(),
-          supabase.from('platform_links').select('platform, url').eq('user_id', userId),
-        ]);
-
-        if (profileError) {
-          throw profileError;
-        }
-
-        if (linksError) {
-          throw linksError;
-        }
-
-        const normalizedLinks = (linksData || []).map((link) => ({
-          platform: normalizePlatform(link.platform),
-          url: toPublicReviewUrl(link.url),
-        }));
-
-        const externalLinks = normalizedLinks.filter((link) => Boolean(link.url));
+        const externalLinks = [
+          { platform: 'google', url: toPublicReviewUrl(publicBusiness.googleReviewUrl) },
+          { platform: 'tripadvisor', url: toPublicReviewUrl(publicBusiness.tripAdvisorUrl) },
+        ].filter((link) => Boolean(link.url));
 
         setBusinessData({
-          id: qrData.id,
-          name: profileData?.business_name || qrData.name || 'Estabelecimento',
-          userId,
+          id: publicBusiness.qrCodeId,
+          name: publicBusiness.businessName,
+          userId: publicBusiness.userId,
           externalLinks,
         });
 
         void trackReviewEvent({
-          eventKey: getQrOpenEventKey(qrData.id),
+          eventKey: getQrOpenEventKey(publicBusiness.qrCodeId),
           eventType: 'qr_open',
-          qrCodeId: qrData.id,
-          userId,
+          qrCodeId: publicBusiness.qrCodeId,
+          userId: publicBusiness.userId,
         });
 
       } catch (error) {

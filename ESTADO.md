@@ -3,6 +3,27 @@
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
+## Prontidão para venda — 21 de agosto de 2026
+
+- [~] Executar o Lote 1 do plano em
+  [docs/plano-prontidao-venda-binno.md](docs/plano-prontidao-venda-binno.md):
+  endurecer a superfície pública do QR sem alterar o cockpit aprovado. A
+  migration e a troca das leituras públicas estão no
+  [PR #30](https://github.com/MarceloDiba/appreview/pull/30), com CI e preview
+  verdes; faltam merge autorizado e aplicação em produção.
+- [ ] Aplicar e verificar a fundação oficial do Google somente após o acesso
+  Basic/credenciais: migration de conexão, três Edge Functions, OAuth,
+  localização selecionada e sincronização paginada completa.
+- [~] Preparar histórico agregado do assessor a partir de leituras oficiais:
+  a migration de snapshots por localização e a gravação no fim da paginação
+  estão no [PR #30](https://github.com/MarceloDiba/appreview/pull/30), sem
+  texto ou identidade de avaliador. Alertas, Radar e resultado observado
+  continuam dependentes da primeira e segunda leituras oficiais comparáveis.
+- [ ] Escolher fornecedor, custo e operação de WhatsApp Business antes de
+  transformar as preferências locais em envio de produção.
+- [ ] Confirmar cobrança, termos, privacidade, suporte e playbook de piloto
+  antes de abrir venda autônoma.
+
 ## Contrato de produto — 20 de agosto de 2026
 
 - [x] Reconstruir localmente a página oficial e `/demo` para refletir o Binno

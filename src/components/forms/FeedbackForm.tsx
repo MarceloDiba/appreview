@@ -64,19 +64,7 @@ const FeedbackForm = ({
     setEnviando(true);
 
     try {
-      let idUsuario = userId;
-
-      if (!idUsuario) {
-        const { data: qrData, error: qrError } = await supabase
-          .from('qr_codes')
-          .select('user_id')
-          .eq('id', businessId)
-          .single();
-
-        if (!qrError && qrData) {
-          idUsuario = qrData.user_id;
-        }
-      }
+      const idUsuario = userId;
 
       if (!idUsuario || !isUUID(idUsuario)) {
         toast.error('Não foi possível identificar o estabelecimento. Tente novamente pelo QR Code.');
