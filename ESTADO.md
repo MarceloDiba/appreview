@@ -5,6 +5,18 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 
 ## Contrato de produto — 20 de agosto de 2026
 
+- [x] Reconstruir localmente a página oficial e `/demo` para refletir o Binno
+  como assessor de reputação no Google, sem tocar no cockpit autenticado.
+  Inclui Monitoramento, WhatsApp, fila, histórico por nota, Radar, perfil e
+  conversão a €49/mês. O demo tem um único cenário fictício identificado e
+  preserva QR como abertura e clique, sem atribuir avaliação publicada. O
+  recorte do topo e o demo usam a mesma composição `ApprovedCockpitDashboard`
+  do painel consolidado, em modo demonstrativo sem estado real.
+- [ ] Revisar visualmente a página pública local com Marcelo e, se aprovada,
+  publicar o PR temático. A publicação continua dependente de autorização
+  explícita para merge/deploy.
+  O ajuste local de contraste do Radar e a QA responsiva em 390 px, 768 px e
+  desktop foram concluídos em 20/08; falta somente a aprovação visual.
 - [x] Consolidar as decisões aprovadas no
   [Contrato de produto Binno](docs/contrato-produto-binno.md): papel de
   assessor, arquitetura do painel, fila, QR, WhatsApp, fontes de dados e

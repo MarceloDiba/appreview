@@ -11,7 +11,7 @@ import type { LocalWhatsAppState } from '@/hooks/useLocalWhatsApp';
 import { maskInternationalPhone, sendLocalWhatsAppText } from '@/lib/localWhatsApp';
 import { defaultPilotNotificationPreferences, type PilotNotificationPreferences, readLatestPilotNotificationDelivery, readPilotNotificationPreferences, savePilotNotificationPreferences } from '@/lib/pilotNotificationPreferences';
 
-export const WhatsAppNotificationWorkspace = ({ localWhatsApp, snapshot, onboardingPhone }: { localWhatsApp: LocalWhatsAppState; snapshot: ExperimentalApifySnapshot; onboardingPhone?: string }) => {
+export const WhatsAppNotificationWorkspace = ({ localWhatsApp, snapshot, onboardingPhone, demoPhone, demo = false }: { localWhatsApp: LocalWhatsAppState; snapshot: ExperimentalApifySnapshot; onboardingPhone?: string; demoPhone?: string; demo?: boolean }) => {
   const { t, i18n } = useOwnerTranslation();
   const [preferences, setPreferences] = useState<PilotNotificationPreferences>(defaultPilotNotificationPreferences);
   const [testRecipient, setTestRecipient] = useState('');
@@ -32,17 +32,23 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, snapshot, onboard
   });
 
   useEffect(() => {
+    if (demo) {
+      setPreferences({ ...defaultPilotNotificationPreferences, recipient: demoPhone || '' });
+      setTestRecipient(demoPhone || '');
+      return;
+    }
     const stored = readPilotNotificationPreferences();
     setPreferences({ ...stored, recipient: stored.recipient || onboardingPhone || '' });
     if (onboardingPhone) setTestRecipient((current) => current || onboardingPhone);
-  }, [onboardingPhone]);
+  }, [demo, demoPhone, onboardingPhone]);
 
   useEffect(() => {
+    if (demo) return;
     setLatestAdvisorDelivery(readLatestPilotNotificationDelivery());
-  }, []);
+  }, [demo]);
 
   const savePreferences = () => {
-    savePilotNotificationPreferences(preferences);
+    if (!demo) savePilotNotificationPreferences(preferences);
     setSaved(true);
   };
 
@@ -65,6 +71,19 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, snapshot, onboard
     { key: 'reputationEnabled', title: t('whatsappPilot.reputationTitle'), body: t('whatsappPilot.reputationBody') },
     { key: 'profileEnabled', title: t('whatsappPilot.profileTitle'), body: t('whatsappPilot.profileBody') },
   ];
+
+  if (demo) return <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-6">
+      <h2 className="text-xl font-semibold text-slate-950">Configuração das notificações</h2>
+      <p className="mt-1 text-sm leading-6 text-slate-600">Escolha o que o gestor quer receber e quando prefere acompanhar.</p>
+      <h3 className="mt-6 text-sm font-semibold text-slate-950">O que você quer receber?</h3>
+      <div className="mt-4 space-y-3">{choices.map((choice) => <label key={choice.key} className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm leading-5 text-slate-700"><Checkbox checked={preferences[choice.key]} onCheckedChange={(checked) => setChoice(choice.key, checked === true)} /><span><strong className="block text-slate-950">{choice.title}</strong>{choice.body}</span></label>)}</div>
+      <div className="mt-5 grid gap-4 sm:grid-cols-3"><label className="text-sm font-medium text-slate-700 sm:col-span-2">WhatsApp do gestor<Input value={preferences.recipient} onChange={(event) => setPreferences((current) => ({ ...current, recipient: event.target.value }))} className="mt-2" inputMode="tel" /><span className="mt-1 block text-xs font-normal leading-5 text-slate-500">Este é o número que recebe resumos e alertas.</span></label><label className="text-sm font-medium text-slate-700">Horário<Input type="time" value={preferences.time} onChange={(event) => setPreferences((current) => ({ ...current, time: event.target.value }))} className="mt-2" /></label></div>
+      <label className="mt-4 block text-sm font-medium text-slate-700">Frequência<select value={preferences.day} onChange={(event) => setPreferences((current) => ({ ...current, day: event.target.value as PilotNotificationPreferences['day'] }))} className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="monday">Toda segunda-feira</option><option value="friday">Toda sexta-feira</option></select></label>
+      <Button onClick={savePreferences} className="mt-5 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><Send className="mr-2 h-4 w-4" />Salvar preferências</Button>{saved && <p className="mt-3 text-sm text-emerald-700">Preferências salvas nesta demonstração.</p>}
+    </CardContent></Card>
+    <aside className="space-y-5"><Card className="border-emerald-200 bg-emerald-50/50 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><MessageCircle className="h-5 w-5 text-emerald-700" /><h2 className="font-semibold text-slate-950">Prévia do WhatsApp</h2></div><div className="mt-4 rounded-2xl rounded-tl-sm bg-white p-4 text-sm leading-6 text-slate-700"><p className="text-xs font-semibold text-emerald-800">Binno</p><p className="mt-2">O que fortaleceu: prato executivo e atendimento. Atenção: tempo de espera apareceu em três avaliações. Próxima ação: revise uma resposta e a escala do almoço.</p></div></CardContent></Card><Card className="border-violet-200 bg-violet-50/50 shadow-none"><CardContent className="p-5"><p className="font-semibold text-slate-950">Acompanhamento no seu ritmo</p><p className="mt-2 text-sm leading-6 text-slate-700">O gestor escolhe os avisos e a frequência. A demonstração não envia mensagens.</p></CardContent></Card></aside>
+  </div>;
 
   return <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
     <section className="space-y-5">
