@@ -11,11 +11,10 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   APIs Business Information e Account Management, mas a quota de Account
   Management permanece em **0 QPM**. Portanto, este projeto ainda não tem
   Basic access aprovado. O formulário oficial de candidatura está aberto na
-  conta `diba@noadigital.com.br`. Marcelo informou que submeteu a candidatura
-  em 21/08. A reabertura posterior do workflow não trouxe recibo e voltou à
-  confirmação inicial da conta, portanto a submissão deve ser tratada como
-  pendente de evidência do Google por e-mail ou alteração da quota, não como
-  aprovação.
+  conta `diba@noadigital.com.br`. A candidatura foi submetida em 21/08 e tem
+  o registo **8-5255000041379**. A reabertura posterior do workflow não trouxe
+  o recibo, mas esse identificador confirma a submissão. O estado é **em
+  análise**, não aprovado, até o e-mail do Google ou a alteração da quota.
 - A função `sync-experimental-apify` segue ativa para o piloto e continua a
   limitar a leitura a 50 itens e uma coleta bem-sucedida a cada 24 horas por
   negócio. Ela é a fonte temporária para fila observada, Radar e métricas da
