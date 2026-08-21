@@ -362,6 +362,42 @@ const collectAdvisor = (reviews: Array<Record<string, unknown>>, now: Date): Adv
   };
 };
 
+const enqueueAdvisorAlert = async ({
+  admin,
+  userId,
+  businessName,
+  placeId,
+  alert,
+}: {
+  admin: ReturnType<typeof createClient>;
+  userId: string;
+  businessName: string;
+  placeId: string;
+  alert: AdvisorAlert | undefined;
+}) => {
+  if (!alert) return;
+  const { data: preferences } = await admin.from('whatsapp_notification_preferences')
+    .select('recipient_e164, reputation_enabled, consented_at')
+    .eq('user_id', userId).maybeSingle();
+  if (!preferences?.consented_at || !preferences.reputation_enabled) return;
+  const topicLabel: Record<TopicId, string> = {
+    service: 'atendimento', wait: 'tempo de espera', food: 'comida', cleanliness: 'limpeza', price: 'preço', atmosphere: 'ambiente', delivery: 'entrega',
+  };
+  const body = [
+    'Binno',
+    `Atenção em ${businessName}.`,
+    `A leitura recente encontrou ${alert.lowRatingCount} notas baixas e ${alert.topicMentions} menções a ${topicLabel[alert.topic]}.`,
+    'Abra o painel para conferir a evidência e decidir a próxima ação.',
+  ].join('\n');
+  await admin.from('whatsapp_outbox').upsert({
+    user_id: userId,
+    kind: 'alert',
+    recipient_e164: preferences.recipient_e164,
+    body,
+    idempotency_key: `apify-alert:${placeId || 'google'}:${alert.fingerprint}`,
+  }, { onConflict: 'user_id,idempotency_key', ignoreDuplicates: true });
+};
+
 serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
@@ -488,6 +524,13 @@ serve(async (request) => {
       completed_at: new Date().toISOString(),
       result_summary: aggregateSnapshot,
     }).eq('id', audit.id);
+    await enqueueAdvisorAlert({
+      admin,
+      userId: user.id,
+      businessName: aggregateSnapshot.business.name,
+      placeId: aggregateSnapshot.business.placeId,
+      alert: advisor.alert,
+    });
     return json({ snapshot: browserSnapshot });
   } catch (error) {
     const errorCode = error instanceof Error && /^APIFY_[A-Z_]+$/.test(error.message) ? error.message : 'APIFY_REQUEST_FAILED';

@@ -5,6 +5,28 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Prontidão para venda — 21/08/2026 (em execução)
 
+### Lote OpenWA operacional e candidatura Google — em execução local
+
+- Foi confirmada no projeto Google Cloud `app-review-505612` a presença das
+  APIs Business Information e Account Management, mas a quota de Account
+  Management permanece em **0 QPM**. Portanto, este projeto ainda não tem
+  Basic access aprovado. O formulário oficial de candidatura está aberto na
+  conta `diba@noadigital.com.br`, na etapa que pede número do projeto, site e
+  justificativa. Não o considerar enviado até a confirmação de envio do
+  Google.
+- A função `sync-experimental-apify` segue ativa para o piloto e continua a
+  limitar a leitura a 50 itens e uma coleta bem-sucedida a cada 24 horas por
+  negócio. Ela é a fonte temporária para fila observada, Radar e métricas da
+  amostra enquanto a API oficial não é aprovada.
+- A branch `codex/openwa-operational-pilot` prepara a substituição do piloto
+  local: fila server-side, preferências e consentimento, outbox idempotente,
+  estados `queued` a `read`, funções autenticadas e relay privado em
+  `services/openwa-relay`. O painel nunca recebe chave OpenWA. A futura troca
+  para Meta Cloud API preservará contrato, UI, fila e histórico.
+- A migration e as funções ainda não foram aplicadas em produção, nem o relay
+  foi hospedado. Isso exige deploy em host persistente e variáveis privadas;
+  consultar `docs/openwa-operational-pilot.md` antes de executar.
+
 - O plano consolidado por lotes está em
   [docs/plano-prontidao-venda-binno.md](docs/plano-prontidao-venda-binno.md).
   Ele separa a fundação segura, Google oficial, histórico do assessor,

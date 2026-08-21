@@ -757,7 +757,25 @@
     "onboardingPhoneHint": "Filled in during onboarding. Edit it only if notifications should go to another owner.",
     "testRecipient": "Your WhatsApp for the preview",
     "testRecipientHint": "Enter your own number or a team member's. This test is never sent to a customer.",
-    "weeklyChangeEmpty": "No change has been confirmed this week."
+    "weeklyChangeEmpty": "No change has been confirmed this week.",
+    "save": "Save preferences",
+    "preferencesSaved": "Preferences saved. Binno will use these choices for the delivery queue.",
+    "backendUnavailable": "The delivery channel is not available yet. Try again after the server is configured.",
+    "deliveryTitle": "WhatsApp delivery",
+    "deliveryBody": "Binno records the send and follows the status reported by the connected channel.",
+    "deliveryReady": "Delivery channel prepared",
+    "deliveryReadyBody": "Messages are placed in the Binno queue. The status changes when the channel confirms the send.",
+    "testQueued": "Message queued for {{recipient}}. The panel will show the state when the channel responds.",
+    "delivery": {
+      "queued": "Message queued for {{recipient}}.",
+      "sending": "Message is being sent to {{recipient}}.",
+      "accepted": "The channel accepted the message for {{recipient}}.",
+      "delivered": "Message delivered to {{recipient}}.",
+      "read": "Message read by {{recipient}}.",
+      "failed": "The latest message could not be delivered.",
+      "skipped": "The latest message was not sent.",
+      "cancelled": "The latest message was cancelled."
+    }
   },
   "localWhatsApp": {
     "proxyUnavailable": "The local OpenWA proxy is unavailable. Start the preview with BINNO_ENABLE_OPENWA_PROXY=true and configure the local key.",
