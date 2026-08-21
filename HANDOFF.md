@@ -739,3 +739,28 @@ H5 Texas Burger (Avenida) e Mania de Petiscos, ambos em Lisboa. Marcelo no Brasi
 
 Área administrativa real; autocomplete do Google nas definições; sistema real
 de notificações; modelo de agência (dói a partir do 3.º cliente); Stripe a sério.
+
+## Venda — atualização operacional 21/08/2026
+
+- PR #30 (`2b902e4`) e PR #31 (`0e8d33d`) foram mergeados. As migrations de QR
+  seguro, snapshots de reputação e restrição da função de token Google estão
+  aplicadas no Supabase. A verificação local e o CI passaram antes de cada
+  merge.
+- Projeto Google Cloud oficial: `app-review-505612`, número `288079352399`.
+  Em 21/08 foram ativadas My Business Business Information API e My Business
+  Account Management API.
+- O pedido Basic do GBP foi aberto com `diba@noadigital.com.br` e reconheceu a
+  Noá Agência Digital como perfil validado. Ainda falta transmitir número do
+  projeto, website e justificativa e confirmar o envio. A documentação do
+  Google informa análise em até 14 dias; 300 QPM é o sinal de aprovação.
+- Após a aprovação: habilitar Google My Business API (v4 reviews), criar um
+  cliente OAuth Web exclusivo do Binno, guardar segredos no Supabase e publicar
+  `start-google-business-oauth`, `google-business-oauth-callback` e
+  `sync-google-business-profile`. Não reutilizar o cliente Local Growth.
+- Stripe foi reconectada e verificada pela integração: conta EUR, pagamentos e
+  repasses ativos, sem requisitos pendentes. Nada de produto, preço, checkout
+  ou cobrança foi criado.
+- OpenWA permanece apenas relé de piloto isolado. A arquitetura proposta usa
+  outbox do Binno, idempotência, consentimento, chave/sessão por piloto e
+  confirmação manual. Não expor a API local e não vender entrega recorrente
+  sobre esse canal. Ver `docs/arquitetura-openwa-piloto.md`.
