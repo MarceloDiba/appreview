@@ -428,6 +428,25 @@ em cache) foram preservados. Evidência completa em
 5. **Stripe:** cobrança real continua manual. Qualquer integração exige
    aprovação por mexer com dinheiro.
 
+## Prontidão para venda — atualização 21/08/2026
+
+- [x] Aplicar em produção as migrations do QR seguro, das leituras históricas
+  e da restrição de leitura de token Google. PRs #30 e #31 foram mergeados;
+  `npm run verify` e o CI passaram antes dos merges.
+- [x] Ativar no projeto Google Cloud `app-review-505612` as APIs My Business
+  Business Information e My Business Account Management.
+- [ ] Enviar o pedido Basic de acesso às APIs GBP. O formulário reconheceu a
+  empresa verificada **Noá Agência Digital**, pediu o projeto `288079352399`,
+  site e justificativa. O Google informa análise em até 14 dias e 300 QPM após
+  aprovação.
+- [ ] Depois da aprovação, habilitar Google My Business API, criar cliente OAuth
+  exclusivo do Binno e publicar as três Edge Functions oficiais.
+- [x] Confirmar a conta Stripe ligada: EUR, pagamentos e repasses ativos, sem
+  requisitos pendentes. Produto, preço, Checkout e webhooks continuam sem
+  configuração porque criam cobrança real.
+- [x] Definir OpenWA como relé de piloto isolado, nunca infraestrutura de venda
+  recorrente. Arquitetura em `docs/arquitetura-openwa-piloto.md`.
+
 ## Piloto
 
 H5 Texas Burger — Avenida e Mania de Petiscos, ambos em Lisboa. Marcelo está em
