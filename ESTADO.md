@@ -8,9 +8,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [~] Executar o Lote 1 do plano em
   [docs/plano-prontidao-venda-binno.md](docs/plano-prontidao-venda-binno.md):
   endurecer a superfície pública do QR sem alterar o cockpit aprovado. A
-  migration e a troca das leituras públicas estão na branch
-  `codex/fundacao-piloto-venda`; falta validação, PR, merge autorizado e
-  aplicação em produção.
+  migration e a troca das leituras públicas estão no
+  [PR #30](https://github.com/MarceloDiba/appreview/pull/30), com CI e preview
+  verdes; faltam merge autorizado e aplicação em produção.
 - [ ] Aplicar e verificar a fundação oficial do Google somente após o acesso
   Basic/credenciais: migration de conexão, três Edge Functions, OAuth,
   localização selecionada e sincronização paginada completa.

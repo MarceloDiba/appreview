@@ -14,8 +14,10 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   mas o produto ainda não está pronto para venda autônoma: faltam conexão
   oficial aplicada, histórico verificável, WhatsApp de produção e cobrança.
 - A política pública de `profiles` expõe colunas além do necessário para o QR.
-  O lote atual substitui as leituras públicas diretas por uma função limitada
-  a QR ativo e restringe `profiles`, `platform_links` e `qr_codes` ao dono.
+  O [PR #30](https://github.com/MarceloDiba/appreview/pull/30) substitui as
+  leituras públicas diretas por uma função limitada a QR ativo e restringe
+  `profiles`, `platform_links` e `qr_codes` ao dono. CI e preview Vercel estão
+  verdes. Falta merge autorizado e aplicação da migration no Supabase.
   Não alterar o cockpit aprovado neste pacote.
 
 > **Contrato vigente:** [docs/contrato-produto-binno.md](docs/contrato-produto-binno.md)
