@@ -5,6 +5,42 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Prontidão para venda — 21/08/2026 (em execução)
 
+### Lote OpenWA operacional e candidatura Google — em execução local
+
+- Foi confirmada no projeto Google Cloud `app-review-505612` a presença das
+  APIs Business Information e Account Management, mas a quota de Account
+  Management permanece em **0 QPM**. Portanto, este projeto ainda não tem
+  Basic access aprovado. O formulário oficial de candidatura está aberto na
+  conta `diba@noadigital.com.br`. A candidatura foi submetida em 21/08 e tem
+  o registo **8-5255000041379**. A reabertura posterior do workflow não trouxe
+  o recibo, mas esse identificador confirma a submissão. O estado é **em
+  análise**, não aprovado, até o e-mail do Google ou a alteração da quota.
+- A função `sync-experimental-apify` segue ativa para o piloto e continua a
+  limitar a leitura a 50 itens e uma coleta bem-sucedida a cada 24 horas por
+  negócio. Ela é a fonte temporária para fila observada, Radar e métricas da
+  amostra enquanto a API oficial não é aprovada.
+- A branch `codex/openwa-operational-pilot` prepara a substituição do piloto
+  local: fila server-side, preferências e consentimento, outbox idempotente,
+  estados `queued` a `read`, funções autenticadas e relay privado em
+  `services/openwa-relay`. O painel nunca recebe chave OpenWA. A futura troca
+  para Meta Cloud API preservará contrato, UI, fila e histórico.
+- A migration e as funções ainda não foram aplicadas em produção, nem o relay
+  foi hospedado. Isso exige deploy em host persistente e variáveis privadas;
+  consultar `docs/openwa-operational-pilot.md` antes de executar.
+- A infraestrutura do relay foi preparada em 21/08 na VPS Hostinger já paga:
+  Ubuntu 24.04, 8 GB de RAM, Docker 29.1.3 e Compose 2.40.3 instalados. O
+  painel financeiro existente na porta 3000 e o ambiente AppReview em 5183
+  foram identificados e preservados. UFW está ativo com SSH, 80, 443 e 3000
+  liberados; o OpenWA não terá porta pública própria.
+- O DNS `relay.binno.pro` já aponta para a VPS e foi confirmado publicamente.
+  Ainda não foram criados containers, sessão WhatsApp, chaves, webhook,
+  migration, Edge Function nem mensagens reais. O deploy será um stack isolado
+  com OpenWA interno, relay Binno interno e Caddy apenas em 80/443.
+- O relay foi corrigido localmente para a API atual do OpenWA: usa a sessão por
+  UUID, o prefixo `/api` e valida a assinatura HMAC do webhook. Os arquivos de
+  implantação estão em `services/openwa-relay/hostinger.compose.yml` e
+  `services/openwa-relay/Caddyfile`; `npm run verify` passou em 21/08.
+
 - O plano consolidado por lotes está em
   [docs/plano-prontidao-venda-binno.md](docs/plano-prontidao-venda-binno.md).
   Ele separa a fundação segura, Google oficial, histórico do assessor,

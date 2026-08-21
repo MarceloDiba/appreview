@@ -5,6 +5,21 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 
 ## Prontidão para venda — 21 de agosto de 2026
 
+- [~] Acompanhar candidatura oficial de Basic access do Google: submetida em
+  21/08 pela conta `diba@noadigital.com.br` para o projeto `app-review-505612`.
+  Registo Google: **8-5255000041379**. A quota de Account Management segue em
+  0 QPM; o estado é em análise até a confirmação do Google por e-mail ou a
+  alteração de quota.
+- [~] Transformar OpenWA local em entrega operacional intercambiável: branch
+  `codex/openwa-operational-pilot` contém migration, fila, funções e relay
+  privado. A VPS Hostinger foi auditada e preparada com Docker, Compose, UFW e
+  `relay.binno.pro` apontando para ela. Faltam aplicar migration/funções,
+  iniciar o stack isolado, criar a sessão e chave de operador, guardar segredos
+  privados e executar o teste real de estados de entrega.
+- [x] Manter Apify como leitura temporária autorizada, com limites e fonte
+  explícita, até a Basic API ficar disponível. Ela não é apresentada como
+  conexão oficial do Perfil da Empresa.
+
 - [x] Executar o Lote 1 do plano em
   [docs/plano-prontidao-venda-binno.md](docs/plano-prontidao-venda-binno.md):
   [PR #30](https://github.com/MarceloDiba/appreview/pull/30) foi mergeado,
