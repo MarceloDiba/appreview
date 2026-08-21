@@ -22,11 +22,11 @@ import BinnoDemoCockpit, { SalesCockpitPreview } from '@/components/marketing/Bi
 import { getMarketingCopy } from '@/i18n/marketing';
 import { useTranslation } from '@/i18n/useTranslation';
 
-const SectionTitle = ({ eyebrow, title, body, centered = false }: { eyebrow: string; title: string; body: string; centered?: boolean }) => (
+const SectionTitle = ({ eyebrow, title, body, centered = false, inverted = false }: { eyebrow: string; title: string; body: string; centered?: boolean; inverted?: boolean }) => (
   <div className={centered ? 'mx-auto max-w-3xl text-center' : 'max-w-2xl'}>
     <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#6D43C0]">{eyebrow}</p>
-    <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{title}</h2>
-    <p className="mt-4 text-lg leading-8 text-slate-600">{body}</p>
+    <h2 className={`mt-3 text-3xl font-bold tracking-tight sm:text-4xl ${inverted ? 'text-white' : 'text-slate-950'}`}>{title}</h2>
+    <p className={`mt-4 text-lg leading-8 ${inverted ? 'text-slate-300' : 'text-slate-600'}`}>{body}</p>
   </div>
 );
 
@@ -99,7 +99,7 @@ const Index = () => {
           <div className="mx-auto max-w-7xl"><SectionTitle centered eyebrow={copy.history.eyebrow} title={copy.history.title} body={copy.history.body} /><div className="mt-12 grid gap-5 md:grid-cols-4">{copy.history.items.map((item, index) => { const Icon = [FileText, TrendingUp, Star, MessageCircle][index]; return <div key={item} className="rounded-2xl border border-slate-200 p-5"><Icon className="h-5 w-5 text-[#2457D6]" /><p className="mt-4 font-semibold text-slate-950">{item}</p></div>; })}</div></div>
         </section>
 
-        <section className="bg-[#111827] px-4 py-20 text-white sm:px-6"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center"><SectionTitle eyebrow={copy.radar.eyebrow} title={copy.radar.title} body={copy.radar.body} /><div className="grid gap-4"><RadarBlock good icon={TrendingUp} title={copy.radar.strengthTitle} body={copy.radar.strengthBody} /><RadarBlock icon={TrendingDown} title={copy.radar.riskTitle} body={copy.radar.riskBody} /></div></div></section>
+        <section className="bg-[#111827] px-4 py-20 text-white sm:px-6"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center"><SectionTitle eyebrow={copy.radar.eyebrow} title={copy.radar.title} body={copy.radar.body} inverted /><div className="grid gap-4"><RadarBlock good icon={TrendingUp} title={copy.radar.strengthTitle} body={copy.radar.strengthBody} /><RadarBlock icon={TrendingDown} title={copy.radar.riskTitle} body={copy.radar.riskBody} /></div></div></section>
 
         <section className="px-4 py-20 sm:px-6"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center"><div><SectionTitle eyebrow={copy.profile.eyebrow} title={copy.profile.title} body={copy.profile.body} /><div className="mt-6 space-y-3">{copy.profile.items.map((item, index) => { const Icon = [MessageCircle, Star, SearchCheck, QrCode][index]; return <p key={item} className="flex gap-3 text-sm leading-6 text-slate-700"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-50 text-[#6D43C0]"><Icon className="h-4 w-4" /></span>{item}</p>; })}</div></div><div className="rounded-2xl border border-slate-200 bg-slate-50 p-6"><div className="flex items-center gap-3"><Lightbulb className="h-6 w-6 text-[#6D43C0]" /><div><p className="font-semibold text-slate-950">{copy.cockpit.plan}</p><p className="text-sm text-slate-500">{copy.cockpit.onePriority}</p></div></div><p className="mt-6 rounded-xl bg-white p-4 text-sm leading-6 text-slate-700">{copy.cockpit.practice}</p></div></div></section>
 
