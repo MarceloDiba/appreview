@@ -33,6 +33,9 @@ histórico de repositório e documentos legados até uma migração intencional.
   publicada sem uma evidência externa adequada.
 - O Binno não publica respostas sozinho. O gestor revisa e decide; uma futura
   publicação via API exige conexão oficial, autorização e confirmação explícita.
+- O QR público recebe somente os campos mínimos para apresentar o negócio e os
+  destinos de avaliação. Perfil completo, telefone, assinatura e demais links
+  do dono nunca podem ficar disponíveis por leitura anônima direta.
 - Nome, texto e URL pública de uma avaliação obtidos no piloto Apify ficam só
   no navegador autenticado, por até 14 dias. Não entram em cache agregado,
   briefing, WhatsApp, banco de auditoria ou perfil do avaliador.

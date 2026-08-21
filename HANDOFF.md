@@ -3,6 +3,21 @@
 Estado atualizado em 20/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
+## Prontidão para venda — 21/08/2026 (em execução)
+
+- O plano consolidado por lotes está em
+  [docs/plano-prontidao-venda-binno.md](docs/plano-prontidao-venda-binno.md).
+  Ele separa a fundação segura, Google oficial, histórico do assessor,
+  WhatsApp, cobrança e liberação controlada, com os portões que exigem decisão
+  externa ou financeira.
+- Auditoria de produção confirmou que a página oficial e a demo estão no ar,
+  mas o produto ainda não está pronto para venda autônoma: faltam conexão
+  oficial aplicada, histórico verificável, WhatsApp de produção e cobrança.
+- A política pública de `profiles` expõe colunas além do necessário para o QR.
+  O lote atual substitui as leituras públicas diretas por uma função limitada
+  a QR ativo e restringe `profiles`, `platform_links` e `qr_codes` ao dono.
+  Não alterar o cockpit aprovado neste pacote.
+
 > **Contrato vigente:** [docs/contrato-produto-binno.md](docs/contrato-produto-binno.md)
 > é a referência aprovada de produto e não pode ser alterado por refatoração ou
 > simplificação visual sem nova aprovação explícita de Marcelo.

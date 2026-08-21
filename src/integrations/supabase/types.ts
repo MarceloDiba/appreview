@@ -584,7 +584,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_qr_business: {
+        Args: {
+          p_identifier: string
+        }
+        Returns: {
+          business_name: string
+          google_review_url: string | null
+          qr_code_id: string
+          qr_name: string
+          tripadvisor_review_url: string | null
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
