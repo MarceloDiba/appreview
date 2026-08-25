@@ -5,6 +5,21 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 
 ## Prontidão para venda — 21 de agosto de 2026
 
+- [~] Acompanhar candidatura oficial de Basic access do Google: submetida em
+  21/08 pela conta `diba@noadigital.com.br` para o projeto `app-review-505612`.
+  Registo Google: **8-5255000041379**. A quota de Account Management segue em
+  0 QPM; o estado é em análise até a confirmação do Google por e-mail ou a
+  alteração de quota.
+- [~] Transformar OpenWA local em entrega operacional intercambiável: a branch
+  `codex/openwa-operational-pilot` contém migration, fila, funções e relay
+  privado. Em 25/08, a migration e as funções foram aplicadas, o relay HTTPS
+  foi iniciado na VPS Hostinger, a sessão `binno-piloto` foi pareada e o
+  webhook assinado foi validado. Faltam somente o teste manual autorizado de
+  uma mensagem e a evidência de estados reais que o OpenWA reportar.
+- [x] Manter Apify como leitura temporária autorizada, com limites e fonte
+  explícita, até a Basic API ficar disponível. Ela não é apresentada como
+  conexão oficial do Perfil da Empresa.
+
 - [x] Executar o Lote 1 do plano em
   [docs/plano-prontidao-venda-binno.md](docs/plano-prontidao-venda-binno.md):
   [PR #30](https://github.com/MarceloDiba/appreview/pull/30) foi mergeado,

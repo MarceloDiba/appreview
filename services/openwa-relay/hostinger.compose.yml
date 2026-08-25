@@ -1,0 +1,39 @@
+services:
+  binno-relay:
+    build:
+      context: ../relay
+    container_name: binno-openwa-relay
+    restart: unless-stopped
+    env_file:
+      - ../relay/.env
+    networks:
+      - openwa-network
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  caddy:
+    image: caddy:2.10-alpine
+    container_name: binno-relay-caddy
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    volumes:
+      - ../relay/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - openwa-network
+
+volumes:
+  caddy-data:
+  caddy-config:
+
+networks:
+  openwa-network:
+    external: true
+    name: openwa-network

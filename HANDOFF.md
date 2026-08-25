@@ -3,7 +3,53 @@
 Estado atualizado em 21/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
-## Prontidão para venda — 21/08/2026 (em execução)
+## Prontidão para venda — 25/08/2026 (em execução)
+
+### Lote OpenWA operacional e candidatura Google — em execução local
+
+- Foi confirmada no projeto Google Cloud `app-review-505612` a presença das
+  APIs Business Information e Account Management, mas a quota de Account
+  Management permanece em **0 QPM**. Portanto, este projeto ainda não tem
+  Basic access aprovado. O formulário oficial de candidatura está aberto na
+  conta `diba@noadigital.com.br`. A candidatura foi submetida em 21/08 e tem
+  o registo **8-5255000041379**. A reabertura posterior do workflow não trouxe
+  o recibo, mas esse identificador confirma a submissão. O estado é **em
+  análise**, não aprovado, até o e-mail do Google ou a alteração da quota.
+- A função `sync-experimental-apify` segue ativa para o piloto e continua a
+  limitar a leitura a 50 itens e uma coleta bem-sucedida a cada 24 horas por
+  negócio. Ela é a fonte temporária para fila observada, Radar e métricas da
+  amostra enquanto a API oficial não é aprovada.
+- A branch `codex/openwa-operational-pilot` prepara a substituição do piloto
+  local: fila server-side, preferências e consentimento, outbox idempotente,
+  estados `queued` a `read`, funções autenticadas e relay privado em
+  `services/openwa-relay`. O painel nunca recebe chave OpenWA. A futura troca
+  para Meta Cloud API preservará contrato, UI, fila e histórico.
+- A migration `20260821193000_whatsapp_delivery_outbox.sql` e as funções
+  `whatsapp-notifications`, `materialize-whatsapp-notifications` e
+  `sync-experimental-apify` foram aplicadas/publicadas no Supabase de
+  produção em 25/08. A leitura posterior confirmou as três tabelas, RLS e o
+  RPC de claim exclusivo do `service_role`. O histórico remoto de migrations
+  já era divergente do diretório local, por isso nenhuma reparação global foi
+  executada.
+- A infraestrutura do relay foi preparada em 21/08 na VPS Hostinger já paga:
+  Ubuntu 24.04, 8 GB de RAM, Docker 29.1.3 e Compose 2.40.3 instalados. O
+  painel financeiro existente na porta 3000 e o ambiente AppReview em 5183
+  foram identificados e preservados. UFW está ativo com SSH, 80, 443 e 3000
+  liberados; o OpenWA não terá porta pública própria.
+- O DNS `relay.binno.pro` aponta para a VPS e foi confirmado publicamente. Em
+  25/08, o stack isolado foi iniciado: OpenWA continua privado, o relay Binno
+  está saudável e Caddy fornece HTTPS. A sessão `binno-piloto` foi pareada; o
+  webhook HMAC de `message.ack` e `message.failed` foi registado e o teste
+  técnico devolveu 204. O relay usa variáveis privadas na VPS, nunca no
+  navegador ou repositório.
+- A chamada relay -> Supabase foi verificada e retornou fila semanal vazia.
+  Não houve criação de item na outbox, disparo, entrega ou leitura de WhatsApp
+  nesta implantação. O próximo passo é uma mensagem de teste manual somente
+  após a confirmação explícita de Marcelo para o destinatário escolhido.
+- O relay foi corrigido localmente para a API atual do OpenWA: usa a sessão por
+  UUID, o prefixo `/api` e valida a assinatura HMAC do webhook. Os arquivos de
+  implantação estão em `services/openwa-relay/hostinger.compose.yml` e
+  `services/openwa-relay/Caddyfile`; `npm run verify` passou em 21/08.
 
 - O plano consolidado por lotes está em
   [docs/plano-prontidao-venda-binno.md](docs/plano-prontidao-venda-binno.md).

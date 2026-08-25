@@ -1,0 +1,13 @@
+relay.binno.pro {
+  encode zstd gzip
+
+  handle /health {
+    reverse_proxy binno-relay:8788
+  }
+
+  handle /webhook/* {
+    reverse_proxy binno-relay:8788
+  }
+
+  respond 404
+}
