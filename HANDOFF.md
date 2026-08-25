@@ -3,7 +3,7 @@
 Estado atualizado em 21/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
-## Prontidão para venda — 21/08/2026 (em execução)
+## Prontidão para venda — 25/08/2026 (em execução)
 
 ### Lote OpenWA operacional e candidatura Google — em execução local
 
@@ -24,18 +24,28 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   estados `queued` a `read`, funções autenticadas e relay privado em
   `services/openwa-relay`. O painel nunca recebe chave OpenWA. A futura troca
   para Meta Cloud API preservará contrato, UI, fila e histórico.
-- A migration e as funções ainda não foram aplicadas em produção, nem o relay
-  foi hospedado. Isso exige deploy em host persistente e variáveis privadas;
-  consultar `docs/openwa-operational-pilot.md` antes de executar.
+- A migration `20260821193000_whatsapp_delivery_outbox.sql` e as funções
+  `whatsapp-notifications`, `materialize-whatsapp-notifications` e
+  `sync-experimental-apify` foram aplicadas/publicadas no Supabase de
+  produção em 25/08. A leitura posterior confirmou as três tabelas, RLS e o
+  RPC de claim exclusivo do `service_role`. O histórico remoto de migrations
+  já era divergente do diretório local, por isso nenhuma reparação global foi
+  executada.
 - A infraestrutura do relay foi preparada em 21/08 na VPS Hostinger já paga:
   Ubuntu 24.04, 8 GB de RAM, Docker 29.1.3 e Compose 2.40.3 instalados. O
   painel financeiro existente na porta 3000 e o ambiente AppReview em 5183
   foram identificados e preservados. UFW está ativo com SSH, 80, 443 e 3000
   liberados; o OpenWA não terá porta pública própria.
-- O DNS `relay.binno.pro` já aponta para a VPS e foi confirmado publicamente.
-  Ainda não foram criados containers, sessão WhatsApp, chaves, webhook,
-  migration, Edge Function nem mensagens reais. O deploy será um stack isolado
-  com OpenWA interno, relay Binno interno e Caddy apenas em 80/443.
+- O DNS `relay.binno.pro` aponta para a VPS e foi confirmado publicamente. Em
+  25/08, o stack isolado foi iniciado: OpenWA continua privado, o relay Binno
+  está saudável e Caddy fornece HTTPS. A sessão `binno-piloto` foi pareada; o
+  webhook HMAC de `message.ack` e `message.failed` foi registado e o teste
+  técnico devolveu 204. O relay usa variáveis privadas na VPS, nunca no
+  navegador ou repositório.
+- A chamada relay -> Supabase foi verificada e retornou fila semanal vazia.
+  Não houve criação de item na outbox, disparo, entrega ou leitura de WhatsApp
+  nesta implantação. O próximo passo é uma mensagem de teste manual somente
+  após a confirmação explícita de Marcelo para o destinatário escolhido.
 - O relay foi corrigido localmente para a API atual do OpenWA: usa a sessão por
   UUID, o prefixo `/api` e valida a assinatura HMAC do webhook. Os arquivos de
   implantação estão em `services/openwa-relay/hostinger.compose.yml` e

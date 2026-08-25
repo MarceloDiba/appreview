@@ -42,7 +42,9 @@ as preferências, as regras de consentimento, a UI e o histórico permanecem.
    versão atualizada de `sync-experimental-apify`.
 3. Definir `BINNO_WORKER_SECRET` somente no Supabase e no relay.
 4. Subir o relay em uma instância privada e persistente com as variáveis de
-   `services/openwa-relay/.env.example`. `OPENWA_SESSION_ID` é o UUID retornado
+   `services/openwa-relay/.env.example`. Quando OpenWA e relay usam composes
+   separados, declarar a rede OpenWA como externa no compose do relay. Não usar
+   `depends_on` entre os dois projetos. `OPENWA_SESSION_ID` é o UUID retornado
    ao criar a sessão, não o nome legível dela.
 5. Manter OpenWA em uma sessão e número dedicados ao piloto. O URL e a chave do
    OpenWA ficam apenas no relay, nunca no Vite, Supabase público ou navegador.
@@ -50,6 +52,21 @@ as preferências, as regras de consentimento, a UI e o histórico permanecem.
    `/webhook/openwa` do relay, com o mesmo `OPENWA_WEBHOOK_SECRET`, e validar o ciclo de
    teste: `na fila` -> `aceito` -> `entregue` ou `lido`, quando o OpenWA emitir
    o evento.
+
+### Operação da VPS Hostinger em 25/08/2026
+
+- A migration de outbox e as três Edge Functions foram aplicadas no projeto
+  Supabase do Binno. As tabelas mantêm RLS e o claim da fila é exclusivo do
+  `service_role`.
+- O relay está em `relay.binno.pro` com HTTPS válido. OpenWA continua privado
+  em loopback; somente os endpoints de saúde e webhook passam pelo proxy.
+- A sessão `binno-piloto` foi pareada. O webhook assinado foi registrado para
+  `message.ack` e `message.failed`, e o teste do próprio OpenWA retornou 204.
+- O relay interpreta o estado de entrega no payload de confirmação. Ele não
+  marca entrega ou leitura por inferência.
+- A comunicação relay -> Supabase foi testada com a materialização semanal,
+  que retornou `queued: 0`. Nenhum item foi criado na outbox nem mensagem foi
+  enviada durante a implantação.
 
 ## Limites transparentes
 

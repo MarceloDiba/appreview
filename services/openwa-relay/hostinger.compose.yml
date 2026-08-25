@@ -13,9 +13,6 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-    depends_on:
-      openwa-api:
-        condition: service_healthy
 
   caddy:
     image: caddy:2.10-alpine
@@ -35,3 +32,8 @@ services:
 volumes:
   caddy-data:
   caddy-config:
+
+networks:
+  openwa-network:
+    external: true
+    name: openwa-network

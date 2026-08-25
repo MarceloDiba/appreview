@@ -10,12 +10,12 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   Registo Google: **8-5255000041379**. A quota de Account Management segue em
   0 QPM; o estado é em análise até a confirmação do Google por e-mail ou a
   alteração de quota.
-- [~] Transformar OpenWA local em entrega operacional intercambiável: branch
+- [~] Transformar OpenWA local em entrega operacional intercambiável: a branch
   `codex/openwa-operational-pilot` contém migration, fila, funções e relay
-  privado. A VPS Hostinger foi auditada e preparada com Docker, Compose, UFW e
-  `relay.binno.pro` apontando para ela. Faltam aplicar migration/funções,
-  iniciar o stack isolado, criar a sessão e chave de operador, guardar segredos
-  privados e executar o teste real de estados de entrega.
+  privado. Em 25/08, a migration e as funções foram aplicadas, o relay HTTPS
+  foi iniciado na VPS Hostinger, a sessão `binno-piloto` foi pareada e o
+  webhook assinado foi validado. Faltam somente o teste manual autorizado de
+  uma mensagem e a evidência de estados reais que o OpenWA reportar.
 - [x] Manter Apify como leitura temporária autorizada, com limites e fonte
   explícita, até a Basic API ficar disponível. Ela não é apresentada como
   conexão oficial do Perfil da Empresa.

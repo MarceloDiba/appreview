@@ -74,10 +74,17 @@ const runDispatch = () => dispatch().catch((error) => {
 });
 
 const statusFromWebhook = (payload, eventHeader) => {
-  const event = String(eventHeader || payload?.event || payload?.type || payload?.status || '').toLowerCase();
-  if (event.includes('read')) return 'read';
-  if (event.includes('deliver')) return 'delivered';
-  if (event.includes('fail')) return 'failed';
+  const state = String(
+    payload?.data?.status
+    || payload?.status
+    || eventHeader
+    || payload?.event
+    || payload?.type
+    || '',
+  ).toLowerCase();
+  if (state.includes('read')) return 'read';
+  if (state.includes('deliver')) return 'delivered';
+  if (state.includes('fail')) return 'failed';
   return null;
 };
 
