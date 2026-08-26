@@ -17,21 +17,24 @@ export const localeFromBusinessPhone = (phone: string | null | undefined): Local
 export const qrCardCopy = (locale: Locale) => {
   if (locale === 'pt-BR') {
     return {
-      ask: 'Conte como foi sua experiência',
+      ask: 'Nos avalie no Google',
       help: 'Sua opinião nos ajuda a melhorar.',
       scan: 'Aponte a câmera do celular para o QR Code',
+      brand: 'Seu assessor de reputação no Google',
     };
   }
   if (locale === 'pt-PT') {
     return {
-      ask: 'Conte como foi a sua experiência',
+      ask: 'Avalie-nos no Google',
       help: 'A sua opinião ajuda-nos a melhorar.',
       scan: 'Aponte a câmara do telemóvel para o QR Code',
+      brand: 'O seu assessor de reputação no Google',
     };
   }
   return {
-    ask: 'Tell us about your experience',
+    ask: 'Review us on Google',
     help: 'Your feedback helps us improve.',
     scan: 'Point your phone camera at the QR code',
+    brand: 'Your Google reputation advisor',
   };
 };
