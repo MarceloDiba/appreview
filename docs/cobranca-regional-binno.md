@@ -12,6 +12,11 @@ O Binno vende a mesma assinatura mensal em duas operações independentes:
 O país nunca é decidido apenas por IP. O site pode sugerir um mercado, mas o
 cliente escolhe e pode trocar antes do checkout.
 
+O Checkout exige o endereço de cobrança. A Stripe confirma o país efetivo no
+evento assinado: uma cobrança BR só é elegível com endereço do Brasil; a
+operação europeia aceita a lista de países europeus definida no código. Um
+endereço incompatível nunca ativa a assinatura ou liberta acesso no Binno.
+
 Não usar Stripe Connect: isto não é um marketplace. Cada operação é a sua
 própria relação comercial, com produto, preço, cliente, fatura, portal e
 webhook na respetiva conta.
@@ -52,8 +57,8 @@ webhook na respetiva conta.
 
 ## Limites atuais
 
-- O checkout não é criado enquanto os segredos e o Price ID daquele mercado
-  não existirem.
+- O checkout não é criado enquanto os três segredos e o Price ID daquele
+  mercado não existirem.
 - A aplicação não cobra, não guarda cartão e não concede acesso apenas por
   voltar da URL de sucesso. O estado vem dos webhooks assinados da Stripe.
 - A cobrança não deve ligar uma trava global de acesso aos pilotos já ativos.

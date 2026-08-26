@@ -21,6 +21,7 @@ type BillingStatus = {
   price_per_month?: number | null;
   current_period_end?: string | null;
   cancel_at?: string | null;
+  eligibility_status?: 'pending' | 'verified' | 'mismatch' | null;
 } | null;
 
 /**
@@ -313,7 +314,7 @@ const Profile = () => {
                   <CardDescription>{t('profile.billingDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {billingStatus?.status && ['active', 'trialing', 'past_due'].includes(billingStatus.status) ? (
+                  {billingStatus?.eligibility_status === 'verified' && billingStatus.status && ['active', 'trialing', 'past_due'].includes(billingStatus.status) ? (
                     <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                       <p className="font-semibold text-emerald-950">{t('profile.billingActive')}</p>
                       <p className="mt-1 text-sm text-emerald-900">{t('profile.billingActiveDescription')}</p>

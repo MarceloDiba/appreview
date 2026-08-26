@@ -3,6 +3,7 @@ export type BillingMarket = 'br' | 'eu';
 export type BillingConfig = {
   market: BillingMarket;
   currency: 'brl' | 'eur';
+  eligibleCountries: readonly string[];
   priceId: string;
   secretKey: string;
   webhookSecret?: string;
@@ -29,11 +30,25 @@ export const billingConfig = (market: BillingMarket): BillingConfig | null => {
   return {
     market,
     currency: market === 'br' ? 'brl' : 'eur',
+    eligibleCountries: market === 'br'
+      ? ['BR']
+      : ['AT', 'BE', 'BG', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HR', 'HU', 'IE', 'IS', 'IT', 'LI', 'LT', 'LU', 'LV', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK'],
     secretKey,
     priceId,
     webhookSecret: Deno.env.get(`STRIPE_${suffix}_WEBHOOK_SECRET`)?.trim() || undefined,
   };
 };
+
+// A price alone is not enough to sell. Without the signed webhook secret the
+// application cannot safely confirm the subscription after Checkout.
+export const billingReady = (market: BillingMarket) => Boolean(billingConfig(market)?.webhookSecret);
+
+export const countryFrom = (value: unknown) => typeof value === 'string' && /^[a-z]{2}$/i.test(value)
+  ? value.toUpperCase()
+  : null;
+
+export const countryIsEligible = (config: BillingConfig, country: string | null) =>
+  Boolean(country && config.eligibleCountries.includes(country));
 
 const stripeRequest = async (config: BillingConfig, path: string, params: URLSearchParams) => {
   const credentials = btoa(`${config.secretKey}:`);
@@ -65,6 +80,7 @@ export const createSubscriptionCheckout = async (
   config: BillingConfig,
   input: { appUrl: string; userId: string; email: string; businessName?: string | null },
 ) => {
+  const suffix = crypto.randomUUID().replace(/[^a-z]/gi, '').slice(0, 8).padEnd(8, 'a');
   const params = new URLSearchParams({
     mode: 'subscription',
     'line_items[0][price]': config.priceId,
@@ -73,10 +89,12 @@ export const createSubscriptionCheckout = async (
     cancel_url: `${input.appUrl}/profile?billing=cancelled`,
     client_reference_id: input.userId,
     customer_email: input.email,
+    billing_address_collection: 'required',
     'metadata[user_id]': input.userId,
     'metadata[market]': config.market,
     'subscription_data[metadata][user_id]': input.userId,
     'subscription_data[metadata][market]': config.market,
+    integration_identifier: `binno_checkout_${suffix}`,
   });
   if (input.businessName) params.set('metadata[business_name]', input.businessName.slice(0, 500));
   return stripeRequest(config, '/v1/checkout/sessions', params);

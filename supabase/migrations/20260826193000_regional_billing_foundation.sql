@@ -9,7 +9,9 @@ alter table public.subscriptions
   add column if not exists market text,
   add column if not exists merchant text,
   add column if not exists stripe_price_id text,
-  add column if not exists checkout_session_id text;
+  add column if not exists checkout_session_id text,
+  add column if not exists billing_country text,
+  add column if not exists eligibility_status text;
 
 alter table public.subscriptions
   drop constraint if exists subscriptions_market_check;
@@ -24,6 +26,20 @@ alter table public.subscriptions
 alter table public.subscriptions
   add constraint subscriptions_merchant_check
   check (merchant is null or merchant in ('br', 'eu'));
+
+alter table public.subscriptions
+  drop constraint if exists subscriptions_billing_country_check;
+
+alter table public.subscriptions
+  add constraint subscriptions_billing_country_check
+  check (billing_country is null or billing_country ~ '^[A-Z]{2}$');
+
+alter table public.subscriptions
+  drop constraint if exists subscriptions_eligibility_status_check;
+
+alter table public.subscriptions
+  add constraint subscriptions_eligibility_status_check
+  check (eligibility_status is null or eligibility_status in ('pending', 'verified', 'mismatch'));
 
 -- A normal unique constraint still permits several NULLs in PostgreSQL, and
 -- lets PostgREST address the conflict target used by the webhook reliably.

@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { corsHeaders, json, verifiedWebhookMarket } from '../_shared/billing.ts';
+import { billingConfig, countryFrom, countryIsEligible, corsHeaders, json, verifiedWebhookMarket } from '../_shared/billing.ts';
 
 type StripeEvent = {
   id?: string;
@@ -47,11 +47,19 @@ serve(async (request) => {
       : string(object.subscription);
     const customerId = string(object.customer);
     if (userId && subscriptionId && (eventType.startsWith('customer.subscription.') || eventType === 'checkout.session.completed')) {
+      const { data: existing } = await admin.from('subscriptions').select('eligibility_status').eq('stripe_subscription_id', subscriptionId).maybeSingle();
       const status = eventType === 'checkout.session.completed' ? 'pending' : string(object.status);
       const price = ((object.items as Record<string, unknown> | undefined)?.data as Array<Record<string, unknown>> | undefined)?.[0]?.price as Record<string, unknown> | undefined;
       const priceId = string(price?.id);
       const currency = string(price?.currency) || string(object.currency);
       const unitAmount = typeof price?.unit_amount === 'number' ? price.unit_amount / 100 : null;
+      const customerDetails = object.customer_details as Record<string, unknown> | undefined;
+      const billingAddress = customerDetails?.address as Record<string, unknown> | undefined;
+      const billingCountry = countryFrom(billingAddress?.country);
+      const config = billingConfig(merchant);
+      const eligibilityStatus = eventType === 'checkout.session.completed'
+        ? (config && countryIsEligible(config, billingCountry) ? 'verified' : 'mismatch')
+        : existing?.eligibility_status || 'pending';
       const record: Record<string, unknown> = {
         user_id: userId,
         stripe_customer_id: customerId,
@@ -59,6 +67,8 @@ serve(async (request) => {
         market: merchant,
         merchant,
         stripe_price_id: priceId,
+        billing_country: billingCountry,
+        eligibility_status: eligibilityStatus,
         plan_name: 'Binno',
         status,
         currency,
@@ -72,12 +82,14 @@ serve(async (request) => {
       if (eventType === 'checkout.session.completed') record.checkout_session_id = string(object.id);
       const { error } = await admin.from('subscriptions').upsert(record, { onConflict: 'stripe_subscription_id' });
       if (error) throw error;
-      await admin.from('profiles').update({
-        subscription_plan: 'Binno',
-        subscription_status: status,
-        subscription_start_date: unixToIso(object.current_period_start),
-        subscription_end_date: unixToIso(object.current_period_end),
-      }).eq('id', userId);
+      if (eligibilityStatus === 'verified') {
+        await admin.from('profiles').update({
+          subscription_plan: 'Binno',
+          subscription_status: status,
+          subscription_start_date: unixToIso(object.current_period_start),
+          subscription_end_date: unixToIso(object.current_period_end),
+        }).eq('id', userId);
+      }
     }
     await admin.from('billing_webhook_events').update({ processed_at: new Date().toISOString() }).eq('merchant', merchant).eq('stripe_event_id', eventId);
     return json({ received: true });

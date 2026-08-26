@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { billingConfig, corsHeaders, createCustomerPortal, createSubscriptionCheckout, json, marketFrom } from '../_shared/billing.ts';
+import { billingConfig, billingReady, corsHeaders, createCustomerPortal, createSubscriptionCheckout, json, marketFrom } from '../_shared/billing.ts';
 
 serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -22,19 +22,19 @@ serve(async (request) => {
 
   if (action === 'status') {
     const { data: subscription } = await admin.from('subscriptions')
-      .select('status, market, merchant, currency, price_per_month, current_period_end, cancel_at')
+      .select('status, market, merchant, currency, price_per_month, current_period_end, cancel_at, eligibility_status')
       .eq('user_id', user.id).order('updated_at', { ascending: false }).limit(1).maybeSingle();
-    return json({ subscription, markets: { br: Boolean(billingConfig('br')), eu: Boolean(billingConfig('eu')) } });
+    return json({ subscription, markets: { br: billingReady('br'), eu: billingReady('eu') } });
   }
 
   if (action === 'checkout') {
     const market = marketFrom(body.market);
     if (!market) return json({ error: 'Market invalid' }, 422);
     const config = billingConfig(market);
-    if (!config) return json({ error: 'Billing is not available for this market yet.' }, 503);
+    if (!config || !billingReady(market)) return json({ error: 'Billing is not available for this market yet.' }, 503);
     const { data: profile } = await admin.from('profiles').select('business_name').eq('id', user.id).maybeSingle();
     const { data: existing } = await admin.from('subscriptions').select('status').eq('user_id', user.id)
-      .in('status', ['active', 'trialing', 'past_due']).limit(1).maybeSingle();
+      .in('status', ['active', 'trialing', 'past_due', 'pending']).limit(1).maybeSingle();
     if (existing) return json({ error: 'Subscription already exists.', code: 'already_subscribed' }, 409);
     const appUrl = (Deno.env.get('APP_URL') || '').replace(/\/$/, '');
     if (!appUrl) return json({ error: 'Billing origin is not configured.' }, 503);
@@ -56,7 +56,7 @@ serve(async (request) => {
 
   if (action === 'portal') {
     const { data: subscription } = await admin.from('subscriptions')
-      .select('merchant, stripe_customer_id').eq('user_id', user.id).not('stripe_customer_id', 'is', null)
+      .select('merchant, stripe_customer_id').eq('user_id', user.id).eq('eligibility_status', 'verified').not('stripe_customer_id', 'is', null)
       .order('updated_at', { ascending: false }).limit(1).maybeSingle();
     const market = marketFrom(subscription?.merchant);
     const config = market ? billingConfig(market) : null;
