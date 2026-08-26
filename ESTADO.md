@@ -476,7 +476,9 @@ migração para Place Details (New) está preparada. Evidência em
   internacional de dados. A Política de Privacidade declara LGPD+RGPD, mas isso
   não substitui revisão jurídica.
 - O endereço do QR não é editável de propósito. A edição manual já causou QR
-  apontando para página inexistente.
+  apontando para página inexistente. O slug permanece fixo enquanto o QR estiver
+  ativo; o cartão com moldura é o padrão de impressão e o QR puro continua
+  disponível para outros materiais.
 - O cartão impresso é material do cliente final e permanece trilingue.
 - Há cópias locais do macOS com nomes `* 2.ts`/`* 2.tsx`; não pertencem ao git
   e não devem entrar em commits.

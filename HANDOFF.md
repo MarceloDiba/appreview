@@ -739,7 +739,9 @@ npm run verify
 - Há ficheiros duplicados do macOS em `src/` (`*  2.tsx`/`* 2.ts`), fora do git.
   Ignorar (os scripts já os saltam).
 - O QR impresso e o endereço do QR **não são editáveis de propósito** (era o que
-  causava o bug do QR apontar para página inexistente).
+  causava o bug do QR apontar para página inexistente). Cada slug é fixo enquanto
+  o QR estiver ativo; o cartão com moldura é o formato padrão para impressão e o
+  PNG do QR puro permanece disponível para outros materiais.
 - Transferência de dados para o Brasil: agora a empresa é brasileira, mas o
   piloto é português → LGPD+RGPD juntos. Precisa de advogado.
 

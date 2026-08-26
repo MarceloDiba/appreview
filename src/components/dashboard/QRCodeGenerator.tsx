@@ -182,7 +182,7 @@ const QRCodeGenerator = ({ baseUrl, businessName, businessPhone, canCreate = tru
     });
   };
 
-  /** Cartão de mesa pronto a imprimir, no idioma do estabelecimento. */
+  /** Cartão de mesa com moldura, pronto a imprimir no idioma do estabelecimento. */
   const printCard = async (qr: SavedQR) => {
     const printed = await printQrCard({
       qrName: qr.name,
