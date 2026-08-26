@@ -5,6 +5,16 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 
 ## Prontidão para venda — 21 de agosto de 2026
 
+- [x] Preparar a fundação regional da Stripe: Brasil R$199/mês e Europa
+  €49/mês, com contas separadas, escolha explícita do cliente e webhooks
+  assinados. Ainda sem cobrança live.
+- [ ] Criar e validar a conta Stripe brasileira, o preço recorrente em BRL e
+  os segredos próprios da região.
+- [ ] Alinhar a entidade vendedora da Europa aos Termos, Privacidade e às
+  obrigações fiscais antes de ativar €49/mês.
+- [ ] Validar uma compra de teste completa em cada região antes de inserir
+  segredos live. Ver `docs/cobranca-regional-binno.md`.
+
 - [~] Acompanhar candidatura oficial de Basic access do Google: submetida em
   21/08 pela conta `diba@noadigital.com.br` para o projeto `app-review-505612`.
   Registo Google: **8-5255000041379**. A quota de Account Management segue em

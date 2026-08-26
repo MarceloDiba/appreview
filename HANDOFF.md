@@ -5,6 +5,23 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Prontidão para venda — 25/08/2026 (em execução)
 
+### Cobrança regional Stripe — base local em 26/08/2026
+
+- **Decisão confirmada:** Brasil usa R$199/mês e Europa usa €49/mês. Cada
+  mercado terá conta Stripe, produto, preço, clientes, faturas, portal e
+  webhook próprios. Não é um caso de Stripe Connect.
+- **Nesta branch:** migration de auditoria de webhooks, Checkout autenticado,
+  Portal Stripe, webhook idempotente e escolha explícita de mercado no site e
+  no Perfil. IP poderá sugerir uma escolha no futuro, mas não decide sozinho.
+- **Proteção:** o Checkout permanece indisponível até aquela região receber
+  chave secreta e Price ID próprios no Supabase. A assinatura só muda após
+  webhook Stripe assinado, nunca apenas pela URL de sucesso.
+- **Não feito:** nenhuma conta, preço, webhook ou cobrança live foi criado.
+  Falta uma conta Stripe brasileira. A conta europeia ativa pertence à MOB CC
+  UNIPESSOAL LDA, enquanto os textos públicos ainda identificam outra entidade;
+  alinhar vendedor, Termos, Privacidade e fiscalidade antes da ativação.
+- O procedimento completo está em `docs/cobranca-regional-binno.md`.
+
 ### Lote OpenWA operacional e candidatura Google — em execução local
 
 - Foi confirmada no projeto Google Cloud `app-review-505612` a presença das
