@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -34,8 +33,6 @@ const SectionTitle = ({ eyebrow, title, body, centered = false, inverted = false
 const Index = () => {
   const { locale } = useTranslation();
   const copy = getMarketingCopy(locale);
-  const [market, setMarket] = useState<'br' | 'eu'>(locale === 'pt-BR' ? 'br' : 'eu');
-  const price = market === 'br' ? 'R$199' : '€49';
 
   return (
     <div className="min-h-screen bg-white text-slate-950">
@@ -108,7 +105,7 @@ const Index = () => {
 
         <section id="demo" className="scroll-mt-20 border-y border-slate-100 bg-slate-50 px-4 py-20 sm:px-6"><div className="mx-auto max-w-7xl"><SectionTitle centered eyebrow={copy.demo.eyebrow} title={copy.demo.title} body={copy.demo.body} /><div className="mt-10"><BinnoDemoCockpit copy={copy} /></div><div className="mt-8 text-center"><Button asChild size="lg" className="bg-[#2457D6] hover:bg-[#1d47b0]"><Link to="/demo">{copy.demo.primary}<ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div></div></section>
 
-        <section id="pricing" className="scroll-mt-20 px-4 py-20 sm:px-6"><div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-8 rounded-3xl border border-violet-200 bg-violet-50/60 p-8 md:flex-row md:p-10"><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#6D43C0]">{copy.pricing.eyebrow}</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">{copy.pricing.title}</h2><p className="mt-3 max-w-xl text-lg leading-7 text-slate-600">{copy.pricing.body}</p></div><div className="w-full max-w-64 text-center md:text-right"><p className="text-sm font-medium text-slate-600">{copy.pricing.marketLabel}</p><div className="mt-3 grid grid-cols-2 gap-2" role="radiogroup" aria-label={copy.pricing.marketLabel}><button type="button" role="radio" aria-checked={market === 'br'} onClick={() => setMarket('br')} className={`rounded-lg border px-3 py-2 text-sm font-semibold transition ${market === 'br' ? 'border-[#2457D6] bg-white text-[#2457D6]' : 'border-transparent text-slate-600 hover:bg-white/70'}`}>{copy.pricing.brazil}</button><button type="button" role="radio" aria-checked={market === 'eu'} onClick={() => setMarket('eu')} className={`rounded-lg border px-3 py-2 text-sm font-semibold transition ${market === 'eu' ? 'border-[#2457D6] bg-white text-[#2457D6]' : 'border-transparent text-slate-600 hover:bg-white/70'}`}>{copy.pricing.europe}</button></div><p className="mt-4"><span className="text-5xl font-bold text-slate-950">{price}</span><span className="text-slate-500">{copy.pricing.monthly}</span></p><p className="mt-2 text-xs text-slate-500">{copy.pricing.availableHint}</p><Button asChild size="lg" className="mt-5 w-full bg-[#2457D6] hover:bg-[#1d47b0]"><Link to={`/signup?market=${market}`}>{copy.pricing.cta}</Link></Button></div></div></section>
+        <section id="pricing" className="scroll-mt-20 px-4 py-20 sm:px-6"><div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-8 rounded-3xl border border-violet-200 bg-violet-50/60 p-8 md:flex-row md:p-10"><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#6D43C0]">{copy.pricing.eyebrow}</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">{copy.pricing.title}</h2><p className="mt-3 max-w-xl text-lg leading-7 text-slate-600">{copy.pricing.body}</p></div><div className="w-full max-w-64 text-center md:text-right"><p className="text-sm font-medium text-slate-600">{copy.pricing.availableLabel}</p><p className="mt-3"><span className="text-5xl font-bold text-slate-950">R$199</span><span className="text-slate-500">{copy.pricing.monthly}</span></p><p className="mt-2 text-xs leading-5 text-slate-500">{copy.pricing.availableHint}</p><Button asChild size="lg" className="mt-5 w-full bg-[#2457D6] hover:bg-[#1d47b0]"><Link to="/signup">{copy.pricing.cta}</Link></Button></div></div></section>
       </main>
       <footer className="bg-slate-950 px-4 py-10 text-slate-300 sm:px-6"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-5 sm:flex-row"><div><p className="text-lg font-bold text-white">Binno</p><p className="mt-2 text-sm text-slate-400">{copy.footer.body}</p></div><div className="flex flex-wrap gap-5 text-sm"><Link to="/demo">{copy.footer.demo}</Link><Link to="/termos">{copy.footer.terms}</Link><Link to="/privacidade">{copy.footer.privacy}</Link></div></div></footer>
     </div>

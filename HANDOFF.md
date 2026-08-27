@@ -5,32 +5,36 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Prontidão para venda — 25/08/2026 (em execução)
 
-### Cobrança regional Stripe — base local em 27/08/2026
+### Cobrança Stripe por país onde o negócio opera — 27/08/2026
 
-- **Decisão confirmada:** Brasil usa R$199/mês e Europa usa €49/mês. Cada
-  mercado terá conta Stripe, produto, preço, clientes, faturas, portal e
-  webhook próprios. Não é um caso de Stripe Connect.
-- **Nesta branch:** migration de auditoria de webhooks, Checkout autenticado,
-  Portal Stripe, webhook idempotente e escolha explícita de mercado no site e
-  no Perfil. IP poderá sugerir uma escolha no futuro, mas não decide sozinho.
-- **Proteção:** o Checkout exige que a pessoa confirme o país de faturação
-  elegível antes de abrir. O endereço efetivo volta a ser validado no webhook
-  Stripe assinado. Uma divergência nunca ativa o Binno, ainda que alguém tenha
-  declarado um país diferente antes do Checkout. A assinatura nunca muda
-  apenas pela URL de sucesso.
-- **Teste configurado:** a conta Stripe de testes da MDR Propaganda recebeu o
-  produto `Binno` e o preço mensal BRL 199. Isto não cria cobrança real nem
-  ativa a região brasileira no produto até os segredos de teste e o webhook
-  serem configurados no Supabase.
-- **Catálogo live BR preparado, ainda inativo:** a conta real da MDR Propaganda
-  foi conectada em 27/08. Foram criados o produto `Binno` e o preço mensal de
-  R$199 (`price_1U93b28uAISU0uycpRFXGwOO`), ambos sem Checkout publicado e com
-  o produto inativo. Portanto, nenhuma cobrança pode ocorrer por esta etapa.
-- **Não feito:** faltam o endpoint de webhook, os segredos no Supabase, o
-  Customer Portal, uma compra de teste completa e a ativação explícita do
-  produto. A conta europeia live conectada pertence à MOB CC / Portugal,
-  enquanto os textos públicos ainda identificam outra entidade; alinhar
-  vendedor, Termos, Privacidade e fiscalidade antes da ativação de €49/mês.
+- **Decisão confirmada:** o Binno abre vendas somente para negócios que operam
+  no Brasil, por R$199/mês. O preço europeu de €49 não aparece, não recebe
+  Checkout e não é uma opção de escolha nesta fase.
+- **Fonte de decisão:** o campo `profiles.business_country`, preenchido no
+  onboarding e no Perfil, é a origem comercial. IP, idioma e código do telefone
+  não definem preço ou mercado. O servidor deriva o mercado e nunca aceita uma
+  região enviada pelo navegador.
+- **Proteção:** o Checkout envia à Stripe o país de operação já validado. No
+  webhook assinado, o endereço efetivo de cobrança precisa corresponder ao país
+  do negócio; uma divergência não ativa a assinatura nem libera acesso.
+- **Base live BR pronta:** a conta MDR Propaganda possui o preço live de R$199
+  (`price_1U93b28uAISU0uycpRFXGwOO`), os segredos necessários estão no
+  Supabase e o webhook live já está configurado.
+- **Base publicada em 27/08:** a coluna `profiles.business_country` foi
+  aplicada e verificada no Supabase. O histórico remoto a registou como
+  `business_country_billing_rule` (versão `20260827202322`), pois a API de
+  migração gera a sua própria versão. As Edge Functions `billing-checkout` e
+  `stripe-billing-webhook` foram publicadas e estão ativas na versão 4.
+- **Pendente antes de abrir vendas autônomas:** abrir e cancelar um Checkout
+  live de teste no Brasil, confirmando webhook e assinatura, e configurar o
+  Customer Portal da conta brasileira. Imposto automático permanece desligado
+  até a revisão fiscal.
+- **Europa fica em espera:** só poderá ser aberta depois de entidade vendedora,
+  termos, privacidade, fiscalidade, catálogo, portal, webhook e teste próprios.
+- **Telefone do gestor:** Perfil, onboarding e Configurações usam o mesmo campo
+  internacional com bandeira e máscara. O telefone é guardado em formato
+  internacional e não participa da decisão comercial; o país do negócio é um
+  campo separado.
 - O procedimento completo está em `docs/cobranca-regional-binno.md`.
 
 ### Lote OpenWA operacional e candidatura Google — em execução local

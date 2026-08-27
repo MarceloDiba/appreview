@@ -5,19 +5,26 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 
 ## Prontidão para venda — 27 de agosto de 2026
 
-- [x] Preparar a fundação regional da Stripe: Brasil R$199/mês e Europa
-  €49/mês, com contas separadas, escolha explícita de país elegível antes do
-  Checkout e confirmação via webhooks assinados. Ainda sem cobrança live.
-- [x] Criar no modo de testes da MDR o produto Binno e o preço mensal de
-  R$199. Não cria cobrança real nem habilita checkout.
-- [~] Conectar e preparar a conta Stripe brasileira da MDR: produto Binno e
-  preço live de R$199/mês (`price_1U93b28uAISU0uycpRFXGwOO`) criados em estado
-  inativo. Faltam webhook, segredos no Supabase, Customer Portal, teste ponta
-  a ponta e ativação explícita do produto.
-- [ ] Alinhar a entidade vendedora da Europa aos Termos, Privacidade e às
-  obrigações fiscais antes de ativar €49/mês.
-- [ ] Validar uma compra de teste completa em cada região antes de inserir
-  segredos live. Ver `docs/cobranca-regional-binno.md`.
+- [x] Definir cobrança pelo país onde o negócio opera: esse país, salvo em
+  `profiles.business_country`, é a fonte comercial. IP, idioma e telefone não
+  definem preço.
+- [x] Padronizar o telefone do gestor com seletor de bandeira e máscara
+  internacional no onboarding, Perfil e Configurações. O campo permanece
+  separado do país onde o negócio opera.
+- [x] Preparar a venda brasileira de R$199/mês na conta live da MDR Propaganda:
+  preço `price_1U93b28uAISU0uycpRFXGwOO`, segredos no Supabase e webhook live
+  já configurados.
+- [x] Publicar a coluna `business_country` e as funções de cobrança que
+  derivam o mercado no servidor. A alteração foi aplicada em 27/08 e
+  verificada no Supabase; as funções `billing-checkout` e
+  `stripe-billing-webhook` estão ativas na versão 4. O histórico remoto usa a
+  versão gerada `20260827202322` para esta alteração isolada.
+- [ ] Abrir e cancelar um Checkout live de teste no Brasil, confirmando o
+  webhook, a assinatura gravada e o bloqueio de país divergente.
+- [ ] Configurar e testar o Customer Portal da conta brasileira.
+- [ ] Manter a Europa indisponível publicamente. Antes de €49/mês, alinhar
+  entidade vendedora, termos, privacidade, fiscalidade, catálogo, portal,
+  webhook e compra de teste próprios.
 
 - [~] Acompanhar candidatura oficial de Basic access do Google: submetida em
   21/08 pela conta `diba@noadigital.com.br` para o projeto `app-review-505612`.

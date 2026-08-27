@@ -2,30 +2,28 @@
 
 ## Modelo aprovado
 
-O Binno vende a mesma assinatura mensal em duas operações independentes:
+O Binno vende inicialmente apenas para negócios que operam no Brasil:
 
-| Mercado escolhido pelo cliente | Preço público | Conta Stripe |
+| País onde o negócio opera | Preço público | Estado |
 | --- | --- | --- |
-| Brasil | R$ 199 por mês | Conta brasileira do vendedor brasileiro |
-| Europa | €49 por mês | Conta europeia do vendedor europeu |
+| Brasil | R$199 por mês | Aberto após a validação final |
+| Outros países | Não exibido | Indisponível nesta fase |
 
-O país nunca é decidido apenas por IP. O site pode sugerir um mercado, mas o
-cliente escolhe e pode trocar antes do checkout.
+O país de operação é preenchido no onboarding ou no Perfil e salvo em
+`profiles.business_country`. Ele é a fonte comercial. IP, idioma, localização
+do navegador e código do telefone nunca definem o preço ou permitem trocar de
+mercado.
 
-Antes de abrir o Checkout, a pessoa confirma o país de cobrança e a aplicação
-aceita apenas países elegíveis para o mercado escolhido. O Checkout exige o
-endereço de cobrança. A Stripe confirma o país efetivo no evento assinado: uma
-cobrança BR só é elegível com endereço do Brasil; a operação europeia aceita a
-lista de países europeus definida no código. Um endereço incompatível nunca
-ativa a assinatura ou liberta acesso no Binno.
+Antes de abrir o Checkout, a função server-side lê esse país no perfil e deriva
+o único mercado permitido. O Checkout exige endereço de cobrança. No webhook
+Stripe assinado, o país efetivo do endereço precisa corresponder ao país onde o
+negócio opera. Uma divergência não ativa a assinatura nem libera acesso.
 
-O Checkout hospedado não oferece uma lista de países permitidos apenas para o
-endereço de faturação. Por isso, a confirmação inicial evita escolhas
-acidentais e a validação assinada é a camada que protege o acesso. Se alguém
-declarar um país incorreto e depois o alterar na Stripe, a compra pode ser
-concluída, mas a assinatura fica marcada como incompatível e não concede
-acesso. Uma política de cancelamento ou reembolso desse caso precisa ser
-definida antes de abrir vendas públicas.
+O Checkout hospedado não permite limitar o endereço apenas por este critério.
+Por isso, a validação no servidor e no webhook é obrigatória. Caso o endereço
+não corresponda, a assinatura fica incompatível e não concede acesso. A regra
+de cancelamento ou reembolso desse caso precisa estar definida antes da venda
+pública.
 
 Não usar Stripe Connect: isto não é um marketplace. Cada operação é a sua
 própria relação comercial, com produto, preço, cliente, fatura, portal e
@@ -35,8 +33,8 @@ webhook na respetiva conta.
 
 1. A entidade que aparece nos Termos e na Privacidade deve ser a mesma que
    vende e recebe naquela conta Stripe.
-2. Criar, na conta Stripe daquela região, um produto `Binno` e um preço mensal
-   recorrente: R$199 no Brasil ou €49 na Europa.
+2. Criar, na conta Stripe brasileira, o produto `Binno` e o preço mensal
+   recorrente de R$199.
 3. Configurar o Customer Portal daquela conta, permitindo cancelar e atualizar
    o meio de pagamento conforme a política comercial aprovada.
 4. Criar o endpoint de webhook dessa mesma conta:
@@ -46,29 +44,28 @@ webhook na respetiva conta.
    Eventos necessários: `checkout.session.completed`,
    `customer.subscription.created`, `customer.subscription.updated` e
    `customer.subscription.deleted`.
-5. Guardar os três segredos da região no Supabase, nunca no repositório:
+5. Guardar os três segredos brasileiros no Supabase, nunca no repositório:
 
    - `STRIPE_BR_SECRET_KEY`, `STRIPE_BR_PRICE_ID`, `STRIPE_BR_WEBHOOK_SECRET`
-   - `STRIPE_EU_SECRET_KEY`, `STRIPE_EU_PRICE_ID`, `STRIPE_EU_WEBHOOK_SECRET`
 
 6. Definir `APP_URL=https://binno.pro` nos segredos do Supabase.
 
 ## Ordem segura de ativação
 
-1. Aplicar a migration regional e publicar as funções `billing-checkout` e
-   `stripe-billing-webhook`.
-2. Configurar primeiro os preços e segredos de teste de uma região.
-3. Realizar uma compra de teste e conferir que o evento chegou, a assinatura
+1. Aplicar a migration `business_country` e publicar as funções
+   `billing-checkout` e `stripe-billing-webhook`.
+2. Só depois publicar a interface que passa a consultar esse campo.
+3. Realizar uma compra de teste no Brasil e conferir que o evento chegou, a assinatura
    foi gravada e o portal abre para o mesmo cliente.
-4. Repetir no modo live somente após a revisão da entidade legal, impostos e
-   textos públicos daquele mercado.
-5. Só então inserir os segredos live. A página de perfil libera o botão apenas
-   para os mercados que possuírem chave secreta e Price ID válidos.
+4. Abrir vendas brasileiras somente depois da revisão da entidade legal,
+   impostos e textos públicos do Brasil.
+5. A Europa só poderá ser desenhada como uma nova operação depois de cumprir
+   estes mesmos passos com entidade, catálogo e textos próprios.
 
 ## Limites atuais
 
-- O checkout não é criado enquanto os três segredos e o Price ID daquele
-  mercado não existirem.
+- O checkout brasileiro não é criado enquanto os três segredos e o Price ID
+  brasileiros não existirem.
 - A aplicação não cobra, não guarda cartão e não concede acesso apenas por
   voltar da URL de sucesso. O estado vem dos webhooks assinados da Stripe.
 - A cobrança não deve ligar uma trava global de acesso aos pilotos já ativos.

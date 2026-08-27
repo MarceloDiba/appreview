@@ -14,7 +14,7 @@ import GoogleReviews from '@/components/dashboard/GoogleReviews';
 import { supabase } from '@/integrations/supabase/client';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
-const EMPTY: BusinessInfo = { name: '', ownerName: '', phone: '' };
+const EMPTY: BusinessInfo = { name: '', ownerName: '', phone: '', country: '' };
 
 /**
  * As definições passaram a ler e a gravar o que existe na base de dados.
@@ -65,7 +65,7 @@ const Settings = () => {
     const load = async () => {
       const { data, error: profileError } = await supabase
         .from('profiles')
-        .select('business_name, first_name, last_name, phone')
+        .select('business_name, first_name, last_name, phone, business_country')
         .eq('id', userId)
         .maybeSingle();
 
@@ -78,6 +78,7 @@ const Settings = () => {
           name: data.business_name || '',
           ownerName: [data.first_name, data.last_name].filter(Boolean).join(' ').trim(),
           phone: data.phone || '',
+          country: data.business_country || '',
         });
       }
 
@@ -111,6 +112,7 @@ const Settings = () => {
         first_name: firstName || null,
         last_name: rest.length ? rest.join(' ') : null,
         phone: businessInfo.phone.trim() || null,
+        business_country: businessInfo.country || null,
         updated_at: new Date().toISOString(),
       });
 
@@ -164,6 +166,7 @@ const Settings = () => {
                 businessInfo={businessInfo}
                 onBusinessInfoChange={handleBusinessInfoChange}
                 onPhoneChange={(phone) => setBusinessInfo((current) => ({ ...current, phone }))}
+                onCountryChange={(country) => setBusinessInfo((current) => ({ ...current, country }))}
                 onSaveBusinessInfo={handleSaveBusinessInfo}
                 onCancel={() => navigate(-1)}
                 saving={savingProfile}

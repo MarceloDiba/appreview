@@ -14,6 +14,7 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { extractPlaceIdFromUrl } from '@/utils/googlePlaceUtils';
 import InternationalPhoneField from '@/components/forms/InternationalPhoneField';
+import BusinessCountrySelect from '@/components/forms/BusinessCountrySelect';
 import { localeFromBusinessPhone, qrCardCopy } from '@/lib/businessLocale';
 import { printQrCard } from '@/lib/qrCard';
 
@@ -43,7 +44,7 @@ const STEPS: { n: Step; labelKey: string }[] = [
 
 const Onboarding = () => {
   const navigate = useNavigate();
-  const { t } = useOwnerTranslation();
+  const { t, i18n } = useOwnerTranslation();
   const { user, loading: authLoading } = useAuth();
   const baseUrl = publicAppOrigin();
 
@@ -55,6 +56,7 @@ const Onboarding = () => {
   const [businessName, setBusinessName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [phone, setPhone] = useState('');
+  const [businessCountry, setBusinessCountry] = useState('');
 
   // Passo 1
   const [googleUrl, setGoogleUrl] = useState('');
@@ -81,7 +83,7 @@ const Onboarding = () => {
       const [profile, links] = await Promise.all([
         supabase
           .from('profiles')
-          .select('business_name, first_name, last_name, phone')
+          .select('business_name, first_name, last_name, phone, business_country')
           .eq('id', user.id)
           .maybeSingle(),
         supabase.from('platform_links').select('platform, url').eq('user_id', user.id),
@@ -95,6 +97,7 @@ const Onboarding = () => {
           [profile.data.first_name, profile.data.last_name].filter(Boolean).join(' ').trim()
         );
         setPhone(profile.data.phone || '');
+        setBusinessCountry(profile.data.business_country || '');
       }
 
       const google = (links.data || []).find((l) => l.platform?.toLowerCase().includes('google'));
@@ -125,6 +128,7 @@ const Onboarding = () => {
         first_name: firstName || null,
         last_name: rest.length ? rest.join(' ') : null,
         phone: phone.trim() || null,
+        business_country: businessCountry || null,
         updated_at: new Date().toISOString(),
       });
 
@@ -313,11 +317,22 @@ const Onboarding = () => {
                 />
                 <p className="text-xs text-muted-foreground">{t('onboarding.phoneHelp')}</p>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="business-country">{t('onboarding.businessCountryLabel')}</Label>
+                <BusinessCountrySelect
+                  id="business-country"
+                  value={businessCountry}
+                  onChange={setBusinessCountry}
+                  placeholder={t('onboarding.businessCountryPlaceholder')}
+                  locale={i18n.language}
+                />
+                <p className="text-xs text-muted-foreground">{t('onboarding.businessCountryHelp')}</p>
+              </div>
               <div className="flex items-center justify-between pt-2">
                 <Button variant="ghost" onClick={() => setStep(1)} disabled={saving}>
                   {t('onboarding.back')}
                 </Button>
-                <Button onClick={saveBusiness} disabled={saving || !businessName.trim()}>
+                <Button onClick={saveBusiness} disabled={saving || !businessName.trim() || !businessCountry}>
                   {saving ? t('onboarding.saving') : t('onboarding.continue')}
                 </Button>
               </div>
