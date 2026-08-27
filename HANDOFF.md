@@ -1,9 +1,37 @@
 # Binno — documento de continuação (handoff)
 
-Estado atualizado em 21/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
+Estado atualizado em 27/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Prontidão para venda — 25/08/2026 (em execução)
+
+### Cobrança regional Stripe — base local em 27/08/2026
+
+- **Decisão confirmada:** Brasil usa R$199/mês e Europa usa €49/mês. Cada
+  mercado terá conta Stripe, produto, preço, clientes, faturas, portal e
+  webhook próprios. Não é um caso de Stripe Connect.
+- **Nesta branch:** migration de auditoria de webhooks, Checkout autenticado,
+  Portal Stripe, webhook idempotente e escolha explícita de mercado no site e
+  no Perfil. IP poderá sugerir uma escolha no futuro, mas não decide sozinho.
+- **Proteção:** o Checkout exige que a pessoa confirme o país de faturação
+  elegível antes de abrir. O endereço efetivo volta a ser validado no webhook
+  Stripe assinado. Uma divergência nunca ativa o Binno, ainda que alguém tenha
+  declarado um país diferente antes do Checkout. A assinatura nunca muda
+  apenas pela URL de sucesso.
+- **Teste configurado:** a conta Stripe de testes da MDR Propaganda recebeu o
+  produto `Binno` e o preço mensal BRL 199. Isto não cria cobrança real nem
+  ativa a região brasileira no produto até os segredos de teste e o webhook
+  serem configurados no Supabase.
+- **Catálogo live BR preparado, ainda inativo:** a conta real da MDR Propaganda
+  foi conectada em 27/08. Foram criados o produto `Binno` e o preço mensal de
+  R$199 (`price_1U93b28uAISU0uycpRFXGwOO`), ambos sem Checkout publicado e com
+  o produto inativo. Portanto, nenhuma cobrança pode ocorrer por esta etapa.
+- **Não feito:** faltam o endpoint de webhook, os segredos no Supabase, o
+  Customer Portal, uma compra de teste completa e a ativação explícita do
+  produto. A conta europeia live conectada pertence à MOB CC / Portugal,
+  enquanto os textos públicos ainda identificam outra entidade; alinhar
+  vendedor, Termos, Privacidade e fiscalidade antes da ativação de €49/mês.
+- O procedimento completo está em `docs/cobranca-regional-binno.md`.
 
 ### Lote OpenWA operacional e candidatura Google — em execução local
 

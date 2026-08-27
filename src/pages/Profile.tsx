@@ -12,7 +12,27 @@ import { useAuth } from '@/context/AuthContext';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 const SUPORTE_EMAIL = 'diba@noadigital.com.br';
-const PRECO_MENSAL = '49 €';
+type BillingMarket = 'br' | 'eu';
+
+const EUROPE_BILLING_COUNTRIES = [
+  ['AT', 'Österreich'], ['BE', 'België / Belgique'], ['BG', 'България'], ['CH', 'Schweiz / Suisse'],
+  ['CY', 'Κύπρος'], ['CZ', 'Česko'], ['DE', 'Deutschland'], ['DK', 'Danmark'], ['EE', 'Eesti'],
+  ['ES', 'España'], ['FI', 'Suomi'], ['FR', 'France'], ['GB', 'United Kingdom'], ['GR', 'Ελλάδα'],
+  ['HR', 'Hrvatska'], ['HU', 'Magyarország'], ['IE', 'Ireland'], ['IS', 'Ísland'], ['IT', 'Italia'],
+  ['LI', 'Liechtenstein'], ['LT', 'Lietuva'], ['LU', 'Luxembourg'], ['LV', 'Latvija'], ['MT', 'Malta'],
+  ['NL', 'Nederland'], ['NO', 'Norge'], ['PL', 'Polska'], ['PT', 'Portugal'], ['RO', 'România'],
+  ['SE', 'Sverige'], ['SI', 'Slovenija'], ['SK', 'Slovensko'],
+] as const;
+
+type BillingStatus = {
+  status?: string | null;
+  market?: BillingMarket | null;
+  currency?: string | null;
+  price_per_month?: number | null;
+  current_period_end?: string | null;
+  cancel_at?: string | null;
+  eligibility_status?: 'pending' | 'verified' | 'mismatch' | null;
+} | null;
 
 /**
  * Esta página era inteiramente inventada: uma "Ana Silva", um plano Pro de
@@ -20,10 +40,9 @@ const PRECO_MENSAL = '49 €';
  * falsas com botão de descarregar recibo. Nada disso existia, e um cliente real
  * podia razoavelmente acreditar que estava a ser cobrado.
  *
- * Agora mostra o que é verdade — a conta que iniciou sessão — e, no que toca a
- * facturação, diz o que se passa de facto: no piloto a assinatura é tratada
- * directamente com a NOÁ. Nada de tabelas de facturas até existir facturação a
- * sério.
+ * Agora mostra somente a conta que iniciou sessão. A cobrança regional tem
+ * escolha explícita de mercado e só abre a Stripe depois da configuração
+ * server-side daquele mercado. Nada de cartões ou faturas inventados.
  */
 const Profile = () => {
   const { t } = useOwnerTranslation();
@@ -35,6 +54,12 @@ const Profile = () => {
 
   const [profilePassword, setProfilePassword] = useState({ new: '', confirm: '' });
   const [changingPassword, setChangingPassword] = useState(false);
+  const [billingMarket, setBillingMarket] = useState<BillingMarket>('br');
+  const [billingCountry, setBillingCountry] = useState('');
+  const [billingStatus, setBillingStatus] = useState<BillingStatus>(null);
+  const [billingMarkets, setBillingMarkets] = useState<Record<BillingMarket, boolean>>({ br: false, eu: false });
+  const [loadingBilling, setLoadingBilling] = useState(true);
+  const [billingAction, setBillingAction] = useState<'checkout' | 'portal' | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -66,6 +91,23 @@ const Profile = () => {
     return () => {
       active = false;
     };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    const loadBilling = async () => {
+      const { data, error } = await supabase.functions.invoke('billing-checkout', { body: { action: 'status' } });
+      if (error) {
+        console.info('A cobrança regional ainda não foi ativada.', error.message);
+        return;
+      }
+      if (!active || !data) return;
+      setBillingStatus(data.subscription || null);
+      setBillingMarkets({ br: Boolean(data.markets?.br), eu: Boolean(data.markets?.eu) });
+    };
+    loadBilling().finally(() => { if (active) setLoadingBilling(false); });
+    return () => { active = false; };
   }, [user]);
 
   const handleProfileUpdate = async () => {
@@ -114,6 +156,36 @@ const Profile = () => {
       toast.error(t('profile.pwError'));
     } finally {
       setChangingPassword(false);
+    }
+  };
+
+  const startCheckout = async () => {
+    setBillingAction('checkout');
+    try {
+      const { data, error } = await supabase.functions.invoke('billing-checkout', {
+        body: { action: 'checkout', market: billingMarket, billingCountry },
+      });
+      if (error || !data?.url) throw new Error(error?.message || 'Checkout unavailable');
+      window.location.assign(data.url);
+    } catch (error) {
+      console.error('Erro ao iniciar cobrança:', error);
+      toast.error(t('profile.billingUnavailable'));
+    } finally {
+      setBillingAction(null);
+    }
+  };
+
+  const openPortal = async () => {
+    setBillingAction('portal');
+    try {
+      const { data, error } = await supabase.functions.invoke('billing-checkout', { body: { action: 'portal' } });
+      if (error || !data?.url) throw new Error(error?.message || 'Portal unavailable');
+      window.location.assign(data.url);
+    } catch (error) {
+      console.error('Erro ao abrir portal da Stripe:', error);
+      toast.error(t('profile.billingPortalUnavailable'));
+    } finally {
+      setBillingAction(null);
     }
   };
 
@@ -255,14 +327,51 @@ const Profile = () => {
                   <CardDescription>{t('profile.billingDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-gray-700">{t('profile.billingBody1', { price: PRECO_MENSAL })}</p>
-                  <p className="text-gray-700">
-                    {t('profile.billingContactPrefix')}{' '}
-                    <a className="text-primary underline" href={`mailto:${SUPORTE_EMAIL}`}>
-                      {SUPORTE_EMAIL}
-                    </a>
-                    {t('profile.billingContactSuffix')}
-                  </p>
+                  {billingStatus?.eligibility_status === 'verified' && billingStatus.status && ['active', 'trialing', 'past_due'].includes(billingStatus.status) ? (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                      <p className="font-semibold text-emerald-950">{t('profile.billingActive')}</p>
+                      <p className="mt-1 text-sm text-emerald-900">{t('profile.billingActiveDescription')}</p>
+                      <Button className="mt-4" variant="outline" onClick={openPortal} disabled={billingAction !== null}>
+                        {billingAction === 'portal' ? t('profile.billingOpeningPortal') : t('profile.billingManage')}
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-gray-700">{t('profile.billingChooseMarket')}</p>
+                      <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label={t('profile.billingChooseMarket')}>
+                        {(['br', 'eu'] as const).map((market) => {
+                          const selected = billingMarket === market;
+                          const value = market === 'br' ? 'R$199' : '€49';
+                          return <button key={market} type="button" role="radio" aria-checked={selected} onClick={() => { setBillingMarket(market); setBillingCountry(''); }} className={`rounded-xl border p-4 text-left transition ${selected ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-gray-200 hover:border-gray-300'}`}>
+                            <span className="block font-semibold text-gray-950">{market === 'br' ? t('profile.billingBrazil') : t('profile.billingEurope')}</span>
+                            <span className="mt-1 block text-2xl font-bold text-gray-950">{value}<span className="ml-1 text-sm font-normal text-gray-500">{t('profile.billingMonthly')}</span></span>
+                          </button>;
+                        })}
+                      </div>
+                      <p className="text-sm text-gray-500">{t('profile.billingMarketHint')}</p>
+                      <label className="block text-sm font-medium text-gray-800" htmlFor="billing-country">
+                        {t('profile.billingCountryLabel')}
+                        <select
+                          id="billing-country"
+                          value={billingCountry}
+                          onChange={(event) => setBillingCountry(event.target.value)}
+                          className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          <option value="">{t('profile.billingCountryPlaceholder')}</option>
+                          {billingMarket === 'br' ? (
+                            <option value="BR">{t('profile.billingCountryBrazil')}</option>
+                          ) : (
+                            EUROPE_BILLING_COUNTRIES.map(([code, name]) => <option key={code} value={code}>{name}</option>)
+                          )}
+                        </select>
+                      </label>
+                      <p className="text-sm text-gray-500">{t('profile.billingEligibilityHint')}</p>
+                      <Button onClick={startCheckout} disabled={loadingBilling || !billingMarkets[billingMarket] || !billingCountry || billingAction !== null}>
+                        {billingAction === 'checkout' ? t('profile.billingOpeningCheckout') : t('profile.billingStart')}
+                      </Button>
+                      {!loadingBilling && !billingMarkets[billingMarket] && <p className="text-sm text-amber-700">{t('profile.billingUnavailable')}</p>}
+                    </>
+                  )}
                   <p className="text-sm text-gray-500">{t('profile.billingNoMinimum')}</p>
                 </CardContent>
               </Card>

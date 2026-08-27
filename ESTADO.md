@@ -3,7 +3,21 @@
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
-## Prontidão para venda — 21 de agosto de 2026
+## Prontidão para venda — 27 de agosto de 2026
+
+- [x] Preparar a fundação regional da Stripe: Brasil R$199/mês e Europa
+  €49/mês, com contas separadas, escolha explícita de país elegível antes do
+  Checkout e confirmação via webhooks assinados. Ainda sem cobrança live.
+- [x] Criar no modo de testes da MDR o produto Binno e o preço mensal de
+  R$199. Não cria cobrança real nem habilita checkout.
+- [~] Conectar e preparar a conta Stripe brasileira da MDR: produto Binno e
+  preço live de R$199/mês (`price_1U93b28uAISU0uycpRFXGwOO`) criados em estado
+  inativo. Faltam webhook, segredos no Supabase, Customer Portal, teste ponta
+  a ponta e ativação explícita do produto.
+- [ ] Alinhar a entidade vendedora da Europa aos Termos, Privacidade e às
+  obrigações fiscais antes de ativar €49/mês.
+- [ ] Validar uma compra de teste completa em cada região antes de inserir
+  segredos live. Ver `docs/cobranca-regional-binno.md`.
 
 - [~] Acompanhar candidatura oficial de Basic access do Google: submetida em
   21/08 pela conta `diba@noadigital.com.br` para o projeto `app-review-505612`.
