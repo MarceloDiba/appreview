@@ -50,6 +50,14 @@ export const countryFrom = (value: unknown) => typeof value === 'string' && /^[a
 export const countryIsEligible = (config: BillingConfig, country: string | null) =>
   Boolean(country && config.eligibleCountries.includes(country));
 
+/**
+ * The commercial market comes from where the business operates, never from a
+ * browser choice, phone number, IP address or app language. Brazil is the only
+ * live market now; add Europe only when that operation is ready end to end.
+ */
+export const marketForBusinessCountry = (country: string | null): BillingMarket | null =>
+  country === 'BR' ? 'br' : null;
+
 const stripeRequest = async (config: BillingConfig, path: string, params: URLSearchParams) => {
   const credentials = btoa(`${config.secretKey}:`);
   const response = await fetch(`https://api.stripe.com${path}`, {

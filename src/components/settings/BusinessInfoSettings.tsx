@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import InternationalPhoneField from '@/components/forms/InternationalPhoneField';
+import BusinessCountrySelect from '@/components/forms/BusinessCountrySelect';
 
 export interface BusinessInfo {
   /** Nome do negócio. Aparece a quem avalia e assina as respostas. */
@@ -12,12 +13,14 @@ export interface BusinessInfo {
   /** Nome de quem responde aos clientes. */
   ownerName: string;
   phone: string;
+  country: string;
 }
 
 interface BusinessInfoSettingsProps {
   businessInfo: BusinessInfo;
   onBusinessInfoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onPhoneChange: (value: string) => void;
+  onCountryChange: (value: string) => void;
   onSaveBusinessInfo: () => void;
   onCancel: () => void;
   saving?: boolean;
@@ -39,11 +42,12 @@ const BusinessInfoSettings: React.FC<BusinessInfoSettingsProps> = ({
   businessInfo,
   onBusinessInfoChange,
   onPhoneChange,
+  onCountryChange,
   onSaveBusinessInfo,
   onCancel,
   saving = false,
 }) => {
-  const { t } = useOwnerTranslation();
+  const { t, i18n } = useOwnerTranslation();
   return (
     <Card>
       <CardHeader>
@@ -85,6 +89,19 @@ const BusinessInfoSettings: React.FC<BusinessInfoSettingsProps> = ({
               disabled={saving}
             />
             <p className="text-xs text-muted-foreground">{t('settings.business.phoneHelp')}</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="business-country">{t('settings.business.countryLabel')}</Label>
+            <BusinessCountrySelect
+              id="business-country"
+              value={businessInfo.country}
+              onChange={onCountryChange}
+              placeholder={t('settings.business.countryPlaceholder')}
+              locale={i18n.language}
+              disabled={saving}
+            />
+            <p className="text-xs text-muted-foreground">{t('settings.business.countryHelp')}</p>
           </div>
         </div>
       </CardContent>

@@ -57,8 +57,10 @@ serve(async (request) => {
       const billingAddress = customerDetails?.address as Record<string, unknown> | undefined;
       const billingCountry = countryFrom(billingAddress?.country);
       const config = billingConfig(merchant);
+      const { data: profile } = await admin.from('profiles').select('business_country').eq('id', userId).maybeSingle();
+      const businessCountry = countryFrom(profile?.business_country);
       const eligibilityStatus = eventType === 'checkout.session.completed'
-        ? (config && countryIsEligible(config, billingCountry) ? 'verified' : 'mismatch')
+        ? (config && countryIsEligible(config, billingCountry) && billingCountry === businessCountry ? 'verified' : 'mismatch')
         : existing?.eligibility_status || 'pending';
       const record: Record<string, unknown> = {
         user_id: userId,

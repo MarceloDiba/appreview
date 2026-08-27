@@ -3,6 +3,7 @@ import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import BusinessCountrySelect from '@/components/forms/BusinessCountrySelect';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
@@ -12,21 +13,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 const SUPORTE_EMAIL = 'diba@noadigital.com.br';
-type BillingMarket = 'br' | 'eu';
-
-const EUROPE_BILLING_COUNTRIES = [
-  ['AT', 'Österreich'], ['BE', 'België / Belgique'], ['BG', 'България'], ['CH', 'Schweiz / Suisse'],
-  ['CY', 'Κύπρος'], ['CZ', 'Česko'], ['DE', 'Deutschland'], ['DK', 'Danmark'], ['EE', 'Eesti'],
-  ['ES', 'España'], ['FI', 'Suomi'], ['FR', 'France'], ['GB', 'United Kingdom'], ['GR', 'Ελλάδα'],
-  ['HR', 'Hrvatska'], ['HU', 'Magyarország'], ['IE', 'Ireland'], ['IS', 'Ísland'], ['IT', 'Italia'],
-  ['LI', 'Liechtenstein'], ['LT', 'Lietuva'], ['LU', 'Luxembourg'], ['LV', 'Latvija'], ['MT', 'Malta'],
-  ['NL', 'Nederland'], ['NO', 'Norge'], ['PL', 'Polska'], ['PT', 'Portugal'], ['RO', 'România'],
-  ['SE', 'Sverige'], ['SI', 'Slovenija'], ['SK', 'Slovensko'],
-] as const;
 
 type BillingStatus = {
   status?: string | null;
-  market?: BillingMarket | null;
+  market?: 'br' | 'eu' | null;
   currency?: string | null;
   price_per_month?: number | null;
   current_period_end?: string | null;
@@ -40,26 +30,35 @@ type BillingStatus = {
  * falsas com botão de descarregar recibo. Nada disso existia, e um cliente real
  * podia razoavelmente acreditar que estava a ser cobrado.
  *
- * Agora mostra somente a conta que iniciou sessão. A cobrança regional tem
- * escolha explícita de mercado e só abre a Stripe depois da configuração
- * server-side daquele mercado. Nada de cartões ou faturas inventados.
+ * Agora mostra somente a conta que iniciou sessão. A cobrança vem do país em
+ * que o negócio opera e só abre a Stripe depois da validação server-side.
+ * Nada de cartões, faturas ou opções comerciais inventadas.
  */
 const Profile = () => {
-  const { t } = useOwnerTranslation();
+  const { t, i18n } = useOwnerTranslation();
   const { user, loading: authLoading } = useAuth();
 
-  const [profileData, setProfileData] = useState({ name: '', phone: '', businessName: '' });
+  const [profileData, setProfileData] = useState({ name: '', phone: '', businessName: '', businessCountry: '' });
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [profilePassword, setProfilePassword] = useState({ new: '', confirm: '' });
   const [changingPassword, setChangingPassword] = useState(false);
-  const [billingMarket, setBillingMarket] = useState<BillingMarket>('br');
-  const [billingCountry, setBillingCountry] = useState('');
   const [billingStatus, setBillingStatus] = useState<BillingStatus>(null);
-  const [billingMarkets, setBillingMarkets] = useState<Record<BillingMarket, boolean>>({ br: false, eu: false });
+  const [billingAvailable, setBillingAvailable] = useState(false);
   const [loadingBilling, setLoadingBilling] = useState(true);
   const [billingAction, setBillingAction] = useState<'checkout' | 'portal' | null>(null);
+
+  const refreshBillingStatus = async () => {
+    const { data, error } = await supabase.functions.invoke('billing-checkout', { body: { action: 'status' } });
+    if (error) {
+      console.info('A cobrança regional ainda não foi ativada.', error.message);
+      return;
+    }
+    if (!data) return;
+    setBillingStatus(data.subscription || null);
+    setBillingAvailable(Boolean(data.billing?.available));
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -68,7 +67,7 @@ const Profile = () => {
     const load = async () => {
       const { data } = await supabase
         .from('profiles')
-        .select('business_name, first_name, last_name, phone')
+        .select('business_name, first_name, last_name, phone, business_country')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -79,6 +78,7 @@ const Profile = () => {
           name: [data.first_name, data.last_name].filter(Boolean).join(' ').trim(),
           phone: data.phone || '',
           businessName: data.business_name || '',
+          businessCountry: data.business_country || '',
         });
       }
     };
@@ -97,14 +97,7 @@ const Profile = () => {
     if (!user) return;
     let active = true;
     const loadBilling = async () => {
-      const { data, error } = await supabase.functions.invoke('billing-checkout', { body: { action: 'status' } });
-      if (error) {
-        console.info('A cobrança regional ainda não foi ativada.', error.message);
-        return;
-      }
-      if (!active || !data) return;
-      setBillingStatus(data.subscription || null);
-      setBillingMarkets({ br: Boolean(data.markets?.br), eu: Boolean(data.markets?.eu) });
+      await refreshBillingStatus();
     };
     loadBilling().finally(() => { if (active) setLoadingBilling(false); });
     return () => { active = false; };
@@ -120,10 +113,12 @@ const Profile = () => {
         first_name: firstName || null,
         last_name: rest.length ? rest.join(' ') : null,
         phone: profileData.phone.trim() || null,
+        business_country: profileData.businessCountry || null,
         updated_at: new Date().toISOString(),
       });
 
       if (error) throw error;
+      await refreshBillingStatus();
       toast.success(t('profile.savedToast'));
     } catch (error) {
       console.error('Erro ao guardar o perfil:', error);
@@ -163,7 +158,7 @@ const Profile = () => {
     setBillingAction('checkout');
     try {
       const { data, error } = await supabase.functions.invoke('billing-checkout', {
-        body: { action: 'checkout', market: billingMarket, billingCountry },
+        body: { action: 'checkout' },
       });
       if (error || !data?.url) throw new Error(error?.message || 'Checkout unavailable');
       window.location.assign(data.url);
@@ -267,6 +262,19 @@ const Profile = () => {
                         placeholder={t('profile.phonePlaceholder')}
                       />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="profile-business-country">{t('profile.businessCountryLabel')}</Label>
+                      <BusinessCountrySelect
+                        id="profile-business-country"
+                        value={profileData.businessCountry}
+                        onChange={(businessCountry) => setProfileData({ ...profileData, businessCountry })}
+                        placeholder={t('profile.businessCountryPlaceholder')}
+                        locale={i18n.language}
+                        disabled={saving}
+                      />
+                      <p className="text-xs text-muted-foreground">{t('profile.businessCountryHelp')}</p>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-end">
@@ -335,42 +343,22 @@ const Profile = () => {
                         {billingAction === 'portal' ? t('profile.billingOpeningPortal') : t('profile.billingManage')}
                       </Button>
                     </div>
-                  ) : (
+                  ) : profileData.businessCountry === 'BR' ? (
                     <>
-                      <p className="text-gray-700">{t('profile.billingChooseMarket')}</p>
-                      <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label={t('profile.billingChooseMarket')}>
-                        {(['br', 'eu'] as const).map((market) => {
-                          const selected = billingMarket === market;
-                          const value = market === 'br' ? 'R$199' : '€49';
-                          return <button key={market} type="button" role="radio" aria-checked={selected} onClick={() => { setBillingMarket(market); setBillingCountry(''); }} className={`rounded-xl border p-4 text-left transition ${selected ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-gray-200 hover:border-gray-300'}`}>
-                            <span className="block font-semibold text-gray-950">{market === 'br' ? t('profile.billingBrazil') : t('profile.billingEurope')}</span>
-                            <span className="mt-1 block text-2xl font-bold text-gray-950">{value}<span className="ml-1 text-sm font-normal text-gray-500">{t('profile.billingMonthly')}</span></span>
-                          </button>;
-                        })}
+                      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                        <p className="font-semibold text-gray-950">{t('profile.billingBrazil')}</p>
+                        <p className="mt-1 text-2xl font-bold text-gray-950">R$199<span className="ml-1 text-sm font-normal text-gray-500">{t('profile.billingMonthly')}</span></p>
                       </div>
-                      <p className="text-sm text-gray-500">{t('profile.billingMarketHint')}</p>
-                      <label className="block text-sm font-medium text-gray-800" htmlFor="billing-country">
-                        {t('profile.billingCountryLabel')}
-                        <select
-                          id="billing-country"
-                          value={billingCountry}
-                          onChange={(event) => setBillingCountry(event.target.value)}
-                          className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                        >
-                          <option value="">{t('profile.billingCountryPlaceholder')}</option>
-                          {billingMarket === 'br' ? (
-                            <option value="BR">{t('profile.billingCountryBrazil')}</option>
-                          ) : (
-                            EUROPE_BILLING_COUNTRIES.map(([code, name]) => <option key={code} value={code}>{name}</option>)
-                          )}
-                        </select>
-                      </label>
-                      <p className="text-sm text-gray-500">{t('profile.billingEligibilityHint')}</p>
-                      <Button onClick={startCheckout} disabled={loadingBilling || !billingMarkets[billingMarket] || !billingCountry || billingAction !== null}>
+                      <p className="text-sm text-gray-500">{t('profile.billingBrazilHint')}</p>
+                      <Button onClick={startCheckout} disabled={loadingBilling || !billingAvailable || billingAction !== null}>
                         {billingAction === 'checkout' ? t('profile.billingOpeningCheckout') : t('profile.billingStart')}
                       </Button>
-                      {!loadingBilling && !billingMarkets[billingMarket] && <p className="text-sm text-amber-700">{t('profile.billingUnavailable')}</p>}
+                      {!loadingBilling && !billingAvailable && <p className="text-sm text-amber-700">{t('profile.billingUnavailable')}</p>}
                     </>
+                  ) : (
+                    <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+                      {profileData.businessCountry ? t('profile.billingCountryUnavailable') : t('profile.billingCountryRequired')}
+                    </p>
                   )}
                   <p className="text-sm text-gray-500">{t('profile.billingNoMinimum')}</p>
                 </CardContent>

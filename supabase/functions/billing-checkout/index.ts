@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { billingConfig, billingReady, corsHeaders, countryFrom, countryIsEligible, createCustomerPortal, createSubscriptionCheckout, json, marketFrom } from '../_shared/billing.ts';
+import { billingConfig, billingReady, corsHeaders, countryFrom, countryIsEligible, createCustomerPortal, createSubscriptionCheckout, json, marketForBusinessCountry, marketFrom } from '../_shared/billing.ts';
 
 serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -21,22 +21,26 @@ serve(async (request) => {
   const admin = createClient(supabaseUrl, serviceRoleKey);
 
   if (action === 'status') {
+    const { data: profile } = await admin.from('profiles').select('business_country').eq('id', user.id).maybeSingle();
+    const businessCountry = countryFrom(profile?.business_country);
+    const market = marketForBusinessCountry(businessCountry);
     const { data: subscription } = await admin.from('subscriptions')
       .select('status, market, merchant, currency, price_per_month, current_period_end, cancel_at, eligibility_status')
       .eq('user_id', user.id).order('updated_at', { ascending: false }).limit(1).maybeSingle();
-    return json({ subscription, markets: { br: billingReady('br'), eu: billingReady('eu') } });
+    return json({ subscription, billing: { businessCountry, market, available: Boolean(market && billingReady(market)) } });
   }
 
   if (action === 'checkout') {
-    const market = marketFrom(body.market);
-    if (!market) return json({ error: 'Market invalid' }, 422);
+    const { data: profile } = await admin.from('profiles').select('business_name, business_country').eq('id', user.id).maybeSingle();
+    const businessCountry = countryFrom(profile?.business_country);
+    if (!businessCountry) return json({ error: 'Business country is required before checkout.', code: 'business_country_required' }, 422);
+    const market = marketForBusinessCountry(businessCountry);
+    if (!market) return json({ error: 'Billing is not available where this business operates yet.', code: 'market_unavailable' }, 503);
     const config = billingConfig(market);
     if (!config || !billingReady(market)) return json({ error: 'Billing is not available for this market yet.' }, 503);
-    const declaredCountry = countryFrom(body.billingCountry);
-    if (!declaredCountry || !countryIsEligible(config, declaredCountry)) {
-      return json({ error: 'This billing country is not eligible for the selected market.', code: 'market_country_mismatch' }, 422);
+    if (!countryIsEligible(config, businessCountry)) {
+      return json({ error: 'Business country is not eligible for this market.', code: 'market_country_mismatch' }, 422);
     }
-    const { data: profile } = await admin.from('profiles').select('business_name').eq('id', user.id).maybeSingle();
     const { data: existing } = await admin.from('subscriptions').select('status').eq('user_id', user.id)
       .in('status', ['active', 'trialing', 'past_due', 'pending']).limit(1).maybeSingle();
     if (existing) return json({ error: 'Subscription already exists.', code: 'already_subscribed' }, 409);
@@ -48,7 +52,7 @@ serve(async (request) => {
         userId: user.id,
         email: user.email,
         businessName: profile?.business_name,
-        declaredCountry,
+        declaredCountry: businessCountry,
       });
       const url = typeof session.url === 'string' ? session.url : null;
       if (!url) return json({ error: 'Checkout session has no URL.' }, 502);
