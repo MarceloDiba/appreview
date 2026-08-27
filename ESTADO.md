@@ -5,6 +5,13 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 
 ## Prontidão para venda — 21 de agosto de 2026
 
+- [x] Ajustar a configuração do WhatsApp para número com país e máscara,
+  mensagem de teste padrão editável e preferências individuais de conteúdo.
+  Números brasileiros antigos são normalizados para `+55` ao carregar. O
+  resumo periódico passou a corresponder somente a nota e total de avaliações;
+  alertas, fila e Perfil do Google são escolhas separadas. Pacote verificado
+  localmente em 27/08 e aguarda PR temático.
+
 - [~] Acompanhar candidatura oficial de Basic access do Google: submetida em
   21/08 pela conta `diba@noadigital.com.br` para o projeto `app-review-505612`.
   Registo Google: **8-5255000041379**. A quota de Account Management segue em
