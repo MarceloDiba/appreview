@@ -14,9 +14,11 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Preparar a venda brasileira de R$199/mês na conta live da MDR Propaganda:
   preço `price_1U93b28uAISU0uycpRFXGwOO`, segredos no Supabase e webhook live
   já configurados.
-- [~] Publicar a migration `business_country` e as funções de cobrança que
-  derivam o mercado no servidor. A ordem é obrigatória: Supabase antes do
-  deploy da interface, para não consultar uma coluna inexistente.
+- [x] Publicar a coluna `business_country` e as funções de cobrança que
+  derivam o mercado no servidor. A alteração foi aplicada em 27/08 e
+  verificada no Supabase; as funções `billing-checkout` e
+  `stripe-billing-webhook` estão ativas na versão 4. O histórico remoto usa a
+  versão gerada `20260827202322` para esta alteração isolada.
 - [ ] Abrir e cancelar um Checkout live de teste no Brasil, confirmando o
   webhook, a assinatura gravada e o bloqueio de país divergente.
 - [ ] Configurar e testar o Customer Portal da conta brasileira.

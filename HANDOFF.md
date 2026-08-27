@@ -19,13 +19,16 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   do negócio; uma divergência não ativa a assinatura nem libera acesso.
 - **Base live BR pronta:** a conta MDR Propaganda possui o preço live de R$199
   (`price_1U93b28uAISU0uycpRFXGwOO`), os segredos necessários estão no
-  Supabase e o webhook live já está configurado. Isso ainda não valida o novo
-  fluxo até que a migration e as Edge Functions desta branch sejam publicadas.
-- **Pendente antes de abrir vendas:** aplicar a migration `business_country`,
-  publicar `billing-checkout` e `stripe-billing-webhook` antes do deploy da
-  interface, abrir e cancelar um Checkout de teste, e configurar o Customer
-  Portal da conta brasileira. Imposto automático permanece desligado até a
-  revisão fiscal.
+  Supabase e o webhook live já está configurado.
+- **Base publicada em 27/08:** a coluna `profiles.business_country` foi
+  aplicada e verificada no Supabase. O histórico remoto a registou como
+  `business_country_billing_rule` (versão `20260827202322`), pois a API de
+  migração gera a sua própria versão. As Edge Functions `billing-checkout` e
+  `stripe-billing-webhook` foram publicadas e estão ativas na versão 4.
+- **Pendente antes de abrir vendas autônomas:** abrir e cancelar um Checkout
+  live de teste no Brasil, confirmando webhook e assinatura, e configurar o
+  Customer Portal da conta brasileira. Imposto automático permanece desligado
+  até a revisão fiscal.
 - **Europa fica em espera:** só poderá ser aberta depois de entidade vendedora,
   termos, privacidade, fiscalidade, catálogo, portal, webhook e teste próprios.
 - **Telefone do gestor:** Perfil, onboarding e Configurações usam o mesmo campo
