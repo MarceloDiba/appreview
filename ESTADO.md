@@ -8,6 +8,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [x] Definir cobrança pelo país onde o negócio opera: esse país, salvo em
   `profiles.business_country`, é a fonte comercial. IP, idioma e telefone não
   definem preço.
+- [x] Padronizar o telefone do gestor com seletor de bandeira e máscara
+  internacional no onboarding, Perfil e Configurações. O campo permanece
+  separado do país onde o negócio opera.
 - [x] Preparar a venda brasileira de R$199/mês na conta live da MDR Propaganda:
   preço `price_1U93b28uAISU0uycpRFXGwOO`, segredos no Supabase e webhook live
   já configurados.

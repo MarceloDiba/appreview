@@ -3,6 +3,7 @@ import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import InternationalPhoneField from '@/components/forms/InternationalPhoneField';
 import BusinessCountrySelect from '@/components/forms/BusinessCountrySelect';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -255,12 +256,15 @@ const Profile = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="phone">{t('profile.phoneLabel')}</Label>
-                      <Input
+                      <InternationalPhoneField
                         id="phone"
                         value={profileData.phone}
-                        onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                        onChange={(phone) => setProfileData({ ...profileData, phone })}
                         placeholder={t('profile.phonePlaceholder')}
+                        ariaLabel={t('profile.phoneCountryLabel')}
+                        disabled={saving}
                       />
+                      <p className="text-xs text-muted-foreground">{t('profile.phoneHelp')}</p>
                     </div>
 
                     <div className="space-y-2">

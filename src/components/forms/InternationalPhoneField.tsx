@@ -6,7 +6,10 @@ import { cn } from '@/lib/utils';
 const fallbackCountry: Country = 'BR';
 
 export const countryFromPhone = (value: string): Country =>
-  parsePhoneNumber(value)?.country || fallbackCountry;
+  parsePhoneNumber(value)?.country || parsePhoneNumber(value, fallbackCountry)?.country || fallbackCountry;
+
+const normalizePhoneValue = (value: string) =>
+  parsePhoneNumber(value)?.number || parsePhoneNumber(value, fallbackCountry)?.number || value;
 
 interface InternationalPhoneFieldProps {
   id: string;
@@ -30,12 +33,13 @@ const InternationalPhoneField = ({
   ariaLabel,
   disabled = false,
 }: InternationalPhoneFieldProps) => {
-  const country = countryFromPhone(value);
+  const normalizedValue = normalizePhoneValue(value);
+  const country = countryFromPhone(normalizedValue);
 
   return (
     <PhoneInput
       id={id}
-      value={value || undefined}
+      value={normalizedValue || undefined}
       defaultCountry={country}
       international
       countryCallingCodeEditable={false}

@@ -28,6 +28,10 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   revisão fiscal.
 - **Europa fica em espera:** só poderá ser aberta depois de entidade vendedora,
   termos, privacidade, fiscalidade, catálogo, portal, webhook e teste próprios.
+- **Telefone do gestor:** Perfil, onboarding e Configurações usam o mesmo campo
+  internacional com bandeira e máscara. O telefone é guardado em formato
+  internacional e não participa da decisão comercial; o país do negócio é um
+  campo separado.
 - O procedimento completo está em `docs/cobranca-regional-binno.md`.
 
 ### Lote OpenWA operacional e candidatura Google — em execução local

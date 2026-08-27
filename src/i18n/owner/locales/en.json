@@ -578,6 +578,8 @@
     "emailHint": "To change your login email, write to us at {{email}}.",
     "phoneLabel": "Phone",
     "phonePlaceholder": "So we can reach you if something breaks",
+    "phoneCountryLabel": "Phone country",
+    "phoneHelp": "Choose the country from the flag. The number is formatted automatically.",
     "saving": "Saving...",
     "save": "Save changes",
     "savedToast": "Profile saved.",
