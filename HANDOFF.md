@@ -5,6 +5,21 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Prontidão para venda — 25/08/2026 (em execução)
 
+### Ajuste de configuração do WhatsApp — 27/08/2026 (verificado localmente; aguarda PR)
+
+- A configuração passa a usar o seletor de país e a máscara internacional já
+  existente no onboarding. Números brasileiros antigos de 10 ou 11 dígitos
+  são migrados para `+55` ao carregar, evitando o erro de validação no teste.
+- A mensagem de teste já vem preenchida, continua editável e não pode mais ser
+  substituída pelo briefing automático. As preferências agora são apresentadas
+  item a item: nota e total de avaliações, avaliações sem resposta, anomalias de
+  reputação e melhorias do Perfil do Google.
+- O resumo semanal server-side foi alinhado à escolha correspondente: entrega
+  somente nota e total de avaliações; oportunidades, temas e alertas têm
+  canais próprios e não são prometidos como parte de um pacote.
+- Validação local concluída em 27/08: TypeScript, i18n do painel, guardas de
+  produto/QR e build passaram por `npm run verify`.
+
 ### Lote OpenWA operacional e candidatura Google — em execução local
 
 - Foi confirmada no projeto Google Cloud `app-review-505612` a presença das

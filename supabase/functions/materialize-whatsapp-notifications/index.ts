@@ -23,15 +23,11 @@ const isExpectedDay = (weekday: string | undefined, day: string) =>
 
 const messageFromSummary = (summary: Record<string, unknown>) => {
   const business = summary.business as Record<string, unknown> | undefined;
-  const sample = summary.sample as Record<string, unknown> | undefined;
-  const advisor = sample?.advisor as Record<string, unknown> | undefined;
-  const opportunity = advisor?.opportunity as Record<string, unknown> | undefined;
   const name = typeof business?.name === 'string' ? business.name : 'seu negócio';
   const rating = typeof business?.googleRating === 'number' ? business.googleRating.toFixed(1).replace('.', ',') : null;
   const total = typeof business?.googleReviewCount === 'number' ? business.googleReviewCount : null;
   const lines = ['Binno', `Resumo de reputação de ${name}.`];
   if (rating !== null && total !== null) lines.push(`Nota atual: ${rating} com ${total} avaliações.`);
-  if (typeof opportunity?.phrase === 'string' && typeof opportunity?.mentions === 'number') lines.push(`Oportunidade observada: “${opportunity.phrase}” apareceu em ${opportunity.mentions} elogios recentes.`);
   lines.push('Abra o painel para ver a leitura e decidir a próxima ação.');
   return lines.join('\n');
 };
