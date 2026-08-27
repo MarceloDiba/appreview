@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { billingConfig, billingReady, corsHeaders, createCustomerPortal, createSubscriptionCheckout, json, marketFrom } from '../_shared/billing.ts';
+import { billingConfig, billingReady, corsHeaders, countryFrom, countryIsEligible, createCustomerPortal, createSubscriptionCheckout, json, marketFrom } from '../_shared/billing.ts';
 
 serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -32,6 +32,10 @@ serve(async (request) => {
     if (!market) return json({ error: 'Market invalid' }, 422);
     const config = billingConfig(market);
     if (!config || !billingReady(market)) return json({ error: 'Billing is not available for this market yet.' }, 503);
+    const declaredCountry = countryFrom(body.billingCountry);
+    if (!declaredCountry || !countryIsEligible(config, declaredCountry)) {
+      return json({ error: 'This billing country is not eligible for the selected market.', code: 'market_country_mismatch' }, 422);
+    }
     const { data: profile } = await admin.from('profiles').select('business_name').eq('id', user.id).maybeSingle();
     const { data: existing } = await admin.from('subscriptions').select('status').eq('user_id', user.id)
       .in('status', ['active', 'trialing', 'past_due', 'pending']).limit(1).maybeSingle();
@@ -44,6 +48,7 @@ serve(async (request) => {
         userId: user.id,
         email: user.email,
         businessName: profile?.business_name,
+        declaredCountry,
       });
       const url = typeof session.url === 'string' ? session.url : null;
       if (!url) return json({ error: 'Checkout session has no URL.' }, 502);

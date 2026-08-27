@@ -1,11 +1,11 @@
 # Binno — documento de continuação (handoff)
 
-Estado atualizado em 21/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
+Estado atualizado em 27/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Prontidão para venda — 25/08/2026 (em execução)
 
-### Cobrança regional Stripe — base local em 26/08/2026
+### Cobrança regional Stripe — base local em 27/08/2026
 
 - **Decisão confirmada:** Brasil usa R$199/mês e Europa usa €49/mês. Cada
   mercado terá conta Stripe, produto, preço, clientes, faturas, portal e
@@ -13,13 +13,20 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 - **Nesta branch:** migration de auditoria de webhooks, Checkout autenticado,
   Portal Stripe, webhook idempotente e escolha explícita de mercado no site e
   no Perfil. IP poderá sugerir uma escolha no futuro, mas não decide sozinho.
-- **Proteção:** o Checkout permanece indisponível até aquela região receber
-  chave secreta e Price ID próprios no Supabase. A assinatura só muda após
-  webhook Stripe assinado, nunca apenas pela URL de sucesso.
-- **Não feito:** nenhuma conta, preço, webhook ou cobrança live foi criado.
-  Falta uma conta Stripe brasileira. A conta europeia ativa pertence à MOB CC
-  UNIPESSOAL LDA, enquanto os textos públicos ainda identificam outra entidade;
-  alinhar vendedor, Termos, Privacidade e fiscalidade antes da ativação.
+- **Proteção:** o Checkout exige que a pessoa confirme o país de faturação
+  elegível antes de abrir. O endereço efetivo volta a ser validado no webhook
+  Stripe assinado. Uma divergência nunca ativa o Binno, ainda que alguém tenha
+  declarado um país diferente antes do Checkout. A assinatura nunca muda
+  apenas pela URL de sucesso.
+- **Teste configurado:** a conta Stripe de testes da MDR Propaganda recebeu o
+  produto `Binno` e o preço mensal BRL 199. Isto não cria cobrança real nem
+  ativa a região brasileira no produto até os segredos de teste e o webhook
+  serem configurados no Supabase.
+- **Não feito:** nenhuma conta, preço, webhook ou cobrança *live* foi criado.
+  Falta conectar a conta Stripe brasileira live da MDR. A conta europeia live
+  conectada pertence à MOB CC / Portugal, enquanto os textos públicos ainda
+  identificam outra entidade; alinhar vendedor, Termos, Privacidade e
+  fiscalidade antes da ativação de €49/mês.
 - O procedimento completo está em `docs/cobranca-regional-binno.md`.
 
 ### Lote OpenWA operacional e candidatura Google — em execução local

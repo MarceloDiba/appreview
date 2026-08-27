@@ -3,11 +3,13 @@
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
-## Prontidão para venda — 21 de agosto de 2026
+## Prontidão para venda — 27 de agosto de 2026
 
 - [x] Preparar a fundação regional da Stripe: Brasil R$199/mês e Europa
-  €49/mês, com contas separadas, escolha explícita do cliente e webhooks
-  assinados. Ainda sem cobrança live.
+  €49/mês, com contas separadas, escolha explícita de país elegível antes do
+  Checkout e confirmação via webhooks assinados. Ainda sem cobrança live.
+- [x] Criar no modo de testes da MDR o produto Binno e o preço mensal de
+  R$199. Não cria cobrança real nem habilita checkout.
 - [ ] Criar e validar a conta Stripe brasileira, o preço recorrente em BRL e
   os segredos próprios da região.
 - [ ] Alinhar a entidade vendedora da Europa aos Termos, Privacidade e às

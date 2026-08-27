@@ -78,7 +78,7 @@ const stripeRequest = async (config: BillingConfig, path: string, params: URLSea
  */
 export const createSubscriptionCheckout = async (
   config: BillingConfig,
-  input: { appUrl: string; userId: string; email: string; businessName?: string | null },
+  input: { appUrl: string; userId: string; email: string; businessName?: string | null; declaredCountry: string },
 ) => {
   const suffix = crypto.randomUUID().replace(/[^a-z]/gi, '').slice(0, 8).padEnd(8, 'a');
   const params = new URLSearchParams({
@@ -92,8 +92,10 @@ export const createSubscriptionCheckout = async (
     billing_address_collection: 'required',
     'metadata[user_id]': input.userId,
     'metadata[market]': config.market,
+    'metadata[declared_billing_country]': input.declaredCountry,
     'subscription_data[metadata][user_id]': input.userId,
     'subscription_data[metadata][market]': config.market,
+    'subscription_data[metadata][declared_billing_country]': input.declaredCountry,
     integration_identifier: `binno_checkout_${suffix}`,
   });
   if (input.businessName) params.set('metadata[business_name]', input.businessName.slice(0, 500));

@@ -12,10 +12,20 @@ O Binno vende a mesma assinatura mensal em duas operações independentes:
 O país nunca é decidido apenas por IP. O site pode sugerir um mercado, mas o
 cliente escolhe e pode trocar antes do checkout.
 
-O Checkout exige o endereço de cobrança. A Stripe confirma o país efetivo no
-evento assinado: uma cobrança BR só é elegível com endereço do Brasil; a
-operação europeia aceita a lista de países europeus definida no código. Um
-endereço incompatível nunca ativa a assinatura ou liberta acesso no Binno.
+Antes de abrir o Checkout, a pessoa confirma o país de cobrança e a aplicação
+aceita apenas países elegíveis para o mercado escolhido. O Checkout exige o
+endereço de cobrança. A Stripe confirma o país efetivo no evento assinado: uma
+cobrança BR só é elegível com endereço do Brasil; a operação europeia aceita a
+lista de países europeus definida no código. Um endereço incompatível nunca
+ativa a assinatura ou liberta acesso no Binno.
+
+O Checkout hospedado não oferece uma lista de países permitidos apenas para o
+endereço de faturação. Por isso, a confirmação inicial evita escolhas
+acidentais e a validação assinada é a camada que protege o acesso. Se alguém
+declarar um país incorreto e depois o alterar na Stripe, a compra pode ser
+concluída, mas a assinatura fica marcada como incompatível e não concede
+acesso. Uma política de cancelamento ou reembolso desse caso precisa ser
+definida antes de abrir vendas públicas.
 
 Não usar Stripe Connect: isto não é um marketplace. Cada operação é a sua
 própria relação comercial, com produto, preço, cliente, fatura, portal e
