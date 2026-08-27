@@ -22,11 +22,15 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   produto `Binno` e o preço mensal BRL 199. Isto não cria cobrança real nem
   ativa a região brasileira no produto até os segredos de teste e o webhook
   serem configurados no Supabase.
-- **Não feito:** nenhuma conta, preço, webhook ou cobrança *live* foi criado.
-  Falta conectar a conta Stripe brasileira live da MDR. A conta europeia live
-  conectada pertence à MOB CC / Portugal, enquanto os textos públicos ainda
-  identificam outra entidade; alinhar vendedor, Termos, Privacidade e
-  fiscalidade antes da ativação de €49/mês.
+- **Catálogo live BR preparado, ainda inativo:** a conta real da MDR Propaganda
+  foi conectada em 27/08. Foram criados o produto `Binno` e o preço mensal de
+  R$199 (`price_1U93b28uAISU0uycpRFXGwOO`), ambos sem Checkout publicado e com
+  o produto inativo. Portanto, nenhuma cobrança pode ocorrer por esta etapa.
+- **Não feito:** faltam o endpoint de webhook, os segredos no Supabase, o
+  Customer Portal, uma compra de teste completa e a ativação explícita do
+  produto. A conta europeia live conectada pertence à MOB CC / Portugal,
+  enquanto os textos públicos ainda identificam outra entidade; alinhar
+  vendedor, Termos, Privacidade e fiscalidade antes da ativação de €49/mês.
 - O procedimento completo está em `docs/cobranca-regional-binno.md`.
 
 ### Lote OpenWA operacional e candidatura Google — em execução local
