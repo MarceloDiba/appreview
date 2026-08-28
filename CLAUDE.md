@@ -1,16 +1,17 @@
-# AppReview — regras para o assistente
+# Binno — regras para o assistente
 
-> Compatibilidade com Claude. As regras canônicas e atualizadas do projeto
-> ficam em `AGENTS.md`.
+> Espelho curto. As regras canônicas ficam em `AGENTS.md`; o contrato de
+> produto aprovado fica em `docs/contrato-produto-binno.md`.
 
-Ferramenta de gestão de reputação para donos de negócio que não sabem de
-tecnologia. QR na mesa → cliente avalia → nota baixa vira caso interno para o
-dono resolver; **a avaliação pública é sempre oferecida, qualquer que seja a
-nota** (esconder isso é *review gating*, proibido — nunca reintroduzir).
+O Binno é o assessor de reputação no Google de um pequeno negócio. QR na mesa →
+cliente avalia → o painel organiza a leitura, sugere resposta editável e aponta
+a próxima ação; **a avaliação pública é sempre oferecida, qualquer que seja a
+nota** (esconder isso é *review gating*, proibido — nunca reintroduzir). O
+repositório ainda se chama `appreview` por motivo histórico.
 
 ## Método de trabalho (economia de tokens — obrigatório)
 
-- **Verificar por `tsc` + CI, nunca por navegador/dev server.** O dev
+- **Verificar por `npm run verify` + CI, nunca por navegador/dev server.** O dev
   server/preview foi o maior sorvedouro de tokens. Só abrir navegador se o
   Marcelo pedir para *ver* algo, e numa passada só.
 - **PRs grandes por tema**, não um por ajuste. Trabalhar em branch, propor PR.
@@ -28,15 +29,17 @@ nota** (esconder isso é *review gating*, proibido — nunca reintroduzir).
   cliente real, e reportar o que apagou).
 - **Precisa de aval:** gastar dinheiro (Stripe, domínio, API paga), merge/deploy,
   decisão de preço/posicionamento, apagar dado de cliente real.
+- **Ter o acesso não é ter a autorização.** Credenciais de Vercel, Supabase,
+  Stripe, Google Cloud, VPS ou DNS não ampliam essa lista.
 
 ## Verificação (rodar antes de propor PR)
 
 ```
-npx tsc --noEmit -p tsconfig.app.json   # obrigatório; o build do Vite NÃO checa tipos
+npm run verify
 ```
 
-Para i18n do painel, checar chaves batendo e resolução: ver o script em
-`HANDOFF.md` (secção "Verificação do i18n").
+Mesmo comando do CI: tipos, paridade do i18n do painel, guarda do contrato de
+produto, guarda do QR público e build. O build do Vite sozinho não checa tipos.
 
 ## i18n — dois sistemas separados por audiência
 
@@ -54,6 +57,7 @@ Para i18n do painel, checar chaves batendo e resolução: ver o script em
 ## Não regredir
 
 - Review gating: a avaliação pública nunca pode ser condicionada à nota.
-- Nada de dado inventado à vista do cliente (já limpámos "Restaurante Exemplo",
-  faturas falsas, etc.).
-- Antes de deploy, `tsc` tem de passar.
+- Nada de dado inventado à vista do cliente nem apresentado como oficial.
+- O painel não volta ao layout legado: a composição do contrato de produto
+  (fila, volume, notas, QR, temas, laterais, Radar, Plano de hoje) é aditiva.
+- Antes de deploy, `npm run verify` tem de passar.

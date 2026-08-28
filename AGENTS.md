@@ -1,15 +1,37 @@
-# AppReview — regras para o Codex
+# Binno — regras para o assistente
+
+O produto chama-se **Binno**. `AppReview` permanece apenas como nome histórico
+do repositório e de identificadores técnicos (`appreview:*`), por
+compatibilidade. Estas regras valem para qualquer assistente que trabalhe no
+projeto (Codex, Claude ou outro).
+
+## Hierarquia de documentos
+
+1. [`docs/contrato-produto-binno.md`](docs/contrato-produto-binno.md) — contrato
+   de produto aprovado. Arquitetura do painel, invariantes e limites de
+   apresentação. Nenhum outro documento o substitui e nenhuma refatoração o
+   altera sem aprovação explícita de Marcelo.
+2. `HANDOFF.md` — estado operacional completo, para retomar sem redescobrir.
+3. `ESTADO.md` — backlog vivo.
+4. Este ficheiro — regras de trabalho. `CLAUDE.md` é só um espelho curto dele.
 
 ## Produto e invariantes
 
-O AppReview é uma ferramenta de gestão de reputação para donos de negócio que
-não sabem de tecnologia. O fluxo principal é: QR na mesa → cliente avalia →
-nota baixa vira caso interno para o dono resolver.
+O Binno é o assessor de reputação no Google de um pequeno negócio: QR na mesa →
+cliente avalia → o painel organiza a leitura, sugere resposta editável e aponta
+a próxima ação útil. O gestor decide e publica; o Binno nunca publica sozinho.
 
-- A avaliação pública é sempre oferecida, qualquer que seja a nota.
-- Condicionar ou esconder a opção pública conforme a nota é review gating e é
-  proibido. Nunca reintroduzir.
-- Nunca mostrar dados inventados como se fossem reais.
+- A avaliação pública é sempre oferecida, qualquer que seja a nota. Condicionar
+  ou esconder a opção pública conforme a nota é review gating e é proibido.
+  Nunca reintroduzir.
+- Nunca mostrar dado ilustrativo, inferência ou amostra como dado oficial,
+  completo ou real sem identificá-lo corretamente.
+- O funil do QR termina em **clicou no Google**; clique não é avaliação
+  publicada.
+- Nome, texto e URL de avaliação obtidos no piloto Apify ficam só no navegador
+  autenticado, por até 14 dias.
+
+A lista completa das invariantes está no contrato de produto.
 
 ## Forma de trabalhar
 
@@ -47,16 +69,24 @@ Precisa de aprovação:
 - qualquer mudança pública, financeira ou difícil de reverter fora do escopo
   já aprovado.
 
+**Ter o acesso não é ter a autorização.** O assistente pode ter credenciais de
+GitHub, Vercel, Supabase, Stripe, Google Cloud, VPS e DNS; nada disso muda a
+lista acima. Em particular, a conta Stripe é partilhada com outro produto da
+casa: não sobrescrever configuração padrão, portal ou webhook alheios.
+
 ## Verificação obrigatória
 
 Antes de propor um PR:
 
 ```bash
-npx tsc --noEmit -p tsconfig.app.json
-npm run check:i18n-owner
+npm run verify
 ```
 
-Depois de subir a branch, aguardar o CI. O build do Vite não verifica tipos.
+É o mesmo comando do CI (`.github/workflows/ci.yml`) e o contrato único de
+verificação: TypeScript (`tsc --noEmit -p tsconfig.app.json`), paridade dos
+catálogos i18n do painel, guarda do contrato de produto, guarda de segurança do
+QR público e build. O build do Vite sozinho **não** verifica tipos. Depois de
+subir a branch, aguardar o CI; o lint continua informativo por dívida herdada.
 
 ## i18n
 
