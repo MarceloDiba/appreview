@@ -9,8 +9,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   `profiles.business_country`, é a fonte comercial. IP, idioma e telefone não
   definem preço.
 - [x] Padronizar o telefone do gestor com seletor de bandeira e máscara
-  internacional no onboarding, Perfil e Configurações. O campo permanece
-  separado do país onde o negócio opera.
+  internacional no onboarding, Perfil, Configurações e aba WhatsApp. O campo
+  permanece separado do país onde o negócio opera; a aba reutiliza o número do
+  onboarding e mantém a mensagem de teste pré-preenchida e editável.
 - [x] Preparar a venda brasileira de R$199/mês na conta live da MDR Propaganda:
   preço `price_1U93b28uAISU0uycpRFXGwOO`, segredos no Supabase e webhook live
   já configurados.
@@ -21,7 +22,11 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   versão gerada `20260827202322` para esta alteração isolada.
 - [ ] Abrir e cancelar um Checkout live de teste no Brasil, confirmando o
   webhook, a assinatura gravada e o bloqueio de país divergente.
-- [ ] Configurar e testar o Customer Portal da conta brasileira.
+- [ ] Criar, configurar e testar um Customer Portal exclusivo do Binno na
+  conta brasileira. A configuração padrão atual pertence ao Auditoria Pro e
+  não pode ser sobrescrita, pois alteraria marca e links jurídicos de outro
+  produto. A aplicação exige a configuração privada
+  `STRIPE_BR_PORTAL_CONFIGURATION_ID` antes de abrir esse portal.
 - [ ] Manter a Europa indisponível publicamente. Antes de €49/mês, alinhar
   entidade vendedora, termos, privacidade, fiscalidade, catálogo, portal,
   webhook e compra de teste próprios.

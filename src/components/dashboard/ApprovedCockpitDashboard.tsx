@@ -93,7 +93,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
     <nav className="flex gap-1 overflow-x-auto border-b border-slate-200" aria-label={t('dashboard.cockpit.layout.navigation')}>
       {tabs.map((item) => <button key={item.id} type="button" onClick={() => setTab(item.id)} className={`shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors ${tab === item.id ? 'border-[#2457D6] text-[#2457D6]' : 'border-transparent text-slate-500 hover:text-slate-900'}`}>{item.label}</button>)}
     </nav>
-    {tab === 'whatsapp' ? <WhatsAppNotificationWorkspace snapshot={snapshot} localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} demoPhone={demo ? '+351 911 000 000' : undefined} demo={demo} /> : tab === 'reviews' ? <ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} /> : <div className="space-y-5">
+    {tab === 'whatsapp' ? <WhatsAppNotificationWorkspace localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} demoPhone={demo ? '+351 911 000 000' : undefined} demo={demo} /> : tab === 'reviews' ? <ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} /> : <div className="space-y-5">
       <RadarNow snapshot={snapshot} />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <section className="min-w-0 space-y-5">

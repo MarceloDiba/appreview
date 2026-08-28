@@ -43,6 +43,14 @@ export const billingConfig = (market: BillingMarket): BillingConfig | null => {
 // application cannot safely confirm the subscription after Checkout.
 export const billingReady = (market: BillingMarket) => Boolean(billingConfig(market)?.webhookSecret);
 
+/**
+ * Customer Portal configurations are product-specific. A shared Stripe account
+ * must never fall back to its default portal, because that can expose another
+ * product's branding, legal links or cancellation rules.
+ */
+export const customerPortalConfigurationId = (market: BillingMarket) =>
+  Deno.env.get(`STRIPE_${market === 'br' ? 'BR' : 'EU'}_PORTAL_CONFIGURATION_ID`)?.trim() || null;
+
 export const countryFrom = (value: unknown) => typeof value === 'string' && /^[a-z]{2}$/i.test(value)
   ? value.toUpperCase()
   : null;
@@ -114,7 +122,12 @@ export const createCustomerPortal = async (
   config: BillingConfig,
   customerId: string,
   returnUrl: string,
-) => stripeRequest(config, '/v1/billing_portal/sessions', new URLSearchParams({ customer: customerId, return_url: returnUrl }));
+  configurationId: string,
+) => stripeRequest(config, '/v1/billing_portal/sessions', new URLSearchParams({
+  customer: customerId,
+  return_url: returnUrl,
+  configuration: configurationId,
+}));
 
 const fromHex = (value: string) => {
   if (!/^[0-9a-f]{64}$/i.test(value)) return null;

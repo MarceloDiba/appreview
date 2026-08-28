@@ -29,12 +29,22 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   live de teste no Brasil, confirmando webhook e assinatura, e configurar o
   Customer Portal da conta brasileira. Imposto automático permanece desligado
   até a revisão fiscal.
+- **Customer Portal separado:** a configuração padrão atual da conta MDR ainda
+  mostra a marca e os links jurídicos do Auditoria Pro. Ela não deve ser
+  reutilizada nem sobrescrita pelo Binno. Antes de liberar a gestão de
+  assinatura, criar uma configuração exclusiva do portal Binno, associá-la às
+  sessões do Binno por `STRIPE_BR_PORTAL_CONFIGURATION_ID` e validar sua
+  marca, links jurídicos, retorno e regras de cancelamento sem alterar o outro
+  produto. Enquanto esse segredo não existir, o Binno não abre sessão do
+  portal compartilhado.
 - **Europa fica em espera:** só poderá ser aberta depois de entidade vendedora,
   termos, privacidade, fiscalidade, catálogo, portal, webhook e teste próprios.
-- **Telefone do gestor:** Perfil, onboarding e Configurações usam o mesmo campo
-  internacional com bandeira e máscara. O telefone é guardado em formato
-  internacional e não participa da decisão comercial; o país do negócio é um
-  campo separado.
+- **Telefone do gestor:** Perfil, onboarding, Configurações e a aba WhatsApp
+  usam o mesmo campo internacional com bandeira e máscara. O telefone é
+  guardado em formato internacional e não participa da decisão comercial; o
+  país do negócio é um campo separado. A aba WhatsApp reutiliza o telefone do
+  onboarding como padrão, mantém a mensagem de teste pré-preenchida e editável
+  e deixa o gestor selecionar cada tipo de aviso, sem pacotes fechados.
 - O procedimento completo está em `docs/cobranca-regional-binno.md`.
 
 ### Lote OpenWA operacional e candidatura Google — em execução local
