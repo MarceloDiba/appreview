@@ -31,10 +31,12 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   até a revisão fiscal.
 - **Europa fica em espera:** só poderá ser aberta depois de entidade vendedora,
   termos, privacidade, fiscalidade, catálogo, portal, webhook e teste próprios.
-- **Telefone do gestor:** Perfil, onboarding e Configurações usam o mesmo campo
-  internacional com bandeira e máscara. O telefone é guardado em formato
-  internacional e não participa da decisão comercial; o país do negócio é um
-  campo separado.
+- **Telefone do gestor:** Perfil, onboarding, Configurações e a aba WhatsApp
+  usam o mesmo campo internacional com bandeira e máscara. O telefone é
+  guardado em formato internacional e não participa da decisão comercial; o
+  país do negócio é um campo separado. A aba WhatsApp reutiliza o telefone do
+  onboarding como padrão, mantém a mensagem de teste pré-preenchida e editável
+  e deixa o gestor selecionar cada tipo de aviso, sem pacotes fechados.
 - O procedimento completo está em `docs/cobranca-regional-binno.md`.
 
 ### Lote OpenWA operacional e candidatura Google — em execução local

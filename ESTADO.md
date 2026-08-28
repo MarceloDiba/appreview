@@ -9,8 +9,9 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   `profiles.business_country`, é a fonte comercial. IP, idioma e telefone não
   definem preço.
 - [x] Padronizar o telefone do gestor com seletor de bandeira e máscara
-  internacional no onboarding, Perfil e Configurações. O campo permanece
-  separado do país onde o negócio opera.
+  internacional no onboarding, Perfil, Configurações e aba WhatsApp. O campo
+  permanece separado do país onde o negócio opera; a aba reutiliza o número do
+  onboarding e mantém a mensagem de teste pré-preenchida e editável.
 - [x] Preparar a venda brasileira de R$199/mês na conta live da MDR Propaganda:
   preço `price_1U93b28uAISU0uycpRFXGwOO`, segredos no Supabase e webhook live
   já configurados.
