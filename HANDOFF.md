@@ -3,6 +3,9 @@
 Estado atualizado em 28/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
+Para uma apresentação executiva sem detalhes operacionais ou segredos, consultar
+[docs/binno-visao-geral.md](docs/binno-visao-geral.md).
+
 ## Prontidão para venda — 25/08/2026 (em execução)
 
 ### Cobrança Stripe por país onde o negócio opera — 28/08/2026
