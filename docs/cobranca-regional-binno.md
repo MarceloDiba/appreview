@@ -35,8 +35,10 @@ webhook na respetiva conta.
    vende e recebe naquela conta Stripe.
 2. Criar, na conta Stripe brasileira, o produto `Binno` e o preço mensal
    recorrente de R$199.
-3. Configurar o Customer Portal daquela conta, permitindo cancelar e atualizar
-   o meio de pagamento conforme a política comercial aprovada.
+3. Configurar uma configuração exclusiva do Customer Portal para o Binno,
+   permitindo cancelar no fim do período, atualizar o meio de pagamento e ver
+   faturas. Nunca reutilizar a configuração padrão de outro produto da mesma
+   conta Stripe.
 4. Criar o endpoint de webhook dessa mesma conta:
 
    `https://tjbznhwdjyabuacrfqie.supabase.co/functions/v1/stripe-billing-webhook`
@@ -44,9 +46,11 @@ webhook na respetiva conta.
    Eventos necessários: `checkout.session.completed`,
    `customer.subscription.created`, `customer.subscription.updated` e
    `customer.subscription.deleted`.
-5. Guardar os três segredos brasileiros no Supabase, nunca no repositório:
+5. Guardar os três segredos brasileiros e o identificador do portal no
+   Supabase, nunca no repositório:
 
    - `STRIPE_BR_SECRET_KEY`, `STRIPE_BR_PRICE_ID`, `STRIPE_BR_WEBHOOK_SECRET`
+     e `STRIPE_BR_PORTAL_CONFIGURATION_ID`
 
 6. Definir `APP_URL=https://binno.pro` nos segredos do Supabase.
 
@@ -61,6 +65,19 @@ webhook na respetiva conta.
    impostos e textos públicos do Brasil.
 5. A Europa só poderá ser desenhada como uma nova operação depois de cumprir
    estes mesmos passos com entidade, catálogo e textos próprios.
+
+## Estado em 28/08/2026
+
+- A conta brasileira já tem preço live, webhook e segredos. A primeira
+  configuração de portal criada por API para o Binno tornou-se o padrão da
+  conta, conforme a regra da Stripe para a primeira configuração encontrada.
+- Antes de qualquer venda, restaurar pelo Dashboard o padrão do Auditoria Pro,
+  criar a segunda configuração para o Binno por API e substituir o valor de
+  `STRIPE_BR_PORTAL_CONFIGURATION_ID`. A segunda configuração será usada só
+  quando o Binno a enviar explicitamente na criação da sessão.
+- Falta o teste live completo com um cliente de teste: criar a sessão de
+  Checkout, confirmar que o pagamento não é submetido, validar a receção do
+  webhook e abrir o portal exclusivo. Este teste não deve criar cobrança real.
 
 ## Limites atuais
 

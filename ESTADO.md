@@ -1,9 +1,9 @@
-# Estado do Binno — 20 de agosto de 2026
+# Estado do Binno — 28 de agosto de 2026
 
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
-## Prontidão para venda — 27 de agosto de 2026
+## Prontidão para venda — 28 de agosto de 2026
 
 - [x] Definir cobrança pelo país onde o negócio opera: esse país, salvo em
   `profiles.business_country`, é a fonte comercial. IP, idioma e telefone não
@@ -21,12 +21,14 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   `stripe-billing-webhook` estão ativas na versão 4. O histórico remoto usa a
   versão gerada `20260827202322` para esta alteração isolada.
 - [ ] Abrir e cancelar um Checkout live de teste no Brasil, confirmando o
-  webhook, a assinatura gravada e o bloqueio de país divergente.
-- [ ] Criar, configurar e testar um Customer Portal exclusivo do Binno na
-  conta brasileira. A configuração padrão atual pertence ao Auditoria Pro e
-  não pode ser sobrescrita, pois alteraria marca e links jurídicos de outro
-  produto. A aplicação exige a configuração privada
-  `STRIPE_BR_PORTAL_CONFIGURATION_ID` antes de abrir esse portal.
+  webhook, a assinatura gravada, o bloqueio de país divergente e o portal
+  exclusivo do Binno para o cliente de teste. Não submeter pagamento real.
+- [~] Isolar o Customer Portal do Binno na conta brasileira. A primeira
+  configuração criada via API foi marcada pela Stripe como padrão. Antes de
+  abrir vendas, restaurar a configuração padrão do Auditoria Pro no Dashboard,
+  criar a segunda configuração exclusiva do Binno por API e atualizar
+  `STRIPE_BR_PORTAL_CONFIGURATION_ID`. A função ativa de cobrança está na
+  versão 13 e só abre o portal quando há uma configuração explícita.
 - [ ] Manter a Europa indisponível publicamente. Antes de €49/mês, alinhar
   entidade vendedora, termos, privacidade, fiscalidade, catálogo, portal,
   webhook e compra de teste próprios.
