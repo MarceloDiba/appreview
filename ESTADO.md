@@ -25,7 +25,8 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 - [ ] Criar, configurar e testar um Customer Portal exclusivo do Binno na
   conta brasileira. A configuração padrão atual pertence ao Auditoria Pro e
   não pode ser sobrescrita, pois alteraria marca e links jurídicos de outro
-  produto.
+  produto. A aplicação exige a configuração privada
+  `STRIPE_BR_PORTAL_CONFIGURATION_ID` antes de abrir esse portal.
 - [ ] Manter a Europa indisponível publicamente. Antes de €49/mês, alinhar
   entidade vendedora, termos, privacidade, fiscalidade, catálogo, portal,
   webhook e compra de teste próprios.

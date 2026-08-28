@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { billingConfig, billingReady, corsHeaders, countryFrom, countryIsEligible, createCustomerPortal, createSubscriptionCheckout, json, marketForBusinessCountry, marketFrom } from '../_shared/billing.ts';
+import { billingConfig, billingReady, corsHeaders, countryFrom, countryIsEligible, createCustomerPortal, createSubscriptionCheckout, customerPortalConfigurationId, json, marketForBusinessCountry, marketFrom } from '../_shared/billing.ts';
 
 serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -69,11 +69,12 @@ serve(async (request) => {
       .order('updated_at', { ascending: false }).limit(1).maybeSingle();
     const market = marketFrom(subscription?.merchant);
     const config = market ? billingConfig(market) : null;
-    if (!config || !subscription?.stripe_customer_id) return json({ error: 'Customer portal unavailable.' }, 404);
+    const portalConfigurationId = market ? customerPortalConfigurationId(market) : null;
+    if (!config || !subscription?.stripe_customer_id || !portalConfigurationId) return json({ error: 'Customer portal unavailable.' }, 404);
     const appUrl = (Deno.env.get('APP_URL') || '').replace(/\/$/, '');
     if (!appUrl) return json({ error: 'Billing origin is not configured.' }, 503);
     try {
-      const portal = await createCustomerPortal(config, subscription.stripe_customer_id, `${appUrl}/profile`);
+      const portal = await createCustomerPortal(config, subscription.stripe_customer_id, `${appUrl}/profile`, portalConfigurationId);
       const url = typeof portal.url === 'string' ? portal.url : null;
       if (!url) return json({ error: 'Customer portal has no URL.' }, 502);
       return json({ url });
