@@ -22,7 +22,10 @@ Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
   versão gerada `20260827202322` para esta alteração isolada.
 - [ ] Abrir e cancelar um Checkout live de teste no Brasil, confirmando o
   webhook, a assinatura gravada e o bloqueio de país divergente.
-- [ ] Configurar e testar o Customer Portal da conta brasileira.
+- [ ] Criar, configurar e testar um Customer Portal exclusivo do Binno na
+  conta brasileira. A configuração padrão atual pertence ao Auditoria Pro e
+  não pode ser sobrescrita, pois alteraria marca e links jurídicos de outro
+  produto.
 - [ ] Manter a Europa indisponível publicamente. Antes de €49/mês, alinhar
   entidade vendedora, termos, privacidade, fiscalidade, catálogo, portal,
   webhook e compra de teste próprios.

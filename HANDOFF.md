@@ -29,6 +29,12 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   live de teste no Brasil, confirmando webhook e assinatura, e configurar o
   Customer Portal da conta brasileira. Imposto automático permanece desligado
   até a revisão fiscal.
+- **Customer Portal separado:** a configuração padrão atual da conta MDR ainda
+  mostra a marca e os links jurídicos do Auditoria Pro. Ela não deve ser
+  reutilizada nem sobrescrita pelo Binno. Antes de liberar a gestão de
+  assinatura, criar uma configuração exclusiva do portal Binno, associá-la às
+  sessões do Binno e validar sua marca, links jurídicos, retorno e regras de
+  cancelamento sem alterar o outro produto.
 - **Europa fica em espera:** só poderá ser aberta depois de entidade vendedora,
   termos, privacidade, fiscalidade, catálogo, portal, webhook e teste próprios.
 - **Telefone do gestor:** Perfil, onboarding, Configurações e a aba WhatsApp
