@@ -1,11 +1,11 @@
 # Binno — documento de continuação (handoff)
 
-Estado atualizado em 27/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
+Estado atualizado em 28/08/2026. Serve para retomar o trabalho noutra sessão ou noutra IA
 sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
 
 ## Prontidão para venda — 25/08/2026 (em execução)
 
-### Cobrança Stripe por país onde o negócio opera — 27/08/2026
+### Cobrança Stripe por país onde o negócio opera — 28/08/2026
 
 - **Decisão confirmada:** o Binno abre vendas somente para negócios que operam
   no Brasil, por R$199/mês. O preço europeu de €49 não aparece, não recebe
@@ -25,18 +25,20 @@ sem redescobrir nada. Leia também `AGENTS.md` (regras) e `ESTADO.md` (backlog).
   `business_country_billing_rule` (versão `20260827202322`), pois a API de
   migração gera a sua própria versão. As Edge Functions `billing-checkout` e
   `stripe-billing-webhook` foram publicadas e estão ativas na versão 4.
+- **Customer Portal em reconciliação em 28/08:** foi criada uma configuração
+  do Binno e associada por `STRIPE_BR_PORTAL_CONFIGURATION_ID`, com retorno
+  para `/profile`, histórico de faturas, atualização de dados e forma de
+  pagamento, e cancelamento ao fim do período. A leitura posterior mostrou
+  que a Stripe a marcou como padrão, porque ela é a primeira configuração
+  criada via API encontrada na conta. Antes de abrir vendas, restaurar no
+  Dashboard a configuração padrão do Auditoria Pro e, só então, criar uma
+  segunda configuração exclusiva do Binno por API e atualizar o identificador
+  guardado. A função `billing-checkout` está ativa na versão 13 e exige uma
+  configuração explícita antes de abrir o portal.
 - **Pendente antes de abrir vendas autônomas:** abrir e cancelar um Checkout
-  live de teste no Brasil, confirmando webhook e assinatura, e configurar o
-  Customer Portal da conta brasileira. Imposto automático permanece desligado
-  até a revisão fiscal.
-- **Customer Portal separado:** a configuração padrão atual da conta MDR ainda
-  mostra a marca e os links jurídicos do Auditoria Pro. Ela não deve ser
-  reutilizada nem sobrescrita pelo Binno. Antes de liberar a gestão de
-  assinatura, criar uma configuração exclusiva do portal Binno, associá-la às
-  sessões do Binno por `STRIPE_BR_PORTAL_CONFIGURATION_ID` e validar sua
-  marca, links jurídicos, retorno e regras de cancelamento sem alterar o outro
-  produto. Enquanto esse segredo não existir, o Binno não abre sessão do
-  portal compartilhado.
+  live de teste no Brasil, confirmando webhook, assinatura e portal exclusivo
+  para um cliente de teste. Imposto automático permanece desligado até a
+  revisão fiscal.
 - **Europa fica em espera:** só poderá ser aberta depois de entidade vendedora,
   termos, privacidade, fiscalidade, catálogo, portal, webhook e teste próprios.
 - **Telefone do gestor:** Perfil, onboarding, Configurações e a aba WhatsApp
