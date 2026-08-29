@@ -14,6 +14,7 @@ const config = {
   workerSecret: process.env.BINNO_WORKER_SECRET,
   webhookSecret: process.env.OPENWA_WEBHOOK_SECRET || '',
   port: Number(process.env.PORT || 8788),
+  dispatchIntervalMs: Number(process.env.BINNO_DISPATCH_INTERVAL_MS || 10_000),
 };
 
 const supabase = async (path, init = {}) => {
@@ -151,5 +152,5 @@ http.createServer(async (request, response) => {
 }).listen(config.port, '0.0.0.0', () => {
   console.log(`Binno OpenWA relay listening on ${config.port}`);
   runDispatch();
-  setInterval(runDispatch, 60_000);
+  setInterval(runDispatch, config.dispatchIntervalMs);
 });

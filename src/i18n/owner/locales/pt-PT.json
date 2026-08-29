@@ -789,7 +789,7 @@
     "deliveryBody": "O Binno regista o envio e acompanha o estado informado pelo canal ligado.",
     "deliveryReady": "Canal de entrega preparado",
     "deliveryReadyBody": "As mensagens entram na fila do Binno. O estado muda quando o canal confirma o envio.",
-    "testQueued": "Mensagem colocada na fila para {{recipient}}. O painel mostrará o estado quando o canal responder.",
+    "testQueued": "Mensagem na fila para {{recipient}}. A entrega costuma demorar alguns segundos; o painel atualiza sozinho quando o WhatsApp confirmar.",
     "delivery": {
       "queued": "Mensagem na fila de envio para {{recipient}}.",
       "sending": "Mensagem a ser enviada para {{recipient}}.",
