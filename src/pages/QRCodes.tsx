@@ -11,6 +11,7 @@ import { isLoopbackPublicOrigin, isNonCanonicalPublicOrigin, publicAppOrigin } f
 const QRCodes = () => {
   const { t } = useOwnerTranslation();
   const [businessName, setBusinessName] = useState<string>('');
+  const [businessCountry, setBusinessCountry] = useState<string>('');
   const [businessPhone, setBusinessPhone] = useState<string>('');
   const baseUrl = publicAppOrigin();
   const isLoopback = isLoopbackPublicOrigin(baseUrl);
@@ -27,12 +28,13 @@ const QRCodes = () => {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('business_name, phone')
+        .select('business_name, business_country, phone')
         .eq('id', user.id)
         .maybeSingle();
 
       if (active) {
         setBusinessName(profile?.business_name || '');
+        setBusinessCountry(profile?.business_country || '');
         setBusinessPhone(profile?.phone || '');
       }
     };
@@ -52,7 +54,7 @@ const QRCodes = () => {
             <p className="text-gray-600 mt-1">{t('qrcodes.subtitle')}</p>
           </header>
 
-          <QRCodeGenerator baseUrl={baseUrl} businessName={businessName} businessPhone={businessPhone} canCreate={!isLoopback} nonCanonicalOrigin={isNonCanonical} />
+          <QRCodeGenerator baseUrl={baseUrl} businessName={businessName} businessCountry={businessCountry} businessPhone={businessPhone} canCreate={!isLoopback} nonCanonicalOrigin={isNonCanonical} />
 
           <div className="mt-8">
             <Card>

@@ -31,6 +31,7 @@ import { printQrCard } from '@/lib/qrCard';
 interface QRCodeGeneratorProps {
   baseUrl: string;
   businessName?: string;
+  businessCountry?: string;
   businessPhone?: string;
   canCreate?: boolean;
   /** A origem não é a canónica de produção (binno.pro/www.binno.pro), mas
@@ -63,6 +64,7 @@ interface SavedQR {
 const QRCodeGenerator = ({
   baseUrl,
   businessName,
+  businessCountry,
   businessPhone,
   canCreate = true,
   nonCanonicalOrigin = false,
@@ -208,6 +210,7 @@ const QRCodeGenerator = ({
       qrName: qr.name,
       qrUrl: qr.url,
       businessName,
+      businessCountry,
       businessPhone,
     });
     if (!printed) {

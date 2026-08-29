@@ -2,13 +2,19 @@ import { parsePhoneNumber } from 'react-phone-number-input';
 import type { Locale } from '@/i18n';
 
 /**
- * O cartão impresso pertence ao estabelecimento. Ao contrário da tela aberta
- * pelo QR, ele não conhece o idioma do telemóvel de quem o vai ler. O telefone
- * internacional escolhido pelo dono é a única localização persistida hoje e
- * permite escolher uma cópia local sem inventar morada ou país.
+ * O cartão impresso pertence ao estabelecimento, não a quem o vai ler nem a
+ * quem o gere. `profiles.business_country` é o fato comercial que descreve
+ * onde o negócio opera (o mesmo campo usado na cobrança regional, ver
+ * docs/cobranca-regional-binno.md) e por isso é a fonte primária do idioma
+ * impresso. O telefone do gestor só entra como reserva quando esse país ainda
+ * não foi preenchido, porque um gestor com telemóvel de outro país não muda o
+ * mercado do negócio.
  */
-export const localeFromBusinessPhone = (phone: string | null | undefined): Locale => {
-  const country = phone ? parsePhoneNumber(phone)?.country : undefined;
+export const localeFromBusiness = (
+  businessCountry: string | null | undefined,
+  phone: string | null | undefined,
+): Locale => {
+  const country = businessCountry || (phone ? parsePhoneNumber(phone)?.country : undefined);
   if (country === 'BR') return 'pt-BR';
   if (country === 'PT') return 'pt-PT';
   return 'en';

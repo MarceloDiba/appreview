@@ -1,10 +1,11 @@
-import { localeFromBusinessPhone, qrCardCopy } from '@/lib/businessLocale';
+import { localeFromBusiness, qrCardCopy } from '@/lib/businessLocale';
 import { QR_PRINT_SIZE, qrDataUrl } from '@/lib/qr';
 
 interface PrintQrCardOptions {
   qrName: string;
   qrUrl: string;
   businessName?: string;
+  businessCountry?: string;
   businessPhone?: string;
 }
 
@@ -22,10 +23,11 @@ export const printQrCard = async ({
   qrName,
   qrUrl,
   businessName,
+  businessCountry,
   businessPhone,
 }: PrintQrCardOptions): Promise<boolean> => {
   const image = await qrDataUrl(qrUrl, QR_PRINT_SIZE);
-  const locale = localeFromBusinessPhone(businessPhone);
+  const locale = localeFromBusiness(businessCountry, businessPhone);
   const copy = qrCardCopy(locale);
   const printWindow = window.open('', '_blank', 'width=800,height=1000');
   if (!printWindow) return false;

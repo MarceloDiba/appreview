@@ -26,7 +26,7 @@ import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { extractPlaceIdFromUrl } from '@/utils/googlePlaceUtils';
 import InternationalPhoneField from '@/components/forms/InternationalPhoneField';
 import BusinessCountrySelect from '@/components/forms/BusinessCountrySelect';
-import { localeFromBusinessPhone, qrCardCopy } from '@/lib/businessLocale';
+import { localeFromBusiness, qrCardCopy } from '@/lib/businessLocale';
 import { printQrCard } from '@/lib/qrCard';
 
 /**
@@ -413,7 +413,7 @@ const Onboarding = () => {
                 </>
               ) : (
                 (() => {
-                  const cardCopy = qrCardCopy(localeFromBusinessPhone(phone));
+                  const cardCopy = qrCardCopy(localeFromBusiness(businessCountry, phone));
                   return <div className="space-y-4 text-center">
                   <div className="inline-block max-w-sm rounded-md border bg-white p-4">
                     <p className="text-lg font-bold">{cardCopy.ask}</p>
@@ -436,6 +436,7 @@ const Onboarding = () => {
                           qrName: createdQr.name,
                           qrUrl: createdQr.url,
                           businessName,
+                          businessCountry,
                           businessPhone: phone,
                         });
                         if (!printed) toast.error(t('qrcodes.popupHint'));
