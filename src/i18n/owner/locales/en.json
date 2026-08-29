@@ -803,5 +803,9 @@
   "localWhatsApp": {
     "proxyUnavailable": "The local OpenWA proxy is unavailable. Start the preview with BINNO_ENABLE_OPENWA_PROXY=true and configure the local key.",
     "apiKeyRequired": "The local OpenWA key is not configured on this computer. Sending remains blocked."
+  },
+  "phoneField": {
+    "incomplete": "The number is incomplete for the selected country. Check the digit count.",
+    "invalid": "This number isn't valid for the selected country."
   }
 }

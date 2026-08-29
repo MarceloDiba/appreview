@@ -803,5 +803,9 @@
   "localWhatsApp": {
     "proxyUnavailable": "O proxy local do OpenWA não está disponível. Inicie a prévia com BINNO_ENABLE_OPENWA_PROXY=true e configure a chave local.",
     "apiKeyRequired": "A chave local do OpenWA não está configurada neste computador. O envio permanece bloqueado."
+  },
+  "phoneField": {
+    "incomplete": "Número incompleto para o país selecionado. Confira a quantidade de dígitos.",
+    "invalid": "Esse número não é válido para o país selecionado."
   }
 }
