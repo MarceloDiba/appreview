@@ -32,7 +32,7 @@ commit `9de4a77`, ja em `origin/main`):
   para o proprio numero, com confirmacao na tela.
 - `preferenceProblem()` nomeia o campo que falta em vez de recusar em bloco.
 
-### 2. O relay nao tinha limite de tempo (CORRIGIDO, FALTA SUBIR NA VPS)
+### 2. O relay nao tinha limite de tempo (RESOLVIDO NA VPS EM 29/08/2026)
 
 Commit `40d3c5a`, ainda nao empurrado quando este documento foi escrito.
 
@@ -49,10 +49,13 @@ engolida pelo catch e so existia no banco, por isso `docker logs` nao mostrava n
 O lote e enviado com `Promise.all` sobre ate 10 itens: uma chamada pendurada
 atrasava o lote inteiro.
 
-**Pendente:** empurrar o commit e redeployar o relay na VPS. Ate la ele roda a
-versao antiga.
+**Resolvido em 29/08/2026:** o `services/openwa-relay/src/server.mjs` do
+commit `40d3c5a` foi copiado para `/opt/binno/relay/src/server.mjs` na VPS
+(`srv1460410.hstgr.cloud`, 72.61.131.23) e a imagem foi reconstruida.
+Confirmado no container em execucao: `AbortSignal.timeout` presente no
+codigo, container `Up`, log `Binno OpenWA relay listening on 8788`.
 
-### 3. Janela do WhatsApp Web travando a pagina (RESOLVIDO SO POR HOJE)
+### 3. Janela do WhatsApp Web travando a pagina (CONFIGURADO EM 29/08/2026, RECONEXAO NOVA AINDA NAO OBSERVADA)
 
 Log do `openwa-api` em 29/08 09:48:16:
 
@@ -70,24 +73,38 @@ funcionando, porque vem da memoria — so o envio depende da pagina.
 
 O proprio OpenWA avisou como resolver, e o alerta nao chegava a lugar nenhum:
 preencher `WWEBJS_ONBOARDING_CONTINUE_LABELS` com o rotulo do botao. A variavel
-existe na imagem mas esta VAZIA. Nao ha `.env` em `/opt/binno/openwa`; precisa
-ser declarada no `environment:` do `docker-compose.yml`.
+existe na imagem mas estava VAZIA, porque nao havia `.env` em
+`/opt/binno/openwa`.
 
-Valor sugerido, cobrindo variacoes de idioma e versao:
+Valor aplicado em 29/08/2026, cobrindo variacoes de idioma e versao:
 `Usar nesta janela,Usar aqui,Continuar,Use Here,Continue`
 
-**Pendente.** Sem isso, na proxima reconexao automatica o envio trava de novo.
+**Configurado em 29/08/2026, ainda nao provado por uma reconexao nova.** Foi
+criado `/opt/binno/openwa/.env` (modo 600) na VPS `srv1460410.hstgr.cloud`
+(72.61.131.23; o nome curto `srv1460410` nao resolve) com exatamente duas
+chaves: `WWEBJS_ONBOARDING_CONTINUE_LABELS` com o valor acima e
+`AUTO_START_SESSIONS=true`. O `docker-compose.yml` daquela pasta ja encaminha
+as duas variaveis (linhas 157 e 338) e nao foi editado — ele pertence ao
+projeto OpenWA. Isso cobre a proxima reconexao automatica, mas nenhuma
+reconexao aconteceu ainda desde a mudanca para confirmar que o dialogo nao
+volta a travar a pagina.
 
-### 4. A sessao nao sobe sozinha apos reinicio do container (RESOLVIDO SO POR HOJE)
+### 4. A sessao nao sobe sozinha apos reinicio do container (RESOLVIDO E PROVADO EM 29/08/2026)
 
 Depois de `docker compose up -d --force-recreate openwa-api`, a sessao responde
 `status: ready` (estado salvo no banco) mas o envio devolve
 `400 Session is not active. Start the session first.` Foi preciso chamar
 `POST /api/sessions/{id}/start` a mao.
 
-**Pendente.** A VPS vai reiniciar em algum momento — atualizacao, queda, manutencao
-da Hostinger. Quando isso acontecer o Binno para de enviar sem avisar ninguem.
-Com cliente pagando, e uma falha silenciosa.
+**Resolvido e provado em 29/08/2026.** Com `AUTO_START_SESSIONS=true` no
+`.env` novo, apos `docker compose up -d openwa-api` recriar o container, o log
+mostrou `Session ready: 557991986091` as 16:33:00 com `action: ready`, e o
+status da sessao devolveu `engineLoaded: true` — sem chamar
+`POST /api/sessions/{id}/start` a mao. Sessao
+`629acdfb-4e29-4037-b819-9b48d71b1315`. Os dados da sessao ficam no volume
+nomeado `openwa_openwa-data`, que sobrevive a recriacao do container. Ainda
+nao ha uma nova mensagem entregue a um telefone desde essas mudancas; o teste
+de envio ponta a ponta e do Marcelo, a partir do painel.
 
 ### 5. `relay.binno.pro` nao resolve em DNS (PENDENTE)
 
