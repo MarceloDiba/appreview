@@ -28,6 +28,7 @@ const preferenceInput = (body: Record<string, unknown>) => {
     replies_enabled: body.repliesEnabled === true,
     reputation_enabled: body.reputationEnabled === true,
     profile_enabled: body.profileEnabled === true,
+    feedback_enabled: body.feedbackEnabled === true,
     weekly_day: day,
     delivery_time: deliveryTime,
     consented_at: body.consented === true ? new Date().toISOString() : null,

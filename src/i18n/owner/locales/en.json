@@ -773,6 +773,8 @@
     "reputationBody": "Relevant drops, low ratings outside the pattern, and repeated causes when evidence is sufficient.",
     "profileTitle": "Google Business Profile",
     "profileBody": "Reminders about hours, photos, and profile information after the official connection is active.",
+    "feedbackTitle": "Private low-rating comment",
+    "feedbackBody": "Immediate alert when someone leaves a comment with a rating of 3 or lower.",
     "notificationRecipient": "Owner's WhatsApp for notifications",
     "notificationRecipientHint": "Enter the business owner's number. Future summaries and alerts will go there.",
     "onboardingPhoneHint": "Filled in during onboarding. Edit it only if notifications should go to another owner.",

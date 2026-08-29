@@ -97,12 +97,13 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, onboardingPhone, 
     }
   };
 
-  const setChoice = (key: keyof Pick<PilotNotificationPreferences, 'weeklyEnabled' | 'repliesEnabled' | 'reputationEnabled' | 'profileEnabled'>, checked: boolean) => setPreferences((current) => ({ ...current, [key]: checked }));
-  const choices: Array<{ key: keyof Pick<PilotNotificationPreferences, 'weeklyEnabled' | 'repliesEnabled' | 'reputationEnabled' | 'profileEnabled'>; title: string; body: string }> = [
+  const setChoice = (key: keyof Pick<PilotNotificationPreferences, 'weeklyEnabled' | 'repliesEnabled' | 'reputationEnabled' | 'profileEnabled' | 'feedbackEnabled'>, checked: boolean) => setPreferences((current) => ({ ...current, [key]: checked }));
+  const choices: Array<{ key: keyof Pick<PilotNotificationPreferences, 'weeklyEnabled' | 'repliesEnabled' | 'reputationEnabled' | 'profileEnabled' | 'feedbackEnabled'>; title: string; body: string }> = [
     { key: 'weeklyEnabled', title: t('whatsappPilot.weeklyTitle'), body: t('whatsappPilot.weeklyBody') },
     { key: 'repliesEnabled', title: t('whatsappPilot.repliesTitle'), body: t('whatsappPilot.repliesBody') },
     { key: 'reputationEnabled', title: t('whatsappPilot.reputationTitle'), body: t('whatsappPilot.reputationBody') },
     { key: 'profileEnabled', title: t('whatsappPilot.profileTitle'), body: t('whatsappPilot.profileBody') },
+    { key: 'feedbackEnabled', title: t('whatsappPilot.feedbackTitle'), body: t('whatsappPilot.feedbackBody') },
   ];
 
   if (demo) return <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">

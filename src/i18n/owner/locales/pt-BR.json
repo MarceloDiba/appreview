@@ -773,6 +773,8 @@
     "reputationBody": "Queda relevante, notas baixas fora do padrão e causa recorrente quando a evidência for suficiente.",
     "profileTitle": "Perfil do Google",
     "profileBody": "Lembretes sobre horários, fotos e informações do perfil quando a conexão oficial estiver ativa.",
+    "feedbackTitle": "Comentário privado com nota baixa",
+    "feedbackBody": "Aviso imediato quando alguém deixa um comentário com nota 3 ou menos.",
     "notificationRecipient": "WhatsApp do gestor que receberá os avisos",
     "notificationRecipientHint": "Informe o número do responsável pelo negócio. Os resumos e alertas futuros chegarão nele.",
     "onboardingPhoneHint": "Preenchido no onboarding. Edite aqui apenas se os avisos precisarem ir para outro responsável.",

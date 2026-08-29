@@ -23,6 +23,7 @@ type WirePreferences = {
   replies_enabled: boolean;
   reputation_enabled: boolean;
   profile_enabled: boolean;
+  feedback_enabled: boolean;
   weekly_day: 'monday' | 'friday';
   delivery_time: string;
   consented_at: string | null;
@@ -44,6 +45,7 @@ const toPreferences = (value: WirePreferences | null | undefined): PilotNotifica
   repliesEnabled: value.replies_enabled,
   reputationEnabled: value.reputation_enabled,
   profileEnabled: value.profile_enabled,
+  feedbackEnabled: value.feedback_enabled,
   recipient: value.recipient_e164,
   day: value.weekly_day,
   time: value.delivery_time.slice(0, 5),

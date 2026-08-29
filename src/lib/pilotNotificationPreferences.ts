@@ -6,6 +6,7 @@ export type PilotNotificationPreferences = {
   repliesEnabled: boolean;
   reputationEnabled: boolean;
   profileEnabled: boolean;
+  feedbackEnabled: boolean;
   recipient: string;
   day: 'monday' | 'friday';
   time: string;
@@ -28,6 +29,7 @@ export const defaultPilotNotificationPreferences: PilotNotificationPreferences =
   repliesEnabled: true,
   reputationEnabled: true,
   profileEnabled: true,
+  feedbackEnabled: true,
   recipient: '',
   day: 'monday',
   time: '09:00',
