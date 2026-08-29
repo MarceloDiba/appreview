@@ -40,12 +40,23 @@ const addEvent = (outboxId, eventType, providerMessageId, detail) => supabase('/
 
 const claim = () => supabase('/rest/v1/rpc/claim_whatsapp_outbox', { method: 'POST', body: JSON.stringify({ batch_size: 10 }) });
 
+/**
+ * Sem limite de tempo, uma chamada que o OpenWA aceita mas nunca responde
+ * prende a mensagem por cinco minutos — o padrao do Node — e so entao vira
+ * 'fetch failed', um erro que nao diz nada sobre a causa. Como o lote e
+ * enviado em paralelo, uma chamada pendurada atrasa o lote inteiro. Vinte
+ * segundos e folgado para um envio de texto e transforma o sintoma em algo
+ * legivel: 'TimeoutError' em vez de 'fetch failed'.
+ */
+const sendTimeoutMs = 20000;
+
 const send = async (item) => {
   try {
     const response = await fetch(`${config.openwaUrl}/api/sessions/${encodeURIComponent(config.sessionId)}/messages/send-text`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-API-Key': config.openwaKey },
       body: JSON.stringify({ chatId: `${item.recipient_e164.slice(1)}@c.us`, text: item.body, linkPreview: false }),
+      signal: AbortSignal.timeout(sendTimeoutMs),
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok) throw new Error(`OpenWA ${response.status}`);
@@ -54,7 +65,11 @@ const send = async (item) => {
     await updateOutbox(item.id, { status: 'accepted', provider_message_id: messageId, last_error_code: null });
     await addEvent(item.id, 'accepted', messageId, { source: 'openwa-relay' });
   } catch (error) {
-    await updateOutbox(item.id, { status: 'failed', last_error_code: error instanceof Error ? error.message.slice(0, 120) : 'send-failed' });
+    const codigo = error instanceof Error
+      ? (error.name === 'TimeoutError' ? `sem resposta do OpenWA em ${sendTimeoutMs / 1000}s` : error.message).slice(0, 120)
+      : 'send-failed';
+    console.error('Binno OpenWA send failed', item.id, codigo);
+    await updateOutbox(item.id, { status: 'failed', last_error_code: codigo });
     await addEvent(item.id, 'failed', null, { source: 'openwa-relay' }).catch(() => {});
   }
 };
