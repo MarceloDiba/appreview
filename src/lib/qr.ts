@@ -54,6 +54,22 @@ export const isLoopbackPublicOrigin = (origin: string): boolean => {
   }
 };
 
+/**
+ * Qualquer origem que não seja a canónica de produção, https://binno.pro.
+ *
+ * O QR é impresso e fica colado numa mesa por anos — muito depois de uma
+ * prévia da Vercel ou de um ensaio em rede local deixarem de existir. Por
+ * isso a régua aqui é mais rígida que a de loopback: não basta não ser
+ * localhost, tem de ser exactamente o domínio de produção.
+ */
+export const isNonCanonicalPublicOrigin = (origin: string): boolean => {
+  try {
+    return new URL(origin).hostname !== 'binno.pro';
+  } catch {
+    return true;
+  }
+};
+
 /** Dispara o download de um data URL como ficheiro. */
 export const downloadDataUrl = (dataUrl: string, filename: string): void => {
   const a = document.createElement('a');
