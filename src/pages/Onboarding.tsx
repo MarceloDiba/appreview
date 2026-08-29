@@ -2,14 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Check, Printer } from 'lucide-react';
+import { AlertCircle, Check, Printer } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { QR_PRINT_SIZE, QR_SCREEN_SIZE, downloadDataUrl, isLoopbackPublicOrigin, publicAppOrigin, publicReviewUrl, qrDataUrl, slugFilename } from '@/lib/qr';
+import {
+  QR_PRINT_SIZE,
+  QR_SCREEN_SIZE,
+  downloadDataUrl,
+  isLoopbackPublicOrigin,
+  isNonCanonicalPublicOrigin,
+  publicAppOrigin,
+  publicReviewUrl,
+  qrDataUrl,
+  slugFilename,
+} from '@/lib/qr';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { extractPlaceIdFromUrl } from '@/utils/googlePlaceUtils';
@@ -47,6 +58,10 @@ const Onboarding = () => {
   const { t, i18n } = useOwnerTranslation();
   const { user, loading: authLoading } = useAuth();
   const baseUrl = publicAppOrigin();
+  const isLoopback = isLoopbackPublicOrigin(baseUrl);
+  // Loopback já é bloqueado em createQr(); o aviso só se aplica quando a
+  // criação está de facto liberada, mas o endereço ainda não é o oficial.
+  const requiresOriginConfirmation = !isLoopback && isNonCanonicalPublicOrigin(baseUrl);
 
   const [step, setStep] = useState<Step>(1);
   const [saving, setSaving] = useState(false);
@@ -66,6 +81,7 @@ const Onboarding = () => {
   const [createdQr, setCreatedQr] = useState<{ name: string; url: string; image: string } | null>(
     null
   );
+  const [confirmedNonCanonical, setConfirmedNonCanonical] = useState(false);
 
   /**
    * Carrega o que já existe antes de mostrar os campos. Sem isto, quem volta ao
@@ -185,10 +201,11 @@ const Onboarding = () => {
 
   const createQr = async () => {
     if (!user || !qrName.trim()) return;
-    if (isLoopbackPublicOrigin(baseUrl)) {
+    if (isLoopback) {
       toast.error(t('onboarding.errQrLocal'));
       return;
     }
+    if (requiresOriginConfirmation && !confirmedNonCanonical) return;
     setSaving(true);
     try {
       // O slug primeiro, a imagem depois — a ordem que corrigiu o QR impresso
@@ -359,11 +376,37 @@ const Onboarding = () => {
                       autoFocus
                     />
                   </div>
+                  {requiresOriginConfirmation && (
+                    <div className="flex flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+                      <div className="flex gap-3">
+                        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-800" aria-hidden="true" />
+                        <p>
+                          <strong>{t('qrcodes.nonCanonicalTitle')}</strong>
+                          <br />
+                          {t('qrcodes.nonCanonicalBody', { url: `${baseUrl.replace(/\/$/, '')}/review/...` })}
+                        </p>
+                      </div>
+                      <label className="flex items-start gap-2 pl-8">
+                        <Checkbox
+                          checked={confirmedNonCanonical}
+                          onCheckedChange={(checked) => setConfirmedNonCanonical(checked === true)}
+                        />
+                        <span>{t('qrcodes.nonCanonicalConfirm')}</span>
+                      </label>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between pt-2">
                     <Button variant="ghost" onClick={() => setStep(2)}>
                       {t('onboarding.back')}
                     </Button>
-                    <Button onClick={createQr} disabled={saving || !qrName.trim()}>
+                    <Button
+                      onClick={createQr}
+                      disabled={
+                        saving ||
+                        !qrName.trim() ||
+                        (requiresOriginConfirmation && !confirmedNonCanonical)
+                      }
+                    >
                       {saving ? t('onboarding.creating') : t('onboarding.createQr')}
                     </Button>
                   </div>
