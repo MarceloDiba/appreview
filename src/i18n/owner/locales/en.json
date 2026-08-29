@@ -789,7 +789,7 @@
     "deliveryBody": "Binno records the send and follows the status reported by the connected channel.",
     "deliveryReady": "Delivery channel prepared",
     "deliveryReadyBody": "Messages are placed in the Binno queue. The status changes when the channel confirms the send.",
-    "testQueued": "Message queued for {{recipient}}. The panel will show the state when the channel responds.",
+    "testQueued": "Message queued for {{recipient}}. Delivery usually takes a few seconds; the panel updates on its own once WhatsApp confirms.",
     "delivery": {
       "queued": "Message queued for {{recipient}}.",
       "sending": "Message is being sent to {{recipient}}.",
