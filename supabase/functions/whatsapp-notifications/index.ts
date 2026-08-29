@@ -17,6 +17,19 @@ const phone = (value: unknown) => typeof value === 'string' && /^\+[1-9]\d{7,14}
 
 const time = (value: unknown) => typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value) ? value : null;
 
+/**
+ * Dizer apenas "Preferências inválidas" obriga quem usa a adivinhar qual dos
+ * três campos está errado. Aconteceu de verdade: o painel tem dois campos de
+ * telefone, o do gestor e o do teste, e preencher só o segundo produzia uma
+ * recusa que não apontava nada. Cada campo agora responde por si.
+ */
+const preferenceProblem = (body: Record<string, unknown>): string | null => {
+  if (!phone(body.recipient)) return 'Informe o WhatsApp do gestor, no topo do formulário, antes de salvar.';
+  if (!time(body.time)) return 'Informe o horário de envio.';
+  if (body.day !== 'monday' && body.day !== 'friday') return 'Escolha a frequência de envio.';
+  return null;
+};
+
 const preferenceInput = (body: Record<string, unknown>) => {
   const recipient = phone(body.recipient);
   const deliveryTime = time(body.time);
@@ -60,6 +73,8 @@ serve(async (request) => {
   }
 
   if (body.action === 'save-preferences') {
+    const problema = preferenceProblem(body);
+    if (problema) return json({ error: problema }, 422);
     const input = preferenceInput(body);
     if (!input) return json({ error: 'Preferências inválidas.' }, 422);
     const { data, error } = await admin.from('whatsapp_notification_preferences')
@@ -76,9 +91,14 @@ serve(async (request) => {
     if (!recipientInput) return json({ error: 'Informe o número de WhatsApp antes de enviar.' }, 422);
     const recipient = phone(body.recipient);
     if (!recipient) return json({ error: 'Número de WhatsApp inválido.' }, 422);
-    const { data: preferences } = await admin.from('whatsapp_notification_preferences')
-      .select('consented_at').eq('user_id', user.id).maybeSingle();
-    if (!preferences?.consented_at) return json({ error: 'Confirme o recebimento de notificações antes de enviar.' }, 422);
+    /**
+     * O envio de teste não exige o consentimento contínuo. São coisas diferentes:
+     * o consentimento autoriza os envios automáticos e recorrentes; o teste é uma
+     * mensagem única, disparada à mão pela pessoa dona da conta, para o número que
+     * ela acabou de digitar na própria tela, com confirmação explícita ali.
+     * Exigir o consentimento aqui obrigava a salvar as preferências antes de poder
+     * testar — um bloco travando o outro, sem ganho de proteção.
+     */
     const key = `test:${crypto.randomUUID()}`;
     const { data, error } = await admin.from('whatsapp_outbox').insert({
       user_id: user.id,

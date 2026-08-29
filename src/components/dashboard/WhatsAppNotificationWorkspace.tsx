@@ -15,7 +15,9 @@ import { enqueueWhatsAppTest, getWhatsAppDeliveryState, saveWhatsAppDeliveryPref
 export const WhatsAppNotificationWorkspace = ({ localWhatsApp, onboardingPhone, demoPhone, demo = false }: { localWhatsApp: LocalWhatsAppState; onboardingPhone?: string; demoPhone?: string; demo?: boolean }) => {
   const { t, i18n } = useOwnerTranslation();
   const [preferences, setPreferences] = useState<PilotNotificationPreferences>(defaultPilotNotificationPreferences);
-  const [testRecipient, setTestRecipient] = useState('');
+  // Um número só. Dois campos de telefone faziam a pessoa preencher um e o
+  // sistema cobrar o outro, sem dizer qual. A prévia vai para o mesmo número
+  // que recebe as notificações.
   const [message, setMessage] = useState(t('dashboard.cockpit.whatsapp.defaultMessage'));
   const [confirmed, setConfirmed] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -23,18 +25,17 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, onboardingPhone, 
   const [latestAdvisorDelivery, setLatestAdvisorDelivery] = useState(() => readLatestPilotNotificationDelivery());
   const [backendState, setBackendState] = useState<'checking' | 'ready' | 'local-fallback' | 'unavailable'>('checking');
   const [deliveries, setDeliveries] = useState<WhatsAppDelivery[]>([]);
+  const testRecipient = preferences.recipient;
   const directReady = localWhatsApp.status === 'ready' && localWhatsApp.session;
   const ready = backendState === 'ready' || Boolean(directReady);
 
   useEffect(() => {
     if (demo) {
       setPreferences({ ...defaultPilotNotificationPreferences, recipient: demoPhone || '' });
-      setTestRecipient(demoPhone || '');
       return;
     }
     const stored = readPilotNotificationPreferences();
     setPreferences({ ...stored, recipient: stored.recipient || onboardingPhone || '' });
-    if (onboardingPhone) setTestRecipient((current) => current || onboardingPhone);
   }, [demo, demoPhone, onboardingPhone]);
 
   const refreshDeliveryState = async () => {
@@ -137,7 +138,7 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, onboardingPhone, 
         <div className="flex items-start justify-between gap-3"><div><h2 className="text-xl font-semibold text-slate-950">{backendState === 'ready' ? t('whatsappPilot.deliveryTitle') : t('dashboard.cockpit.whatsapp.localTitle')}</h2><p className="mt-1 text-sm leading-6 text-slate-600">{backendState === 'ready' ? t('whatsappPilot.deliveryBody') : t('dashboard.cockpit.whatsapp.localBody')}</p></div><Button variant="outline" size="sm" onClick={() => void (backendState === 'ready' ? refreshDeliveryState().catch(() => setBackendState('unavailable')) : localWhatsApp.refresh())}>{t('dashboard.cockpit.whatsapp.refresh')}</Button></div>
         <div className={`mt-5 rounded-xl border p-4 text-sm leading-6 ${ready ? 'border-emerald-100 bg-emerald-50/60 text-emerald-950' : 'border-amber-200 bg-amber-50/60 text-amber-950'}`}><strong className="block">{backendState === 'ready' ? t('whatsappPilot.deliveryReady') : t(`dashboard.cockpit.whatsapp.status.${localWhatsApp.status}`)}</strong><p className="mt-1">{backendState === 'ready' ? t('whatsappPilot.deliveryReadyBody') : localWhatsApp.detail || t('dashboard.cockpit.whatsapp.unavailableBody')}</p></div>
         <div className="mt-6 space-y-4">
-          <label className="block text-sm font-medium text-slate-700">{t('whatsappPilot.testRecipient')}<div className="mt-2"><InternationalPhoneField id="whatsapp-test-recipient" value={testRecipient} onChange={setTestRecipient} placeholder="(00) 00000-0000" ariaLabel={t('whatsappPilot.testRecipient')} disabled={!ready || sendState.status === 'sending'} /></div><span className="mt-1 block text-xs font-normal leading-5 text-slate-500">{t('whatsappPilot.testRecipientHint')}</span></label>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700"><p className="font-medium text-slate-950">{t('whatsappPilot.testRecipient')}</p><p className="mt-1">{testRecipient.trim() ? maskInternationalPhone(testRecipient) : t('whatsappPilot.testRecipientMissing')}</p><p className="mt-1 text-xs leading-5 text-slate-500">{t('whatsappPilot.testRecipientHint')}</p></div>
           <label className="block text-sm font-medium text-slate-700">{t('dashboard.cockpit.whatsapp.message')}<Textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-2 min-h-28 resize-y" disabled={!ready || sendState.status === 'sending'} /></label><label className="flex items-start gap-3 rounded-xl border border-slate-200 p-3 text-sm leading-5 text-slate-700"><Checkbox checked={confirmed} onCheckedChange={(checked) => setConfirmed(checked === true)} disabled={!ready || sendState.status === 'sending'} /><span>{t('dashboard.cockpit.whatsapp.confirmation')}</span></label>
           <Button onClick={() => void sendTest()} disabled={!ready || !testRecipient.trim() || !message.trim() || !confirmed || sendState.status === 'sending'} className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]">{sendState.status === 'sending' ? t('dashboard.cockpit.whatsapp.sending') : t('dashboard.cockpit.whatsapp.sendTest')}</Button>{sendState.status === 'error' && <p className="text-sm text-red-700">{sendState.detail}</p>}{sendState.status === 'sent' && sendState.sentAt && <p className="mt-3 flex items-center gap-2 text-sm text-emerald-700"><CheckCircle2 className="h-4 w-4" />{sendState.detail === 'queued' ? t('whatsappPilot.testQueued', { recipient: sendState.recipient }) : t('dashboard.cockpit.whatsapp.sent', { recipient: sendState.recipient, time: new Intl.DateTimeFormat(i18n.language, { dateStyle: 'short', timeStyle: 'short' }).format(new Date(sendState.sentAt)) })}</p>}</div>
       </CardContent></Card>
