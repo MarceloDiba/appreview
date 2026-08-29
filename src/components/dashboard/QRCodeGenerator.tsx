@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
@@ -32,6 +33,11 @@ interface QRCodeGeneratorProps {
   businessName?: string;
   businessPhone?: string;
   canCreate?: boolean;
+  /** A origem não é a canónica de produção (binno.pro/www.binno.pro), mas
+   * também não é loopback. Legítimo para uma prévia em rede local, ver
+   * docs/preview-local-qr.md, mas exige confirmação explícita porque o QR é
+   * impresso e o endereço fica permanente enquanto ele existir. */
+  nonCanonicalOrigin?: boolean;
 }
 
 interface SavedQR {
@@ -54,7 +60,13 @@ interface SavedQR {
  * partir dele. O endereço deixou de ser editável de propósito: um endereço
  * escrito à mão quebra a atribuição do caso ao negócio.
  */
-const QRCodeGenerator = ({ baseUrl, businessName, businessPhone, canCreate = true }: QRCodeGeneratorProps) => {
+const QRCodeGenerator = ({
+  baseUrl,
+  businessName,
+  businessPhone,
+  canCreate = true,
+  nonCanonicalOrigin = false,
+}: QRCodeGeneratorProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { t } = useOwnerTranslation();
@@ -64,6 +76,12 @@ const QRCodeGenerator = ({ baseUrl, businessName, businessPhone, canCreate = tru
   const [savedQRCodes, setSavedQRCodes] = useState<SavedQR[]>([]);
   const [isLoadingQRs, setIsLoadingQRs] = useState(true);
   const [lastCreated, setLastCreated] = useState<SavedQR | null>(null);
+  // Ato deliberado exigido antes de gravar um QR fora do endereço oficial.
+  // Reposto depois de cada QR criado com sucesso: cada QR é um cartão
+  // impresso à parte com endereço permanente, então a confirmação vale para
+  // um QR de cada vez, nunca fica marcada sozinha para o próximo.
+  const [confirmedNonCanonical, setConfirmedNonCanonical] = useState(false);
+  const requiresConfirmation = canCreate && nonCanonicalOrigin;
 
   const fetchSavedQRCodes = useCallback(async () => {
     if (!user) return;
@@ -109,6 +127,7 @@ const QRCodeGenerator = ({ baseUrl, businessName, businessPhone, canCreate = tru
 
   const createQRCode = async () => {
     if (!user || !qrName.trim() || !canCreate) return;
+    if (requiresConfirmation && !confirmedNonCanonical) return;
     setCreating(true);
 
     try {
@@ -136,6 +155,7 @@ const QRCodeGenerator = ({ baseUrl, businessName, businessPhone, canCreate = tru
 
       setLastCreated(created);
       setSavedQRCodes((prev) => [created, ...prev]);
+      setConfirmedNonCanonical(false);
 
       toast({
         title: t('qrcodes.createdTitle'),
@@ -217,6 +237,25 @@ const QRCodeGenerator = ({ baseUrl, businessName, businessPhone, canCreate = tru
           </CardHeader>
           <CardContent className="space-y-4">
             {!canCreate && <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-800" aria-hidden="true" /><p><strong>{t('qrcodes.previewOnlyTitle')}</strong><br />{t('qrcodes.previewOnlyBody')}</p></div>}
+            {requiresConfirmation && (
+              <div className="flex flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+                <div className="flex gap-3">
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-800" aria-hidden="true" />
+                  <p>
+                    <strong>{t('qrcodes.nonCanonicalTitle')}</strong>
+                    <br />
+                    {t('qrcodes.nonCanonicalBody', { url: baseUrl.replace(/\/$/, '') })}
+                  </p>
+                </div>
+                <label className="flex items-start gap-2 pl-8">
+                  <Checkbox
+                    checked={confirmedNonCanonical}
+                    onCheckedChange={(checked) => setConfirmedNonCanonical(checked === true)}
+                  />
+                  <span>{t('qrcodes.nonCanonicalConfirm')}</span>
+                </label>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="qr-name">{t('qrcodes.nameLabel')}</Label>
               <Input
@@ -228,7 +267,15 @@ const QRCodeGenerator = ({ baseUrl, businessName, businessPhone, canCreate = tru
             </div>
 
             <div className="flex justify-center pt-2">
-              <Button onClick={createQRCode} disabled={creating || !qrName.trim() || !canCreate}>
+              <Button
+                onClick={createQRCode}
+                disabled={
+                  creating ||
+                  !qrName.trim() ||
+                  !canCreate ||
+                  (requiresConfirmation && !confirmedNonCanonical)
+                }
+              >
                 {creating ? t('qrcodes.creating') : t('qrcodes.create')}
               </Button>
             </div>

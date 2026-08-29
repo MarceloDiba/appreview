@@ -6,13 +6,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
-import { isLoopbackPublicOrigin, publicAppOrigin } from '@/lib/qr';
+import { isLoopbackPublicOrigin, isNonCanonicalPublicOrigin, publicAppOrigin } from '@/lib/qr';
 
 const QRCodes = () => {
   const { t } = useOwnerTranslation();
   const [businessName, setBusinessName] = useState<string>('');
   const [businessPhone, setBusinessPhone] = useState<string>('');
   const baseUrl = publicAppOrigin();
+  const isLoopback = isLoopbackPublicOrigin(baseUrl);
+  // Loopback já bloqueia a criação; o aviso de origem não canónica só faz
+  // sentido quando a criação está de facto liberada.
+  const isNonCanonical = !isLoopback && isNonCanonicalPublicOrigin(baseUrl);
 
   useEffect(() => {
     let active = true;
@@ -48,7 +52,7 @@ const QRCodes = () => {
             <p className="text-gray-600 mt-1">{t('qrcodes.subtitle')}</p>
           </header>
 
-          <QRCodeGenerator baseUrl={baseUrl} businessName={businessName} businessPhone={businessPhone} canCreate={ !isLoopbackPublicOrigin(baseUrl) } />
+          <QRCodeGenerator baseUrl={baseUrl} businessName={businessName} businessPhone={businessPhone} canCreate={!isLoopback} nonCanonicalOrigin={isNonCanonical} />
 
           <div className="mt-8">
             <Card>
