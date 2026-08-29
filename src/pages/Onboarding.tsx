@@ -383,7 +383,7 @@ const Onboarding = () => {
                         <p>
                           <strong>{t('qrcodes.nonCanonicalTitle')}</strong>
                           <br />
-                          {t('qrcodes.nonCanonicalBody', { url: `${baseUrl.replace(/\/$/, '')}/review/...` })}
+                          {t('qrcodes.nonCanonicalBody', { url: baseUrl.replace(/\/$/, '') })}
                         </p>
                       </div>
                       <label className="flex items-start gap-2 pl-8">

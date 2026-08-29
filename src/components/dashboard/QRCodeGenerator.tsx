@@ -77,8 +77,9 @@ const QRCodeGenerator = ({
   const [isLoadingQRs, setIsLoadingQRs] = useState(true);
   const [lastCreated, setLastCreated] = useState<SavedQR | null>(null);
   // Ato deliberado exigido antes de gravar um QR fora do endereço oficial.
-  // Não é reposto a cada criação: quem já confirmou que conhece o endereço
-  // não precisa de repetir o gesto para criar o próximo código da mesma sessão.
+  // Reposto depois de cada QR criado com sucesso: cada QR é um cartão
+  // impresso à parte com endereço permanente, então a confirmação vale para
+  // um QR de cada vez, nunca fica marcada sozinha para o próximo.
   const [confirmedNonCanonical, setConfirmedNonCanonical] = useState(false);
   const requiresConfirmation = canCreate && nonCanonicalOrigin;
 
@@ -154,6 +155,7 @@ const QRCodeGenerator = ({
 
       setLastCreated(created);
       setSavedQRCodes((prev) => [created, ...prev]);
+      setConfirmedNonCanonical(false);
 
       toast({
         title: t('qrcodes.createdTitle'),
@@ -242,7 +244,7 @@ const QRCodeGenerator = ({
                   <p>
                     <strong>{t('qrcodes.nonCanonicalTitle')}</strong>
                     <br />
-                    {t('qrcodes.nonCanonicalBody', { url: `${baseUrl.replace(/\/$/, '')}/review/...` })}
+                    {t('qrcodes.nonCanonicalBody', { url: baseUrl.replace(/\/$/, '') })}
                   </p>
                 </div>
                 <label className="flex items-start gap-2 pl-8">

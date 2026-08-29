@@ -704,7 +704,7 @@
     "previewOnlyTitle": "The local preview cannot reach a phone yet",
     "previewOnlyBody": "Start the preview on the local network or set VITE_PUBLIC_APP_URL before creating or printing a QR for testing.",
     "nonCanonicalTitle": "This address is not Binno's official one",
-    "nonCanonicalBody": "The QR will be printed and the address {{url}} stays permanent while the QR exists. Check it carefully before creating.",
+    "nonCanonicalBody": "The QR will be printed, and its address starts with {{url}}. That part stays permanent while the QR exists; a unique code is appended at the end when it's created. Check it carefully before creating.",
     "nonCanonicalConfirm": "I confirm I want to create the QR at this address, knowing it is permanent.",
     "defaultName": "Table 1",
     "nameLabel": "Where will this code go?",
