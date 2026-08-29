@@ -68,11 +68,12 @@ as preferências, as regras de consentimento, a UI e o histórico permanecem.
   que retornou `queued: 0`. Nenhum item foi criado na outbox nem mensagem foi
   enviada durante a implantação.
 
-A implantação do OpenWA exige um `/opt/binno/openwa/.env` com
-`WWEBJS_ONBOARDING_CONTINUE_LABELS` e `AUTO_START_SESSIONS=true`. O
-`docker-compose.yml` daquela pasta pertence ao projeto OpenWA e não deve ser
-editado: ele já encaminha as duas variáveis (linhas 157 e 338), e uma
-atualização do OpenWA sobrescreve qualquer alteração feita nele.
+Em 29/08/2026, a implantação do OpenWA passou a exigir um
+`/opt/binno/openwa/.env` (modo 600) com `WWEBJS_ONBOARDING_CONTINUE_LABELS` e
+`AUTO_START_SESSIONS=true`. O `docker-compose.yml` daquela pasta pertence ao
+projeto OpenWA e não deve ser editado: ele já encaminha as duas variáveis
+(linhas 157 e 338), e uma atualização do OpenWA sobrescreve qualquer
+alteração feita nele.
 
 ## Limites transparentes
 

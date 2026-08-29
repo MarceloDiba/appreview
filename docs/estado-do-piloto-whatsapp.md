@@ -84,7 +84,7 @@ criado `/opt/binno/openwa/.env` (modo 600) na VPS `srv1460410.hstgr.cloud`
 (72.61.131.23; o nome curto `srv1460410` nao resolve) com exatamente duas
 chaves: `WWEBJS_ONBOARDING_CONTINUE_LABELS` com o valor acima e
 `AUTO_START_SESSIONS=true`. O `docker-compose.yml` daquela pasta ja encaminha
-as duas variaveis (linhas 157 e 338) e nao foi editado — ele pertence ao
+as duas variaveis (linhas 157 e 338), e nao foi editado porque pertence ao
 projeto OpenWA. Isso cobre a proxima reconexao automatica, mas nenhuma
 reconexao aconteceu ainda desde a mudanca para confirmar que o dialogo nao
 volta a travar a pagina.
@@ -99,7 +99,7 @@ Depois de `docker compose up -d --force-recreate openwa-api`, a sessao responde
 **Resolvido e provado em 29/08/2026.** Com `AUTO_START_SESSIONS=true` no
 `.env` novo, apos `docker compose up -d openwa-api` recriar o container, o log
 mostrou `Session ready: 557991986091` as 16:33:00 com `action: ready`, e o
-status da sessao devolveu `engineLoaded: true` — sem chamar
+status da sessao devolveu `engineLoaded: true`, sem que fosse preciso chamar
 `POST /api/sessions/{id}/start` a mao. Sessao
 `629acdfb-4e29-4037-b819-9b48d71b1315`. Os dados da sessao ficam no volume
 nomeado `openwa_openwa-data`, que sobrevive a recriacao do container. Ainda
