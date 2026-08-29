@@ -12,8 +12,19 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 const fallbackCountry: Country = 'BR';
 
+/**
+ * Onde a Noá opera ou pretende operar. Limitar a lista não é enfeite: com o
+ * mundo inteiro no seletor, escolher o país errado por engano é fácil e o
+ * erro só aparece quando a mensagem não chega. Três opções cabem na tela e
+ * não deixam dúvida.
+ */
+const allowedCountries: Country[] = ['BR', 'PT', 'ES'];
+
+const clampToAllowed = (country: Country | undefined): Country =>
+  country && allowedCountries.includes(country) ? country : fallbackCountry;
+
 export const countryFromPhone = (value: string): Country =>
-  parsePhoneNumber(value)?.country || parsePhoneNumber(value, fallbackCountry)?.country || fallbackCountry;
+  clampToAllowed(parsePhoneNumber(value)?.country || parsePhoneNumber(value, fallbackCountry)?.country);
 
 const normalizePhoneValue = (value: string) =>
   parsePhoneNumber(value)?.number || parsePhoneNumber(value, fallbackCountry)?.number || value;
@@ -72,7 +83,8 @@ const InternationalPhoneField = ({
         value={normalizedValue || undefined}
         defaultCountry={country}
         international
-        countryCallingCodeEditable={false}
+        countries={allowedCountries}
+      countryCallingCodeEditable={false}
         flags={flags}
         onChange={(nextValue) => {
           setTypedAttempt(nextValue);
