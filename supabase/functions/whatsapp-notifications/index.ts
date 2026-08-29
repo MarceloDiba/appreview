@@ -72,6 +72,8 @@ serve(async (request) => {
   if (body.action === 'enqueue-test') {
     const message = typeof body.message === 'string' ? body.message.trim() : '';
     if (!message || message.length > 4096) return json({ error: 'Mensagem de teste inválida.' }, 422);
+    const recipientInput = typeof body.recipient === 'string' ? body.recipient.trim() : '';
+    if (!recipientInput) return json({ error: 'Informe o número de WhatsApp antes de enviar.' }, 422);
     const recipient = phone(body.recipient);
     if (!recipient) return json({ error: 'Número de WhatsApp inválido.' }, 422);
     const { data: preferences } = await admin.from('whatsapp_notification_preferences')
