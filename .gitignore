@@ -27,3 +27,4 @@ dist-ssr
 # Ignorar variáveis de ambiente
 .env
 .env.local
+supabase/.temp/
