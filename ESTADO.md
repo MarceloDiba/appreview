@@ -52,8 +52,15 @@ commits. Detalhe do piloto em `docs/estado-do-piloto-whatsapp.md`.
 - [ ] Algo apagou o DNS de `relay.binno.pro` em 26/08. O numero de serie da zona
   e o ultimo disparo do webhook apontam para o mesmo dia. Sem saber o que foi,
   pode cair de novo.
-- [ ] Fase 5, higiene: rotacionar `GOOGLE_PLACES_API_KEY`, cinco erros de lint
-  herdados, renomear `EmojiRating`.
+- [x] Fase 5, higiene, a parte que nao depende de console externo (PR #45).
+  `EmojiRating` virou `ReviewChooser`: o nome vinha da versao que filtrava a
+  opcao publica pela nota, e o componente nem coleta nota, so apresenta a
+  escolha. Os erros de lint herdados eram **quatro**, nao cinco, e todos foram
+  corrigidos sem mudar comportamento. No caminho, fechou um defeito latente do
+  `AuthContext`: o `catch` devolvia o valor lancado sob o rotulo de `AuthError`,
+  e as telas de login e cadastro chamam `error.message` confiando nisso.
+- [ ] Fase 5, o que sobrou: rotacionar `GOOGLE_PLACES_API_KEY`. Exige o console
+  do Google Cloud, entao e de Marcelo.
 
 ### Achado de produto, sem decisao
 
