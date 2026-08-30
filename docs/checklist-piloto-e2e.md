@@ -48,6 +48,15 @@ consentimento, o gatilho do banco devolve sem enviar nada e sem erro visível
 - [ ] Em Configurações, salvar o número de WhatsApp do dono da Casa Due e
   confirmar o consentimento na tela. Isso grava `consented_at` em
   `whatsapp_notification_preferences` (`supabase/functions/whatsapp-notifications/index.ts`).
+- [ ] **Confirmar que o aviso de comentário privado está ligado.** O gatilho
+  exige três coisas, não duas: número, `consented_at` **e**
+  `feedback_enabled`. Basta uma faltar para ele sair sem enviar nada e sem
+  erro em lugar nenhum (`if pref is null or pref.consented_at is null or not
+  pref.feedback_enabled then return`, linha 36 da migration
+  `20260829124017_alerta_imediato_comentario_privado.sql`). O interruptor está
+  na aba de WhatsApp do painel. Se o passo 5 não produzir linha nenhuma na
+  `whatsapp_outbox`, este é o primeiro lugar a olhar, antes de suspeitar do
+  relay ou da VPS.
 - [ ] Disparar "enviar mensagem de teste" e confirmar que o painel mostra a
   mensagem "Mensagem na fila para {{recipient}}. A entrega costuma levar
   alguns segundos; o painel atualiza sozinho quando o WhatsApp confirmar."
