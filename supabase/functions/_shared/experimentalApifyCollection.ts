@@ -389,8 +389,8 @@ export type CollectionOutcome = CollectionSuccess | CollectionFailure;
  * efêmera de avaliações com nome público, que é assunto exclusivo do piloto
  * manual em `sync-experimental-apify/index.ts`).
  *
- * QUALQUER chamador — o botão manual ou o drenador automático do cadastro —
- * passa por aqui. Não existe um segundo caminho que fale com o Apify.
+ * QUALQUER chamador, seja o botão manual, seja o drenador automático do
+ * cadastro, passa por aqui. Não existe um segundo caminho que fale com o Apify.
  */
 export async function runExperimentalApifyCollection({
   admin,

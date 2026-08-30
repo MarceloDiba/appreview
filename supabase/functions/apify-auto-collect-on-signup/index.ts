@@ -15,8 +15,8 @@ import { corsHeaders, json, resolveMonthlyRunLimit, runExperimentalApifyCollecti
  *
  * Esta função só lê essa fila e gasta com o Apify. Alguém ainda precisa
  * agendar a sua execução (pg_cron, Supabase Scheduled Function ou um cron
- * externo apontando para esta URL) — isso não está incluído aqui de propósito:
- * a primeira execução real é decisão de Marcelo, não deste código.
+ * externo apontando para esta URL); isso não está incluído aqui de propósito,
+ * pois a primeira execução real é decisão de Marcelo, não deste código.
  *
  * INTERRUPTOR DE DESLIGAMENTO
  *
@@ -28,7 +28,7 @@ import { corsHeaders, json, resolveMonthlyRunLimit, runExperimentalApifyCollecti
  * e sem afetar o botão manual do piloto assistido, que pode continuar a
  * existir por mais tempo como ferramenta de diagnóstico. Sem esse segredo em
  * `true`, esta função nunca reivindica uma linha da fila nem gasta um
- * centavo — só responde com `processed: 0`.
+ * centavo: só responde com `processed: 0`.
  */
 
 const authorizedServiceCall = (request: Request, serviceRoleKey: string) => {
