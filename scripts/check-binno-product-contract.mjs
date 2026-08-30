@@ -11,9 +11,23 @@ const advisorReading = read('src/lib/advisorReading.ts');
 const estilos = read('src/index.css');
 
 const requirements = [
-  ['painel mantém a fila antes das métricas', dashboard.indexOf('<ResponseQueue reviews={queue} snapshot={snapshot} />') < dashboard.indexOf('<VolumeCard weeks={history} />')],
+  ['painel mantém a fila antes das métricas', dashboard.indexOf('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />') < dashboard.indexOf('<VolumeCard weeks={history} />')],
   ['painel mantém volume, notas, QR e temas', ['<VolumeCard weeks={history} />', '<RatingTrends weeks={history} snapshot={snapshot} />', '<QrCard funnel={funnel.data} />', '<TopicsCard snapshot={snapshot} />'].every((token) => dashboard.includes(token))],
   ['coluna lateral mantém reputação, WhatsApp, boas práticas, completude e semana', ['<ReputationCard snapshot={snapshot} />', '<WhatsAppCard localWhatsApp={whatsApp}', '<DailyPractice snapshot={snapshot}', '<ProfileCompleteness connected={official.syncComplete} />', '<WeeklyChange weeks={history} />'].every((token) => dashboard.includes(token))],
+  // Decisão de 30/08/2026: a navegação em três abas (Visão geral, Avaliações,
+  // WhatsApp) virou uma tela única. A aba Avaliações não sobrevive como seção
+  // porque já era, byte a byte, a mesma <ResponseQueue> da Visão geral; a aba
+  // só duplicava o que já estava na tela. As quatro linhas abaixo protegem a
+  // mudança inteira: sem estado nem seletor de aba, a fila e a configuração
+  // do WhatsApp completo têm âncora própria e permanecem sempre renderizadas
+  // (nunca atrás de uma condição de aba), e os três cartões que antes trocavam
+  // de aba (Plano de hoje, Boas práticas, Resumo no WhatsApp) linkam para
+  // essas âncoras em vez de chamar um estado que deixou de existir.
+  ['painel vira uma tela única: sem estado de aba, sem seletor, sem <nav>', !dashboard.includes('CockpitTab') && !dashboard.includes('setTab(') && !dashboard.includes('<nav ')],
+  ['fila de respostas aparece uma única vez: a antiga aba "Avaliações" não duplica a seção', (dashboard.match(/<ResponseQueue reviews=\{queue\} snapshot=\{snapshot\} demo=\{demo\} \/>/g) || []).length === 1],
+  ['fila de respostas e configuração do WhatsApp têm âncora própria e única na página', (dashboard.match(/id=\{QUEUE_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{WHATSAPP_ANCHOR_ID\}/g) || []).length === 1],
+  ['Plano de hoje, Boas práticas e Resumo no WhatsApp linkam para a âncora certa em vez de trocar de aba', (dashboard.match(/href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/g) || []).length === 2 && (dashboard.match(/href=\{`#\$\{WHATSAPP_ANCHOR_ID\}`\}/g) || []).length === 1],
+  ['configuração completa do WhatsApp não fica atrás de aba: sempre renderizada na página', dashboard.includes('<WhatsAppNotificationWorkspace localWhatsApp={whatsApp} onboardingPhone={onboardingPhone}') && !dashboard.includes("tab === 'whatsapp'")],
   ['Radar, Plano de hoje e Resultado observado são adicionais aos módulos aprovados', ['<RadarNow snapshot={snapshot} />', '<TodayPlan snapshot={snapshot}', '<ObservedResult snapshot={snapshot}'].every((token) => dashboard.includes(token))],
   ['Radar e Plano permanecem visíveis sem alerta severo', dashboard.includes('const reading = getAdvisorReading(snapshot);') && !dashboard.includes('if (!alert && !opportunity) return null;')],
   ['assessor só usa força positiva agregada ou critérios de alerta existentes', advisorReading.includes("topic.sentiment === 'positive' && topic.count >= 3") && advisorReading.includes("if (alert)") && advisorReading.includes("return { kind: 'monitor' }")],
