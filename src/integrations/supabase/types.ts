@@ -540,9 +540,9 @@ export type Database = {
           average_response_hours: number | null
           captured_at: string
           id: string
-          location_id: string
+          location_id: string | null
           rating_breakdown: Json
-          reviews_last_30_days: number
+          reviews_last_30_days: number | null
           source: string
           topics: Json
           total_reviews: number
@@ -554,9 +554,9 @@ export type Database = {
           average_response_hours?: number | null
           captured_at?: string
           id?: string
-          location_id: string
+          location_id?: string | null
           rating_breakdown?: Json
-          reviews_last_30_days?: number
+          reviews_last_30_days?: number | null
           source?: string
           topics?: Json
           total_reviews: number
@@ -568,9 +568,9 @@ export type Database = {
           average_response_hours?: number | null
           captured_at?: string
           id?: string
-          location_id?: string
+          location_id?: string | null
           rating_breakdown?: Json
-          reviews_last_30_days?: number
+          reviews_last_30_days?: number | null
           source?: string
           topics?: Json
           total_reviews?: number

@@ -367,6 +367,73 @@ export const resolveMonthlyRunLimit = () => {
   return Number.isFinite(configured) ? Math.max(1, Math.min(configured, 100)) : 10;
 };
 
+/**
+ * Proveniência do piloto Apify. É o mesmo literal que o retrato agregado já
+ * emitia como `source`, agora com um nome só para que a linha gravada no
+ * banco e o retrato entregue ao navegador não possam divergir.
+ */
+export const APIFY_SNAPSHOT_SOURCE = 'apify-experimental';
+
+/**
+ * Grava o agregado da coleta em `google_business_reputation_snapshots`, que é
+ * a tabela de onde o painel tira os números. Sem isto, uma coleta paga existe
+ * apenas no `localStorage` do aparelho que a pediu: outro aparelho do mesmo
+ * dono não vê nada, e a coleta automática do cadastro, que roda sem navegador
+ * nenhum, gasta dinheiro e não entrega nada que o dono consiga ver.
+ *
+ * Só medição entra aqui. Nome do avaliador, texto da avaliação e URL pública
+ * da avaliação ficam na fila efêmera do navegador autenticado, por até 14
+ * dias (contrato de produto, linhas 39 a 41).
+ *
+ * Uma falha de gravação é registrada e nunca propagada. A essa altura o Apify
+ * já cobrou e a auditoria já está marcada como bem-sucedida; transformar isso
+ * numa coleta falhada faria o chamador tentar de novo e gastar de novo.
+ */
+const persistAggregateSnapshot = async ({
+  admin,
+  userId,
+  aggregateSnapshot,
+}: {
+  admin: ReturnType<typeof createClient>;
+  userId: string;
+  aggregateSnapshot: Record<string, unknown> & { sample: Record<string, unknown> };
+}) => {
+  try {
+    const business = (aggregateSnapshot.business || {}) as Record<string, unknown>;
+    const sample = aggregateSnapshot.sample;
+    const insights = (sample.insights || {}) as Record<string, unknown>;
+    const sampleSize = numberInRange(sample.reviewCount);
+    const ownerReplies = numberInRange(sample.ownerRepliesFound);
+    const { error } = await admin.from('google_business_reputation_snapshots').insert({
+      user_id: userId,
+      // Uma coleta Apify não passa pela conexão oficial e não tem localização.
+      location_id: null,
+      captured_at: aggregateSnapshot.fetchedAt as string,
+      // Totais do negócio inteiro, lidos do próprio perfil no Google
+      // (`reviewsCount` e `totalScore` do Actor). Não são números de amostra.
+      total_reviews: Math.max(0, Math.trunc(numberInRange(business.googleReviewCount))),
+      average_rating: Math.round(Math.min(5, Math.max(0, numberInRange(business.googleRating))) * 10) / 10,
+      // Daqui para baixo tudo vem da amostra de no máximo 50 avaliações. É
+      // exatamente por isso que a coluna `source` importa: no caminho oficial
+      // as mesmas colunas são calculadas sobre todas as avaliações do negócio,
+      // e comparar as duas sem separar por proveniência inventaria um salto
+      // que o dono leria como resultado dele.
+      rating_breakdown: sample.ratingBreakdown,
+      // Não respondidas DENTRO DA AMOSTRA, nunca no negócio inteiro.
+      unanswered_review_count: Math.max(0, sampleSize - ownerReplies),
+      // Nulo quando nenhuma avaliação da amostra trouxe data. Desconhecido não
+      // é zero, e zero apareceria no painel como "nenhuma avaliação nova".
+      reviews_last_30_days: insights.reviewsLast30Days ?? null,
+      average_response_hours: insights.averageResponseHours ?? null,
+      topics: insights.topics ?? [],
+      source: APIFY_SNAPSHOT_SOURCE,
+    });
+    if (error) console.error('Agregado da coleta Apify nao foi persistido', error.code || error.message);
+  } catch (error) {
+    console.error('Agregado da coleta Apify nao foi persistido', error instanceof Error ? error.message : 'erro desconhecido');
+  }
+};
+
 export type CollectionSuccess = {
   ok: true;
   runId: string;
@@ -547,7 +614,7 @@ export async function runExperimentalApifyCollection({
     const first = reviews[0];
     const advisor = collectAdvisor(reviews, now);
     const aggregateSnapshot = {
-      source: 'apify-experimental' as const,
+      source: APIFY_SNAPSHOT_SOURCE,
       fetchedAt: now.toISOString(),
       business: {
         name: typeof first.title === 'string' ? first.title : 'Negócio no Google',
@@ -570,6 +637,7 @@ export async function runExperimentalApifyCollection({
       completed_at: new Date().toISOString(),
       result_summary: aggregateSnapshot,
     }).eq('id', audit.id);
+    await persistAggregateSnapshot({ admin, userId, aggregateSnapshot });
     await enqueueAdvisorAlert({
       admin,
       userId,
