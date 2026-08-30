@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import EmojiRating from '@/components/emoji-review/EmojiRating';
+import ReviewChooser from '@/components/review-funnel/ReviewChooser';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -98,7 +98,7 @@ const Review = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <EmojiRating
+      <ReviewChooser
         businessId={businessData.id}
         businessName={businessData.name}
         userId={businessData.userId}

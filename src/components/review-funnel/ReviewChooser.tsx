@@ -6,7 +6,7 @@ import { ExternalLink, MessageSquareText } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { trackReviewEvent, type ReviewPlatform } from '@/lib/reviewFunnel';
 
-interface EmojiRatingProps {
+interface ReviewChooserProps {
   businessName: string;
   businessId: string;
   userId: string;
@@ -23,12 +23,12 @@ const platformFor = (platform: string): ReviewPlatform | null => {
   return null;
 };
 
-const EmojiRating = ({
+const ReviewChooser = ({
   businessName,
   businessId,
   userId,
   externalLinks = [],
-}: EmojiRatingProps) => {
+}: ReviewChooserProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -111,4 +111,4 @@ const EmojiRating = ({
   );
 };
 
-export default EmojiRating;
+export default ReviewChooser;
