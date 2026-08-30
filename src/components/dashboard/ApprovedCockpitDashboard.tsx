@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Copy, ExternalLink, Lightbulb, MessageCircle, QrCode, Sparkles, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Copy, ExternalLink, Info, Lightbulb, MessageCircle, QrCode, Sparkles, Star } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,6 +36,7 @@ const actionStorageKey = 'binno.approved-cockpit-actions';
 // aba (fila e WhatsApp) agora levam a estes ids por link nativo
 // (href="#..."), sem estado de aba nem JavaScript para funcionar.
 const QUEUE_ANCHOR_ID = 'fila-de-respostas';
+const QR_ANCHOR_ID = 'qr-e-temas';
 const WHATSAPP_ANCHOR_ID = 'configuracao-whatsapp';
 
 const readActions = (): Record<string, ActionState> => {
@@ -102,7 +104,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
         <div id={QUEUE_ANCHOR_ID} className="scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} /></div>
         <VolumeCard weeks={history} />
         <RatingTrends weeks={history} snapshot={snapshot} />
-        <div className="grid gap-5 md:grid-cols-2"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
+        <div id={QR_ANCHOR_ID} className="grid scroll-mt-4 gap-5 md:grid-cols-2"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
       </section>
       <aside className="space-y-5">
         <TodayPlan snapshot={snapshot} onMarked={() => setAdvisorActionVersion((current) => current + 1)} />
@@ -186,7 +188,27 @@ const ResponseQueue = ({ reviews, snapshot, demo = false }: { reviews: QueueRevi
     try { await navigator.clipboard.writeText(currentAction.draft); } catch { /* Keep the editable draft available. */ }
     save({ ...currentAction, copied: true });
   };
-  if (!selected) return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2><p className="mt-3 text-sm text-slate-500">—</p></CardContent></Card>;
+  // Sem oficial sincronizado e sem recolha local do piloto, a fila fica
+  // genuinamente vazia hoje em toda conta real: a ligação oficial ao Google
+  // está em aprovação desde 21/08/2026. Um traço aqui ensinaria o dono que o
+  // produto tem menos do que tem, o mesmo defeito que motivou tirar a aba
+  // Avaliações. Reaproveita o par título/ação já escrito para este estado em
+  // `dashboard.cockpit.reviews.lockedTitle`/`action`; o corpo ganha uma chave
+  // nova (`queueEmptyBody`) porque `lockedBody` descreve uma coleta que não
+  // guarda nome, texto ou link, o que já não é verdade desde que o piloto
+  // Apify passou a reter isso por até 14 dias no navegador. Este bloco some
+  // sozinho assim que a fila tiver uma avaliação, oficial ou do piloto.
+  if (!selected) return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5">
+    <h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2>
+    <div className="mt-4 flex gap-3 rounded-xl border border-amber-100 bg-amber-50/60 p-4">
+      <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-800" />
+      <div>
+        <p className="font-semibold text-amber-950">{t('dashboard.cockpit.reviews.lockedTitle')}</p>
+        <p className="mt-1 text-sm leading-6 text-amber-950">{t('dashboard.cockpit.layout.queueEmptyBody')}</p>
+      </div>
+    </div>
+    <Button asChild variant="outline" className="mt-4"><Link to="/settings">{t('dashboard.cockpit.reviews.action')}<ChevronRight className="ml-1 h-4 w-4" /></Link></Button>
+  </CardContent></Card>;
 
   return <Card className="overflow-hidden border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-0">
     <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2><span className="text-sm text-slate-500">{index + 1} de {reviews.length}</span></div>
@@ -239,12 +261,16 @@ const DailyPractice = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) =>
   const { t } = useOwnerTranslation();
   const reading = getAdvisorReading(snapshot);
   const unresolved = (snapshot.sample.observedReviews?.items || []).filter((review) => !review.responseObserved).length;
+  // O destino do CTA acompanha o texto: "Ver QR Codes" tinha o rótulo certo
+  // mas sempre levava para a fila (herdado de quando só existia setTab para
+  // a aba de avaliações). Cada variante aponta para a âncora que o próprio
+  // texto promete.
   const practice = reading.kind === 'opportunity'
-    ? { title: t('dashboard.advisorPilot.opportunityBody', { phrase: reading.phrase, mentions: reading.mentions }), body: t('dashboard.advisorPilot.opportunityAction'), action: t('dashboard.advisorPilot.planTitle') }
+    ? { title: t('dashboard.advisorPilot.opportunityBody', { phrase: reading.phrase, mentions: reading.mentions }), body: t('dashboard.advisorPilot.opportunityAction'), action: t('dashboard.advisorPilot.planTitle'), target: QUEUE_ANCHOR_ID }
     : reading.kind === 'strength'
-      ? { title: t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions }), body: t('dashboard.advisorPilot.strengthAction', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`) }), action: t('dashboard.advisorPilot.reviewEvidence') }
-    : unresolved ? { title: `${unresolved} avaliações com texto ainda não mostram resposta`, body: 'Revise uma resposta e publique quando estiver satisfeito.', action: 'Revisar fila' } : { title: 'Planeje uma foto recente da experiência', body: 'Mostre o que o cliente encontra hoje.', action: 'Ver QR Codes' };
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">Boas práticas</h2></div><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button asChild variant="link" className="mt-2 h-auto px-0 text-[#2457D6]"><a href={`#${QUEUE_ANCHOR_ID}`}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></a></Button></CardContent></Card>;
+      ? { title: t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions }), body: t('dashboard.advisorPilot.strengthAction', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`) }), action: t('dashboard.advisorPilot.reviewEvidence'), target: QUEUE_ANCHOR_ID }
+    : unresolved ? { title: `${unresolved} avaliações com texto ainda não mostram resposta`, body: 'Revise uma resposta e publique quando estiver satisfeito.', action: 'Revisar fila', target: QUEUE_ANCHOR_ID } : { title: 'Planeje uma foto recente da experiência', body: 'Mostre o que o cliente encontra hoje.', action: 'Ver QR Codes', target: QR_ANCHOR_ID };
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">Boas práticas</h2></div><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button asChild variant="link" className="mt-2 h-auto px-0 text-[#2457D6]"><a href={`#${practice.target}`}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></a></Button></CardContent></Card>;
 };
 
 const ProfileCompleteness = ({ connected, demo = false }: { connected: boolean; demo?: boolean }) => {

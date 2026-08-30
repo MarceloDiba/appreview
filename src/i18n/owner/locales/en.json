@@ -464,6 +464,7 @@
         "queueSubtitle": "One decision at a time, with text and evidence once the official reading is available.",
         "queueUnavailableTitle": "The individual queue is not available yet",
         "queueUnavailableBody": "The {{count}} low ratings are a signal in the sample, not a real queue. Binno does not invent an author or review.",
+        "queueEmptyBody": "There are no reviews here yet. The queue appears once you run a manual collection in Settings or once the Google Business Profile connection is approved.",
         "queueLive": "Official queue synced",
         "anonymousReviewer": "Customer name unavailable",
         "dateUnavailable": "Date unavailable",

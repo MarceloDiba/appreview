@@ -10,23 +10,34 @@ const collector = read('supabase/functions/sync-experimental-apify/index.ts');
 const advisorReading = read('src/lib/advisorReading.ts');
 const estilos = read('src/index.css');
 
+// indexOf(A) < indexOf(B) sozinho e cego a A ter sido apagado inteiro: sem A,
+// indexOf devolve -1, e -1 e sempre menor que a posicao real de B, entao o
+// guarda passa sem checar nada. As duas comparacoes de ordem abaixo exigem
+// presenca dos dois lados antes de comparar posicao, para nao depender de um
+// guarda vizinho contar as ocorrencias por acidente.
 const requirements = [
-  ['painel mantém a fila antes das métricas', dashboard.indexOf('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />') < dashboard.indexOf('<VolumeCard weeks={history} />')],
+  ['painel mantém a fila antes das métricas', dashboard.includes('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />') && dashboard.includes('<VolumeCard weeks={history} />') && dashboard.indexOf('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />') < dashboard.indexOf('<VolumeCard weeks={history} />')],
   ['painel mantém volume, notas, QR e temas', ['<VolumeCard weeks={history} />', '<RatingTrends weeks={history} snapshot={snapshot} />', '<QrCard funnel={funnel.data} />', '<TopicsCard snapshot={snapshot} />'].every((token) => dashboard.includes(token))],
   ['coluna lateral mantém reputação, WhatsApp, boas práticas, completude e semana', ['<ReputationCard snapshot={snapshot} />', '<WhatsAppCard localWhatsApp={whatsApp}', '<DailyPractice snapshot={snapshot}', '<ProfileCompleteness connected={official.syncComplete} />', '<WeeklyChange weeks={history} />'].every((token) => dashboard.includes(token))],
   // Decisão de 30/08/2026: a navegação em três abas (Visão geral, Avaliações,
   // WhatsApp) virou uma tela única. A aba Avaliações não sobrevive como seção
   // porque já era, byte a byte, a mesma <ResponseQueue> da Visão geral; a aba
   // só duplicava o que já estava na tela. As quatro linhas abaixo protegem a
-  // mudança inteira: sem estado nem seletor de aba, a fila e a configuração
-  // do WhatsApp completo têm âncora própria e permanecem sempre renderizadas
-  // (nunca atrás de uma condição de aba), e os três cartões que antes trocavam
-  // de aba (Plano de hoje, Boas práticas, Resumo no WhatsApp) linkam para
-  // essas âncoras em vez de chamar um estado que deixou de existir.
+  // mudança inteira: sem estado nem seletor de aba, a fila, o QR/temas e a
+  // configuração do WhatsApp completo têm âncora própria e permanecem sempre
+  // renderizados (nunca atrás de uma condição de aba), e os três cartões que
+  // antes trocavam de aba (Plano de hoje, Boas práticas, Resumo no WhatsApp)
+  // linkam para essas âncoras em vez de chamar um estado que deixou de existir.
   ['painel vira uma tela única: sem estado de aba, sem seletor, sem <nav>', !dashboard.includes('CockpitTab') && !dashboard.includes('setTab(') && !dashboard.includes('<nav ')],
   ['fila de respostas aparece uma única vez: a antiga aba "Avaliações" não duplica a seção', (dashboard.match(/<ResponseQueue reviews=\{queue\} snapshot=\{snapshot\} demo=\{demo\} \/>/g) || []).length === 1],
-  ['fila de respostas e configuração do WhatsApp têm âncora própria e única na página', (dashboard.match(/id=\{QUEUE_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{WHATSAPP_ANCHOR_ID\}/g) || []).length === 1],
-  ['Plano de hoje, Boas práticas e Resumo no WhatsApp linkam para a âncora certa em vez de trocar de aba', (dashboard.match(/href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/g) || []).length === 2 && (dashboard.match(/href=\{`#\$\{WHATSAPP_ANCHOR_ID\}`\}/g) || []).length === 1],
+  ['fila de respostas, QR/temas e configuração do WhatsApp têm âncora própria e única na página', (dashboard.match(/id=\{QUEUE_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{QR_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{WHATSAPP_ANCHOR_ID\}/g) || []).length === 1],
+  ['Plano de hoje e Resumo no WhatsApp linkam para a âncora certa em vez de trocar de aba', (dashboard.match(/href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/g) || []).length === 1 && (dashboard.match(/href=\{`#\$\{WHATSAPP_ANCHOR_ID\}`\}/g) || []).length === 1],
+  // "Ver QR Codes" tinha o rotulo certo mas o href sempre apontava para a
+  // fila (heranca de quando so existia setTab para a aba de avaliacoes,
+  // achado no round de correcao de 30/08/2026). Boas praticas agora escolhe
+  // o alvo por variante: as tres que falam de avaliacao ou fila apontam para
+  // a fila, a que fala de foto/QR aponta para o QR.
+  ['Boas práticas linka para a âncora que o próprio texto do CTA promete (fila ou QR)', dashboard.includes('href={`#${practice.target}`}') && (dashboard.match(/target: QUEUE_ANCHOR_ID/g) || []).length === 3 && dashboard.includes('target: QR_ANCHOR_ID')],
   ['configuração completa do WhatsApp não fica atrás de aba: sempre renderizada na página', dashboard.includes('<WhatsAppNotificationWorkspace localWhatsApp={whatsApp} onboardingPhone={onboardingPhone}') && !dashboard.includes("tab === 'whatsapp'")],
   ['Radar, Plano de hoje e Resultado observado são adicionais aos módulos aprovados', ['<RadarNow snapshot={snapshot} />', '<TodayPlan snapshot={snapshot}', '<ObservedResult snapshot={snapshot}'].every((token) => dashboard.includes(token))],
   ['Radar e Plano permanecem visíveis sem alerta severo', dashboard.includes('const reading = getAdvisorReading(snapshot);') && !dashboard.includes('if (!alert && !opportunity) return null;')],
@@ -44,7 +55,7 @@ const requirements = [
   // sempre antes da fila quando existir, sem deslocar a fila da posicao
   // dela quando ele nao existir.
   ['bloco de comentários pendentes some por completo sem caso sem tratar', pendingCommentsBanner.includes('if (pendingOrdered.length === 0) return null;')],
-  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.indexOf('<PendingCommentsBanner userId={userId} />') < dashboard.lastIndexOf('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />')],
+  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner userId={userId} />') && dashboard.includes('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />') && dashboard.indexOf('<PendingCommentsBanner userId={userId} />') < dashboard.lastIndexOf('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />')],
   ['coleta pede nome público', collector.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
   ['coleta aceita somente campos específicos de permalink', collector.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !collector.includes("'reviewUri', 'url'")],
   ['coleta temporária continua sem agenda e com limite explícito', collector.includes("maxReviews: 50") && collector.includes("APIFY_EXPERIMENTAL_COOLDOWN")],
