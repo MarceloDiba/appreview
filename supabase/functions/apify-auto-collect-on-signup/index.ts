@@ -126,14 +126,19 @@ serve(async (request) => {
       continue;
     }
 
-    // O teto mensal e a janela de 24 horas são condições transitórias: o
-    // negócio continua elegível, só não agora. A linha volta para "queued"
-    // (sem marcar processed_at) para a próxima drenagem tentar de novo, em
-    // vez de descartar para sempre uma coleta que o próprio produto autoriza.
-    // Qualquer outro código de erro (token inválido, Apify fora do ar, link
-    // que o Apify recusa) é definitivo: uma tentativa automática por negócio,
-    // nunca um laço de novas tentativas gastando repetidamente.
-    const transient = outcome.code === 'APIFY_EXPERIMENTAL_COOLDOWN' || outcome.code === 'APIFY_EXPERIMENTAL_MONTHLY_LIMIT';
+    // O teto mensal, a janela de 24 horas e uma reivindicação perdida para
+    // outra chamada concorrente (índice único sobre 'started') são condições
+    // transitórias: o negócio continua elegível, só não agora. A linha volta
+    // para "queued" (sem marcar processed_at) para a próxima drenagem tentar
+    // de novo, em vez de descartar para sempre uma coleta que o próprio
+    // produto autoriza. Qualquer outro código de erro (token inválido, Apify
+    // fora do ar, link que o Apify recusa) é definitivo: uma tentativa
+    // automática por negócio, nunca um laço de novas tentativas gastando
+    // repetidamente. Nenhum desses três códigos representa uma chamada ao
+    // Apify que já aconteceu; todos rejeitam antes do `fetch` que cobra.
+    const transient = outcome.code === 'APIFY_EXPERIMENTAL_COOLDOWN'
+      || outcome.code === 'APIFY_EXPERIMENTAL_MONTHLY_LIMIT'
+      || outcome.code === 'APIFY_EXPERIMENTAL_CLAIMED_ELSEWHERE';
     await admin.from('apify_auto_collection_queue').update({
       status: transient ? 'queued' : 'failed',
       claimed_at: null,

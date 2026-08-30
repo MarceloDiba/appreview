@@ -65,6 +65,27 @@ as $$
     and p_url ~* '^https://(www\.)?(google\.com(\.br|\.pt)?|maps\.google\.com(\.br)?|maps\.google\.pt|g\.page|maps\.app\.goo\.gl|goo\.gl|share\.google)(/|$)';
 $$;
 
+-- Uma coleta por negócio EM ANDAMENTO, garantida pelo Postgres, não só pela
+-- checagem de 24h em runExperimentalApifyCollection. Duas chamadas
+-- concorrentes (o botão manual e o drenador automático, ou duas execuções
+-- do drenador) podiam antes passar pelo SELECT de cooldown ao mesmo tempo e
+-- as duas gastarem com o Apify. Este índice único PARCIAL torna o INSERT da
+-- linha 'started' a própria reivindicação atômica: só uma linha 'started'
+-- por user_id pode existir. A segunda chamada que tentar inserir recebe
+-- unique_violation (23505) do Postgres antes de qualquer chamada ao Apify, e
+-- trata isso como "outra coleta já está em andamento", não como erro.
+--
+-- Por ser PARCIAL (só sobre `status = 'started'`), a vaga se libera sozinha
+-- assim que a linha muda de status: tanto ao concluir de verdade
+-- ('succeeded'/'failed' no fim de runExperimentalApifyCollection) quanto ao
+-- ser reivindicada como órfã (ver ORPHANED_STARTED_AFTER_MS em
+-- supabase/functions/_shared/experimentalApifyCollection.ts). Uma vaga
+-- liberada pode ser reivindicada de novo na mesma transação seguinte, sem
+-- espera adicional.
+create unique index if not exists experimental_apify_runs_one_started_idx
+  on public.experimental_apify_runs (user_id)
+  where status = 'started';
+
 -- Núcleo do gatilho: só enfileira quando as duas condições coexistem. Nunca
 -- lança para fora: uma falha aqui é conveniência perdida, não pode derrubar
 -- o INSERT/UPDATE em profiles ou platform_links que o cadastro depende.
@@ -151,11 +172,19 @@ for each row execute function public.trg_apify_auto_collection_from_platform_lin
 -- Uma linha 'processing' cujo drenador caiu antes de gravar o resultado
 -- ficaria travada para sempre, e o negócio perderia a coleta em silêncio, sem
 -- ninguém saber. Por isso, junto de 'queued', esta função também reivindica
--- linhas 'processing' cujo claimed_at passou de 15 minutos: o mesmo prazo
+-- linhas 'processing' cujo claimed_at passou de 15 minutos: o MESMO prazo
 -- (bem maior que o timeout de 240s do Actor) usado para reivindicar uma linha
--- 'started' órfã em experimental_apify_runs. Isso é seguro mesmo se o gasto
--- já tiver acontecido: quem decide se pode gastar de novo é a checagem de
--- 24h em runExperimentalApifyCollection, não o status desta fila.
+-- 'started' órfã em experimental_apify_runs, em
+-- ORPHANED_STARTED_AFTER_MS (supabase/functions/_shared/experimentalApifyCollection.ts).
+-- São dois literais em duas linguagens que precisam concordar; TypeScript não
+-- consegue ler esta migração, nem esta migração consegue importar aquela
+-- constante, então não há como derivar um do outro no código. Em vez disso,
+-- `scripts/check-apify-auto-collection.mjs` lê os dois literais e falha se
+-- eles divergirem. Mudar um exige mudar o outro E o comentário aqui.
+--
+-- Isso é seguro mesmo se o gasto já tiver acontecido: quem decide se pode
+-- gastar de novo é a checagem de 24h em runExperimentalApifyCollection, não o
+-- status desta fila.
 create or replace function public.claim_apify_auto_collection(batch_size integer default 5)
 returns setof public.apify_auto_collection_queue
 language plpgsql

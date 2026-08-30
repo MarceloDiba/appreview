@@ -18,6 +18,28 @@ const autoDispatcher = read('supabase/functions/apify-auto-collect-on-signup/ind
 const onboarding = read('src/pages/Onboarding.tsx');
 const rolloutDocs = read('docs/apify-experimental-rollout.md');
 
+// Extrai o corpo de um bloco `if (condição) { ... }` respeitando chaves
+// aninhadas (o objeto passado a `.update({...})` tem as suas próprias `{}`),
+// para poder inspecionar a ÚLTIMA instrução do bloco, não só procurar uma
+// string solta em qualquer lugar do arquivo.
+const extractIfBlock = (source, conditionSnippet) => {
+  const conditionIndex = source.indexOf(conditionSnippet);
+  if (conditionIndex === -1) return null;
+  const braceStart = source.indexOf('{', conditionIndex);
+  if (braceStart === -1) return null;
+  let depth = 0;
+  for (let i = braceStart; i < source.length; i += 1) {
+    if (source[i] === '{') depth += 1;
+    else if (source[i] === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        return { end: i + 1, body: source.slice(braceStart + 1, i) };
+      }
+    }
+  }
+  return null;
+};
+
 const requirements = [
   // "Uma vez por negócio, para sempre": user_id é chave primária da fila, e o
   // gatilho insere com ON CONFLICT DO NOTHING. Reabrir o cadastro, recarregar
@@ -78,6 +100,50 @@ const requirements = [
     && collectorCore.includes("error_code: 'APIFY_EXPERIMENTAL_ORPHANED'")
     && collectorCore.indexOf("error_code: 'APIFY_EXPERIMENTAL_ORPHANED'") < collectorCore.indexOf(".in('status', ['succeeded', 'started'])")],
 
+  // A reivindicação órfã tem que ser escopada só por user_id, a mesma chave
+  // do índice único parcial: uma linha 'started' presa sob um link antigo
+  // precisa liberar a vaga para uma tentativa com o link atual, senão o
+  // índice único trava o negócio para sempre mesmo depois do prazo de órfã.
+  ['reivindicação de linha "started" órfã é escopada só por user_id, não também por google_review_url',
+    (() => {
+      const block = extractIfBlock(collectorCore, "if (reclaimError) {");
+      const reclaimCallIndex = collectorCore.lastIndexOf(".update({ status: 'failed', completed_at: now.toISOString(), error_code: 'APIFY_EXPERIMENTAL_ORPHANED' })", collectorCore.indexOf("if (reclaimError) {"));
+      if (reclaimCallIndex === -1) return false;
+      const chainEnd = collectorCore.indexOf(';', reclaimCallIndex);
+      const chain = collectorCore.slice(reclaimCallIndex, chainEnd);
+      return chain.includes(".eq('user_id', userId)") && !chain.includes('google_review_url');
+    })()],
+
+  // O check-then-act original deixava duas chamadas concorrentes passarem
+  // pelo mesmo SELECT de cooldown e as duas gastarem. O índice único parcial
+  // faz do INSERT a própria reivindicação atômica: só existe UMA linha
+  // 'started' por user_id no banco a qualquer momento. Isso tem que existir
+  // na migração (não só ser assumido pelo código) e o INSERT tem que tratar
+  // unique_violation como "outra chamada já reivindicou", não como erro.
+  ['índice único parcial garante uma única linha "started" por negócio, e o INSERT trata violação de unicidade como reivindicação perdida (não como erro)',
+    migration.includes("create unique index if not exists experimental_apify_runs_one_started_idx")
+    && migration.includes("on public.experimental_apify_runs (user_id)")
+    && migration.includes("where status = 'started';")
+    && collectorCore.includes("POSTGRES_UNIQUE_VIOLATION = '23505'")
+    && collectorCore.includes("auditError.code === POSTGRES_UNIQUE_VIOLATION")
+    && collectorCore.includes("code: 'APIFY_EXPERIMENTAL_CLAIMED_ELSEWHERE'")
+    && collectorCore.indexOf("auditError.code === POSTGRES_UNIQUE_VIOLATION") < collectorCore.indexOf('await fetch(actorUrl')],
+
+  // As duas linguagens não se leem: nada IMPEDE alguém de mudar um dos dois
+  // prazos de 15 minutos (o de linha 'started' órfã em TypeScript, o de linha
+  // 'processing' travada em SQL) sem lembrar do outro. Este teste lê os dois
+  // literais de verdade, não confia em comentário nem em nome de variável, e
+  // falha se os valores divergirem.
+  ['os dois prazos de 15 minutos (linha "started" órfã em TS, linha "processing" travada em SQL) concordam, lidos como literais',
+    (() => {
+      const tsMatch = collectorCore.match(/const ORPHANED_STARTED_AFTER_MS = (\d+) \* 60 \* 1_000;/);
+      const sqlMatch = migration.match(/claimed_at < now\(\) - interval '(\d+) minutes'/);
+      if (!tsMatch || !sqlMatch) return false;
+      const tsMinutes = Number(tsMatch[1]);
+      const sqlMinutes = Number(sqlMatch[1]);
+      return Number.isFinite(tsMinutes) && Number.isFinite(sqlMinutes) && tsMinutes === sqlMinutes;
+    })()],
+
   ['núcleo partilhado aplica o teto mensal ANTES de abrir a auditoria e ANTES de chamar o Apify',
     collectorCore.includes("code: 'APIFY_EXPERIMENTAL_MONTHLY_LIMIT'")
     && collectorCore.includes('(monthlyCount || 0) >= monthlyRunLimit')
@@ -87,10 +153,26 @@ const requirements = [
   // "Uma vez por negócio" é uma vez no total. Se o piloto manual (ou uma
   // automação anterior) já teve sucesso, em qualquer momento, a automação de
   // cadastro não gasta de novo só porque o cooldown de 24h já passou.
-  ['drenador automático pula negócio com QUALQUER coleta bem-sucedida anterior, não só uma fora da janela de 24h',
-    autoDispatcher.includes(".eq('status', 'succeeded')")
-    && autoDispatcher.includes("status: 'skipped_existing'")
-    && autoDispatcher.indexOf(".eq('status', 'succeeded')") < autoDispatcher.indexOf('await runExperimentalApifyCollection')],
+  //
+  // Checar só a POSIÇÃO da string `.eq('status', 'succeeded')` no arquivo é
+  // vazio: apagar o `continue;` do bloco `if (existingSuccess)` deixa a
+  // checagem no lugar, mas a execução cai para `runExperimentalApifyCollection`
+  // na mesma iteração e o negócio é cobrado de novo, com o teste passando do
+  // mesmo jeito. Em vez disso, este teste extrai o bloco `if (existingSuccess)`
+  // respeitando chaves aninhadas e exige que a ÚLTIMA instrução dele seja
+  // `continue` (ou `return`), ou seja, que o gate realmente pare a iteração
+  // antes de qualquer chamada à coleta.
+  (() => {
+    const label = 'drenador automático pula negócio com QUALQUER coleta bem-sucedida anterior, e o `continue` realmente impede a chamada à coleta na mesma iteração';
+    const gateQuery = autoDispatcher.includes(".eq('status', 'succeeded')") && autoDispatcher.includes("status: 'skipped_existing'");
+    const block = extractIfBlock(autoDispatcher, 'if (existingSuccess) {');
+    const collectionCallIndex = autoDispatcher.indexOf('await runExperimentalApifyCollection(');
+    const blockExitsBeforeSpending = Boolean(block)
+      && collectionCallIndex !== -1
+      && block.end <= collectionCallIndex
+      && /(?:^|\s)(continue|return[^;]*);\s*$/.test(block.body.trim());
+    return [label, gateQuery && blockExitsBeforeSpending];
+  })(),
 
   // O teto não pode ser lido em dois lugares com valores diferentes: os dois
   // chamadores importam a mesma função que lê APIFY_EXPERIMENTAL_MONTHLY_RUN_LIMIT.
@@ -121,22 +203,23 @@ const requirements = [
   ['drenador automático não reimplementa a chamada ao Apify',
     !autoDispatcher.includes('api.apify.com')],
 
-  // Falhas transitórias (cooldown, teto mensal) voltam para "queued" e podem
-  // ser tentadas de novo depois; qualquer outro erro é definitivo, uma
-  // tentativa automática por negócio, nunca um laço de novas tentativas. A
-  // string `transient ? 'queued' : 'failed'` sozinha não prova nada: alguém
-  // poderia alargar a própria condição `transient` para incluir um código
-  // pós-gasto (ex.: `APIFY_REQUEST_FAILED`) e criar retries pagos sem limite,
-  // com essa linha continuando idêntica. Por isso o teste lê a expressão de
-  // `transient` e exige exatamente os dois códigos que rejeitam ANTES de
-  // gastar, nem um a mais.
-  ['"transient" deriva só dos dois códigos que rejeitam antes de gastar (cooldown, teto mensal); nenhum código pós-gasto entra nessa lista',
+  // Falhas transitórias (cooldown, teto mensal, perder a corrida do índice
+  // único) voltam para "queued" e podem ser tentadas de novo depois; qualquer
+  // outro erro é definitivo, uma tentativa automática por negócio, nunca um
+  // laço de novas tentativas. A string `transient ? 'queued' : 'failed'`
+  // sozinha não prova nada: alguém poderia alargar a própria condição
+  // `transient` para incluir um código pós-gasto (ex.: `APIFY_REQUEST_FAILED`)
+  // e criar retries pagos sem limite, com essa linha continuando idêntica.
+  // Por isso o teste lê a expressão de `transient` e exige exatamente os três
+  // códigos que rejeitam ANTES de gastar, nem um a mais.
+  ['"transient" deriva só dos três códigos que rejeitam antes de gastar (cooldown, teto mensal, corrida do índice único); nenhum código pós-gasto entra nessa lista',
     (() => {
-      const match = autoDispatcher.match(/const transient = ([^;]+);/);
+      const match = autoDispatcher.match(/const transient = ([^;]+);/s);
       const expr = match ? match[1] : '';
       return expr.includes("outcome.code === 'APIFY_EXPERIMENTAL_COOLDOWN'")
         && expr.includes("outcome.code === 'APIFY_EXPERIMENTAL_MONTHLY_LIMIT'")
-        && (expr.match(/outcome\.code ===/g) || []).length === 2;
+        && expr.includes("outcome.code === 'APIFY_EXPERIMENTAL_CLAIMED_ELSEWHERE'")
+        && (expr.match(/outcome\.code ===/g) || []).length === 3;
     })()
     && autoDispatcher.includes("status: transient ? 'queued' : 'failed'")],
 

@@ -384,21 +384,39 @@ export type CollectionOutcome = CollectionSuccess | CollectionFailure;
 
 /**
  * Uma linha 'started' sem conclusão significa que o processo pode ter caído
- * entre a chamada ao Apify (a cobrança, linha ~470 abaixo) e a gravação do
- * resultado. Não há como saber, a essa altura, se o Apify já cobrou. Por
- * isso 'started' bloqueia a janela de 24h exatamente como 'succeeded'.
+ * entre a chamada ao Apify (a cobrança) e a gravação do resultado. Não há
+ * como saber, a essa altura, se o Apify já cobrou. Por isso 'started'
+ * bloqueia a janela de 24h exatamente como 'succeeded', e o índice único
+ * parcial `experimental_apify_runs_one_started_idx` (ver migração
+ * 20260830190000) impede uma segunda linha 'started' simultânea para o
+ * mesmo user_id: o INSERT abaixo É a reivindicação atômica de uma coleta em
+ * andamento, não só um registro depois da checagem.
  *
  * Isso sozinho bloquearia um negócio para sempre se a linha nunca fosse
  * concluída. A saída escolhida: depois de um tempo bem maior que qualquer
  * coleta legítima leva (o Actor roda com timeout de 240s), a linha é
  * reivindicada como órfã e marcada 'failed' com um código próprio. Isso a
- * tira do bloqueio, e a próxima tentativa pode gastar de novo, mas essa é
- * uma decisão visível e registrada (error_code = 'APIFY_EXPERIMENTAL_ORPHANED'),
- * não uma nova tentativa silenciosa. A reivindicação é preguiçosa: só
- * acontece na próxima vez que alguém tentar coletar para o mesmo (negócio,
- * link); não existe uma varredura agendada separada.
+ * tira do bloqueio (e, por ser um índice PARCIAL sobre `status = 'started'`,
+ * libera a vaga do índice único assim que o status muda), e a próxima
+ * tentativa pode gastar de novo, mas essa é uma decisão visível e registrada
+ * (error_code = 'APIFY_EXPERIMENTAL_ORPHANED'), não uma nova tentativa
+ * silenciosa. A reivindicação é preguiçosa: só acontece na próxima vez que
+ * alguém tentar coletar para o mesmo negócio; não existe uma varredura
+ * agendada separada. Ela é escopada só por user_id (não também por link),
+ * porque é isso que o índice único protege: uma linha 'started' presa sob um
+ * link antigo tem que liberar a vaga para uma tentativa com o link atual.
  */
+// Este valor tem um gêmeo em SQL: o `interval '15 minutes'` que reivindica
+// linhas 'processing' travadas na fila (supabase/migrations/20260830190000_coleta_apify_automatica_no_cadastro.sql,
+// claim_apify_auto_collection). TypeScript não lê SQL nem o contrário, então
+// os dois literais são independentes por construção; `scripts/check-apify-auto-collection.mjs`
+// lê os dois e falha se divergirem. Mudar este valor exige mudar o outro.
 const ORPHANED_STARTED_AFTER_MS = 15 * 60 * 1_000;
+
+// Código Postgres de violação de unicidade (unique_violation). O
+// supabase-js repassa esse código em PostgrestError.code quando o INSERT
+// esbarra no índice único parcial sobre `status = 'started'`.
+const POSTGRES_UNIQUE_VIOLATION = '23505';
 
 /**
  * Coleta guardada: aplica o teto de 24 horas por (negócio, link) e o teto
@@ -428,12 +446,15 @@ export async function runExperimentalApifyCollection({
   const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1_000).toISOString();
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 
-  // Reivindica primeiro qualquer linha 'started' órfã deste (negócio, link):
-  // só depois disso a checagem de 24h abaixo pode confiar no que lê.
+  // Reivindica primeiro qualquer linha 'started' órfã deste negócio (por
+  // user_id, não também por link: é essa a chave do índice único que o
+  // INSERT abaixo depende para reivindicar a vaga), só depois disso a
+  // checagem de 24h abaixo pode confiar no que lê, e só depois disso o
+  // INSERT mais adiante pode contar com a vaga do índice único livre.
   const orphanCutoff = new Date(now.getTime() - ORPHANED_STARTED_AFTER_MS).toISOString();
   const { error: reclaimError } = await admin.from('experimental_apify_runs')
     .update({ status: 'failed', completed_at: now.toISOString(), error_code: 'APIFY_EXPERIMENTAL_ORPHANED' })
-    .eq('user_id', userId).eq('google_review_url', googleReviewUrl).eq('status', 'started').lt('requested_at', orphanCutoff);
+    .eq('user_id', userId).eq('status', 'started').lt('requested_at', orphanCutoff);
   if (reclaimError) {
     return { ok: false, code: 'APIFY_EXPERIMENTAL_LIMIT_CHECK_FAILED', status: 500, message: 'Não foi possível aplicar os limites da coleta experimental.' };
   }
@@ -455,12 +476,29 @@ export async function runExperimentalApifyCollection({
     return { ok: false, code: 'APIFY_EXPERIMENTAL_MONTHLY_LIMIT', status: 429, message: 'O limite mensal de coletas experimentais foi alcançado.' };
   }
 
+  // Este INSERT É a reivindicação atômica, não um registro depois de já
+  // termos decidido gastar. Se outra chamada (o botão manual, ou outra
+  // execução concorrente do drenador) já tem uma linha 'started' para este
+  // user_id, o índice único parcial `experimental_apify_runs_one_started_idx`
+  // rejeita este INSERT com unique_violation (23505) antes de qualquer
+  // `fetch` ao Apify: ninguém gasta duas vezes só porque as duas leituras
+  // de SELECT passaram antes de qualquer uma delas escrever.
   const { data: audit, error: auditError } = await admin.from('experimental_apify_runs').insert({
     user_id: userId,
     google_review_url: googleReviewUrl,
     status: 'started',
   }).select('id').single();
-  if (auditError || !audit) {
+  if (auditError) {
+    if (auditError.code === POSTGRES_UNIQUE_VIOLATION) {
+      // Outra chamada já detém a reivindicação para este negócio. Não é um
+      // erro para o chamador tratar como falha definitiva: é a mesma
+      // condição transitória que o cooldown representa, só que descoberta
+      // no momento da escrita em vez de numa leitura anterior.
+      return { ok: false, code: 'APIFY_EXPERIMENTAL_CLAIMED_ELSEWHERE', status: 409, message: 'Já existe uma coleta em andamento para este negócio.' };
+    }
+    return { ok: false, code: 'APIFY_EXPERIMENTAL_START_FAILED', status: 500, message: 'Não foi possível iniciar a coleta experimental.' };
+  }
+  if (!audit) {
     return { ok: false, code: 'APIFY_EXPERIMENTAL_START_FAILED', status: 500, message: 'Não foi possível iniciar a coleta experimental.' };
   }
 
