@@ -223,12 +223,18 @@ const buildGreeting = (locale: ReplyLocale, name?: string | null): string => {
   return { pt: `Olá, ${first},`, es: `Hola, ${first},`, en: `Hello ${first},` }[locale];
 };
 
+/**
+ * A assinatura é o nome do negócio sozinho na sua linha, do jeito que uma
+ * pessoa assina de verdade. Já não antecede o nome por um travessão: era
+ * esse sinal que denunciava texto de máquina numa resposta publicada em
+ * nome do dono.
+ */
 const buildSignature = (locale: ReplyLocale, business?: string | null): string => {
   const clean = business?.trim();
   if (!clean) {
     return { pt: 'Obrigado, mais uma vez.', es: 'Gracias de nuevo.', en: 'Thank you again.' }[locale];
   }
-  return { pt: `— ${clean}`, es: `— ${clean}`, en: `— ${clean}` }[locale];
+  return { pt: clean, es: clean, en: clean }[locale];
 };
 
 type Builder = (c: Ctx) => string;
@@ -274,9 +280,9 @@ const PUBLIC_NEGATIVE: Variant[] = [
       en: 'Use when you have already taken a concrete step. Adjust the middle sentence to what you actually did.',
     },
     body: {
-      pt: (c) => `${c.greeting}\n\nObrigado pelo seu relato — foi lido com atenção. Lamento sinceramente o que se passou com ${c.noun}.\n\n${c.fix}\n\nSe nos der uma segunda oportunidade, faço questão de acompanhar a sua visita pessoalmente.\n\n${c.signature}`,
-      es: (c) => `${c.greeting}\n\nGracias por tu comentario — lo hemos leído con atención. Lamento sinceramente lo que ocurrió con ${c.noun}.\n\n${c.fix}\n\nSi nos das una segunda oportunidad, me encargo personalmente de tu visita.\n\n${c.signature}`,
-      en: (c) => `${c.greeting}\n\nThank you for your review — we read it properly. I am genuinely sorry about ${c.noun}.\n\n${c.fix}\n\nIf you give us another chance, I will look after your visit myself.\n\n${c.signature}`,
+      pt: (c) => `${c.greeting}\n\nObrigado pelo seu relato. Foi lido com atenção. Lamento sinceramente o que se passou com ${c.noun}.\n\n${c.fix}\n\nSe nos der uma segunda oportunidade, faço questão de acompanhar a sua visita pessoalmente.\n\n${c.signature}`,
+      es: (c) => `${c.greeting}\n\nGracias por tu comentario. Lo hemos leído con atención. Lamento sinceramente lo que ocurrió con ${c.noun}.\n\n${c.fix}\n\nSi nos das una segunda oportunidad, me encargo personalmente de tu visita.\n\n${c.signature}`,
+      en: (c) => `${c.greeting}\n\nThank you for your review. We read it properly. I am genuinely sorry about ${c.noun}.\n\n${c.fix}\n\nIf you give us another chance, I will look after your visit myself.\n\n${c.signature}`,
     },
   },
 ];
@@ -308,9 +314,9 @@ const PUBLIC_POSITIVE: Variant[] = [
       en: 'Replying to praise is what builds regulars — and almost nobody does it.',
     },
     body: {
-      pt: (c) => `${c.greeting}\n\nMuito obrigado pelas suas palavras. Fico feliz por saber que ${c.praise} — vou passar isso à equipa, que é quem faz acontecer.\n\nCá o esperamos da próxima.\n\n${c.signature}`,
-      es: (c) => `${c.greeting}\n\nMuchas gracias por tus palabras. Me alegra saber que ${c.praise} — se lo paso al equipo, que es quien lo hace posible.\n\nTe esperamos en la próxima.\n\n${c.signature}`,
-      en: (c) => `${c.greeting}\n\nThank you for the kind words. I am glad ${c.praise} — I will pass it on to the team, who are the ones who make it happen.\n\nWe will be here next time.\n\n${c.signature}`,
+      pt: (c) => `${c.greeting}\n\nMuito obrigado pelas suas palavras. Fico feliz por saber que ${c.praise}. Vou passar isso à equipa, que é quem faz acontecer.\n\nCá o esperamos da próxima.\n\n${c.signature}`,
+      es: (c) => `${c.greeting}\n\nMuchas gracias por tus palabras. Me alegra saber que ${c.praise}. Se lo paso al equipo, que es quien lo hace posible.\n\nTe esperamos en la próxima.\n\n${c.signature}`,
+      en: (c) => `${c.greeting}\n\nThank you for the kind words. I am glad ${c.praise}. I will pass it on to the team, who are the ones who make it happen.\n\nWe will be here next time.\n\n${c.signature}`,
     },
   },
 ];
@@ -330,9 +336,9 @@ const PRIVATE_NEGATIVE: Variant[] = [
       en: 'Send today, even without a solution yet. Silence is what loses the customer.',
     },
     body: {
-      pt: (c) => `${c.greeting}\n\nSou eu que respondo aqui. Recebi o que escreveu sobre ${c.noun} e queria falar consigo antes de mais nada.\n\nLamento o que aconteceu — não é o que queremos oferecer a quem nos visita. Pode contar-me um pouco mais: dia, hora e o que se passou?\n\nQuero corrigir isto consigo.\n\n${c.signature}`,
-      es: (c) => `${c.greeting}\n\nTe respondo personalmente. He recibido lo que escribiste sobre ${c.noun} y quería hablar contigo antes que nada.\n\nLamento lo ocurrido — no es lo que queremos ofrecer a quien nos visita. ¿Puedes contarme un poco más: día, hora y qué pasó?\n\nQuiero corregirlo contigo.\n\n${c.signature}`,
-      en: (c) => `${c.greeting}\n\nI am replying to you personally. I read what you wrote about ${c.noun} and wanted to reach you before anything else.\n\nI am sorry it happened — it is not what we want to offer anyone who visits us. Could you tell me a bit more: the day, the time, and what went on?\n\nI would like to put this right with you.\n\n${c.signature}`,
+      pt: (c) => `${c.greeting}\n\nSou eu que respondo aqui. Recebi o que escreveu sobre ${c.noun} e queria falar consigo antes de mais nada.\n\nLamento o que aconteceu. Não é o que queremos oferecer a quem nos visita. Pode contar-me um pouco mais: dia, hora e o que se passou?\n\nQuero corrigir isto consigo.\n\n${c.signature}`,
+      es: (c) => `${c.greeting}\n\nTe respondo personalmente. He recibido lo que escribiste sobre ${c.noun} y quería hablar contigo antes que nada.\n\nLamento lo ocurrido. No es lo que queremos ofrecer a quien nos visita. ¿Puedes contarme un poco más: día, hora y qué pasó?\n\nQuiero corregirlo contigo.\n\n${c.signature}`,
+      en: (c) => `${c.greeting}\n\nI am replying to you personally. I read what you wrote about ${c.noun} and wanted to reach you before anything else.\n\nI am sorry it happened. It is not what we want to offer anyone who visits us. Could you tell me a bit more: the day, the time, and what went on?\n\nI would like to put this right with you.\n\n${c.signature}`,
     },
   },
   {

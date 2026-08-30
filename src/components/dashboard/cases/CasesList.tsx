@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import { useInternalFeedback } from '@/hooks/useInternalFeedback';
-import { orderPendingCasesByUrgency } from '@/lib/internalCasePriority';
+import { orderPendingCasesByRecency } from '@/lib/internalCasePriority';
 import ReplySuggestions from '@/components/dashboard/ReplySuggestions';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
@@ -18,8 +18,8 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
   const { t, i18n } = useOwnerTranslation();
   const { loading, cases, error, resolvingId, resolveCase } = useInternalFeedback(userId);
   // O caso sem tratar é o que ainda tem prazo; o caso já tratado é histórico.
-  // Por isso a lista deixa de ser só created_at desc: casos sem tratar vêm
-  // primeiro, na mesma ordem de urgência de `orderPendingCasesByUrgency`
+  // Casos sem tratar vêm primeiro, do mais recente para o mais antigo, na
+  // mesma ordem de `orderPendingCasesByRecency`
   // (`src/lib/internalCasePriority.ts`), e só depois os já tratados, na
   // ordem que a busca devolveu. Quem chega pelo bloco "Comentários que pedem
   // atenção" da Visão geral encontra aqui, no topo, o mesmo caso que o
@@ -27,7 +27,7 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
   // segunda cópia da regra para divergir. Esta ordem vale para toda visita
   // à página, não só para quem chega pelo bloco.
   const orderedCases = useMemo(() => {
-    const pending = orderPendingCasesByUrgency(cases);
+    const pending = orderPendingCasesByRecency(cases);
     const resolved = cases.filter((item) => item.is_addressed);
     return [...pending, ...resolved];
   }, [cases]);
