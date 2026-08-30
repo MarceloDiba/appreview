@@ -487,13 +487,12 @@ try {
     depoisSemNota.ok && gravadosSemNota === '1'
   );
 
-  const u14 = psqlValor(
-    'depois',
-    `select count(*) from public.whatsapp_outbox o
-       join teste_caso c on c.user_id = o.user_id
-      where c.rotulo = '13-sem-preferencia';`
-  ).trim();
-  exigir('o comentario sem nota nao dispara aviso nenhum', u14 === '0');
+  // Havia aqui uma asserção sobre o caso '13-sem-preferencia'. Foi removida em
+  // 30/08/2026 porque nao podia falhar: sem preferencia nao ha destinatario,
+  // entao nenhum aviso sai faca o gatilho o que fizer. Provado empiricamente,
+  // desligando a porta da preferencia no gatilho: a assercao continuou verde.
+  // Quem prova de verdade que nota nula nao alerta e o `caso14`, logo abaixo,
+  // que usa um dono COM preferencia configurada.
 
   // Um usuario que pediu aviso, comentando sem nota, tambem fica em silencio.
   // O `caso14.ok` faz parte da regra de proposito: se o insert falhasse, o bloco
@@ -513,18 +512,22 @@ try {
     caso14.ok && porRotulo(filaDe('depois', null), '14-sem-nota-com-preferencia').length === 0
   );
 
-  // A escala continua barrando nota fora de 1 a 5.
-  let recusouForaDaEscala = false;
-  try {
-    psql(
-      'depois',
-      `insert into public.internal_feedback (user_id, rating, feedback_text)
-         select user_id, 0, 'Nota invalida.' from teste_caso where rotulo = '13-sem-preferencia';`
-    );
-  } catch (erro) {
-    recusouForaDaEscala = /internal_feedback_rating_check/i.test(String(erro.stderr || erro));
-  }
-  exigir('a nota 0 continua barrada: aceitar nulo nao afrouxou a escala', recusouForaDaEscala);
+  // A escala continua barrando nota fora de 1 a 5, nos dois extremos. Testar so
+  // o 0 deixaria passar um afrouxamento que atingisse apenas o topo.
+  const foraDaEscala = (nota) => {
+    try {
+      psql(
+        'depois',
+        `insert into public.internal_feedback (user_id, rating, feedback_text)
+           select user_id, ${nota}, 'Nota invalida.' from teste_caso where rotulo = '13-sem-preferencia';`
+      );
+      return false;
+    } catch (erro) {
+      return /internal_feedback_rating_check/i.test(String(erro.stderr || erro));
+    }
+  };
+  exigir('a nota 0 continua barrada: aceitar nulo nao afrouxou a escala por baixo', foraDaEscala(0));
+  exigir('a nota 6 continua barrada: aceitar nulo nao afrouxou a escala por cima', foraDaEscala(6));
 } finally {
   if (servidorNoAr) {
     try {

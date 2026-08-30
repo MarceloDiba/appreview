@@ -19,6 +19,20 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
+      # O guarda `check:gatilho-feedback-sql` roda o gatilho de verdade num
+      # Postgres descartável, em vez de conferir o SQL por texto. A imagem do
+      # runner historicamente já traz o Postgres instalado e parado, mas
+      # depender disso deixaria o portão à mercê de uma mudança de imagem que
+      # ninguém aqui controla. Este passo torna a dependência explícita e falha
+      # alto se nem a imagem nem a instalação resolverem.
+      - name: Garantir Postgres para o guarda do gatilho
+        run: |
+          if ! ls /usr/lib/postgresql/*/bin/initdb >/dev/null 2>&1 && ! command -v initdb >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+          fi
+          ls /usr/lib/postgresql/*/bin/initdb || command -v initdb
+
       # Um único contrato de validação para desenvolvimento e CI. Inclui tipos,
       # i18n do painel e build; o build do Vite sozinho NÃO verifica tipos.
       - name: Verificar aplicação
