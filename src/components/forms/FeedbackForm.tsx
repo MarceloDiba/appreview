@@ -10,6 +10,11 @@ import { X, Send, ExternalLink } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { trackReviewEvent } from '@/lib/reviewFunnel';
 import WhatsAppField from '@/components/forms/WhatsAppField';
+import {
+  type Rating,
+  comentarioParaGravar,
+  notaDoRating,
+} from '@/lib/comentarioInterno';
 
 // Função para validar UUID
 function isUUID(value: string): boolean {
@@ -21,7 +26,11 @@ interface FeedbackFormProps {
   businessName: string;
   businessId: string;
   userId?: string;
-  rating: 'negative' | 'neutral' | 'positive';
+  /**
+   * A escolha feita na tela anterior, ou `null` quando o cliente chegou direto
+   * a este formulário. Sem escolha, nenhuma estrela vem marcada.
+   */
+  rating: Rating | null;
   /**
    * Public review destinations. These must always be offered, whatever the
    * rating — routing a customer away from public review based on sentiment is
@@ -46,8 +55,14 @@ const FeedbackForm = ({
     comentario: '',
     nome: '',
     contato: '',
-    notaInterna: rating === 'negative' ? '1' : rating === 'neutral' ? '3' : '5',
   });
+
+  // A nota vive fora do `formData` porque não é texto digitado e porque pode
+  // legitimamente não existir. Quem chegou sem escolher na tela anterior começa
+  // com `null`: nenhuma estrela marcada, e nenhuma nota gravada se o cliente
+  // não tocar em nenhuma. Marcar 5 de antemão empurraria o cliente para a nota
+  // boa, que é da mesma família do review gating que este produto recusa.
+  const [nota, setNota] = useState<number | null>(notaDoRating(rating));
 
   const [enviando, setEnviando] = useState(false);
   // O WhatsApp é opcional: campo vazio nunca bloqueia o envio. Mas um número
@@ -62,7 +77,7 @@ const FeedbackForm = ({
   };
 
   const handleClickEstrela = (index: number) => {
-    setFormData(prev => ({ ...prev, notaInterna: (index + 1).toString() }));
+    setNota(index + 1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,13 +100,13 @@ const FeedbackForm = ({
       }
 
       const { error } = await supabase.from('internal_feedback').insert([
-        {
-          user_id: idUsuario,
-          feedback_text: formData.comentario,
-          rating: parseInt(formData.notaInterna, 10),
-          customer_name: formData.nome || null,
-          customer_email: formData.contato || null,
-        },
+        comentarioParaGravar({
+          userId: idUsuario,
+          nota,
+          comentario: formData.comentario,
+          nome: formData.nome,
+          contato: formData.contato,
+        }),
       ]);
 
       if (error) throw error;
@@ -152,7 +167,9 @@ const FeedbackForm = ({
         {/* Estrelas */}
         <div className="flex justify-center gap-1 mb-6">
           {[...Array(5)].map((_, i) => {
-            const isSelected = i < parseInt(formData.notaInterna);
+            // Sem nota escolhida, nenhuma estrela acende. `nota` nula não
+            // acende nada porque a comparação nem chega a ser feita.
+            const isSelected = nota !== null && i < nota;
             return (
               <svg
                 key={i}

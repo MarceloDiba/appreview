@@ -8,7 +8,12 @@ export interface InternalCase {
   customer_name: string | null;
   customer_email: string | null;
   feedback_text: string | null;
-  rating: number;
+  /**
+   * `null` quando o cliente escreveu sem escolher nota. A coluna passou a
+   * aceitar nulo em `20260830210000_nota_opcional_no_comentario.sql`, porque
+   * assumir 3 para quem não avaliou gravava uma opinião que ninguém deu.
+   */
+  rating: number | null;
   is_addressed: boolean | null;
   created_at: string | null;
 }
