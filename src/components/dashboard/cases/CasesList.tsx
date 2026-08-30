@@ -12,9 +12,11 @@ interface CasesListProps {
   userId: string;
   /** Nome do negócio, para assinar as mensagens sugeridas. */
   businessName?: string | null;
+  /** `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão. */
+  businessCountry?: string | null;
 }
 
-const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
+const CasesList: React.FC<CasesListProps> = ({ userId, businessName, businessCountry }) => {
   const { t, i18n } = useOwnerTranslation();
   const { loading, cases, error, resolvingId, resolveCase } = useInternalFeedback(userId);
   // O caso sem tratar é o que ainda tem prazo; o caso já tratado é histórico.
@@ -105,6 +107,7 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
                     customerName={item.customer_name}
                     customerEmail={item.customer_email}
                     businessName={businessName}
+                    businessCountry={businessCountry}
                   />
                 </div>
                 <Button

@@ -9,7 +9,7 @@ import { buildReplySuggestions } from '@/lib/replySuggestions';
 import { useGoogleBusinessReviewQueue } from '@/hooks/useGoogleBusinessReviewQueue';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
-const GoogleBusinessReviewQueue = ({ userId, businessName }: { userId: string; businessName?: string }) => {
+const GoogleBusinessReviewQueue = ({ userId, businessName, businessCountry }: { userId: string; businessName?: string; businessCountry?: string }) => {
   const { t, i18n } = useOwnerTranslation();
   const queue = useGoogleBusinessReviewQueue(userId);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -32,8 +32,9 @@ const GoogleBusinessReviewQueue = ({ userId, businessName }: { userId: string; b
       text: activeReview.comment || '',
       customerName: activeReview.reviewer_name || t('reviews.google.official.anonymous'),
       businessName: businessName || queue.locationTitle || '',
+      businessCountry,
     })[0]?.body || '');
-  }, [activeReview?.id, businessName, queue.locationTitle, t]);
+  }, [activeReview?.id, businessName, businessCountry, queue.locationTitle, t]);
 
   if (queue.loading) return <div className="py-8 text-center text-gray-500">{t('reviews.loading')}</div>;
 
