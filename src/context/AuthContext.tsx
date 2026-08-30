@@ -1,8 +1,21 @@
 
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { AuthError, Session, User } from '@supabase/supabase-js';
+import { AuthError, AuthUnknownError, isAuthError, Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+/**
+ * Garante que o que sai de signIn/signUp e sempre um AuthError de verdade,
+ * mesmo quando o catch pega algo que nao veio do supabase-js (falha de
+ * rede, erro de runtime, ou qualquer coisa nao padrao). Sem isso, Login.tsx
+ * e Signup.tsx chamam error.message assumindo que ele existe, e um valor
+ * lancado sem essa propriedade quebraria essa suposicao silenciosamente.
+ */
+const toAuthError = (caught: unknown): AuthError => {
+  if (isAuthError(caught)) return caught;
+  const message = caught instanceof Error ? caught.message : String(caught);
+  return new AuthUnknownError(message, caught);
+};
 
 type AuthContextType = {
   user: User | null;
@@ -91,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       return { error };
     } catch (error) {
-      return { error };
+      return { error: toAuthError(error) };
     }
   };
 
@@ -114,7 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       return { error };
     } catch (error) {
-      return { error };
+      return { error: toAuthError(error) };
     }
   };
 
