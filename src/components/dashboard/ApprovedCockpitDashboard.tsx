@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Copy, ExternalLink, Lightbulb, MessageCircle, QrCode, Sparkles, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Copy, ExternalLink, Info, Lightbulb, MessageCircle, QrCode, Sparkles, Star } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,7 +17,6 @@ import { getAdvisorObservedResult, markAdvisorAction } from '@/lib/advisorPilot'
 import { getAdvisorReading } from '@/lib/advisorReading';
 import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
 
-type CockpitTab = 'overview' | 'reviews' | 'whatsapp';
 type QueueReview = {
   id: string;
   rating: number;
@@ -32,6 +32,12 @@ type Week = { start: string; reviewCount: number; ratingBreakdown: Record<Rating
 
 const ratings: Rating[] = ['5', '4', '3', '2', '1'];
 const actionStorageKey = 'binno.approved-cockpit-actions';
+// Âncoras que substituem as antigas abas. Os cartões que antes trocavam de
+// aba (fila e WhatsApp) agora levam a estes ids por link nativo
+// (href="#..."), sem estado de aba nem JavaScript para funcionar.
+const QUEUE_ANCHOR_ID = 'fila-de-respostas';
+const QR_ANCHOR_ID = 'qr-e-temas';
+const WHATSAPP_ANCHOR_ID = 'configuracao-whatsapp';
 
 const readActions = (): Record<string, ActionState> => {
   try {
@@ -54,8 +60,6 @@ const formatAge = (value: string | null, locale: string) => value
 const normalizeObserved = (review: ExperimentalObservedReview): QueueReview => review;
 
 const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }: { snapshot: ExperimentalApifySnapshot; userId?: string; demo?: boolean; demoFunnel?: ReviewFunnelMetrics }) => {
-  const { t, i18n } = useOwnerTranslation();
-  const [tab, setTab] = useState<CockpitTab>('overview');
   const official = useGoogleBusinessReviewQueue(import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined);
   const liveFunnel = useReviewFunnelMetrics(userId);
   const funnel = demoFunnel ? { ...liveFunnel, data: demoFunnel } : liveFunnel;
@@ -84,37 +88,37 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
     ? official.reviews.map((review) => ({ id: review.id, rating: review.rating, comment: review.comment || '', publishedAt: review.review_updated_at, reviewerName: review.reviewer_name || undefined, responseObserved: Boolean(review.reply_text) }))
     : observed;
   const history = useMemo(() => snapshot.sample.insights?.history?.weeks || [], [snapshot.sample.insights?.history?.weeks]);
-  const tabs: Array<{ id: CockpitTab; label: string }> = [
-    { id: 'overview', label: t('dashboard.cockpit.tabs.overview') },
-    { id: 'reviews', label: t('dashboard.cockpit.tabs.reviews') },
-    { id: 'whatsapp', label: t('dashboard.cockpit.tabs.whatsapp') },
-  ];
 
+  // Uma só tela, sem seletor de abas. A ordem segue a decisão de 30/08/2026:
+  // o que tem prazo primeiro (comentários pendentes, depois a fila de
+  // respostas), o que é informativo depois (volume, notas, QR e temas, mais
+  // a coluna lateral já fixada pelo contrato) e o que é configuração por
+  // último (WhatsApp). A antiga aba "Avaliações" não vira uma seção própria
+  // porque já era, byte a byte, a mesma <ResponseQueue> que a Visão geral
+  // sempre mostrou; a aba só duplicava o que já estava na tela.
   return <div className="space-y-5">
-    <nav className="flex gap-1 overflow-x-auto border-b border-slate-200" aria-label={t('dashboard.cockpit.layout.navigation')}>
-      {tabs.map((item) => <button key={item.id} type="button" onClick={() => setTab(item.id)} className={`shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors ${tab === item.id ? 'border-[#2457D6] text-[#2457D6]' : 'border-transparent text-slate-500 hover:text-slate-900'}`}>{item.label}</button>)}
-    </nav>
-    {tab === 'whatsapp' ? <WhatsAppNotificationWorkspace localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} demoPhone={demo ? '+351 911 000 000' : undefined} demo={demo} /> : tab === 'reviews' ? <ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} /> : <div className="space-y-5">
-      <RadarNow snapshot={snapshot} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <RadarNow snapshot={snapshot} />
+    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <section className="min-w-0 space-y-5">
         {!demo && <PendingCommentsBanner userId={userId} />}
-        <ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />
+        <div id={QUEUE_ANCHOR_ID} className="scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} /></div>
         <VolumeCard weeks={history} />
         <RatingTrends weeks={history} snapshot={snapshot} />
-        <div className="grid gap-5 md:grid-cols-2"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
+        <div id={QR_ANCHOR_ID} className="grid scroll-mt-4 gap-5 md:grid-cols-2"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
       </section>
       <aside className="space-y-5">
-        <TodayPlan snapshot={snapshot} onMarked={() => setAdvisorActionVersion((current) => current + 1)} onOpenReviews={() => setTab('reviews')} />
+        <TodayPlan snapshot={snapshot} onMarked={() => setAdvisorActionVersion((current) => current + 1)} />
         <ReputationCard snapshot={snapshot} />
-        <WhatsAppCard localWhatsApp={whatsApp} onOpen={() => setTab('whatsapp')} />
-        <DailyPractice snapshot={snapshot} onOpenReviews={() => setTab('reviews')} />
+        <WhatsAppCard localWhatsApp={whatsApp} />
+        <DailyPractice snapshot={snapshot} />
         {demo ? <ProfileCompleteness connected={official.syncComplete} demo /> : <ProfileCompleteness connected={official.syncComplete} />}
         <WeeklyChange weeks={history} />
         <ObservedResult snapshot={snapshot} version={advisorActionVersion} />
       </aside>
-      </div>
-    </div>}
+    </div>
+    <div id={WHATSAPP_ANCHOR_ID} className="scroll-mt-4">
+      <WhatsAppNotificationWorkspace localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} demoPhone={demo ? '+351 911 000 000' : undefined} demo={demo} />
+    </div>
   </div>;
 };
 
@@ -133,7 +137,7 @@ const RadarNow = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   return <Card className={`shadow-[0_1px_3px_rgba(15,23,42,0.08)] ${urgent ? 'border-red-200 bg-red-50/60' : 'border-violet-200 bg-violet-50/50'}`}><CardContent className="flex items-start gap-3 p-4"><span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${urgent ? 'bg-red-100 text-red-700' : 'bg-violet-100 text-violet-800'}`}>{urgent ? <AlertTriangle className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}</span><div><p className="text-sm font-semibold text-slate-950">{t('dashboard.advisorPilot.radarTitle')}</p>{content}</div></CardContent></Card>;
 };
 
-const TodayPlan = ({ snapshot, onMarked, onOpenReviews }: { snapshot: ExperimentalApifySnapshot; onMarked: () => void; onOpenReviews: () => void }) => {
+const TodayPlan = ({ snapshot, onMarked }: { snapshot: ExperimentalApifySnapshot; onMarked: () => void }) => {
   const { t } = useOwnerTranslation();
   const reading = getAdvisorReading(snapshot);
   const topic = reading.kind === 'alert' || reading.kind === 'strength' ? t(`dashboard.cockpit.topicLabels.${reading.topic}`) : null;
@@ -151,7 +155,7 @@ const TodayPlan = ({ snapshot, onMarked, onOpenReviews }: { snapshot: Experiment
       : reading.kind === 'strength'
         ? t('dashboard.advisorPilot.strengthAction', { topic })
         : t('dashboard.advisorPilot.monitorAction');
-  return <Card className="border-violet-200 bg-violet-50/40 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.planTitle')}</h2></div><p className="mt-4 text-sm font-medium leading-5 text-slate-900">{body}</p>{reading.kind === 'alert' ? <Button onClick={mark} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><CheckCircle2 className="mr-2 h-4 w-4" />{t('dashboard.advisorPilot.markDone')}</Button> : <Button variant="outline" onClick={onOpenReviews} className="mt-4">{t('dashboard.advisorPilot.reviewEvidence')}</Button>}</CardContent></Card>;
+  return <Card className="border-violet-200 bg-violet-50/40 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.planTitle')}</h2></div><p className="mt-4 text-sm font-medium leading-5 text-slate-900">{body}</p>{reading.kind === 'alert' ? <Button onClick={mark} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><CheckCircle2 className="mr-2 h-4 w-4" />{t('dashboard.advisorPilot.markDone')}</Button> : <Button asChild variant="outline" className="mt-4"><a href={`#${QUEUE_ANCHOR_ID}`}>{t('dashboard.advisorPilot.reviewEvidence')}</a></Button>}</CardContent></Card>;
 };
 
 const ResponseQueue = ({ reviews, snapshot, demo = false }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean }) => {
@@ -184,7 +188,27 @@ const ResponseQueue = ({ reviews, snapshot, demo = false }: { reviews: QueueRevi
     try { await navigator.clipboard.writeText(currentAction.draft); } catch { /* Keep the editable draft available. */ }
     save({ ...currentAction, copied: true });
   };
-  if (!selected) return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2><p className="mt-3 text-sm text-slate-500">—</p></CardContent></Card>;
+  // Sem oficial sincronizado e sem recolha local do piloto, a fila fica
+  // genuinamente vazia hoje em toda conta real: a ligação oficial ao Google
+  // está em aprovação desde 21/08/2026. Um traço aqui ensinaria o dono que o
+  // produto tem menos do que tem, o mesmo defeito que motivou tirar a aba
+  // Avaliações. Reaproveita o par título/ação já escrito para este estado em
+  // `dashboard.cockpit.reviews.lockedTitle`/`action`; o corpo ganha uma chave
+  // nova (`queueEmptyBody`) porque `lockedBody` descreve uma coleta que não
+  // guarda nome, texto ou link, o que já não é verdade desde que o piloto
+  // Apify passou a reter isso por até 14 dias no navegador. Este bloco some
+  // sozinho assim que a fila tiver uma avaliação, oficial ou do piloto.
+  if (!selected) return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5">
+    <h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2>
+    <div className="mt-4 flex gap-3 rounded-xl border border-amber-100 bg-amber-50/60 p-4">
+      <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-800" />
+      <div>
+        <p className="font-semibold text-amber-950">{t('dashboard.cockpit.reviews.lockedTitle')}</p>
+        <p className="mt-1 text-sm leading-6 text-amber-950">{t('dashboard.cockpit.layout.queueEmptyBody')}</p>
+      </div>
+    </div>
+    <Button asChild variant="outline" className="mt-4"><Link to="/settings">{t('dashboard.cockpit.reviews.action')}<ChevronRight className="ml-1 h-4 w-4" /></Link></Button>
+  </CardContent></Card>;
 
   return <Card className="overflow-hidden border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-0">
     <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2><span className="text-sm text-slate-500">{index + 1} de {reviews.length}</span></div>
@@ -231,18 +255,22 @@ const ReputationCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) =
 
 const Metric = ({ label, value, tone }: { label: string; value: string; tone?: 'positive' }) => <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs leading-4 text-slate-500">{label}</p><p className={`mt-2 text-xl font-semibold ${tone === 'positive' ? 'text-emerald-700' : 'text-slate-950'}`}>{value}</p></div>;
 
-const WhatsAppCard = ({ localWhatsApp, onOpen }: { localWhatsApp: LocalWhatsAppState; onOpen: () => void }) => <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">Resumo no WhatsApp</h2><MessageCircle className="h-5 w-5 text-emerald-700" /></div><div className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm leading-5 text-emerald-950">{localWhatsApp.status === 'ready' ? 'Canal conectado para o seu resumo.' : 'Configure quando quer receber o resumo.'}</div><Button variant="link" className="mt-2 h-auto px-0 text-[#2457D6]" onClick={onOpen}>Configurar WhatsApp<ChevronRight className="ml-1 h-4 w-4" /></Button></CardContent></Card>;
+const WhatsAppCard = ({ localWhatsApp }: { localWhatsApp: LocalWhatsAppState }) => <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">Resumo no WhatsApp</h2><MessageCircle className="h-5 w-5 text-emerald-700" /></div><div className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm leading-5 text-emerald-950">{localWhatsApp.status === 'ready' ? 'Canal conectado para o seu resumo.' : 'Configure quando quer receber o resumo.'}</div><Button asChild variant="link" className="mt-2 h-auto px-0 text-[#2457D6]"><a href={`#${WHATSAPP_ANCHOR_ID}`}>Configurar WhatsApp<ChevronRight className="ml-1 h-4 w-4" /></a></Button></CardContent></Card>;
 
-const DailyPractice = ({ snapshot, onOpenReviews }: { snapshot: ExperimentalApifySnapshot; onOpenReviews: () => void }) => {
+const DailyPractice = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
   const reading = getAdvisorReading(snapshot);
   const unresolved = (snapshot.sample.observedReviews?.items || []).filter((review) => !review.responseObserved).length;
+  // O destino do CTA acompanha o texto: "Ver QR Codes" tinha o rótulo certo
+  // mas sempre levava para a fila (herdado de quando só existia setTab para
+  // a aba de avaliações). Cada variante aponta para a âncora que o próprio
+  // texto promete.
   const practice = reading.kind === 'opportunity'
-    ? { title: t('dashboard.advisorPilot.opportunityBody', { phrase: reading.phrase, mentions: reading.mentions }), body: t('dashboard.advisorPilot.opportunityAction'), action: t('dashboard.advisorPilot.planTitle') }
+    ? { title: t('dashboard.advisorPilot.opportunityBody', { phrase: reading.phrase, mentions: reading.mentions }), body: t('dashboard.advisorPilot.opportunityAction'), action: t('dashboard.advisorPilot.planTitle'), target: QUEUE_ANCHOR_ID }
     : reading.kind === 'strength'
-      ? { title: t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions }), body: t('dashboard.advisorPilot.strengthAction', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`) }), action: t('dashboard.advisorPilot.reviewEvidence') }
-    : unresolved ? { title: `${unresolved} avaliações com texto ainda não mostram resposta`, body: 'Revise uma resposta e publique quando estiver satisfeito.', action: 'Revisar fila' } : { title: 'Planeje uma foto recente da experiência', body: 'Mostre o que o cliente encontra hoje.', action: 'Ver QR Codes' };
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">Boas práticas</h2></div><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button variant="link" className="mt-2 h-auto px-0 text-[#2457D6]" onClick={onOpenReviews}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></Button></CardContent></Card>;
+      ? { title: t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions }), body: t('dashboard.advisorPilot.strengthAction', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`) }), action: t('dashboard.advisorPilot.reviewEvidence'), target: QUEUE_ANCHOR_ID }
+    : unresolved ? { title: `${unresolved} avaliações com texto ainda não mostram resposta`, body: 'Revise uma resposta e publique quando estiver satisfeito.', action: 'Revisar fila', target: QUEUE_ANCHOR_ID } : { title: 'Planeje uma foto recente da experiência', body: 'Mostre o que o cliente encontra hoje.', action: 'Ver QR Codes', target: QR_ANCHOR_ID };
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">Boas práticas</h2></div><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button asChild variant="link" className="mt-2 h-auto px-0 text-[#2457D6]"><a href={`#${practice.target}`}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></a></Button></CardContent></Card>;
 };
 
 const ProfileCompleteness = ({ connected, demo = false }: { connected: boolean; demo?: boolean }) => {

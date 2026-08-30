@@ -464,6 +464,7 @@
         "queueSubtitle": "Uma decisão por vez, com texto e evidência quando a leitura oficial estiver disponível.",
         "queueUnavailableTitle": "A fila individual ainda não está disponível",
         "queueUnavailableBody": "As {{count}} notas baixas são um sinal na amostra, não uma fila real. O Binno não inventa autor ou comentário.",
+        "queueEmptyBody": "Ainda não há avaliações aqui. A fila aparece assim que você fizer uma coleta manual em Configurações ou quando o Perfil da Empresa no Google for autorizado.",
         "queueLive": "Fila oficial sincronizada",
         "anonymousReviewer": "Cliente sem nome disponível",
         "dateUnavailable": "Data não disponível",

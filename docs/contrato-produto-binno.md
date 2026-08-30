@@ -42,11 +42,12 @@ histórico de repositório e documentos legados até uma migração intencional.
 
 ## 3. Arquitetura aprovada do painel
 
-A navegação principal é restrita a **Visão geral**, **Avaliações** e
-**WhatsApp**. Não reintroduzir abas de Fotos, Perguntas ou Boas práticas como
-destinos principais sem aprovação.
+A navegação principal é uma tela única, sem seletor de abas: Visão geral,
+Avaliações e WhatsApp deixaram de ser destinos separados em 30/08/2026 (ver
+"Navegação em tela única" abaixo). Não reintroduzir seletor de abas, nem
+destinos principais de Fotos, Perguntas ou Boas práticas, sem aprovação.
 
-A Visão geral segue esta ordem, inclusive na primeira dobra:
+A página segue esta ordem, inclusive na primeira dobra:
 
 1. **Fila de respostas** — uma avaliação por vez, comentário, nota, nome público
    quando disponível e resposta sugerida editável.
@@ -59,6 +60,49 @@ A Visão geral segue esta ordem, inclusive na primeira dobra:
    suficiente.
 5. Coluna lateral: **Reputação no Google**, **Resumo no WhatsApp**, **Boas
    práticas**, **Completude do perfil** e **O que mudou na semana**.
+6. **Configuração do WhatsApp**: notificações e teste manual do piloto, ao fim
+   da página porque é configuração, não é prazo nem leitura.
+
+### Navegação em tela única (decisão de 30/08/2026)
+
+**Aprovado por Marcelo em 30/08/2026**, depois do segundo uso real do
+produto. Nas palavras dele: "Temos um submenu que não faz sentido que é
+Visão Geral, avaliações (que não tem nada) e WhatsApp. Penso que deveria ser
+tudo um só menu."
+
+A aba Avaliações mostrava a fila de resposta pública, que depende da conexão
+oficial com o Google, travada na fila de aprovação desde 21/08/2026. Para
+toda conta real, a aba abria vazia. Uma aba vazia ensina que o produto tem
+menos do que tem, e escondia a configuração do WhatsApp atrás de um clique
+sem motivo.
+
+Isto é maior que uma aba vazia: quatro das sete observações do dono naquele
+dia eram a mesma causa. O painel foi montado em volta das avaliações do
+Google, que ainda não funcionam, e o comentário privado, que é a única coisa
+que funciona hoje, foi encaixado nas beiradas. Enquanto o Google não abrir, o
+produto que existe é QR na mesa, comentário privado, aviso no WhatsApp, dono
+resolve; a tela precisa refletir isso.
+
+**A mudança:** o tipo `CockpitTab`, o estado de aba e o seletor somem de
+`src/components/dashboard/ApprovedCockpitDashboard.tsx`. A ordem de 1 a 5
+acima não muda de lugar: ela já era o conteúdo da antiga aba Visão geral e
+continua a primeira coisa que o dono vê. A antiga aba Avaliações não vira uma
+seção própria porque já era, byte a byte, a mesma Fila de respostas do item
+1; a aba só duplicava o que a Visão geral já mostrava. A configuração
+completa do WhatsApp (item 6) passa de aba para a última seção da página, e
+fica sempre renderizada ali, nunca atrás de uma condição de aba.
+
+**A ordem segue uma regra:** o que tem prazo vem primeiro (o comentário
+privado da exceção abaixo, depois a fila), o que é leitura vem no meio
+(volume, notas, QR, temas e a coluna lateral fixada acima), e o que é
+configuração vem por último (WhatsApp). Um comentário privado com nota baixa
+expira porque o cliente pode sair do restaurante; uma avaliação pública pode
+esperar um dia; a configuração do WhatsApp não expira nunca.
+
+Os cartões que antes trocavam de aba (**Plano de hoje**, **Boas práticas** e
+**Resumo no WhatsApp**, todos na coluna lateral) agora levam a uma âncora na
+própria página (`#fila-de-respostas` e `#configuracao-whatsapp`) por link
+nativo, não por clique de estado. Nenhum deles fica sem destino.
 
 ### Exceção aprovada em 30/08/2026: comentários que pedem atenção
 
@@ -199,6 +243,12 @@ permanente do Radar/Plano/Resultado, integração do telefone de onboarding,
 ação de resposta com permalink individual, coleta de nome público, rejeição
 do URL genérico e a única exceção à primeira dobra: o bloco de comentários
 que pedem atenção some por completo sem caso sem tratar e, quando existe,
-fica antes da fila de respostas. O teste não substitui revisão de produto:
-qualquer mudança visual ou de fluxo ainda deve ser comparada com este documento antes de ser
-aceita.
+fica antes da fila de respostas. Desde 30/08/2026 também protege a navegação
+em tela única: nenhum estado nem seletor de aba no componente, a fila de
+respostas aparecendo uma única vez (a antiga aba Avaliações não pode voltar a
+duplicá-la), a fila e a configuração do WhatsApp com âncora própria e única
+na página, os cartões que antes trocavam de aba linkando para essas âncoras
+em vez de chamar um estado que não existe mais, e a configuração do WhatsApp
+sempre renderizada, nunca atrás de uma condição de aba. O teste não substitui
+revisão de produto: qualquer mudança visual ou de fluxo ainda deve ser
+comparada com este documento antes de ser aceita.
