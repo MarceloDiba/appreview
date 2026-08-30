@@ -14,6 +14,7 @@ import { WhatsAppNotificationWorkspace } from '@/components/dashboard/WhatsAppNo
 import { supabase } from '@/integrations/supabase/client';
 import { getAdvisorObservedResult, markAdvisorAction } from '@/lib/advisorPilot';
 import { getAdvisorReading } from '@/lib/advisorReading';
+import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
 
 type CockpitTab = 'overview' | 'reviews' | 'whatsapp';
 type QueueReview = {
@@ -97,6 +98,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
       <RadarNow snapshot={snapshot} />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <section className="min-w-0 space-y-5">
+        {!demo && <PendingCommentsBanner userId={userId} />}
         <ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />
         <VolumeCard weeks={history} />
         <RatingTrends weeks={history} snapshot={snapshot} />

@@ -101,78 +101,6 @@
     "and": "e a",
     "privacy": "Política de Privacidade"
   },
-  "attention": {
-    "andOthers": "e outros",
-    "ui": {
-      "analyzing": "A analisar a sua semana...",
-      "heading": "Central de atenção",
-      "last7": "Últimos 7 dias",
-      "priorityNow": "A sua prioridade agora",
-      "openCases": "Casos em aberto",
-      "oldest_one": "Mais antigo há {{count}} dia",
-      "oldest_other": "Mais antigo há {{count}} dias",
-      "nothingPending": "Nada pendente",
-      "awaitingReturn": "À espera de retorno",
-      "leftContact": "Deixaram contacto",
-      "weekAverage": "Média da semana",
-      "prevAverage": "Média anterior {{value}}",
-      "noHistory": "Sem histórico suficiente",
-      "resolutionRate": "Taxa de resolução",
-      "resolvedTotal_one": "{{count}} resolvido no total",
-      "resolvedTotal_other": "{{count}} resolvidos no total",
-      "openCasesBtn": "Abrir os casos",
-      "alsoWorth": "Também merece atenção"
-    },
-    "label": {
-      "awaiting": "Sem retorno",
-      "stale": "Caso parado",
-      "ratingDrop": "Fora do padrão",
-      "volume": "Volume acima",
-      "open": "Em aberto",
-      "allClear": "Em dia"
-    },
-    "awaiting": {
-      "title_one": "{{count}} cliente deixou contacto e ainda não teve retorno",
-      "title_other": "{{count}} clientes deixaram contacto e ainda não tiveram retorno",
-      "detailNames": "Inclui {{names}}.",
-      "detailGeneric": "Eles esperaram para escrever e deixaram como falar com eles.",
-      "action": "Responda hoje, mesmo que ainda não tenha solução. Um contacto no mesmo dia costuma recuperar o cliente; uma semana de silêncio raramente recupera."
-    },
-    "stale": {
-      "someone": "Um cliente",
-      "title_one": "{{who}} está à espera há {{count}} dia",
-      "title_other": "{{who}} está à espera há {{count}} dias",
-      "detailQuote": "\"{{quote}}\"",
-      "detailGeneric": "O caso continua aberto no seu painel.",
-      "action": "Resolva ou marque como resolvido com uma nota do que foi feito. O registo é o que prova que você agiu."
-    },
-    "ratingDrop": {
-      "title": "A média desta semana caiu para {{average}}",
-      "detail": "Nas quatro semanas anteriores estava em {{baseline}}. A queda é de {{drop}} ponto.",
-      "action": "Leia os casos desta semana à procura do que se repete. Uma queda súbita costuma ter uma causa única: um turno, um prato, uma pessoa."
-    },
-    "volume": {
-      "title_one": "{{count}} caso esta semana, contra uma média de {{average}}",
-      "title_other": "{{count}} casos esta semana, contra uma média de {{average}}",
-      "detail": "O número de clientes insatisfeitos subiu em relação às semanas anteriores.",
-      "action": "Verifique se algo mudou na operação nos últimos sete dias — equipa, fornecedor, horário, menu."
-    },
-    "open": {
-      "title_one": "{{count}} caso aberto sem contacto do cliente",
-      "title_other": "{{count}} casos abertos sem contacto do cliente",
-      "detail": "Não dá para responder a estes, mas o relato continua a valer como sinal.",
-      "action": "Leia, corrija o que for operacional e marque como resolvido para manter o painel limpo."
-    },
-    "allClear": {
-      "titleEmpty": "Ainda não há casos registados",
-      "titleClear": "Nenhum caso em aberto esta semana",
-      "detailEmpty": "Assim que alguém avaliar como \"Ruim\" no QR code, o caso aparece aqui na hora.",
-      "detailResolved_one": "Você já resolveu {{count}} caso no total.",
-      "detailResolved_other": "Você já resolveu {{count}} casos no total.",
-      "actionEmpty": "Confirme que o QR code está visível na mesa ou no balcão — é ele que alimenta esta página.",
-      "actionClear": "Aproveite para pedir avaliação pública a quem teve boa experiência. É o melhor momento."
-    }
-  },
   "dashboard": {
     "greetingNamed": "Olá, {{name}}",
     "greetingGeneric": "O seu painel",
@@ -525,6 +453,11 @@
         "priorityBody": "A recolha Apify leu {{count}} avaliações, mas não traz autor, texto ou estado de resposta.",
         "prioritySampleBody": "{{count}} avaliações da amostra parecem não ter resposta, mas a fila individual ainda depende da leitura oficial.",
         "priorityAction": "Ver ligação oficial",
+        "pendingCommentsTitle": "Comentários que pedem atenção",
+        "pendingCommentsCount_one": "{{count}} comentário privado ainda sem resposta",
+        "pendingCommentsCount_other": "{{count}} comentários privados ainda sem resposta",
+        "pendingCommentsQuote": "\"{{quote}}\"",
+        "pendingCommentsAction": "Ver e responder",
         "queueTitle": "Fila de respostas",
         "queueSubtitle": "Uma decisão de cada vez, com texto e evidência quando a leitura oficial estiver disponível.",
         "queueUnavailableTitle": "A fila individual ainda não está disponível",
