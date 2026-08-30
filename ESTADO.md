@@ -3,6 +3,34 @@
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
+## Quota do Google verificada em 30/08/2026
+
+Primeira leitura direta da quota desde que a candidatura foi enviada, feita por
+Marcelo no console do projeto `app-review-505612`:
+
+| API | Cota | Valor |
+|---|---|---|
+| My Business Account Management | Requests per minute | **0** |
+| My Business Business Information | Requests per minute | **0** |
+
+As duas APIs aparecem como **ativadas**, o que mudou desde 21/08, quando o
+`HANDOFF.md` registrou a Business Information como desativada. Ativar e ser
+aprovado sao coisas diferentes: a ativacao e do projeto, a quota e do Google.
+
+**Com RPM em zero, nenhuma chamada acontece.** Os demais numeros visiveis na
+mesma tela (100 criacoes de local por dia, 200 buscas, 10.000 atualizacoes) sao
+tetos diarios padrao e ficam irrelevantes enquanto o RPM for zero.
+
+Conclusao: a candidatura de 21/08, registo `8-5255000041379`, **nao foi
+aprovada**. Continua dentro da janela indicada pelo Google, de 7 a 10 dias uteis,
+que cai entre 1 e 4 de setembro.
+
+Verificado tambem em 30/08: nenhum e-mail do Google sobre a candidatura chegou a
+`diba@noadigital.com.br` nos ultimos 60 dias. O que ha do Google no periodo e
+ruido de outros produtos. Silencio, nao recusa.
+
+**O sinal a vigiar e a quota, nao o e-mail.** Ela costuma mudar antes do aviso.
+
 ## 29 de agosto de 2026
 
 Dia em que a primeira mensagem de WhatsApp do produto chegou a um telefone e o
