@@ -7,6 +7,7 @@ const dashboard = read('src/components/dashboard/ApprovedCockpitDashboard.tsx');
 const dashboardPage = read('src/pages/Dashboard.tsx');
 const collector = read('supabase/functions/sync-experimental-apify/index.ts');
 const advisorReading = read('src/lib/advisorReading.ts');
+const estilos = read('src/index.css');
 
 const requirements = [
   ['painel mantém a fila antes das métricas', dashboard.indexOf('<ResponseQueue reviews={queue} snapshot={snapshot} />') < dashboard.indexOf('<VolumeCard weeks={history} />')],
@@ -22,6 +23,20 @@ const requirements = [
   ['coleta pede nome público', collector.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
   ['coleta aceita somente campos específicos de permalink', collector.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !collector.includes("'reviewUri', 'url'")],
   ['coleta temporária continua sem agenda e com limite explícito', collector.includes("maxReviews: 50") && collector.includes("APIFY_EXPERIMENTAL_COOLDOWN")],
+  // O contrato fixa violeta #6D43C0 como assinatura e azul #2457D6 para acoes,
+  // e ate 30/08/2026 nada verificava isso. O token --primary tinha derivado
+  // para #6C45BA, que e o violeta que slider, switch, badge e barra de
+  // progresso renderizavam. Ninguem notou porque a diferenca e invisivel a
+  // olho; uma regra escrita sem guarda deriva em silencio ate deixar de valer.
+  //
+  // 260.2 49.8% 50.8% e o unico triplo HSL que reproduz #6D43C0 exatamente.
+  // Com percentuais inteiros o mais proximo e #6D44C1, que erra dois canais.
+  // Contar, nao procurar: o token existe duas vezes, tema claro e escuro, e um
+  // `includes` passa achando so a segunda quando alguem quebra a primeira.
+  // Este guarda ja nasceu assim e foi corrigido antes de entrar.
+  ['o token --primary e o violeta #6D43C0 do contrato, nos dois temas',
+    (estilos.match(/--primary: 260\.2 49\.8% 50\.8%;/g) || []).length === 2
+    && !/--primary: (?!260\.2 49\.8% 50\.8%;)/.test(estilos)],
 ];
 
 const failed = requirements.filter(([, ok]) => !ok).map(([label]) => label);
