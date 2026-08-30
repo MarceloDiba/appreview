@@ -48,14 +48,20 @@ consentimento, o gatilho do banco devolve sem enviar nada e sem erro visível
 - [ ] Em Configurações, salvar o número de WhatsApp do dono da Casa Due e
   confirmar o consentimento na tela. Isso grava `consented_at` em
   `whatsapp_notification_preferences` (`supabase/functions/whatsapp-notifications/index.ts`).
-- [ ] Disparar "enviar mensagem de teste" e confirmar que a mensagem chega no
-  WhatsApp do número salvo. O código do relay em
-  `services/openwa-relay/src/config.mjs` varre a fila a cada 10 segundos por
-  padrão, mas isso só vale se a VPS estiver rodando essa versão, e não há como
-  confirmar isso a partir deste repositório. Se a mensagem demorar mais que
-  isso e chegar a um minuto sem sinal, não conclua que falhou nem clique de
-  novo várias vezes: confira o estado da linha em `whatsapp_outbox` (mesma
-  tabela do passo 5) antes de repetir o envio.
+- [ ] Disparar "enviar mensagem de teste" e confirmar que o painel mostra a
+  mensagem "Mensagem na fila para {{recipient}}. A entrega costuma levar
+  alguns segundos; o painel atualiza sozinho quando o WhatsApp confirmar."
+  Essa chave (`testQueued`) existe nos três idiomas do painel
+  (`src/i18n/owner/locales/pt-BR.json`, `pt-PT.json`, `en.json`) e aparece em
+  `src/components/dashboard/WhatsAppNotificationWorkspace.tsx`.
+- [ ] Confirmar que a mensagem chega no WhatsApp do número salvo em poucos
+  segundos, não em até um minuto. O relay varre a fila a cada 10 segundos por
+  padrão (`services/openwa-relay/src/server.mjs:17`,
+  `dispatchIntervalMs: Number(process.env.BINNO_DISPATCH_INTERVAL_MS || 10_000)`),
+  já implantado e medido na VPS: a espera na fila caiu de 54,0 s para 0,5 s
+  (`docs/estado-do-piloto-whatsapp.md`). Se a entrega passar de
+  aproximadamente um minuto, isso é anormal. Não clique de novo várias vezes:
+  confira o estado da linha em `whatsapp_outbox` (mesma tabela do passo 5).
 
 ## 3. QR: criar, imprimir, escanear
 
@@ -99,8 +105,9 @@ Este é o passo que a versão de julho não tinha, porque a entrega de WhatsApp
 só passou a funcionar de ponta a ponta em 29/08/2026
 (`docs/estado-do-piloto-whatsapp.md`).
 
-- [ ] Dentro de cerca de um minuto do envio do comentário do passo 4, o
-  WhatsApp do dono da Casa Due deve receber um aviso começando com "Binno" e
+- [ ] Em poucos segundos (a fila do relay é varrida a cada 10 segundos, ver
+  passo 2), o WhatsApp do dono da Casa Due deve receber um aviso começando
+  com "Binno" e
   "Comentário privado agora, nota X de 5", com o texto do comentário e o
   contato deixado, se houver. Isso é o gatilho `notify_low_rating_feedback`
   disparando após o `insert` em `internal_feedback` (nota <= 3), que grava
