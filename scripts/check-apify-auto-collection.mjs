@@ -54,13 +54,43 @@ const requirements = [
     && manualCollector.includes('runExperimentalApifyCollection')
     && autoDispatcher.includes('runExperimentalApifyCollection')],
 
-  ['núcleo partilhado aplica a janela de 24 horas antes de gastar',
+  // Não basta a string existir: o teste original passava mesmo se a checagem
+  // rodasse depois do gasto, porque nunca comparava posições. Aqui a rejeição
+  // por cooldown precisa aparecer ANTES do insert que abre 'started' e ANTES
+  // do fetch que de fato chama o Apify (a cobrança).
+  ['núcleo partilhado aplica a janela de 24 horas ANTES de abrir a auditoria e ANTES de chamar o Apify',
     collectorCore.includes("code: 'APIFY_EXPERIMENTAL_COOLDOWN'")
-    && collectorCore.includes(".eq('status', 'succeeded').gte('requested_at', dayAgo)")],
+    && collectorCore.indexOf("code: 'APIFY_EXPERIMENTAL_COOLDOWN'") < collectorCore.indexOf("status: 'started',")
+    && collectorCore.indexOf("code: 'APIFY_EXPERIMENTAL_COOLDOWN'") < collectorCore.indexOf('await fetch(actorUrl')],
 
-  ['núcleo partilhado aplica o teto mensal antes de gastar',
+  // Uma linha 'started' sem conclusão pode significar que o Apify já foi
+  // chamado e cobrou; só não sabemos o resultado. Ela tem que bloquear a
+  // janela de 24h igual a 'succeeded', não só linhas concluídas.
+  ['janela de 24 horas trata "started" (coleta talvez já cobrada) igual a "succeeded", não só coletas concluídas',
+    collectorCore.includes(".in('status', ['succeeded', 'started'])")],
+
+  // Sem isso, uma linha 'started' órfã bloquearia o negócio para sempre. A
+  // reivindicação tem que rodar antes da checagem de 24h usar o resultado, e
+  // tem que gravar um código próprio (não apaga, não finge que nunca houve
+  // tentativa).
+  ['linha "started" órfã (muito além do timeout do Actor) é reivindicada como falha antes da checagem de 24h, com código próprio',
+    collectorCore.includes('ORPHANED_STARTED_AFTER_MS')
+    && collectorCore.includes("error_code: 'APIFY_EXPERIMENTAL_ORPHANED'")
+    && collectorCore.indexOf("error_code: 'APIFY_EXPERIMENTAL_ORPHANED'") < collectorCore.indexOf(".in('status', ['succeeded', 'started'])")],
+
+  ['núcleo partilhado aplica o teto mensal ANTES de abrir a auditoria e ANTES de chamar o Apify',
     collectorCore.includes("code: 'APIFY_EXPERIMENTAL_MONTHLY_LIMIT'")
-    && collectorCore.includes('(monthlyCount || 0) >= monthlyRunLimit')],
+    && collectorCore.includes('(monthlyCount || 0) >= monthlyRunLimit')
+    && collectorCore.indexOf("code: 'APIFY_EXPERIMENTAL_MONTHLY_LIMIT'") < collectorCore.indexOf("status: 'started',")
+    && collectorCore.indexOf("code: 'APIFY_EXPERIMENTAL_MONTHLY_LIMIT'") < collectorCore.indexOf('await fetch(actorUrl')],
+
+  // "Uma vez por negócio" é uma vez no total. Se o piloto manual (ou uma
+  // automação anterior) já teve sucesso, em qualquer momento, a automação de
+  // cadastro não gasta de novo só porque o cooldown de 24h já passou.
+  ['drenador automático pula negócio com QUALQUER coleta bem-sucedida anterior, não só uma fora da janela de 24h',
+    autoDispatcher.includes(".eq('status', 'succeeded')")
+    && autoDispatcher.includes("status: 'skipped_existing'")
+    && autoDispatcher.indexOf(".eq('status', 'succeeded')") < autoDispatcher.indexOf('await runExperimentalApifyCollection')],
 
   // O teto não pode ser lido em dois lugares com valores diferentes: os dois
   // chamadores importam a mesma função que lê APIFY_EXPERIMENTAL_MONTHLY_RUN_LIMIT.
@@ -78,8 +108,12 @@ const requirements = [
     && autoDispatcher.indexOf('if (!autoOnSignupEnabled') < autoDispatcher.indexOf("rpc('claim_apify_auto_collection'")
     && autoDispatcher.indexOf('if (!autoOnSignupEnabled') < autoDispatcher.indexOf('await runExperimentalApifyCollection')],
 
-  ['desligado, o drenador não gasta: nenhuma chamada ao Apify por baixo do interruptor',
-    autoDispatcher.includes("return json({ code: 'APIFY_AUTO_COLLECT_DISABLED', processed: 0, results: [] });")],
+  // Não basta o JSON de "desligado" existir em algum lugar do arquivo: ele
+  // precisa ser o retorno imediato de DENTRO do próprio `if` do interruptor,
+  // senão o teste passaria mesmo com o `return` solto em outro branch morto
+  // ou com o `if` sem `return` nenhum.
+  ['interruptor desligado retorna dentro do próprio bloco `if`, sem seguir adiante para reivindicar a fila',
+    /if\s*\(\s*!autoOnSignupEnabled\s*\|\|\s*!experimentalEnabled\s*\|\|\s*!apifyToken\s*\)\s*\{\s*return json\(\{\s*code:\s*'APIFY_AUTO_COLLECT_DISABLED',\s*processed:\s*0,\s*results:\s*\[\]\s*\}\);\s*\}/.test(autoDispatcher)],
 
   // O drenador nunca fala com a API do Apify diretamente; só o núcleo
   // partilhado fala. Duplicar essa chamada seria reabrir a possibilidade de
@@ -89,16 +123,37 @@ const requirements = [
 
   // Falhas transitórias (cooldown, teto mensal) voltam para "queued" e podem
   // ser tentadas de novo depois; qualquer outro erro é definitivo, uma
-  // tentativa automática por negócio, nunca um laço de novas tentativas.
-  ['falha transitória reenfileira; falha definitiva não tenta de novo automaticamente',
-    autoDispatcher.includes("status: transient ? 'queued' : 'failed'")],
+  // tentativa automática por negócio, nunca um laço de novas tentativas. A
+  // string `transient ? 'queued' : 'failed'` sozinha não prova nada: alguém
+  // poderia alargar a própria condição `transient` para incluir um código
+  // pós-gasto (ex.: `APIFY_REQUEST_FAILED`) e criar retries pagos sem limite,
+  // com essa linha continuando idêntica. Por isso o teste lê a expressão de
+  // `transient` e exige exatamente os dois códigos que rejeitam ANTES de
+  // gastar, nem um a mais.
+  ['"transient" deriva só dos dois códigos que rejeitam antes de gastar (cooldown, teto mensal); nenhum código pós-gasto entra nessa lista',
+    (() => {
+      const match = autoDispatcher.match(/const transient = ([^;]+);/);
+      const expr = match ? match[1] : '';
+      return expr.includes("outcome.code === 'APIFY_EXPERIMENTAL_COOLDOWN'")
+        && expr.includes("outcome.code === 'APIFY_EXPERIMENTAL_MONTHLY_LIMIT'")
+        && (expr.match(/outcome\.code ===/g) || []).length === 2;
+    })()
+    && autoDispatcher.includes("status: transient ? 'queued' : 'failed'")],
 
-  ['drenador reivindica a fila com bloqueio atômico (skip locked), sem duas execuções pegarem a mesma linha',
+  // Uma linha 'processing' cujo drenador caiu antes de gravar o resultado
+  // ficaria travada para sempre e o negócio perderia a coleta em silêncio.
+  ['drenador reivindica a fila com bloqueio atômico (skip locked) e também recupera linhas "processing" travadas havia mais de 15 minutos',
     migration.includes('for update skip locked')
-    && migration.includes("where status = 'queued'")],
+    && migration.includes("where status = 'queued'")
+    && migration.includes("or (status = 'processing' and claimed_at < now() - interval '15 minutes')")],
 
-  ['documentação de operação registra o novo interruptor',
-    rolloutDocs.includes('APIFY_AUTO_COLLECT_ON_SIGNUP_ENABLED')],
+  // Não basta o nome da variável de ambiente aparecer nos docs: o texto
+  // precisa afirmar o que o interruptor garante (desliga sozinho, mesmo com
+  // o piloto manual ligado) e o que acontece quando ele está desligado.
+  ['documentação explica o comportamento do interruptor, não só cita o nome da variável',
+    rolloutDocs.includes('APIFY_AUTO_COLLECT_ON_SIGNUP_ENABLED')
+    && rolloutDocs.includes('sempre desliga a coleta automática')
+    && rolloutDocs.includes('nunca reivindica')],
 ];
 
 const failed = requirements.filter(([, ok]) => !ok).map(([label]) => label);

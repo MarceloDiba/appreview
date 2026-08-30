@@ -17,7 +17,10 @@ coleta falhar, o cadastro já terminou sem depender dela.
 Quem de fato gasta é `supabase/functions/apify-auto-collect-on-signup`, que
 lê essa fila e usa o mesmo núcleo guardado do piloto manual
 (`supabase/functions/_shared/experimentalApifyCollection.ts`), respeitando a
-mesma janela de 24 horas e o mesmo teto mensal. Alguém ainda precisa agendar a
+mesma janela de 24 horas e o mesmo teto mensal. "Uma vez por negócio" é uma
+vez no total: se o piloto manual já coletou com sucesso para aquele negócio
+(em qualquer momento, não só nas últimas 24h), o drenador não gasta de novo;
+marca a linha como `skipped_existing`. Alguém ainda precisa agendar a
 execução dessa função (pg_cron, Supabase Scheduled Function ou cron externo);
 isso é operação, não código.
 
@@ -25,11 +28,15 @@ isso é operação, não código.
 APIFY_AUTO_COLLECT_ON_SIGNUP_ENABLED=true
 ```
 
-É o interruptor exclusivo da automação, independente de
-`APIFY_EXPERIMENTAL_ENABLED`. Sem ele em `true`, o drenador nunca reivindica
+É o interruptor desta automação: girar só este segredo para `false` (ou
+removê-lo) sempre desliga a coleta automática, mesmo com
+`APIFY_EXPERIMENTAL_ENABLED=true` ligado para o piloto manual. O contrário não
+vale: a automação também exige `APIFY_EXPERIMENTAL_ENABLED=true` como
+pré-requisito, então desligar esse outro segredo também a desliga. Sem
+`APIFY_AUTO_COLLECT_ON_SIGNUP_ENABLED` em `true`, o drenador nunca reivindica
 uma linha da fila nem gasta um centavo. Quando o acesso Basic à Business
-Profile API for aprovado, a coleta automática se desliga girando este segredo
-para `false` (ou removendo-o), sem alterar código.
+Profile API for aprovado, a forma correta de desligar a coleta automática é
+girar este segredo para `false` (ou removê-lo), sem alterar código.
 
 **Atenção ao teto mensal antes de ligar este interruptor**: automatizar a
 coleta no cadastro multiplica o número de execuções por cadastro novo, e

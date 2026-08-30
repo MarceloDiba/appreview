@@ -25,10 +25,14 @@
 -- retroativamente: só um INSERT ou UPDATE novo em profiles ou platform_links
 -- aciona o gatilho.
 
+-- 'skipped_existing': o drenador achou uma coleta bem-sucedida anterior para
+-- este user_id (piloto manual ou automação passada, em qualquer janela de
+-- tempo) e não gastou de novo. "Uma vez por negócio" é uma vez no total, não
+-- uma vez por caminho de disparo.
 create table if not exists public.apify_auto_collection_queue (
   user_id uuid primary key references auth.users(id) on delete cascade,
   google_review_url text not null,
-  status text not null default 'queued' check (status in ('queued', 'processing', 'succeeded', 'failed')),
+  status text not null default 'queued' check (status in ('queued', 'processing', 'succeeded', 'failed', 'skipped_existing')),
   queued_at timestamptz not null default now(),
   claimed_at timestamptz,
   processed_at timestamptz,
@@ -143,6 +147,15 @@ for each row execute function public.trg_apify_auto_collection_from_platform_lin
 -- O drenador (apify-auto-collect-on-signup) reivindica um lote atomicamente,
 -- no mesmo padrão de claim_whatsapp_outbox: "for update skip locked" evita
 -- que duas execuções concorrentes peguem a mesma linha.
+--
+-- Uma linha 'processing' cujo drenador caiu antes de gravar o resultado
+-- ficaria travada para sempre, e o negócio perderia a coleta em silêncio, sem
+-- ninguém saber. Por isso, junto de 'queued', esta função também reivindica
+-- linhas 'processing' cujo claimed_at passou de 15 minutos: o mesmo prazo
+-- (bem maior que o timeout de 240s do Actor) usado para reivindicar uma linha
+-- 'started' órfã em experimental_apify_runs. Isso é seguro mesmo se o gasto
+-- já tiver acontecido: quem decide se pode gastar de novo é a checagem de
+-- 24h em runExperimentalApifyCollection, não o status desta fila.
 create or replace function public.claim_apify_auto_collection(batch_size integer default 5)
 returns setof public.apify_auto_collection_queue
 language plpgsql
@@ -155,6 +168,7 @@ begin
     select user_id
     from public.apify_auto_collection_queue
     where status = 'queued'
+       or (status = 'processing' and claimed_at < now() - interval '15 minutes')
     order by queued_at asc
     for update skip locked
     limit greatest(1, least(batch_size, 25))

@@ -20,15 +20,28 @@ import { corsHeaders, json, resolveMonthlyRunLimit, runExperimentalApifyCollecti
  *
  * INTERRUPTOR DE DESLIGAMENTO
  *
- * `APIFY_AUTO_COLLECT_ON_SIGNUP_ENABLED` é o interruptor exclusivo desta
- * automação. Ele é independente de `APIFY_EXPERIMENTAL_ENABLED` (que liga o
- * piloto manual inteiro): quando o acesso Basic ao Google Business Profile
- * for aprovado, a coleta automática se desliga girando só este segredo para
- * `false` (ou removendo-o) nos segredos da Edge Function, sem tocar em código
- * e sem afetar o botão manual do piloto assistido, que pode continuar a
- * existir por mais tempo como ferramenta de diagnóstico. Sem esse segredo em
- * `true`, esta função nunca reivindica uma linha da fila nem gasta um
- * centavo: só responde com `processed: 0`.
+ * `APIFY_AUTO_COLLECT_ON_SIGNUP_ENABLED` é o interruptor desta automação:
+ * girar só este segredo para `false` (ou removê-lo) sempre desliga a coleta
+ * automática, mesmo que `APIFY_EXPERIMENTAL_ENABLED` continue `true` para o
+ * piloto manual. O contrário não vale: a automação também exige
+ * `APIFY_EXPERIMENTAL_ENABLED=true` como pré-requisito, porque herda o
+ * interruptor geral do piloto (linha `if (!autoOnSignupEnabled ||
+ * !experimentalEnabled || !apifyToken)` abaixo), então desligar esse outro
+ * segredo também a desliga. Quando o acesso Basic ao Google Business Profile
+ * for aprovado, a forma correta de desligar é girar
+ * `APIFY_AUTO_COLLECT_ON_SIGNUP_ENABLED` para `false`, sem tocar em código e
+ * sem afetar o botão manual do piloto assistido, que pode continuar a existir
+ * por mais tempo como ferramenta de diagnóstico. Sem esse segredo em `true`,
+ * esta função nunca reivindica uma linha da fila nem gasta um centavo: só
+ * responde com `processed: 0`.
+ *
+ * UMA COLETA POR NEGÓCIO, NÃO POR CAMINHO
+ *
+ * "Uma vez por negócio" na decisão de 30/08/2026 significa uma vez no total,
+ * não uma vez pelo caminho manual e outra pelo automático. Se o piloto manual
+ * já coletou com sucesso para este negócio, em qualquer momento (não só nas
+ * últimas 24h), a automação não tem nada a acrescentar e não gasta: marca a
+ * linha da fila como `skipped_existing` e segue para a próxima.
  */
 
 const authorizedServiceCall = (request: Request, serviceRoleKey: string) => {
@@ -75,6 +88,29 @@ serve(async (request) => {
   const results: Array<{ userId: string; status: string; code?: string }> = [];
 
   for (const row of rows) {
+    // Uma coleta por negócio, não por caminho: se o piloto manual (ou uma
+    // automação anterior) já teve sucesso para este user_id, qualquer que
+    // tenha sido a janela de tempo, este negócio já tem sua base de dados.
+    // Gastar de novo aqui não agrega nada que a decisão de 30/08/2026 pediu.
+    const { data: existingSuccess, error: existingError } = await admin.from('experimental_apify_runs')
+      .select('id').eq('user_id', row.user_id).eq('status', 'succeeded')
+      .order('completed_at', { ascending: false }).limit(1).maybeSingle();
+    if (existingError) {
+      results.push({ userId: row.user_id, status: 'requeued', code: 'APIFY_EXPERIMENTAL_LIMIT_CHECK_FAILED' });
+      await admin.from('apify_auto_collection_queue').update({ status: 'queued', claimed_at: null }).eq('user_id', row.user_id);
+      continue;
+    }
+    if (existingSuccess) {
+      await admin.from('apify_auto_collection_queue').update({
+        status: 'skipped_existing',
+        processed_at: new Date().toISOString(),
+        apify_run_id: existingSuccess.id,
+        error_code: null,
+      }).eq('user_id', row.user_id);
+      results.push({ userId: row.user_id, status: 'skipped_existing' });
+      continue;
+    }
+
     const outcome = await runExperimentalApifyCollection({
       admin, userId: row.user_id, googleReviewUrl: row.google_review_url, apifyToken, monthlyRunLimit, now,
     });

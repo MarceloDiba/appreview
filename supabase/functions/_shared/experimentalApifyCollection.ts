@@ -383,6 +383,24 @@ export type CollectionFailure = {
 export type CollectionOutcome = CollectionSuccess | CollectionFailure;
 
 /**
+ * Uma linha 'started' sem conclusão significa que o processo pode ter caído
+ * entre a chamada ao Apify (a cobrança, linha ~470 abaixo) e a gravação do
+ * resultado. Não há como saber, a essa altura, se o Apify já cobrou. Por
+ * isso 'started' bloqueia a janela de 24h exatamente como 'succeeded'.
+ *
+ * Isso sozinho bloquearia um negócio para sempre se a linha nunca fosse
+ * concluída. A saída escolhida: depois de um tempo bem maior que qualquer
+ * coleta legítima leva (o Actor roda com timeout de 240s), a linha é
+ * reivindicada como órfã e marcada 'failed' com um código próprio. Isso a
+ * tira do bloqueio, e a próxima tentativa pode gastar de novo, mas essa é
+ * uma decisão visível e registrada (error_code = 'APIFY_EXPERIMENTAL_ORPHANED'),
+ * não uma nova tentativa silenciosa. A reivindicação é preguiçosa: só
+ * acontece na próxima vez que alguém tentar coletar para o mesmo (negócio,
+ * link); não existe uma varredura agendada separada.
+ */
+const ORPHANED_STARTED_AFTER_MS = 15 * 60 * 1_000;
+
+/**
  * Coleta guardada: aplica o teto de 24 horas por (negócio, link) e o teto
  * mensal por negócio antes de gastar um único centavo, grava a auditoria em
  * `experimental_apify_runs` e devolve um resumo agregado (nunca a fila
@@ -410,10 +428,21 @@ export async function runExperimentalApifyCollection({
   const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1_000).toISOString();
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 
+  // Reivindica primeiro qualquer linha 'started' órfã deste (negócio, link):
+  // só depois disso a checagem de 24h abaixo pode confiar no que lê.
+  const orphanCutoff = new Date(now.getTime() - ORPHANED_STARTED_AFTER_MS).toISOString();
+  const { error: reclaimError } = await admin.from('experimental_apify_runs')
+    .update({ status: 'failed', completed_at: now.toISOString(), error_code: 'APIFY_EXPERIMENTAL_ORPHANED' })
+    .eq('user_id', userId).eq('google_review_url', googleReviewUrl).eq('status', 'started').lt('requested_at', orphanCutoff);
+  if (reclaimError) {
+    return { ok: false, code: 'APIFY_EXPERIMENTAL_LIMIT_CHECK_FAILED', status: 500, message: 'Não foi possível aplicar os limites da coleta experimental.' };
+  }
+
   const [{ data: recentRun, error: recentError }, { count: monthlyCount, error: monthlyError }] = await Promise.all([
-    // A failed transport/authentication attempt must not lock the manager out
-    // for 24 hours. Only a completed collection consumes the daily interval.
-    admin.from('experimental_apify_runs').select('id').eq('user_id', userId).eq('google_review_url', googleReviewUrl).eq('status', 'succeeded').gte('requested_at', dayAgo).limit(1).maybeSingle(),
+    // 'started' bloqueia igual a 'succeeded': um crash entre a cobrança e a
+    // gravação do resultado não pode virar uma segunda cobrança. Só uma linha
+    // órfã reivindicada acima (agora 'failed') deixa de bloquear.
+    admin.from('experimental_apify_runs').select('id').eq('user_id', userId).eq('google_review_url', googleReviewUrl).in('status', ['succeeded', 'started']).gte('requested_at', dayAgo).limit(1).maybeSingle(),
     admin.from('experimental_apify_runs').select('id', { count: 'exact', head: true }).eq('user_id', userId).gte('requested_at', monthStart),
   ]);
   if (recentError || monthlyError) {
