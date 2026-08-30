@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdvisorObservedResult, markAdvisorAction } from '@/lib/advisorPilot';
 import { getAdvisorReading } from '@/lib/advisorReading';
 import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
+import { sampleWasTruncated } from '@/lib/reputationSnapshotReading';
 
 type QueueReview = {
   id: string;
@@ -63,22 +64,28 @@ const normalizeObserved = (review: ExperimentalObservedReview): QueueReview => r
  * Contrato de produto, linha 30: amostra nunca pode aparecer como dado
  * oficial, completo ou real sem estar identificada.
  *
- * No piloto Apify a distribuicao por nota, o tempo medio de resposta, as
- * avaliações dos últimos 30 dias e os temas são calculados sobre no máximo 50
- * avaliações públicas. No caminho oficial as mesmas medidas saem de todas as
- * avaliações do negócio. Um negócio com 400 avaliações mostrava uma
- * distribuicao oito vezes menor que a realidade, sem nada dizendo isso.
+ * No piloto Apify a distribuição por nota, o tempo médio de resposta, as
+ * avaliações dos últimos 30 dias e os temas são calculados sobre a amostra
+ * coletada. Um negócio com 400 avaliações mostrava a distribuição de 50 sem
+ * nada dizendo isso, oito vezes menor que a realidade.
  *
- * A nota e o total de avaliações NAO levam esta etiqueta: mesmo vindos do
+ * A etiqueta aparece exatamente quando houve corte, e não sempre que a leitura
+ * veio do Apify. A coleta pede no máximo 50 e recebe o que existir: um negócio
+ * com 20 avaliações recebe as 20, e aí a leitura está completa. Chamar isso de
+ * amostra subestimaria, na frente de um cliente, um dado que está inteiro. Por
+ * isso a condição é a mesma que decide o histórico semanal, e vem da mesma
+ * função: `sampleWasTruncated`.
+ *
+ * A nota e o total de avaliações nunca levam a etiqueta: mesmo vindos do
  * Apify eles são os números do negócio inteiro, lidos do próprio perfil.
  *
- * A etiqueta e aditiva por exigencia do contrato: um rodape discreto dentro do
+ * A etiqueta é aditiva por exigência do contrato: um rodapé discreto dentro do
  * cartão que já existe, sem redesenhar, fundir, esconder ou deslocar módulo
  * nenhum.
  */
 const SampleSourceNote = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
-  if (snapshot.source !== 'apify-experimental' || snapshot.sample.reviewCount <= 0) return null;
+  if (!sampleWasTruncated(snapshot)) return null;
   return <p className="mt-4 text-xs leading-4 text-slate-500">{t('dashboard.cockpit.layout.sampleSourceNote', { sample: snapshot.sample.reviewCount })}</p>;
 };
 

@@ -283,7 +283,7 @@ const expressaoRenderizada = valorRenderizado && /^[A-Za-z_$][\w$]*$/.test(valor
 const corpoDaComposicao = expressaoAtribuida(leituraDoAgregado, 'composeCockpitSnapshot');
 const corpoDaEscolha = expressaoAtribuida(leituraDoAgregado, 'freshestAggregates');
 const corpoDaDataDoNavegador = expressaoAtribuida(leituraDoAgregado, 'browserTimeOf');
-const corpoDaCobertura = expressaoAtribuida(leituraDoAgregado, 'historyCoversWindow');
+const corpoDoCorte = expressaoAtribuida(leituraDoAgregado, 'sampleWasTruncated');
 
 const requisitos = [
   // ------------------------------------------------------------------
@@ -392,11 +392,13 @@ const requisitos = [
     const compara = /browserTime > persistedTime \? browserSnapshot : persistedSnapshot/.test(corpoDaEscolha);
     const ilegivelPerde = /if \(browserTime === null\) return persistedSnapshot;/.test(corpoDaEscolha);
     // Sem limite para o futuro, um `fetchedAt` datado de 2099 venceria o banco
-    // para sempre. A tolerância existe para o relógio do aparelho, então ela
-    // tem que ser pequena de verdade, não um número que anula a regra.
+    // para sempre. A tolerância existe para o relógio do aparelho, e aceitar
+    // uma FAIXA (qualquer coisa até uma hora) deixaria alguém alargá-la de 10
+    // para 55 minutos sem que nada reclamasse. O valor fica preso ao
+    // documentado, e mudá-lo passa a exigir mudar esta linha junto.
     const futuroPerde = /parsed > now \+ CLOCK_SKEW_TOLERANCE_MS\) return null;/.test(corpoDaDataDoNavegador);
-    const tolerância = valorNumerico(expressaoAtribuida(leituraDoAgregado, 'CLOCK_SKEW_TOLERANCE_MS'));
-    const toleranciaPequena = tolerância !== null && tolerância > 0 && tolerância <= 60 * 60 * 1_000;
+    const toleranciaDeRelogio = valorNumerico(expressaoAtribuida(leituraDoAgregado, 'CLOCK_SKEW_TOLERANCE_MS'));
+    const toleranciaPequena = toleranciaDeRelogio === 10 * 60 * 1_000;
     return [rotulo, composicaoUsaAEscolha && leAsDuasDatas && compara && ilegivelPerde && futuroPerde && toleranciaPequena];
   })(),
 
@@ -422,9 +424,9 @@ const requisitos = [
 
   (() => {
     const rotulo = 'histórico semanal só entra quando a amostra que o gerou cobre a janela: no teto do Apify a comparação de varias semanas não afirma queda, e o teto e o mesmo número pedido ao Actor';
-    if (!corpoDaComposicao || !corpoDaCobertura) return [rotulo, false];
-    const portao = /const history = owner && historyCoversWindow\(owner\) \? owner\.sample\.insights\?\.history : undefined;/.test(corpoDaComposicao);
-    const regraDoTeto = /owner\.source !== 'apify-experimental' \|\| owner\.sample\.reviewCount < APIFY_SAMPLE_CAP/.test(corpoDaCobertura);
+    if (!corpoDaComposicao || !corpoDoCorte) return [rotulo, false];
+    const portao = /const history = owner && !sampleWasTruncated\(owner\) \? owner\.sample\.insights\?\.history : undefined;/.test(corpoDaComposicao);
+    const regraDoTeto = /snapshot\.source === 'apify-experimental' && snapshot\.sample\.reviewCount >= APIFY_SAMPLE_CAP/.test(corpoDoCorte);
     // As duas pontas não se leem: o teto pedido ao Actor esta numa Edge
     // Function em Deno, o teto usado na leitura esta no painel. Divergir faria
     // o portao abrir com a amostra truncada.
@@ -453,26 +455,61 @@ const requisitos = [
   })(),
 
   (() => {
-    const rotulo = 'a identificação de amostra e decidida pela proveniência do retrato: sem `apify-experimental` ela não renderiza nada';
+    const rotulo = 'a identificação de amostra só aparece quando houve corte de verdade, pelo mesmo predicado que decide o histórico semanal, e o portão vem antes do texto';
+    // A versão anterior gateava por proveniência: qualquer leitura vinda do
+    // Apify levava a etiqueta. Mas a coleta pede no máximo 50 e recebe o que
+    // existir, então um negócio com 20 avaliações tem leitura COMPLETA, e
+    // dizer "amostra, não o total" ali subestima um dado inteiro na frente de
+    // um cliente. O portão passou a ser o corte, não a fonte.
     const corpo = expressaoAtribuida(cockpitRenderizado, 'SampleSourceNote');
     if (!corpo) return [rotulo, false];
-    const portao = corpo.match(/if \(([^)]*)\) return null;/);
-    const gateiaPelaFonte = Boolean(portao) && portao[1].includes("snapshot.source !== 'apify-experimental'");
+    const portao = /if \(!sampleWasTruncated\(snapshot\)\) return null;/.test(corpo);
     const retorno = instrucaoDeRetorno(corpo);
     const usaAChave = Boolean(retorno) && retorno.includes("t('dashboard.cockpit.layout.sampleSourceNote'");
-    const portaoAntesDaNota = Boolean(portao) && corpo.indexOf('return null;') < corpo.indexOf("t('dashboard.cockpit.layout.sampleSourceNote'");
-    return [rotulo, gateiaPelaFonte && usaAChave && portaoAntesDaNota];
+    const portaoAntesDaNota = corpo.indexOf('return null;') < corpo.indexOf("t('dashboard.cockpit.layout.sampleSourceNote'");
+    const importaOPredicado = /import \{[^}]*sampleWasTruncated[^}]*\} from '@\/lib\/reputationSnapshotReading';/.test(cockpitRenderizado);
+    return [rotulo, portao && usaAChave && portaoAntesDaNota && importaOPredicado];
   })(),
 
   (() => {
-    const rotulo = 'os módulos que desenham medidas de amostra (reputação, cada nota separada, temas) renderizam a identificação DENTRO do próprio return, não apenas em algum lugar do arquivo';
-    const módulos = ['ReputationCard', 'RatingTrends', 'TopicsCard'];
-    return [rotulo, módulos.every((nome) => {
+    const rotulo = 'todo cartão que desenha uma medida derivada da amostra carrega a identificação dentro do próprio return: a regra é a medida que o cartão lê, não uma lista de nomes';
+    // Listar `ReputationCard`, `RatingTrends` e `TopicsCard` protegia esses
+    // três e mais nada: um cartão novo mostrando distribuição ou temas sem a
+    // etiqueta passava. Aqui o conjunto é descoberto pela leitura que cada
+    // componente faz, então um cartão novo entra na regra sozinho.
+    const MEDIDAS_DA_AMOSTRA = ['.sample.ratingBreakdown', 'averageResponseHours', 'reviewsLast30Days', '.insights?.topics'];
+    const componentes = [...cockpitRenderizado.matchAll(/^const ([A-Z][\w]*) = /gm)]
+      .map((achado) => achado[1])
+      .filter((nome) => nome !== 'SampleSourceNote');
+    const comMedidaDeAmostra = [];
+    for (const nome of componentes) {
       const corpo = expressaoAtribuida(cockpitRenderizado, nome);
-      if (!corpo) return false;
+      if (!corpo) continue;
       const retorno = instrucaoDeRetorno(corpo);
-      return Boolean(retorno) && retorno.includes('<Card') && retorno.includes('<SampleSourceNote snapshot={snapshot} />');
-    })];
+      if (!retorno) continue;
+      if (MEDIDAS_DA_AMOSTRA.some((medida) => corpo.includes(medida))) comMedidaDeAmostra.push({ nome, retorno });
+    }
+    // Sem esta contagem, apagar as leituras (ou quebrar a extração) esvaziaria
+    // o conjunto e o `every` ficaria verde sem conferir cartão nenhum.
+    if (comMedidaDeAmostra.length < 3) return [rotulo, false];
+    return [rotulo, comMedidaDeAmostra.every(({ retorno }) => retorno.includes('<SampleSourceNote snapshot={snapshot} />'))];
+  })(),
+
+  (() => {
+    const rotulo = 'o teto da amostra é comparado num lugar só: a etiqueta do cockpit e o portão do histórico saem do mesmo predicado e não podem discordar';
+    // Duas regras que precisam concordar, escritas duas vezes, é o defeito que
+    // este projeto já pagou mais de uma vez. Enquanto `APIFY_SAMPLE_CAP` só
+    // aparecer na definição e dentro de `sampleWasTruncated`, não existe uma
+    // segunda regra para divergir da primeira.
+    if (!corpoDoCorte || !corpoDaComposicao) return [rotulo, false];
+    const ocorrencias = arquivosTypeScript()
+      .filter((caminho) => caminho.startsWith('src/'))
+      .reduce((total, caminho) => total + (lerCodigo(caminho).match(/APIFY_SAMPLE_CAP/g) || []).length, 0);
+    const definido = /export const APIFY_SAMPLE_CAP = \d+;/.test(leituraDoAgregado);
+    const comparadoSoNoPredicado = corpoDoCorte.includes('APIFY_SAMPLE_CAP') && ocorrencias === 2;
+    const etiquetaUsaOPredicado = cockpitRenderizado.includes('sampleWasTruncated(snapshot)');
+    const historicoUsaOPredicado = corpoDaComposicao.includes('sampleWasTruncated(owner)');
+    return [rotulo, definido && comparadoSoNoPredicado && etiquetaUsaOPredicado && historicoUsaOPredicado];
   })(),
 ];
 

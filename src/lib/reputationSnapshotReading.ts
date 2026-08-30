@@ -188,18 +188,31 @@ const weeklyHistoryOwner = (
 ) => [aggregates, browserSnapshot].find((candidato) => candidato?.sample.insights?.history?.weeks?.length) || null;
 
 /**
- * A amostra do Apify são as até 50 avaliações MAIS RECENTES. Quando ela bate
- * no teto, as semanas mais antigas da janela ficam sem as avaliações que o
- * teto cortou, e a comparação de varias semanas mostra uma queda que e
- * artefato do corte, não do negócio. Uma observacao que falta e aceitavel;
- * uma fragilidade inventada não e, e o contrato já diz isso do Radar.
+ * A amostra do Apify são as até 50 avaliações MAIS RECENTES. A coleta pede no
+ * máximo 50 e recebe o que existir: um negócio com 20 avaliações recebe as 20,
+ * e essa leitura é COMPLETA. Só quando a amostra bate no teto é que houve
+ * corte, e só aí as medidas derivadas dela representam parte do perfil.
  *
- * Abaixo do teto nada foi cortado: a janela esta coberta de verdade e os
- * números podem ser desenhados normalmente. No caminho oficial a leitura vem
- * de todas as avaliações, então não existe corte nenhum.
+ * Este é o único lugar do painel que compara a amostra com o teto. As duas
+ * regras que dependem disso saem daqui:
+ *
+ *   - o histórico semanal não entra na leitura quando houve corte, porque as
+ *     semanas mais antigas da janela ficam sem as avaliações cortadas e a
+ *     comparação mostraria uma queda que é artefato do corte, não do negócio.
+ *     Uma observação que falta é aceitável; uma fragilidade inventada não é, e
+ *     o contrato já diz isso do Radar;
+ *   - a identificação de amostra no cockpit só aparece quando houve corte.
+ *     Dizer "amostra, não o total" sobre uma leitura completa subestimaria um
+ *     dado inteiro na frente de um cliente.
+ *
+ * Duas regras que precisam concordar, escritas duas vezes, é o defeito que
+ * este projeto já pagou mais de uma vez. Por isso as duas chamam esta função.
+ *
+ * No caminho oficial a leitura vem de todas as avaliações do negócio, então
+ * não existe corte nenhum.
  */
-const historyCoversWindow = (owner: ExperimentalApifySnapshot) =>
-  owner.source !== 'apify-experimental' || owner.sample.reviewCount < APIFY_SAMPLE_CAP;
+export const sampleWasTruncated = (snapshot: ExperimentalApifySnapshot) =>
+  snapshot.source === 'apify-experimental' && snapshot.sample.reviewCount >= APIFY_SAMPLE_CAP;
 
 /**
  * Monta a leitura que o cockpit desenha a partir das três fontes possíveis,
@@ -236,7 +249,7 @@ export const composeCockpitSnapshot = ({
 
   const observedReviews = browserSnapshot?.sample.observedReviews;
   const owner = weeklyHistoryOwner(aggregates, browserSnapshot);
-  const history = owner && historyCoversWindow(owner) ? owner.sample.insights?.history : undefined;
+  const history = owner && !sampleWasTruncated(owner) ? owner.sample.insights?.history : undefined;
 
   return {
     ...aggregates,
