@@ -33,12 +33,30 @@ type Week = { start: string; reviewCount: number; ratingBreakdown: Record<Rating
 
 const ratings: Rating[] = ['5', '4', '3', '2', '1'];
 const actionStorageKey = 'binno.approved-cockpit-actions';
+const integer = new Intl.NumberFormat();
+const decimal = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 // Âncoras que substituem as antigas abas. Os cartões que antes trocavam de
 // aba (fila e WhatsApp) agora levam a estes ids por link nativo
 // (href="#..."), sem estado de aba nem JavaScript para funcionar.
 const QUEUE_ANCHOR_ID = 'fila-de-respostas';
 const QR_ANCHOR_ID = 'qr-e-temas';
 const WHATSAPP_ANCHOR_ID = 'configuracao-whatsapp';
+const RADAR_ANCHOR_ID = 'radar-do-binno';
+const VOLUME_ANCHOR_ID = 'volume-de-avaliacoes';
+const RATINGS_ANCHOR_ID = 'cada-nota-separada';
+
+// Índice do celular. A ordem aqui repete a ordem da página e nunca a
+// reordena: cada atalho leva a um módulo que continua exatamente onde o
+// contrato mandou. Nada é escondido, fundido nem deslocado; no ecrã grande
+// o índice não existe, porque lá a página inteira já cabe à vista.
+const MOBILE_SECTIONS = [
+  { id: RADAR_ANCHOR_ID, label: 'Radar' },
+  { id: QUEUE_ANCHOR_ID, label: 'Fila' },
+  { id: VOLUME_ANCHOR_ID, label: 'Volume' },
+  { id: RATINGS_ANCHOR_ID, label: 'Notas' },
+  { id: QR_ANCHOR_ID, label: 'QR e temas' },
+  { id: WHATSAPP_ANCHOR_ID, label: 'WhatsApp' },
+] as const;
 
 const readActions = (): Record<string, ActionState> => {
   try {
@@ -89,6 +107,68 @@ const SampleSourceNote = ({ snapshot }: { snapshot: ExperimentalApifySnapshot })
   return <p className="mt-4 text-xs leading-4 text-slate-500">{t('dashboard.cockpit.layout.sampleSourceNote', { sample: snapshot.sample.reviewCount })}</p>;
 };
 
+/**
+ * Índice do celular, só abaixo de `lg`. É atalho, não navegação: rola até um
+ * módulo que continua na página, na mesma ordem. Links nativos, sem estado e
+ * sem JavaScript, como as âncoras que já substituíram as abas.
+ */
+const MobileIndex = () => (
+  <nav
+    aria-label="Ir para uma seção"
+    className="sticky top-0 z-30 -mx-4 border-b border-slate-200 bg-white/95 backdrop-blur lg:hidden"
+  >
+    <ul className="flex gap-1 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {MOBILE_SECTIONS.map((section) => (
+        <li key={section.id}>
+          <a
+            href={`#${section.id}`}
+            className="flex min-h-11 items-center whitespace-nowrap rounded-full px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+          >
+            {section.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+);
+
+/**
+ * Faixa-resumo do celular, só abaixo de `lg`. Adiciona, nunca substitui: os
+ * módulos abaixo continuam inteiros e na ordem aprovada.
+ *
+ * A fila de respostas vive apenas no navegador que fez a coleta, por contrato
+ * (linhas 39 a 41). Num segundo aparelho ela não existe, e a faixa diz isso em
+ * vez de mostrar zero, que seria afirmar "nada a responder" sem saber.
+ */
+const MobileSummary = ({ snapshot, queue, queueOnThisDevice }: { snapshot: ExperimentalApifySnapshot; queue: QueueReview[]; queueOnThisDevice: boolean }) => {
+  const waiting = queue.filter((review) => !review.responseObserved).length;
+  const next = queue.find((review) => !review.responseObserved);
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-4 lg:hidden">
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <span className="text-2xl font-medium tracking-tight text-slate-950">{decimal.format(snapshot.business.googleRating)}</span>
+        <Stars rating={Math.round(snapshot.business.googleRating)} />
+        <span className="text-sm text-slate-600">{integer.format(snapshot.business.googleReviewCount)} avaliações</span>
+      </div>
+      {!queueOnThisDevice ? (
+        <p className="mt-2 text-sm leading-5 text-slate-600">A fila de respostas está no aparelho onde a coleta foi feita. Os números acima valem em qualquer aparelho.</p>
+      ) : waiting ? (
+        <p className="mt-2 text-sm leading-5 text-slate-900">
+          <strong className="font-semibold">{waiting}</strong> {waiting === 1 ? 'avaliação espera' : 'avaliações esperam'} resposta
+          {next?.reviewerName ? <>. A seguir, {next.reviewerName}</> : null}.
+        </p>
+      ) : (
+        <p className="mt-2 text-sm leading-5 text-slate-600">Nenhuma avaliação esperando resposta.</p>
+      )}
+      {queueOnThisDevice && waiting ? (
+        <a href={`#${QUEUE_ANCHOR_ID}`} className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-[#2457D6] hover:underline">
+          Ir para a fila<ChevronRight className="ml-1 h-4 w-4" />
+        </a>
+      ) : null}
+    </section>
+  );
+};
+
 const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }: { snapshot: ExperimentalApifySnapshot; userId?: string; demo?: boolean; demoFunnel?: ReviewFunnelMetrics }) => {
   const official = useGoogleBusinessReviewQueue(import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined);
   const liveFunnel = useReviewFunnelMetrics(userId);
@@ -114,6 +194,10 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
     return () => { active = false; };
   }, [userId]);
   const observed = (snapshot.sample.observedReviews?.items || []).map(normalizeObserved);
+  // Fila ausente e fila vazia não são a mesma coisa. Sem o retrato do
+  // navegador e sem a conexão oficial, este aparelho não tem como saber o que
+  // está por responder, e a faixa do celular precisa dizer isso.
+  const queueOnThisDevice = official.syncComplete || snapshot.sample.observedReviews !== undefined;
   const queue: QueueReview[] = official.syncComplete
     ? official.reviews.map((review) => ({ id: review.id, rating: review.rating, comment: review.comment || '', publishedAt: review.review_updated_at, reviewerName: review.reviewer_name || undefined, responseObserved: Boolean(review.reply_text) }))
     : observed;
@@ -127,14 +211,16 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
   // porque já era, byte a byte, a mesma <ResponseQueue> que a Visão geral
   // sempre mostrou; a aba só duplicava o que já estava na tela.
   return <div className="space-y-5">
-    <RadarNow snapshot={snapshot} />
+    <MobileIndex />
+    <MobileSummary snapshot={snapshot} queue={queue} queueOnThisDevice={queueOnThisDevice} />
+    <div id={RADAR_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><RadarNow snapshot={snapshot} /></div>
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <section className="min-w-0 space-y-5">
         {!demo && <PendingCommentsBanner userId={userId} />}
-        <div id={QUEUE_ANCHOR_ID} className="scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} /></div>
-        <VolumeCard weeks={history} />
-        <RatingTrends weeks={history} snapshot={snapshot} />
-        <div id={QR_ANCHOR_ID} className="grid scroll-mt-4 gap-5 md:grid-cols-2"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
+        <div id={QUEUE_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} /></div>
+        <div id={VOLUME_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><VolumeCard weeks={history} /></div>
+        <div id={RATINGS_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><RatingTrends weeks={history} snapshot={snapshot} /></div>
+        <div id={QR_ANCHOR_ID} className="grid scroll-mt-16 gap-5 md:grid-cols-2 lg:scroll-mt-4"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
       </section>
       <aside className="space-y-5">
         <TodayPlan snapshot={snapshot} onMarked={() => setAdvisorActionVersion((current) => current + 1)} />
@@ -146,7 +232,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
         <ObservedResult snapshot={snapshot} version={advisorActionVersion} />
       </aside>
     </div>
-    <div id={WHATSAPP_ANCHOR_ID} className="scroll-mt-4">
+    <div id={WHATSAPP_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4">
       <WhatsAppNotificationWorkspace localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} demoPhone={demo ? '+351 911 000 000' : undefined} demo={demo} />
     </div>
   </div>;
@@ -271,12 +357,10 @@ const RatingTrends = ({ weeks, snapshot }: { weeks: Week[]; snapshot: Experiment
   const lowCurrent = rows.filter((row) => row.rating === '1' || row.rating === '2').reduce((sum, row) => sum + (row.current || 0), 0);
   const lowPrevious = rows.filter((row) => row.rating === '1' || row.rating === '2').reduce((sum, row) => sum + (row.previous || 0), 0);
   const needsAttention = hasHistory && five.current < (five.previous || 0) || hasHistory && lowCurrent > lowPrevious;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="text-lg font-semibold text-slate-950">Cada nota separada</h2><span className="text-sm text-slate-500">sem empilhamento</span></div><div className="mt-5 divide-y divide-slate-200">{rows.map((row) => { const risk = hasHistory && row.current !== null && (row.rating === '5' ? row.current < (row.previous || 0) : Number(row.rating) <= 2 && row.current > (row.previous || 0)); return <div key={row.rating} className="grid grid-cols-[52px_1fr_auto] items-center gap-3 py-3"><span className="text-sm font-semibold text-slate-800">{row.rating}<Star className="ml-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" /></span><div className="h-8 min-w-24">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={row.series}><Line type="monotone" dataKey="value" stroke={risk ? '#C2413A' : '#D4A72C'} strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><span className="whitespace-nowrap text-xs text-slate-500"><strong className="text-slate-900">{row.current === null ? '—' : `${row.current}%`}</strong> antes {row.previous === null ? '—' : `${row.previous}%`} {risk && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-red-700">atenção</span>}</span></div>; })}</div>{needsAttention && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p>As 5 estrelas mudaram de {five.previous}% para {five.current}% e as notas 1 e 2 mudaram de {lowPrevious}% para {lowCurrent}% nas últimas 4 semanas.</p></div>}<SampleSourceNote snapshot={snapshot} /></CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="text-lg font-semibold text-slate-950">Cada nota separada</h2><span className="text-sm text-slate-500">sem empilhamento</span></div><div className="mt-5 divide-y divide-slate-200">{rows.map((row) => { const risk = hasHistory && row.current !== null && (row.rating === '5' ? row.current < (row.previous || 0) : Number(row.rating) <= 2 && row.current > (row.previous || 0)); return <div key={row.rating} className="grid grid-cols-[40px_1fr_auto] items-center gap-2 py-3 sm:grid-cols-[52px_1fr_auto] sm:gap-3"><span className="text-sm font-semibold text-slate-800">{row.rating}<Star className="ml-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" /></span><div className="h-8 min-w-16 sm:min-w-24">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={row.series}><Line type="monotone" dataKey="value" stroke={risk ? '#C2413A' : '#D4A72C'} strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><span className="text-right text-xs leading-5 text-slate-500"><strong className="text-slate-900">{row.current === null ? '—' : `${row.current}%`}</strong> antes {row.previous === null ? '—' : `${row.previous}%`} {risk && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-red-700">atenção</span>}</span></div>; })}</div>{needsAttention && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p>As 5 estrelas mudaram de {five.previous}% para {five.current}% e as notas 1 e 2 mudaram de {lowPrevious}% para {lowCurrent}% nas últimas 4 semanas.</p></div>}<SampleSourceNote snapshot={snapshot} /></CardContent></Card>;
 };
 
 const ReputationCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
-  const integer = new Intl.NumberFormat();
-  const decimal = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const replyHours = snapshot.sample.insights?.averageResponseHours;
   const last30 = snapshot.sample.insights?.reviewsLast30Days;
   const hasDistribution = snapshot.sample.reviewCount > 0;

@@ -4,13 +4,14 @@ import FeedbackForm from '@/components/forms/FeedbackForm';
 import { toast } from 'sonner';
 import { loadPublicQrBusiness } from '@/lib/publicQrBusiness';
 
-type Rating = 'negative' | 'neutral' | 'positive';
+import { type Rating, normalizarRating } from '@/lib/comentarioInterno';
 
 type FeedbackState = {
   id: string;
   name: string;
   userId: string;
-  rating: Rating;
+  /** `null` quando o cliente chegou aqui sem ter escolhido nada. */
+  rating: Rating | null;
   googleReviewUrl: string;
   tripAdvisorUrl: string;
 };
@@ -26,7 +27,7 @@ const Feedback = () => {
     id: businessId,
     name: location.state?.businessName || 'Carregando...',
     userId: location.state?.userId || '',
-    rating: (location.state?.rating as Rating) || 'neutral',
+    rating: normalizarRating(location.state?.rating),
     googleReviewUrl: location.state?.googleReviewUrl || '',
     tripAdvisorUrl: location.state?.tripAdvisorUrl || '',
   });
@@ -58,9 +59,12 @@ const Feedback = () => {
           id: publicBusiness.qrCodeId,
           name: location.state?.businessName || publicBusiness.businessName,
           userId: publicBusiness.userId,
-          // Keep the rating the customer actually gave. Defaulting to 'neutral'
-          // here would record a 3 for someone who tapped "Ruim".
-          rating: (location.state?.rating as Rating) || 'neutral',
+          // Preservar a nota que o cliente realmente deu. Inventar uma nota
+          // padrão aqui gravava 3 para quem tocou em "Ruim", e gravava 3
+          // também para quem nunca escolheu nada. Quem não escolheu fica com
+          // `null`, e a decisão de traduzir isso mora em
+          // `normalizarRating`, não espalhada por esta tela.
+          rating: normalizarRating(location.state?.rating),
           googleReviewUrl: toPublicReviewUrl(publicBusiness.googleReviewUrl),
           tripAdvisorUrl: toPublicReviewUrl(publicBusiness.tripAdvisorUrl),
         });

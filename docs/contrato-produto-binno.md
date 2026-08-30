@@ -47,7 +47,25 @@ Avaliações e WhatsApp deixaram de ser destinos separados em 30/08/2026 (ver
 "Navegação em tela única" abaixo). Não reintroduzir seletor de abas, nem
 destinos principais de Fotos, Perguntas ou Boas práticas, sem aprovação.
 
-A página segue esta ordem, inclusive na primeira dobra:
+A página segue esta ordem, inclusive na primeira dobra. **Aprovado por Marcelo
+em 30/08/2026, apenas no celular** (abaixo do ponto de corte `lg`), dois blocos
+aditivos precedem essa ordem: uma faixa-resumo com nota, total de avaliações e
+quantas esperam resposta, e um índice fixo com atalhos para os módulos. Os dois
+existem porque no celular a tela única vira um rolo longo, e o contrato proíbe
+resolver isso com abas.
+
+Regras que esses dois blocos não podem quebrar, e que têm guarda própria em
+`scripts/check-painel-no-celular.mjs`:
+
+- Só existem abaixo de `lg`. No ecrã grande a página aprovada fica intacta.
+- O índice é atalho, nunca navegação: leva a um módulo que continua na página,
+  na mesma ordem. Não esconde, não funde, não desloca e não substitui nada.
+- A faixa-resumo não repete um módulo nem o dispensa: os cartões abaixo dela
+  continuam inteiros.
+- Quando a fila de respostas não existe neste aparelho, a faixa diz isso. Nunca
+  mostra zero, que afirmaria "nada a responder" sem ter como saber.
+
+A ordem dos módulos, então, é:
 
 1. **Fila de respostas** — uma avaliação por vez, comentário, nota, nome público
    quando disponível e resposta sugerida editável.
