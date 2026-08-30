@@ -58,6 +58,17 @@ const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
             <p className="mt-1 text-sm leading-5 text-slate-700">
               {t('dashboard.cockpit.layout.pendingCommentsCount', { count: pendingOrdered.length })}
             </p>
+            {/*
+              O produto tem duas filas e nunca explicou a diferença a ninguém.
+              Esta pede um telefonema, a de baixo pede um texto público no
+              Google. Marcelo procurou o comentário privado na fila de
+              respostas em 30/08/2026, no primeiro uso real, porque nada dizia
+              que eram coisas separadas. Separação sem explicação é a mesma
+              coisa que armadilha.
+            */}
+            <p className="mt-1 text-xs leading-5 text-slate-600">
+              {t('dashboard.cockpit.layout.pendingCommentsDistinction')}
+            </p>
             <div className="mt-3 rounded-lg bg-white/70 p-3 text-sm leading-5 text-slate-700">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-medium text-slate-900">
