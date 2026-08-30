@@ -79,3 +79,20 @@ export function comentarioParaGravar(entrada: ComentarioInterno): ComentarioInte
     customer_email: entrada.contato || null,
   };
 }
+
+/**
+ * Como o painel deve ler a nota de um caso.
+ *
+ * `null` não é zero nem uma nota ruim: é a ausência de opinião. Desenhar a
+ * escala mesmo assim, com as cinco estrelas apagadas, mostra ao dono
+ * exatamente o que uma nota 1 mostraria, o que é o oposto da verdade quando o
+ * comentário é um elogio. Quem lê tem de ver que não houve nota.
+ */
+export type LeituraDaNota = { tipo: 'nota'; valor: number } | { tipo: 'sem-nota' };
+
+export function lerNotaDoCaso(rating: number | null | undefined): LeituraDaNota {
+  if (typeof rating !== 'number' || Number.isNaN(rating)) {
+    return { tipo: 'sem-nota' };
+  }
+  return { tipo: 'nota', valor: rating };
+}

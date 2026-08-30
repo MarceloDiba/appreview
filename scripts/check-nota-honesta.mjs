@@ -94,6 +94,11 @@ const requisitos = [
   ['rating nulo no state nao vira nota', notaDoRating(normalizarRating(null)) === null],
   ['rating numerico no state nao vira nota', notaDoRating(normalizarRating(3)) === null],
   ['normalizarRating devolve o proprio valor quando ele e valido', normalizarRating('neutral') === 'neutral'],
+  // Sem estas duas, `normalizarRating` podia passar a devolver qualquer texto
+  // que `notaDoRating` ainda assim daria null, e o guarda nao veria nada. A
+  // escolha invalida tem de morrer na fronteira, nao mais adiante por sorte.
+  ['normalizarRating recusa um texto que nao e escolha', normalizarRating('otimo') === null],
+  ['normalizarRating recusa um numero', normalizarRating(3) === null],
 
   // O resto do payload nao pode ter mudado de forma.
   ['nome vazio vira null, nao string vazia', semNota.customer_name === null],

@@ -1010,6 +1010,7 @@
       "loadError": "Couldn't load the cases. Please try again.",
       "empty": "No cases yet. When someone leaves a private comment through the table QR, it shows up here instantly.",
       "anonCustomer": "Anonymous customer",
+      "noRating": "Customer left no rating",
       "resolved": "Resolved",
       "open": "Open",
       "contact": "Contact",

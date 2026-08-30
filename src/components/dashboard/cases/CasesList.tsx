@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import { useInternalFeedback } from '@/hooks/useInternalFeedback';
 import { orderPendingCasesByRecency } from '@/lib/internalCasePriority';
+import { lerNotaDoCaso } from '@/lib/comentarioInterno';
 import ReplySuggestions from '@/components/dashboard/ReplySuggestions';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
@@ -74,6 +75,8 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName, businessCou
     <div className="space-y-4">
       {orderedCases.map((item) => {
         const isAddressed = !!item.is_addressed;
+        // A nota pode não existir: quem escreveu sem avaliar grava `null`.
+        const nota = lerNotaDoCaso(item.rating);
         return (
           <Card key={item.id}>
             <CardContent className="p-4">
@@ -86,15 +89,27 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName, businessCou
                       {isAddressed ? t('reviews.cases.resolved') : t('reviews.cases.open')}
                     </Badge>
                   </div>
-                  <div className="flex mt-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        size={14}
-                        className={star <= item.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
-                      />
-                    ))}
-                  </div>
+                  {/*
+                    Cinco estrelas apagadas é exatamente o que uma nota 1
+                    desenha, então usar a escala para dizer "não houve nota"
+                    mostrava ao dono o oposto da verdade quando o comentário era
+                    um elogio. Sem nota, não se desenha escala nenhuma: diz-se.
+                  */}
+                  {nota.tipo === 'sem-nota' ? (
+                    <span className="mt-1 inline-flex w-fit rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                      {t('reviews.cases.noRating')}
+                    </span>
+                  ) : (
+                    <div className="flex mt-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          size={14}
+                          className={star <= nota.valor ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
+                        />
+                      ))}
+                    </div>
+                  )}
                   <p className="mt-2 text-gray-700 text-sm">{item.feedback_text}</p>
                   {item.customer_email && (
                     <p className="mt-2 text-xs text-gray-500">{t('reviews.cases.contact')}: {item.customer_email}</p>

@@ -13,7 +13,8 @@ import {
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface ReplySuggestionsProps {
-  rating: number;
+  /** `null` para o caso interno em que o cliente escreveu sem avaliar. */
+  rating: number | null;
   text?: string | null;
   customerName?: string | null;
   customerEmail?: string | null;
