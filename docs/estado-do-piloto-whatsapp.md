@@ -155,43 +155,36 @@ O SOA da zona traz o numero de serie `2026082606`, ou seja, dia 26/08, revisao
 6. O `lastTriggeredAt` do webhook tambem parou em 26/08. Alguma edicao na zona
 naquele dia levou o `relay` junto. Continua sem resposta o que foi.
 
-## Caminho completo provado em 29/08/2026
+## O botao de teste esperava ate um minuto. Resolvido em 29/08/2026
 
-Tres linhas de `whatsapp_outbox` contam a historia do dia inteiro:
+O relay varria a fila a cada 60 segundos. Quem apertava "enviar mensagem de
+teste" ficava ate um minuto sem sinal nenhum, e concluia que tinha falhado. Isso
+aconteceu de verdade durante a propria sessao de 29/08: o teste foi dado como
+falho aos 51 segundos, quando estava apenas na fila.
 
-| Criada | Situacao | Erro | Tempo ate resolver |
-|---|---|---|---|
-| 14:42 e 14:52 | `failed` | `fetch failed` | 300,6 s |
-| 17:07 | `accepted` | nenhum | 4,9 s |
-| 17:21 | **`delivered`** | nenhum | 6 s apos reivindicar |
+**As duas saidas foram implementadas no mesmo dia, no PR #42.**
 
-Os 300 segundos eram o padrao do Node sem limite de tempo. O commit `40d3c5a`
-levou isso a 4,9 segundos. A linha das 17:21 e a primeira que chega a
-`delivered`: ate ela, nenhuma mensagem do produto tinha ido alem de `accepted`,
-porque a confirmacao de entrega nao tinha caminho de volta.
+1. O relay passou a varrer a cada **10 segundos**, e o valor virou configuravel
+   por `BINNO_DISPATCH_INTERVAL_MS` em vez de numero fixo no codigo. Ver
+   `services/openwa-relay/src/server.mjs:17`. Implantado na VPS e confirmado no
+   container em execucao.
+2. O painel passou a dizer quanto esperar. A chave `testQueued` dizia "O painel
+   mostrara o estado quando o canal responder", que nao promete prazo nenhum, e
+   passou a dizer que a entrega leva alguns segundos e que a tela se atualiza
+   sozinha. Nos tres idiomas.
 
-Antes de 29/08 nenhuma linha desta tabela tinha tido sucesso. A mensagem que
-chegou a um telefone mais cedo no dia foi por chamada direta ao OpenWA,
-contornando a fila; ela provou o ultimo trecho do caminho, nao o caminho todo.
+Efeito medido em `whatsapp_outbox`, comparando a mensagem antes e a depois:
 
-## Achado de produto aberto: o botao de teste espera ate um minuto
+| | Antes | Depois |
+|---|---|---|
+| Espera na fila | 54,0 s | **0,5 s** |
+| Envio | 5,9 s | 4,7 s |
 
-O relay varre a fila a cada 60 segundos (`setInterval(runDispatch, 60_000)` em
-`services/openwa-relay/src/server.mjs`). A mensagem das 17:21:50 so foi
-reivindicada as 17:22:44.
-
-Na pratica, quem aperta "enviar mensagem de teste" fica ate um minuto sem
-qualquer sinal. Isso ja induziu ao erro de leitura durante a propria sessao de
-29/08: o teste foi dado como falho aos 51 segundos, quando estava apenas na
-fila. Um dono de negocio vai apertar de novo varias vezes e concluir que nao
-funciona.
-
-Duas saidas possiveis, nenhuma decidida:
-
-1. O painel declarar "na fila, chega em ate um minuto" em vez de ficar em
-   silencio. Barato.
-2. O botao de teste acionar o relay na hora, em vez de esperar o tique. Melhor
-   para quem usa, e mais trabalho.
+O que **nao** foi feito, de proposito: o botao acionar o relay na hora, sem
+esperar o tique. E a solucao completa e exige rota nova no relay, autenticacao e
+mudanca na funcao do painel. O caminho de envio tinha comecado a funcionar havia
+duas horas, e mexer nele no mesmo dia era arriscar o que acabara de ser
+consertado. Fica para quando houver cliente pagando.
 
 ## Estado do repositorio
 
