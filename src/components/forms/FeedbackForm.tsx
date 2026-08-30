@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { X, Send, ExternalLink } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { trackReviewEvent } from '@/lib/reviewFunnel';
+import WhatsAppField from '@/components/forms/WhatsAppField';
 
 // Função para validar UUID
 function isUUID(value: string): boolean {
@@ -49,6 +50,11 @@ const FeedbackForm = ({
   });
 
   const [enviando, setEnviando] = useState(false);
+  // O WhatsApp é opcional: campo vazio nunca bloqueia o envio. Mas um número
+  // digitado e incompleto (DDD faltando, um dígito a menos) também não deve
+  // seguir como se fosse contato válido, e bloqueia até a pessoa corrigir ou
+  // apagar.
+  const [contatoInvalido, setContatoInvalido] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,6 +67,12 @@ const FeedbackForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (contatoInvalido) {
+      toast.error(t('whatsappInvalid'));
+      return;
+    }
+
     setEnviando(true);
 
     try {
@@ -191,14 +203,17 @@ const FeedbackForm = ({
 
           <div>
             <Label htmlFor="contato" className="text-sm text-gray-600">{t('formContactLabel')}</Label>
-            <Input
-              id="contato"
-              name="contato"
-              value={formData.contato}
-              onChange={handleChange}
-              placeholder={t('formContactPlaceholder')}
-              className="mt-1"
-            />
+            <div className="mt-1">
+              <WhatsAppField
+                id="contato"
+                value={formData.contato}
+                onChange={(value) => setFormData(prev => ({ ...prev, contato: value }))}
+                onValidityChange={setContatoInvalido}
+                placeholder={t('formContactPlaceholder')}
+                countryAriaLabel={t('whatsappCountryLabel')}
+                errorMessage={t('whatsappInvalid')}
+              />
+            </div>
           </div>
 
           {/*
