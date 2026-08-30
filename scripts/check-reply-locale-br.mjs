@@ -11,7 +11,7 @@ import { pathToFileURL } from 'node:url';
 //
 // Este guarda prova quatro coisas, na ordem em que quebrariam se alguém
 // desfizer a decisão por engano:
-// 1. Um negócio português continua a receber exatamente o texto de hoje —
+// 1. Um negócio português continua a receber exatamente o texto de hoje,
 //    contra valores capturados aqui como literais, não contra o próprio
 //    módulo: comparar `buildReplySuggestions` com `THEMES`/`GENERIC`
 //    importados do mesmo arquivo provaria apenas que o arquivo concorda
