@@ -46,8 +46,8 @@ export interface ReplySuggestion {
 }
 
 export interface ReplySuggestionInput {
-  /** 1 a 5. */
-  rating: number;
+  /** 1 a 5, ou `null` quando o cliente escreveu sem avaliar. */
+  rating: number | null;
   /** O que o cliente escreveu. Pode vir vazio. */
   text?: string | null;
   customerName?: string | null;
@@ -65,7 +65,12 @@ export interface ReplySuggestionInput {
   businessCountry?: string | null;
 }
 
-type Sentiment = 'negative' | 'neutral' | 'positive';
+/**
+ * `unrated` é a ausência de nota, e não uma nota do meio. Existe porque um
+ * comentário sem nota não autoriza nenhuma das três posições: não houve queixa
+ * a lamentar, não houve elogio a celebrar e não houve nota média a recuperar.
+ */
+type Sentiment = 'negative' | 'neutral' | 'positive' | 'unrated';
 
 const stripAccents = (value: string): string =>
   value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -212,7 +217,17 @@ const findTheme = (text?: string | null): Theme | null => {
   return THEMES.find((theme) => theme.keywords.some((k) => haystack.includes(k))) ?? null;
 };
 
-const sentimentOf = (rating: number): Sentiment => {
+/**
+ * A ausência de nota é testada ANTES de qualquer comparação, e explicitamente.
+ *
+ * `null <= 2` é `true` em JavaScript, porque o null vira 0 na comparação. Com o
+ * teste no fim, ou ausente, quem escrevia um elogio sem dar nota recebia a
+ * resposta de uma estrela: pedido de desculpa e oferta de reparação, prontos
+ * para o dono enviar em nome dele. Não trocar por `!rating` nem por `rating < 1`:
+ * o que se quer saber aqui é se houve nota, não que valor ela tem.
+ */
+const sentimentOf = (rating: number | null | undefined): Sentiment => {
+  if (rating === null || rating === undefined || Number.isNaN(rating)) return 'unrated';
   if (rating <= 2) return 'negative';
   if (rating === 3) return 'neutral';
   return 'positive';
@@ -433,9 +448,75 @@ const PRIVATE_POSITIVE: Variant[] = [
   },
 ];
 
+/**
+ * Sem nota, a resposta é guiada só pelo texto.
+ *
+ * Estas variantes usam apenas a saudação, o ASSUNTO que a pessoa escreveu
+ * (`c.noun`) e a assinatura. Nunca `c.fix`, que promete consertar uma falha, nem
+ * `c.praise`, que celebra um elogio: as duas afirmam algo sobre a visita que
+ * ninguém disse. O que sobra é o que é verdade em qualquer caso, que a pessoa
+ * escreveu e que o dono leu.
+ *
+ * A dica de cada variante diz ao dono que não houve nota, para que ele leia o
+ * comentário e escolha o tom, em vez de a ferramenta escolher por ele e errar.
+ */
+const PUBLIC_UNRATED: Variant[] = [
+  {
+    id: 'agradecer-sem-presumir',
+    title: { pt: 'Agradecer sem presumir', 'pt-BR': 'Agradecer sem presumir', es: 'Agradecer sin presumir', en: 'Thank without assuming' },
+    hint: {
+      pt: 'Esta pessoa escreveu sem deixar nota. Em público, presumir a nota errada é o erro mais caro.',
+      'pt-BR': 'Esta pessoa escreveu sem deixar nota. Em público, presumir a nota errada é o erro mais caro.',
+      es: 'Esta persona escribió sin dejar valoración. En público, presumir la nota equivocada es el error más caro.',
+      en: 'This person wrote without leaving a rating. In public, assuming the wrong one is the costliest mistake.',
+    },
+    body: {
+      pt: (c) => `${c.greeting}\n\nObrigado por ter escrito sobre ${c.noun}. Lemos tudo o que nos chega e levamos a sério.\n\nSe quiser falar connosco directamente, estamos à disposição.\n\n${c.signature}`,
+      'pt-BR': (c) => `${c.greeting}\n\nObrigado por escrever sobre ${c.noun}. A gente lê tudo o que chega e leva a sério.\n\nSe quiser falar com a gente diretamente, estamos à disposição.\n\n${c.signature}`,
+      es: (c) => `${c.greeting}\n\nGracias por escribir sobre ${c.noun}. Leemos todo lo que nos llega y lo tomamos en serio.\n\nSi quieres hablar con nosotros directamente, aquí estamos.\n\n${c.signature}`,
+      en: (c) => `${c.greeting}\n\nThank you for writing about ${c.noun}. We read everything that reaches us and take it seriously.\n\nIf you would like to talk to us directly, we are here.\n\n${c.signature}`,
+    },
+  },
+];
+
+const PRIVATE_UNRATED: Variant[] = [
+  {
+    id: 'agradecer-e-perguntar',
+    title: { pt: 'Agradecer e perguntar', 'pt-BR': 'Agradecer e perguntar', es: 'Agradecer y preguntar', en: 'Thank and ask' },
+    hint: {
+      pt: 'Esta pessoa escreveu sem deixar nota. Leia o que ela diz e ajuste o tom antes de enviar.',
+      'pt-BR': 'Esta pessoa escreveu sem deixar nota. Leia o que ela diz e ajuste o tom antes de enviar.',
+      es: 'Esta persona escribió sin dejar valoración. Lee lo que dice y ajusta el tono antes de enviar.',
+      en: 'This person wrote without leaving a rating. Read what they say and adjust the tone before sending.',
+    },
+    body: {
+      pt: (c) => `${c.greeting}\n\nObrigado por nos ter escrito sobre ${c.noun}. Li com atenção o que deixou.\n\nSe quiser contar-me mais, leio tudo o que me escrever. É assim que sabemos o que manter e o que mudar.\n\n${c.signature}`,
+      'pt-BR': (c) => `${c.greeting}\n\nObrigado por escrever sobre ${c.noun}. Li com atenção o que você deixou.\n\nSe quiser me contar mais, eu leio tudo. É assim que a gente sabe o que manter e o que mudar.\n\n${c.signature}`,
+      es: (c) => `${c.greeting}\n\nGracias por escribirnos sobre ${c.noun}. He leído con atención lo que dejaste.\n\nSi quieres contarme más, lo leo todo. Así sabemos qué mantener y qué cambiar.\n\n${c.signature}`,
+      en: (c) => `${c.greeting}\n\nThank you for writing to us about ${c.noun}. I read what you left carefully.\n\nIf you want to tell me more, I read everything that comes in. That is how we know what to keep and what to change.\n\n${c.signature}`,
+    },
+  },
+  {
+    id: 'abrir-conversa',
+    title: { pt: 'Abrir conversa directa', 'pt-BR': 'Abrir conversa direta', es: 'Abrir conversación directa', en: 'Open a direct conversation' },
+    hint: {
+      pt: 'Quando prefere ouvir a pessoa antes de decidir o que fazer com o caso.',
+      'pt-BR': 'Quando você prefere ouvir a pessoa antes de decidir o que fazer com o caso.',
+      es: 'Cuando prefieres escuchar a la persona antes de decidir qué hacer con el caso.',
+      en: 'When you would rather hear the person out before deciding what to do with the case.',
+    },
+    body: {
+      pt: (c) => `${c.greeting}\n\nRecebi o que escreveu sobre ${c.noun} e quis responder eu próprio.\n\nSe lhe der jeito falar directamente, diga-me quando. Prefiro ouvir de si do que supor.\n\n${c.signature}`,
+      'pt-BR': (c) => `${c.greeting}\n\nRecebi o que você escreveu sobre ${c.noun} e quis responder pessoalmente.\n\nSe for melhor falar direto, me diga quando. Prefiro ouvir de você do que supor.\n\n${c.signature}`,
+      es: (c) => `${c.greeting}\n\nHe recibido lo que escribiste sobre ${c.noun} y quise responderte personalmente.\n\nSi te viene bien hablar directamente, dime cuándo. Prefiero escucharte a suponer.\n\n${c.signature}`,
+      en: (c) => `${c.greeting}\n\nI received what you wrote about ${c.noun} and wanted to reply personally.\n\nIf it suits you to talk directly, tell me when. I would rather hear it from you than assume.\n\n${c.signature}`,
+    },
+  },
+];
+
 const VARIANTS: Record<ReplyChannel, Record<Sentiment, Variant[]>> = {
-  public: { negative: PUBLIC_NEGATIVE, neutral: PUBLIC_NEUTRAL, positive: PUBLIC_POSITIVE },
-  private: { negative: PRIVATE_NEGATIVE, neutral: PRIVATE_NEUTRAL, positive: PRIVATE_POSITIVE },
+  public: { negative: PUBLIC_NEGATIVE, neutral: PUBLIC_NEUTRAL, positive: PUBLIC_POSITIVE, unrated: PUBLIC_UNRATED },
+  private: { negative: PRIVATE_NEGATIVE, neutral: PRIVATE_NEUTRAL, positive: PRIVATE_POSITIVE, unrated: PRIVATE_UNRATED },
 };
 
 /**

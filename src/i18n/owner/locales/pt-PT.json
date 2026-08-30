@@ -1010,6 +1010,7 @@
       "loadError": "Não foi possível carregar os casos. Tente novamente.",
       "empty": "Ainda não há casos. Quando alguém deixar um comentário privado pelo QR da mesa, ele aparece aqui de imediato.",
       "anonCustomer": "Cliente anónimo",
+      "noRating": "Cliente não deu nota",
       "resolved": "Resolvido",
       "open": "Aberto",
       "contact": "Contacto",

@@ -1,0 +1,834 @@
+{
+  "pt|public|1|com-texto": [
+    {
+      "id": "curta",
+      "title": "Curta e directa",
+      "hint": "A escolha segura quando ainda não sabe exactamente o que correu mal.",
+      "body": "Olá, Ana,\n\nObrigado por escrever, e lamento que a limpeza não tenha correspondido ao que esperava. Não é assim que queremos receber quem nos visita.\n\nGostava de perceber melhor o que aconteceu. Se puder falar connosco directamente, resolvemos isto consigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Com o que já foi feito",
+      "hint": "Use quando já tomou uma medida concreta. Ajuste a frase do meio ao que realmente fez.",
+      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Foi lido com atenção. Lamento sinceramente o que se passou com a limpeza.\n\nReforcei a rotina de limpeza e a verificação das casas de banho durante o serviço.\n\nSe nos der uma segunda oportunidade, faço questão de acompanhar a sua visita pessoalmente.\n\nCasa do Forno"
+    }
+  ],
+  "pt|public|1|sem-texto": [
+    {
+      "id": "curta",
+      "title": "Curta e directa",
+      "hint": "A escolha segura quando ainda não sabe exactamente o que correu mal.",
+      "body": "Olá, Ana,\n\nObrigado por escrever, e lamento que a sua experiência não tenha correspondido ao que esperava. Não é assim que queremos receber quem nos visita.\n\nGostava de perceber melhor o que aconteceu. Se puder falar connosco directamente, resolvemos isto consigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Com o que já foi feito",
+      "hint": "Use quando já tomou uma medida concreta. Ajuste a frase do meio ao que realmente fez.",
+      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Foi lido com atenção. Lamento sinceramente o que se passou com a sua experiência.\n\nJá revi o caso com a equipa para perceber onde falhámos.\n\nSe nos der uma segunda oportunidade, faço questão de acompanhar a sua visita pessoalmente.\n\nCasa do Forno"
+    }
+  ],
+  "pt|public|2|com-texto": [
+    {
+      "id": "curta",
+      "title": "Curta e directa",
+      "hint": "A escolha segura quando ainda não sabe exactamente o que correu mal.",
+      "body": "Olá, Ana,\n\nObrigado por escrever, e lamento que a limpeza não tenha correspondido ao que esperava. Não é assim que queremos receber quem nos visita.\n\nGostava de perceber melhor o que aconteceu. Se puder falar connosco directamente, resolvemos isto consigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Com o que já foi feito",
+      "hint": "Use quando já tomou uma medida concreta. Ajuste a frase do meio ao que realmente fez.",
+      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Foi lido com atenção. Lamento sinceramente o que se passou com a limpeza.\n\nReforcei a rotina de limpeza e a verificação das casas de banho durante o serviço.\n\nSe nos der uma segunda oportunidade, faço questão de acompanhar a sua visita pessoalmente.\n\nCasa do Forno"
+    }
+  ],
+  "pt|public|2|sem-texto": [
+    {
+      "id": "curta",
+      "title": "Curta e directa",
+      "hint": "A escolha segura quando ainda não sabe exactamente o que correu mal.",
+      "body": "Olá, Ana,\n\nObrigado por escrever, e lamento que a sua experiência não tenha correspondido ao que esperava. Não é assim que queremos receber quem nos visita.\n\nGostava de perceber melhor o que aconteceu. Se puder falar connosco directamente, resolvemos isto consigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Com o que já foi feito",
+      "hint": "Use quando já tomou uma medida concreta. Ajuste a frase do meio ao que realmente fez.",
+      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Foi lido com atenção. Lamento sinceramente o que se passou com a sua experiência.\n\nJá revi o caso com a equipa para perceber onde falhámos.\n\nSe nos der uma segunda oportunidade, faço questão de acompanhar a sua visita pessoalmente.\n\nCasa do Forno"
+    }
+  ],
+  "pt|public|3|com-texto": [
+    {
+      "id": "perguntar",
+      "title": "Perguntar o que faltou",
+      "hint": "Uma nota do meio é a mais fácil de recuperar: normalmente falta uma coisa só.",
+      "body": "Olá, Ana,\n\nObrigado por avaliar. Fico contente por ter havido coisas boas, e quero perceber o que faltou em a limpeza para que a visita fosse mesmo boa.\n\nSe nos disser, é isso que vamos trabalhar.\n\nCasa do Forno"
+    }
+  ],
+  "pt|public|3|sem-texto": [
+    {
+      "id": "perguntar",
+      "title": "Perguntar o que faltou",
+      "hint": "Uma nota do meio é a mais fácil de recuperar: normalmente falta uma coisa só.",
+      "body": "Olá, Ana,\n\nObrigado por avaliar. Fico contente por ter havido coisas boas, e quero perceber o que faltou em a sua experiência para que a visita fosse mesmo boa.\n\nSe nos disser, é isso que vamos trabalhar.\n\nCasa do Forno"
+    }
+  ],
+  "pt|public|4|com-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer com especificidade",
+      "hint": "Responder a quem elogia é o que mais cria clientes habituais \u2014 e quase ninguém faz.",
+      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz por saber que tenha reparado no cuidado com a limpeza. Vou passar isso à equipa, que é quem faz acontecer.\n\nCá o esperamos da próxima.\n\nCasa do Forno"
+    }
+  ],
+  "pt|public|4|sem-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer com especificidade",
+      "hint": "Responder a quem elogia é o que mais cria clientes habituais \u2014 e quase ninguém faz.",
+      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz por saber que tenha gostado da visita. Vou passar isso à equipa, que é quem faz acontecer.\n\nCá o esperamos da próxima.\n\nCasa do Forno"
+    }
+  ],
+  "pt|public|5|com-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer com especificidade",
+      "hint": "Responder a quem elogia é o que mais cria clientes habituais \u2014 e quase ninguém faz.",
+      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz por saber que tenha reparado no cuidado com a limpeza. Vou passar isso à equipa, que é quem faz acontecer.\n\nCá o esperamos da próxima.\n\nCasa do Forno"
+    }
+  ],
+  "pt|public|5|sem-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer com especificidade",
+      "hint": "Responder a quem elogia é o que mais cria clientes habituais \u2014 e quase ninguém faz.",
+      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz por saber que tenha gostado da visita. Vou passar isso à equipa, que é quem faz acontecer.\n\nCá o esperamos da próxima.\n\nCasa do Forno"
+    }
+  ],
+  "pt|private|1|com-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contacto no próprio dia",
+      "hint": "Envie hoje, mesmo sem solução ainda. O silêncio é o que perde o cliente.",
+      "body": "Olá, Ana,\n\nSou eu que respondo aqui. Recebi o que escreveu sobre a limpeza e queria falar consigo antes de mais nada.\n\nLamento o que aconteceu. Não é o que queremos oferecer a quem nos visita. Pode contar-me um pouco mais: dia, hora e o que se passou?\n\nQuero corrigir isto consigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Com uma reparação",
+      "hint": "Só em privado, e nunca em troca de apagar ou mudar uma avaliação pública \u2014 isso é proibido.",
+      "body": "Olá, Ana,\n\nObrigado por nos ter dito o que se passou com a limpeza, em vez de simplesmente não voltar.\n\nReforcei a rotina de limpeza e a verificação das casas de banho durante o serviço.\n\nGostava de o receber outra vez, por nossa conta, e mostrar-lhe como devia ter sido. Diga-me quando lhe der jeito.\n\nCasa do Forno"
+    }
+  ],
+  "pt|private|1|sem-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contacto no próprio dia",
+      "hint": "Envie hoje, mesmo sem solução ainda. O silêncio é o que perde o cliente.",
+      "body": "Olá, Ana,\n\nSou eu que respondo aqui. Recebi o que escreveu sobre a sua experiência e queria falar consigo antes de mais nada.\n\nLamento o que aconteceu. Não é o que queremos oferecer a quem nos visita. Pode contar-me um pouco mais: dia, hora e o que se passou?\n\nQuero corrigir isto consigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Com uma reparação",
+      "hint": "Só em privado, e nunca em troca de apagar ou mudar uma avaliação pública \u2014 isso é proibido.",
+      "body": "Olá, Ana,\n\nObrigado por nos ter dito o que se passou com a sua experiência, em vez de simplesmente não voltar.\n\nJá revi o caso com a equipa para perceber onde falhámos.\n\nGostava de o receber outra vez, por nossa conta, e mostrar-lhe como devia ter sido. Diga-me quando lhe der jeito.\n\nCasa do Forno"
+    }
+  ],
+  "pt|private|2|com-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contacto no próprio dia",
+      "hint": "Envie hoje, mesmo sem solução ainda. O silêncio é o que perde o cliente.",
+      "body": "Olá, Ana,\n\nSou eu que respondo aqui. Recebi o que escreveu sobre a limpeza e queria falar consigo antes de mais nada.\n\nLamento o que aconteceu. Não é o que queremos oferecer a quem nos visita. Pode contar-me um pouco mais: dia, hora e o que se passou?\n\nQuero corrigir isto consigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Com uma reparação",
+      "hint": "Só em privado, e nunca em troca de apagar ou mudar uma avaliação pública \u2014 isso é proibido.",
+      "body": "Olá, Ana,\n\nObrigado por nos ter dito o que se passou com a limpeza, em vez de simplesmente não voltar.\n\nReforcei a rotina de limpeza e a verificação das casas de banho durante o serviço.\n\nGostava de o receber outra vez, por nossa conta, e mostrar-lhe como devia ter sido. Diga-me quando lhe der jeito.\n\nCasa do Forno"
+    }
+  ],
+  "pt|private|2|sem-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contacto no próprio dia",
+      "hint": "Envie hoje, mesmo sem solução ainda. O silêncio é o que perde o cliente.",
+      "body": "Olá, Ana,\n\nSou eu que respondo aqui. Recebi o que escreveu sobre a sua experiência e queria falar consigo antes de mais nada.\n\nLamento o que aconteceu. Não é o que queremos oferecer a quem nos visita. Pode contar-me um pouco mais: dia, hora e o que se passou?\n\nQuero corrigir isto consigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Com uma reparação",
+      "hint": "Só em privado, e nunca em troca de apagar ou mudar uma avaliação pública \u2014 isso é proibido.",
+      "body": "Olá, Ana,\n\nObrigado por nos ter dito o que se passou com a sua experiência, em vez de simplesmente não voltar.\n\nJá revi o caso com a equipa para perceber onde falhámos.\n\nGostava de o receber outra vez, por nossa conta, e mostrar-lhe como devia ter sido. Diga-me quando lhe der jeito.\n\nCasa do Forno"
+    }
+  ],
+  "pt|private|3|com-texto": [
+    {
+      "id": "perguntar-privado",
+      "title": "Perguntar o que faltou",
+      "hint": "Quem escreve sem estar furioso costuma responder \u2014 e diz-lhe exactamente o que corrigir.",
+      "body": "Olá, Ana,\n\nObrigado por ter deixado o seu relato. Li o que escreveu sobre a limpeza.\n\nO que teria de ter acontecido para a visita ter sido mesmo boa? A sua resposta vale-me mais do que qualquer inquérito.\n\nCasa do Forno"
+    }
+  ],
+  "pt|private|3|sem-texto": [
+    {
+      "id": "perguntar-privado",
+      "title": "Perguntar o que faltou",
+      "hint": "Quem escreve sem estar furioso costuma responder \u2014 e diz-lhe exactamente o que corrigir.",
+      "body": "Olá, Ana,\n\nObrigado por ter deixado o seu relato. Li o que escreveu sobre a sua experiência.\n\nO que teria de ter acontecido para a visita ter sido mesmo boa? A sua resposta vale-me mais do que qualquer inquérito.\n\nCasa do Forno"
+    }
+  ],
+  "pt|private|4|com-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e convidar",
+      "hint": "Este é o melhor momento para convidar a avaliar em público \u2014 e só depois de agradecer.",
+      "body": "Olá, Ana,\n\nObrigado por ter dedicado um minuto a dizer-nos que tenha reparado no cuidado com a limpeza. Passei a mensagem à equipa.\n\nSe lhe apetecer deixar essas palavras também numa avaliação pública, ajuda-nos muito. E se não, ficamos na mesma gratos.\n\nCasa do Forno"
+    }
+  ],
+  "pt|private|4|sem-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e convidar",
+      "hint": "Este é o melhor momento para convidar a avaliar em público \u2014 e só depois de agradecer.",
+      "body": "Olá, Ana,\n\nObrigado por ter dedicado um minuto a dizer-nos que tenha gostado da visita. Passei a mensagem à equipa.\n\nSe lhe apetecer deixar essas palavras também numa avaliação pública, ajuda-nos muito. E se não, ficamos na mesma gratos.\n\nCasa do Forno"
+    }
+  ],
+  "pt|private|5|com-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e convidar",
+      "hint": "Este é o melhor momento para convidar a avaliar em público \u2014 e só depois de agradecer.",
+      "body": "Olá, Ana,\n\nObrigado por ter dedicado um minuto a dizer-nos que tenha reparado no cuidado com a limpeza. Passei a mensagem à equipa.\n\nSe lhe apetecer deixar essas palavras também numa avaliação pública, ajuda-nos muito. E se não, ficamos na mesma gratos.\n\nCasa do Forno"
+    }
+  ],
+  "pt|private|5|sem-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e convidar",
+      "hint": "Este é o melhor momento para convidar a avaliar em público \u2014 e só depois de agradecer.",
+      "body": "Olá, Ana,\n\nObrigado por ter dedicado um minuto a dizer-nos que tenha gostado da visita. Passei a mensagem à equipa.\n\nSe lhe apetecer deixar essas palavras também numa avaliação pública, ajuda-nos muito. E se não, ficamos na mesma gratos.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|public|1|com-texto": [
+    {
+      "id": "curta",
+      "title": "Curta e direta",
+      "hint": "A escolha segura para quando você ainda não sabe exatamente o que deu errado.",
+      "body": "Olá, Ana,\n\nObrigado por escrever. Sinto muito que a limpeza não tenha sido o que você esperava. Não é assim que a gente quer receber quem vem aqui.\n\nGostaria de entender melhor o que aconteceu. Se puder falar direto com a gente, resolvemos isso com você.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Com o que já foi feito",
+      "hint": "Use quando você já tomou uma providência concreta. Ajuste a frase do meio para o que você realmente fez.",
+      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Li com atenção. Sinto muito de verdade pelo que aconteceu com a limpeza.\n\nReforcei a limpeza e a conferência dos banheiros durante o expediente.\n\nSe você nos der uma segunda chance, faço questão de acompanhar sua visita pessoalmente.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|public|1|sem-texto": [
+    {
+      "id": "curta",
+      "title": "Curta e direta",
+      "hint": "A escolha segura para quando você ainda não sabe exatamente o que deu errado.",
+      "body": "Olá, Ana,\n\nObrigado por escrever. Sinto muito que sua experiência não tenha sido o que você esperava. Não é assim que a gente quer receber quem vem aqui.\n\nGostaria de entender melhor o que aconteceu. Se puder falar direto com a gente, resolvemos isso com você.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Com o que já foi feito",
+      "hint": "Use quando você já tomou uma providência concreta. Ajuste a frase do meio para o que você realmente fez.",
+      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Li com atenção. Sinto muito de verdade pelo que aconteceu com sua experiência.\n\nJá revisei o caso com a equipe para entender onde erramos.\n\nSe você nos der uma segunda chance, faço questão de acompanhar sua visita pessoalmente.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|public|2|com-texto": [
+    {
+      "id": "curta",
+      "title": "Curta e direta",
+      "hint": "A escolha segura para quando você ainda não sabe exatamente o que deu errado.",
+      "body": "Olá, Ana,\n\nObrigado por escrever. Sinto muito que a limpeza não tenha sido o que você esperava. Não é assim que a gente quer receber quem vem aqui.\n\nGostaria de entender melhor o que aconteceu. Se puder falar direto com a gente, resolvemos isso com você.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Com o que já foi feito",
+      "hint": "Use quando você já tomou uma providência concreta. Ajuste a frase do meio para o que você realmente fez.",
+      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Li com atenção. Sinto muito de verdade pelo que aconteceu com a limpeza.\n\nReforcei a limpeza e a conferência dos banheiros durante o expediente.\n\nSe você nos der uma segunda chance, faço questão de acompanhar sua visita pessoalmente.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|public|2|sem-texto": [
+    {
+      "id": "curta",
+      "title": "Curta e direta",
+      "hint": "A escolha segura para quando você ainda não sabe exatamente o que deu errado.",
+      "body": "Olá, Ana,\n\nObrigado por escrever. Sinto muito que sua experiência não tenha sido o que você esperava. Não é assim que a gente quer receber quem vem aqui.\n\nGostaria de entender melhor o que aconteceu. Se puder falar direto com a gente, resolvemos isso com você.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Com o que já foi feito",
+      "hint": "Use quando você já tomou uma providência concreta. Ajuste a frase do meio para o que você realmente fez.",
+      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Li com atenção. Sinto muito de verdade pelo que aconteceu com sua experiência.\n\nJá revisei o caso com a equipe para entender onde erramos.\n\nSe você nos der uma segunda chance, faço questão de acompanhar sua visita pessoalmente.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|public|3|com-texto": [
+    {
+      "id": "perguntar",
+      "title": "Perguntar o que faltou",
+      "hint": "Uma nota no meio é a mais fácil de recuperar: geralmente falta só uma coisa.",
+      "body": "Olá, Ana,\n\nObrigado por avaliar. Fico feliz que tenha tido coisas boas, e quero entender o que faltou em a limpeza para a visita ter sido realmente boa.\n\nSe você nos contar, é nisso que vamos trabalhar.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|public|3|sem-texto": [
+    {
+      "id": "perguntar",
+      "title": "Perguntar o que faltou",
+      "hint": "Uma nota no meio é a mais fácil de recuperar: geralmente falta só uma coisa.",
+      "body": "Olá, Ana,\n\nObrigado por avaliar. Fico feliz que tenha tido coisas boas, e quero entender o que faltou em sua experiência para a visita ter sido realmente boa.\n\nSe você nos contar, é nisso que vamos trabalhar.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|public|4|com-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer com especificidade",
+      "hint": "Responder a quem elogia é o que mais fideliza cliente, e quase ninguém faz.",
+      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz em saber que tenha notado o cuidado com a limpeza. Vou passar isso para a equipe, que é quem faz isso acontecer.\n\nEsperamos você na próxima.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|public|4|sem-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer com especificidade",
+      "hint": "Responder a quem elogia é o que mais fideliza cliente, e quase ninguém faz.",
+      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz em saber que tenha gostado da visita. Vou passar isso para a equipe, que é quem faz isso acontecer.\n\nEsperamos você na próxima.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|public|5|com-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer com especificidade",
+      "hint": "Responder a quem elogia é o que mais fideliza cliente, e quase ninguém faz.",
+      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz em saber que tenha notado o cuidado com a limpeza. Vou passar isso para a equipe, que é quem faz isso acontecer.\n\nEsperamos você na próxima.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|public|5|sem-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer com especificidade",
+      "hint": "Responder a quem elogia é o que mais fideliza cliente, e quase ninguém faz.",
+      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz em saber que tenha gostado da visita. Vou passar isso para a equipe, que é quem faz isso acontecer.\n\nEsperamos você na próxima.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|private|1|com-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contato no mesmo dia",
+      "hint": "Envie hoje, mesmo sem solução ainda. O silêncio é o que faz perder o cliente.",
+      "body": "Olá, Ana,\n\nSou eu quem responde aqui. Recebi o que você escreveu sobre a limpeza e queria falar com você antes de mais nada.\n\nSinto muito pelo que aconteceu. Não é isso que queremos oferecer a quem vem aqui. Pode me contar um pouco mais: dia, horário e o que aconteceu?\n\nQuero corrigir isso com você.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Com uma compensação",
+      "hint": "Só em privado, e nunca em troca de apagar ou mudar uma avaliação pública. Isso é proibido.",
+      "body": "Olá, Ana,\n\nObrigado por nos contar o que aconteceu com a limpeza, em vez de simplesmente não voltar.\n\nReforcei a limpeza e a conferência dos banheiros durante o expediente.\n\nGostaria de receber você de novo, por nossa conta, e mostrar como deveria ter sido. Me diga quando for melhor para você.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|private|1|sem-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contato no mesmo dia",
+      "hint": "Envie hoje, mesmo sem solução ainda. O silêncio é o que faz perder o cliente.",
+      "body": "Olá, Ana,\n\nSou eu quem responde aqui. Recebi o que você escreveu sobre sua experiência e queria falar com você antes de mais nada.\n\nSinto muito pelo que aconteceu. Não é isso que queremos oferecer a quem vem aqui. Pode me contar um pouco mais: dia, horário e o que aconteceu?\n\nQuero corrigir isso com você.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Com uma compensação",
+      "hint": "Só em privado, e nunca em troca de apagar ou mudar uma avaliação pública. Isso é proibido.",
+      "body": "Olá, Ana,\n\nObrigado por nos contar o que aconteceu com sua experiência, em vez de simplesmente não voltar.\n\nJá revisei o caso com a equipe para entender onde erramos.\n\nGostaria de receber você de novo, por nossa conta, e mostrar como deveria ter sido. Me diga quando for melhor para você.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|private|2|com-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contato no mesmo dia",
+      "hint": "Envie hoje, mesmo sem solução ainda. O silêncio é o que faz perder o cliente.",
+      "body": "Olá, Ana,\n\nSou eu quem responde aqui. Recebi o que você escreveu sobre a limpeza e queria falar com você antes de mais nada.\n\nSinto muito pelo que aconteceu. Não é isso que queremos oferecer a quem vem aqui. Pode me contar um pouco mais: dia, horário e o que aconteceu?\n\nQuero corrigir isso com você.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Com uma compensação",
+      "hint": "Só em privado, e nunca em troca de apagar ou mudar uma avaliação pública. Isso é proibido.",
+      "body": "Olá, Ana,\n\nObrigado por nos contar o que aconteceu com a limpeza, em vez de simplesmente não voltar.\n\nReforcei a limpeza e a conferência dos banheiros durante o expediente.\n\nGostaria de receber você de novo, por nossa conta, e mostrar como deveria ter sido. Me diga quando for melhor para você.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|private|2|sem-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contato no mesmo dia",
+      "hint": "Envie hoje, mesmo sem solução ainda. O silêncio é o que faz perder o cliente.",
+      "body": "Olá, Ana,\n\nSou eu quem responde aqui. Recebi o que você escreveu sobre sua experiência e queria falar com você antes de mais nada.\n\nSinto muito pelo que aconteceu. Não é isso que queremos oferecer a quem vem aqui. Pode me contar um pouco mais: dia, horário e o que aconteceu?\n\nQuero corrigir isso com você.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Com uma compensação",
+      "hint": "Só em privado, e nunca em troca de apagar ou mudar uma avaliação pública. Isso é proibido.",
+      "body": "Olá, Ana,\n\nObrigado por nos contar o que aconteceu com sua experiência, em vez de simplesmente não voltar.\n\nJá revisei o caso com a equipe para entender onde erramos.\n\nGostaria de receber você de novo, por nossa conta, e mostrar como deveria ter sido. Me diga quando for melhor para você.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|private|3|com-texto": [
+    {
+      "id": "perguntar-privado",
+      "title": "Perguntar o que faltou",
+      "hint": "Quem escreve sem estar bravo costuma responder, e diz exatamente o que corrigir.",
+      "body": "Olá, Ana,\n\nObrigado por deixar seu relato. Li o que você escreveu sobre a limpeza.\n\nO que precisava ter acontecido para a visita ter sido realmente boa? Sua resposta vale mais para mim do que qualquer pesquisa.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|private|3|sem-texto": [
+    {
+      "id": "perguntar-privado",
+      "title": "Perguntar o que faltou",
+      "hint": "Quem escreve sem estar bravo costuma responder, e diz exatamente o que corrigir.",
+      "body": "Olá, Ana,\n\nObrigado por deixar seu relato. Li o que você escreveu sobre sua experiência.\n\nO que precisava ter acontecido para a visita ter sido realmente boa? Sua resposta vale mais para mim do que qualquer pesquisa.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|private|4|com-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e convidar",
+      "hint": "Este é o melhor momento para convidar a avaliar em público, e só depois de agradecer.",
+      "body": "Olá, Ana,\n\nObrigado por dedicar um minuto para nos dizer que tenha notado o cuidado com a limpeza. Passei a mensagem para a equipe.\n\nSe você quiser deixar essas palavras também numa avaliação pública, ajuda muito a gente. E se não quiser, ficamos gratos do mesmo jeito.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|private|4|sem-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e convidar",
+      "hint": "Este é o melhor momento para convidar a avaliar em público, e só depois de agradecer.",
+      "body": "Olá, Ana,\n\nObrigado por dedicar um minuto para nos dizer que tenha gostado da visita. Passei a mensagem para a equipe.\n\nSe você quiser deixar essas palavras também numa avaliação pública, ajuda muito a gente. E se não quiser, ficamos gratos do mesmo jeito.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|private|5|com-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e convidar",
+      "hint": "Este é o melhor momento para convidar a avaliar em público, e só depois de agradecer.",
+      "body": "Olá, Ana,\n\nObrigado por dedicar um minuto para nos dizer que tenha notado o cuidado com a limpeza. Passei a mensagem para a equipe.\n\nSe você quiser deixar essas palavras também numa avaliação pública, ajuda muito a gente. E se não quiser, ficamos gratos do mesmo jeito.\n\nCasa do Forno"
+    }
+  ],
+  "pt-BR|private|5|sem-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e convidar",
+      "hint": "Este é o melhor momento para convidar a avaliar em público, e só depois de agradecer.",
+      "body": "Olá, Ana,\n\nObrigado por dedicar um minuto para nos dizer que tenha gostado da visita. Passei a mensagem para a equipe.\n\nSe você quiser deixar essas palavras também numa avaliação pública, ajuda muito a gente. E se não quiser, ficamos gratos do mesmo jeito.\n\nCasa do Forno"
+    }
+  ],
+  "es|public|1|com-texto": [
+    {
+      "id": "curta",
+      "title": "Corta y directa",
+      "hint": "La opción segura cuando aún no sabes exactamente qué salió mal.",
+      "body": "Hola, Ana,\n\nGracias por escribir, y lamento que la limpieza no haya estado a la altura de lo que esperabas. No es así como queremos recibir a quien nos visita.\n\nMe gustaría entender mejor qué pasó. Si puedes hablar con nosotros directamente, lo resolvemos contigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Con lo que ya se hizo",
+      "hint": "Úsala cuando ya has tomado una medida concreta. Ajusta la frase del medio a lo que hiciste de verdad.",
+      "body": "Hola, Ana,\n\nGracias por tu comentario. Lo hemos leído con atención. Lamento sinceramente lo que ocurrió con la limpieza.\n\nHe reforzado la rutina de limpieza y la revisión de los baños durante el servicio.\n\nSi nos das una segunda oportunidad, me encargo personalmente de tu visita.\n\nCasa do Forno"
+    }
+  ],
+  "es|public|1|sem-texto": [
+    {
+      "id": "curta",
+      "title": "Corta y directa",
+      "hint": "La opción segura cuando aún no sabes exactamente qué salió mal.",
+      "body": "Hola, Ana,\n\nGracias por escribir, y lamento que tu experiencia no haya estado a la altura de lo que esperabas. No es así como queremos recibir a quien nos visita.\n\nMe gustaría entender mejor qué pasó. Si puedes hablar con nosotros directamente, lo resolvemos contigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Con lo que ya se hizo",
+      "hint": "Úsala cuando ya has tomado una medida concreta. Ajusta la frase del medio a lo que hiciste de verdad.",
+      "body": "Hola, Ana,\n\nGracias por tu comentario. Lo hemos leído con atención. Lamento sinceramente lo que ocurrió con tu experiencia.\n\nYa he revisado el caso con el equipo para entender dónde fallamos.\n\nSi nos das una segunda oportunidad, me encargo personalmente de tu visita.\n\nCasa do Forno"
+    }
+  ],
+  "es|public|2|com-texto": [
+    {
+      "id": "curta",
+      "title": "Corta y directa",
+      "hint": "La opción segura cuando aún no sabes exactamente qué salió mal.",
+      "body": "Hola, Ana,\n\nGracias por escribir, y lamento que la limpieza no haya estado a la altura de lo que esperabas. No es así como queremos recibir a quien nos visita.\n\nMe gustaría entender mejor qué pasó. Si puedes hablar con nosotros directamente, lo resolvemos contigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Con lo que ya se hizo",
+      "hint": "Úsala cuando ya has tomado una medida concreta. Ajusta la frase del medio a lo que hiciste de verdad.",
+      "body": "Hola, Ana,\n\nGracias por tu comentario. Lo hemos leído con atención. Lamento sinceramente lo que ocurrió con la limpieza.\n\nHe reforzado la rutina de limpieza y la revisión de los baños durante el servicio.\n\nSi nos das una segunda oportunidad, me encargo personalmente de tu visita.\n\nCasa do Forno"
+    }
+  ],
+  "es|public|2|sem-texto": [
+    {
+      "id": "curta",
+      "title": "Corta y directa",
+      "hint": "La opción segura cuando aún no sabes exactamente qué salió mal.",
+      "body": "Hola, Ana,\n\nGracias por escribir, y lamento que tu experiencia no haya estado a la altura de lo que esperabas. No es así como queremos recibir a quien nos visita.\n\nMe gustaría entender mejor qué pasó. Si puedes hablar con nosotros directamente, lo resolvemos contigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "Con lo que ya se hizo",
+      "hint": "Úsala cuando ya has tomado una medida concreta. Ajusta la frase del medio a lo que hiciste de verdad.",
+      "body": "Hola, Ana,\n\nGracias por tu comentario. Lo hemos leído con atención. Lamento sinceramente lo que ocurrió con tu experiencia.\n\nYa he revisado el caso con el equipo para entender dónde fallamos.\n\nSi nos das una segunda oportunidad, me encargo personalmente de tu visita.\n\nCasa do Forno"
+    }
+  ],
+  "es|public|3|com-texto": [
+    {
+      "id": "perguntar",
+      "title": "Preguntar qué faltó",
+      "hint": "Una nota intermedia es la más fácil de recuperar: casi siempre falta una sola cosa.",
+      "body": "Hola, Ana,\n\nGracias por tu valoración. Me alegra que haya habido cosas buenas, y quiero entender qué faltó en la limpieza para que la visita fuera realmente buena.\n\nSi nos lo cuentas, es en eso en lo que vamos a trabajar.\n\nCasa do Forno"
+    }
+  ],
+  "es|public|3|sem-texto": [
+    {
+      "id": "perguntar",
+      "title": "Preguntar qué faltó",
+      "hint": "Una nota intermedia es la más fácil de recuperar: casi siempre falta una sola cosa.",
+      "body": "Hola, Ana,\n\nGracias por tu valoración. Me alegra que haya habido cosas buenas, y quiero entender qué faltó en tu experiencia para que la visita fuera realmente buena.\n\nSi nos lo cuentas, es en eso en lo que vamos a trabajar.\n\nCasa do Forno"
+    }
+  ],
+  "es|public|4|com-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer con detalle",
+      "hint": "Responder a quien te elogia es lo que más fideliza \u2014 y casi nadie lo hace.",
+      "body": "Hola, Ana,\n\nMuchas gracias por tus palabras. Me alegra saber que hayas notado el cuidado con la limpieza. Se lo paso al equipo, que es quien lo hace posible.\n\nTe esperamos en la próxima.\n\nCasa do Forno"
+    }
+  ],
+  "es|public|4|sem-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer con detalle",
+      "hint": "Responder a quien te elogia es lo que más fideliza \u2014 y casi nadie lo hace.",
+      "body": "Hola, Ana,\n\nMuchas gracias por tus palabras. Me alegra saber que te haya gustado la visita. Se lo paso al equipo, que es quien lo hace posible.\n\nTe esperamos en la próxima.\n\nCasa do Forno"
+    }
+  ],
+  "es|public|5|com-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer con detalle",
+      "hint": "Responder a quien te elogia es lo que más fideliza \u2014 y casi nadie lo hace.",
+      "body": "Hola, Ana,\n\nMuchas gracias por tus palabras. Me alegra saber que hayas notado el cuidado con la limpieza. Se lo paso al equipo, que es quien lo hace posible.\n\nTe esperamos en la próxima.\n\nCasa do Forno"
+    }
+  ],
+  "es|public|5|sem-texto": [
+    {
+      "id": "agradecer",
+      "title": "Agradecer con detalle",
+      "hint": "Responder a quien te elogia es lo que más fideliza \u2014 y casi nadie lo hace.",
+      "body": "Hola, Ana,\n\nMuchas gracias por tus palabras. Me alegra saber que te haya gustado la visita. Se lo paso al equipo, que es quien lo hace posible.\n\nTe esperamos en la próxima.\n\nCasa do Forno"
+    }
+  ],
+  "es|private|1|com-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contacto el mismo día",
+      "hint": "Envíalo hoy, aunque aún no tengas solución. El silencio es lo que pierde al cliente.",
+      "body": "Hola, Ana,\n\nTe respondo personalmente. He recibido lo que escribiste sobre la limpieza y quería hablar contigo antes que nada.\n\nLamento lo ocurrido. No es lo que queremos ofrecer a quien nos visita. ¿Puedes contarme un poco más: día, hora y qué pasó?\n\nQuiero corregirlo contigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Con una compensación",
+      "hint": "Sólo en privado, y nunca a cambio de borrar o cambiar una reseña pública \u2014 eso está prohibido.",
+      "body": "Hola, Ana,\n\nGracias por contarnos lo que pasó con la limpieza, en lugar de simplemente no volver.\n\nHe reforzado la rutina de limpieza y la revisión de los baños durante el servicio.\n\nMe gustaría recibirte otra vez, por nuestra cuenta, y enseñarte cómo debería haber sido. Dime cuándo te viene bien.\n\nCasa do Forno"
+    }
+  ],
+  "es|private|1|sem-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contacto el mismo día",
+      "hint": "Envíalo hoy, aunque aún no tengas solución. El silencio es lo que pierde al cliente.",
+      "body": "Hola, Ana,\n\nTe respondo personalmente. He recibido lo que escribiste sobre tu experiencia y quería hablar contigo antes que nada.\n\nLamento lo ocurrido. No es lo que queremos ofrecer a quien nos visita. ¿Puedes contarme un poco más: día, hora y qué pasó?\n\nQuiero corregirlo contigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Con una compensación",
+      "hint": "Sólo en privado, y nunca a cambio de borrar o cambiar una reseña pública \u2014 eso está prohibido.",
+      "body": "Hola, Ana,\n\nGracias por contarnos lo que pasó con tu experiencia, en lugar de simplemente no volver.\n\nYa he revisado el caso con el equipo para entender dónde fallamos.\n\nMe gustaría recibirte otra vez, por nuestra cuenta, y enseñarte cómo debería haber sido. Dime cuándo te viene bien.\n\nCasa do Forno"
+    }
+  ],
+  "es|private|2|com-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contacto el mismo día",
+      "hint": "Envíalo hoy, aunque aún no tengas solución. El silencio es lo que pierde al cliente.",
+      "body": "Hola, Ana,\n\nTe respondo personalmente. He recibido lo que escribiste sobre la limpieza y quería hablar contigo antes que nada.\n\nLamento lo ocurrido. No es lo que queremos ofrecer a quien nos visita. ¿Puedes contarme un poco más: día, hora y qué pasó?\n\nQuiero corregirlo contigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Con una compensación",
+      "hint": "Sólo en privado, y nunca a cambio de borrar o cambiar una reseña pública \u2014 eso está prohibido.",
+      "body": "Hola, Ana,\n\nGracias por contarnos lo que pasó con la limpieza, en lugar de simplemente no volver.\n\nHe reforzado la rutina de limpieza y la revisión de los baños durante el servicio.\n\nMe gustaría recibirte otra vez, por nuestra cuenta, y enseñarte cómo debería haber sido. Dime cuándo te viene bien.\n\nCasa do Forno"
+    }
+  ],
+  "es|private|2|sem-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Contacto el mismo día",
+      "hint": "Envíalo hoy, aunque aún no tengas solución. El silencio es lo que pierde al cliente.",
+      "body": "Hola, Ana,\n\nTe respondo personalmente. He recibido lo que escribiste sobre tu experiencia y quería hablar contigo antes que nada.\n\nLamento lo ocurrido. No es lo que queremos ofrecer a quien nos visita. ¿Puedes contarme un poco más: día, hora y qué pasó?\n\nQuiero corregirlo contigo.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "Con una compensación",
+      "hint": "Sólo en privado, y nunca a cambio de borrar o cambiar una reseña pública \u2014 eso está prohibido.",
+      "body": "Hola, Ana,\n\nGracias por contarnos lo que pasó con tu experiencia, en lugar de simplemente no volver.\n\nYa he revisado el caso con el equipo para entender dónde fallamos.\n\nMe gustaría recibirte otra vez, por nuestra cuenta, y enseñarte cómo debería haber sido. Dime cuándo te viene bien.\n\nCasa do Forno"
+    }
+  ],
+  "es|private|3|com-texto": [
+    {
+      "id": "perguntar-privado",
+      "title": "Preguntar qué faltó",
+      "hint": "Quien escribe sin estar furioso suele responder \u2014 y te dice exactamente qué corregir.",
+      "body": "Hola, Ana,\n\nGracias por dejar tu comentario. He leído lo que escribiste sobre la limpieza.\n\n¿Qué tendría que haber pasado para que la visita fuera realmente buena? Tu respuesta me vale más que cualquier encuesta.\n\nCasa do Forno"
+    }
+  ],
+  "es|private|3|sem-texto": [
+    {
+      "id": "perguntar-privado",
+      "title": "Preguntar qué faltó",
+      "hint": "Quien escribe sin estar furioso suele responder \u2014 y te dice exactamente qué corregir.",
+      "body": "Hola, Ana,\n\nGracias por dejar tu comentario. He leído lo que escribiste sobre tu experiencia.\n\n¿Qué tendría que haber pasado para que la visita fuera realmente buena? Tu respuesta me vale más que cualquier encuesta.\n\nCasa do Forno"
+    }
+  ],
+  "es|private|4|com-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e invitar",
+      "hint": "Este es el mejor momento para invitar a valorar en público \u2014 y sólo después de agradecer.",
+      "body": "Hola, Ana,\n\nGracias por dedicar un minuto a decirnos que hayas notado el cuidado con la limpieza. Se lo he pasado al equipo.\n\nSi te apetece dejar esas palabras también en una reseña pública, nos ayuda mucho. Y si no, te lo agradecemos igual.\n\nCasa do Forno"
+    }
+  ],
+  "es|private|4|sem-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e invitar",
+      "hint": "Este es el mejor momento para invitar a valorar en público \u2014 y sólo después de agradecer.",
+      "body": "Hola, Ana,\n\nGracias por dedicar un minuto a decirnos que te haya gustado la visita. Se lo he pasado al equipo.\n\nSi te apetece dejar esas palabras también en una reseña pública, nos ayuda mucho. Y si no, te lo agradecemos igual.\n\nCasa do Forno"
+    }
+  ],
+  "es|private|5|com-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e invitar",
+      "hint": "Este es el mejor momento para invitar a valorar en público \u2014 y sólo después de agradecer.",
+      "body": "Hola, Ana,\n\nGracias por dedicar un minuto a decirnos que hayas notado el cuidado con la limpieza. Se lo he pasado al equipo.\n\nSi te apetece dejar esas palabras también en una reseña pública, nos ayuda mucho. Y si no, te lo agradecemos igual.\n\nCasa do Forno"
+    }
+  ],
+  "es|private|5|sem-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Agradecer e invitar",
+      "hint": "Este es el mejor momento para invitar a valorar en público \u2014 y sólo después de agradecer.",
+      "body": "Hola, Ana,\n\nGracias por dedicar un minuto a decirnos que te haya gustado la visita. Se lo he pasado al equipo.\n\nSi te apetece dejar esas palabras también en una reseña pública, nos ayuda mucho. Y si no, te lo agradecemos igual.\n\nCasa do Forno"
+    }
+  ],
+  "en|public|1|com-texto": [
+    {
+      "id": "curta",
+      "title": "Short and direct",
+      "hint": "The safe choice when you do not yet know exactly what went wrong.",
+      "body": "Hello Ana,\n\nThank you for taking the time to write, and I am sorry cleanliness was not what you had hoped for. That is not how we want to welcome anyone.\n\nI would like to understand better what happened. If you can get in touch with us directly, we will put it right.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "With what you already did",
+      "hint": "Use when you have already taken a concrete step. Adjust the middle sentence to what you actually did.",
+      "body": "Hello Ana,\n\nThank you for your review. We read it properly. I am genuinely sorry about cleanliness.\n\nWe have tightened our cleaning routine and the checks on the washrooms during service.\n\nIf you give us another chance, I will look after your visit myself.\n\nCasa do Forno"
+    }
+  ],
+  "en|public|1|sem-texto": [
+    {
+      "id": "curta",
+      "title": "Short and direct",
+      "hint": "The safe choice when you do not yet know exactly what went wrong.",
+      "body": "Hello Ana,\n\nThank you for taking the time to write, and I am sorry your experience was not what you had hoped for. That is not how we want to welcome anyone.\n\nI would like to understand better what happened. If you can get in touch with us directly, we will put it right.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "With what you already did",
+      "hint": "Use when you have already taken a concrete step. Adjust the middle sentence to what you actually did.",
+      "body": "Hello Ana,\n\nThank you for your review. We read it properly. I am genuinely sorry about your experience.\n\nI have gone through what happened with the team to understand where we fell short.\n\nIf you give us another chance, I will look after your visit myself.\n\nCasa do Forno"
+    }
+  ],
+  "en|public|2|com-texto": [
+    {
+      "id": "curta",
+      "title": "Short and direct",
+      "hint": "The safe choice when you do not yet know exactly what went wrong.",
+      "body": "Hello Ana,\n\nThank you for taking the time to write, and I am sorry cleanliness was not what you had hoped for. That is not how we want to welcome anyone.\n\nI would like to understand better what happened. If you can get in touch with us directly, we will put it right.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "With what you already did",
+      "hint": "Use when you have already taken a concrete step. Adjust the middle sentence to what you actually did.",
+      "body": "Hello Ana,\n\nThank you for your review. We read it properly. I am genuinely sorry about cleanliness.\n\nWe have tightened our cleaning routine and the checks on the washrooms during service.\n\nIf you give us another chance, I will look after your visit myself.\n\nCasa do Forno"
+    }
+  ],
+  "en|public|2|sem-texto": [
+    {
+      "id": "curta",
+      "title": "Short and direct",
+      "hint": "The safe choice when you do not yet know exactly what went wrong.",
+      "body": "Hello Ana,\n\nThank you for taking the time to write, and I am sorry your experience was not what you had hoped for. That is not how we want to welcome anyone.\n\nI would like to understand better what happened. If you can get in touch with us directly, we will put it right.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-accao",
+      "title": "With what you already did",
+      "hint": "Use when you have already taken a concrete step. Adjust the middle sentence to what you actually did.",
+      "body": "Hello Ana,\n\nThank you for your review. We read it properly. I am genuinely sorry about your experience.\n\nI have gone through what happened with the team to understand where we fell short.\n\nIf you give us another chance, I will look after your visit myself.\n\nCasa do Forno"
+    }
+  ],
+  "en|public|3|com-texto": [
+    {
+      "id": "perguntar",
+      "title": "Ask what was missing",
+      "hint": "A middling rating is the easiest to win back: there is usually one thing missing.",
+      "body": "Hello Ana,\n\nThank you for the review. I am glad parts of it worked, and I would like to know what was missing in cleanliness to make the visit a good one.\n\nTell us and that is what we will work on.\n\nCasa do Forno"
+    }
+  ],
+  "en|public|3|sem-texto": [
+    {
+      "id": "perguntar",
+      "title": "Ask what was missing",
+      "hint": "A middling rating is the easiest to win back: there is usually one thing missing.",
+      "body": "Hello Ana,\n\nThank you for the review. I am glad parts of it worked, and I would like to know what was missing in your experience to make the visit a good one.\n\nTell us and that is what we will work on.\n\nCasa do Forno"
+    }
+  ],
+  "en|public|4|com-texto": [
+    {
+      "id": "agradecer",
+      "title": "Thank them specifically",
+      "hint": "Replying to praise is what builds regulars \u2014 and almost nobody does it.",
+      "body": "Hello Ana,\n\nThank you for the kind words. I am glad you noticed how much care we put into keeping the place clean. I will pass it on to the team, who are the ones who make it happen.\n\nWe will be here next time.\n\nCasa do Forno"
+    }
+  ],
+  "en|public|4|sem-texto": [
+    {
+      "id": "agradecer",
+      "title": "Thank them specifically",
+      "hint": "Replying to praise is what builds regulars \u2014 and almost nobody does it.",
+      "body": "Hello Ana,\n\nThank you for the kind words. I am glad you enjoyed your visit. I will pass it on to the team, who are the ones who make it happen.\n\nWe will be here next time.\n\nCasa do Forno"
+    }
+  ],
+  "en|public|5|com-texto": [
+    {
+      "id": "agradecer",
+      "title": "Thank them specifically",
+      "hint": "Replying to praise is what builds regulars \u2014 and almost nobody does it.",
+      "body": "Hello Ana,\n\nThank you for the kind words. I am glad you noticed how much care we put into keeping the place clean. I will pass it on to the team, who are the ones who make it happen.\n\nWe will be here next time.\n\nCasa do Forno"
+    }
+  ],
+  "en|public|5|sem-texto": [
+    {
+      "id": "agradecer",
+      "title": "Thank them specifically",
+      "hint": "Replying to praise is what builds regulars \u2014 and almost nobody does it.",
+      "body": "Hello Ana,\n\nThank you for the kind words. I am glad you enjoyed your visit. I will pass it on to the team, who are the ones who make it happen.\n\nWe will be here next time.\n\nCasa do Forno"
+    }
+  ],
+  "en|private|1|com-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Same-day contact",
+      "hint": "Send today, even without a solution yet. Silence is what loses the customer.",
+      "body": "Hello Ana,\n\nI am replying to you personally. I read what you wrote about cleanliness and wanted to reach you before anything else.\n\nI am sorry it happened. It is not what we want to offer anyone who visits us. Could you tell me a bit more: the day, the time, and what went on?\n\nI would like to put this right with you.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "With something to make up for it",
+      "hint": "Private only, and never in exchange for removing or changing a public review \u2014 that is prohibited.",
+      "body": "Hello Ana,\n\nThank you for telling us what happened with cleanliness, rather than simply not coming back.\n\nWe have tightened our cleaning routine and the checks on the washrooms during service.\n\nI would like to have you back, on us, and show you how it should have gone. Tell me when suits you.\n\nCasa do Forno"
+    }
+  ],
+  "en|private|1|sem-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Same-day contact",
+      "hint": "Send today, even without a solution yet. Silence is what loses the customer.",
+      "body": "Hello Ana,\n\nI am replying to you personally. I read what you wrote about your experience and wanted to reach you before anything else.\n\nI am sorry it happened. It is not what we want to offer anyone who visits us. Could you tell me a bit more: the day, the time, and what went on?\n\nI would like to put this right with you.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "With something to make up for it",
+      "hint": "Private only, and never in exchange for removing or changing a public review \u2014 that is prohibited.",
+      "body": "Hello Ana,\n\nThank you for telling us what happened with your experience, rather than simply not coming back.\n\nI have gone through what happened with the team to understand where we fell short.\n\nI would like to have you back, on us, and show you how it should have gone. Tell me when suits you.\n\nCasa do Forno"
+    }
+  ],
+  "en|private|2|com-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Same-day contact",
+      "hint": "Send today, even without a solution yet. Silence is what loses the customer.",
+      "body": "Hello Ana,\n\nI am replying to you personally. I read what you wrote about cleanliness and wanted to reach you before anything else.\n\nI am sorry it happened. It is not what we want to offer anyone who visits us. Could you tell me a bit more: the day, the time, and what went on?\n\nI would like to put this right with you.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "With something to make up for it",
+      "hint": "Private only, and never in exchange for removing or changing a public review \u2014 that is prohibited.",
+      "body": "Hello Ana,\n\nThank you for telling us what happened with cleanliness, rather than simply not coming back.\n\nWe have tightened our cleaning routine and the checks on the washrooms during service.\n\nI would like to have you back, on us, and show you how it should have gone. Tell me when suits you.\n\nCasa do Forno"
+    }
+  ],
+  "en|private|2|sem-texto": [
+    {
+      "id": "contacto-imediato",
+      "title": "Same-day contact",
+      "hint": "Send today, even without a solution yet. Silence is what loses the customer.",
+      "body": "Hello Ana,\n\nI am replying to you personally. I read what you wrote about your experience and wanted to reach you before anything else.\n\nI am sorry it happened. It is not what we want to offer anyone who visits us. Could you tell me a bit more: the day, the time, and what went on?\n\nI would like to put this right with you.\n\nCasa do Forno"
+    },
+    {
+      "id": "com-reparacao",
+      "title": "With something to make up for it",
+      "hint": "Private only, and never in exchange for removing or changing a public review \u2014 that is prohibited.",
+      "body": "Hello Ana,\n\nThank you for telling us what happened with your experience, rather than simply not coming back.\n\nI have gone through what happened with the team to understand where we fell short.\n\nI would like to have you back, on us, and show you how it should have gone. Tell me when suits you.\n\nCasa do Forno"
+    }
+  ],
+  "en|private|3|com-texto": [
+    {
+      "id": "perguntar-privado",
+      "title": "Ask what was missing",
+      "hint": "Someone who writes without being angry usually replies \u2014 and tells you exactly what to fix.",
+      "body": "Hello Ana,\n\nThank you for leaving your feedback. I read what you wrote about cleanliness.\n\nWhat would have had to happen for the visit to be a good one? Your answer is worth more to me than any survey.\n\nCasa do Forno"
+    }
+  ],
+  "en|private|3|sem-texto": [
+    {
+      "id": "perguntar-privado",
+      "title": "Ask what was missing",
+      "hint": "Someone who writes without being angry usually replies \u2014 and tells you exactly what to fix.",
+      "body": "Hello Ana,\n\nThank you for leaving your feedback. I read what you wrote about your experience.\n\nWhat would have had to happen for the visit to be a good one? Your answer is worth more to me than any survey.\n\nCasa do Forno"
+    }
+  ],
+  "en|private|4|com-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Thank and invite",
+      "hint": "This is the best moment to invite a public review \u2014 and only after thanking them.",
+      "body": "Hello Ana,\n\nThank you for taking a minute to tell us you noticed how much care we put into keeping the place clean. I passed it on to the team.\n\nIf you feel like leaving those words in a public review as well, it helps us a lot. And if not, we are grateful all the same.\n\nCasa do Forno"
+    }
+  ],
+  "en|private|4|sem-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Thank and invite",
+      "hint": "This is the best moment to invite a public review \u2014 and only after thanking them.",
+      "body": "Hello Ana,\n\nThank you for taking a minute to tell us you enjoyed your visit. I passed it on to the team.\n\nIf you feel like leaving those words in a public review as well, it helps us a lot. And if not, we are grateful all the same.\n\nCasa do Forno"
+    }
+  ],
+  "en|private|5|com-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Thank and invite",
+      "hint": "This is the best moment to invite a public review \u2014 and only after thanking them.",
+      "body": "Hello Ana,\n\nThank you for taking a minute to tell us you noticed how much care we put into keeping the place clean. I passed it on to the team.\n\nIf you feel like leaving those words in a public review as well, it helps us a lot. And if not, we are grateful all the same.\n\nCasa do Forno"
+    }
+  ],
+  "en|private|5|sem-texto": [
+    {
+      "id": "agradecer-privado",
+      "title": "Thank and invite",
+      "hint": "This is the best moment to invite a public review \u2014 and only after thanking them.",
+      "body": "Hello Ana,\n\nThank you for taking a minute to tell us you enjoyed your visit. I passed it on to the team.\n\nIf you feel like leaving those words in a public review as well, it helps us a lot. And if not, we are grateful all the same.\n\nCasa do Forno"
+    }
+  ]
+}
