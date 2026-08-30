@@ -34,10 +34,20 @@ const requirements = [
   // renderizados (nunca atrás de uma condição de aba), e os três cartões que
   // antes trocavam de aba (Plano de hoje, Boas práticas, Resumo no WhatsApp)
   // linkam para essas âncoras em vez de chamar um estado que deixou de existir.
-  ['painel vira uma tela única: sem estado de aba, sem seletor, sem <nav>', !dashboard.includes('CockpitTab') && !dashboard.includes('setTab(') && !dashboard.includes('<nav ')],
+  ['painel vira uma tela única: sem estado de aba e sem seletor', !dashboard.includes('CockpitTab') && !dashboard.includes('setTab(')],
+  // O <nav> era proibido por significar seletor de abas. Em 30/08/2026 o
+  // contrato passou a permitir exatamente um: o índice do celular, que é
+  // atalho e não navegação. A proibição continua valendo para qualquer outro,
+  // e é por isso que a contagem é exata e o único permitido é nomeado.
+  ['o único <nav> do painel é o índice do celular aprovado', (dashboard.match(/<nav/g) || []).length === 1 && /const MobileIndex[\s\S]{0,400}<nav/.test(dashboard)],
   ['fila de respostas aparece uma única vez: a antiga aba "Avaliações" não duplica a seção', (dashboard.match(/<ResponseQueue reviews=\{queue\} snapshot=\{snapshot\} demo=\{demo\} \/>/g) || []).length === 1],
   ['fila de respostas, QR/temas e configuração do WhatsApp têm âncora própria e única na página', (dashboard.match(/id=\{QUEUE_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{QR_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{WHATSAPP_ANCHOR_ID\}/g) || []).length === 1],
-  ['Plano de hoje e Resumo no WhatsApp linkam para a âncora certa em vez de trocar de aba', (dashboard.match(/href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/g) || []).length === 1 && (dashboard.match(/href=\{`#\$\{WHATSAPP_ANCHOR_ID\}`\}/g) || []).length === 1],
+  ['Plano de hoje e Resumo no WhatsApp linkam para a âncora certa em vez de trocar de aba', (dashboard.match(/href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/g) || []).length >= 1 && (dashboard.match(/href=\{`#\$\{WHATSAPP_ANCHOR_ID\}`\}/g) || []).length === 1],
+  // A faixa-resumo do celular acrescentou um segundo link para a fila, por isso
+  // a contagem acima deixou de ser exata. O que a contagem media de verdade era
+  // "ninguém troca de aba": isso agora é medido diretamente, e todo link de
+  // âncora tem de apontar para um id que existe na página.
+  ['todo link de âncora do painel aponta para um id que existe', [...dashboard.matchAll(/href=\{`#\$\{([A-Z_]+)\}`\}/g)].every(([, id]) => new RegExp(`id=\\{${id}\\}`).test(dashboard))],
   // "Ver QR Codes" tinha o rotulo certo mas o href sempre apontava para a
   // fila (heranca de quando so existia setTab para a aba de avaliacoes,
   // achado no round de correcao de 30/08/2026). Boas praticas agora escolhe

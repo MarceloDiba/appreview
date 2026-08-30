@@ -303,7 +303,7 @@ export type Database = {
           feedback_text: string | null
           id: string
           is_addressed: boolean | null
-          rating: number
+          rating: number | null
           updated_at: string | null
           user_id: string
         }
@@ -314,7 +314,7 @@ export type Database = {
           feedback_text?: string | null
           id?: string
           is_addressed?: boolean | null
-          rating: number
+          rating?: number | null
           updated_at?: string | null
           user_id: string
         }
@@ -325,7 +325,7 @@ export type Database = {
           feedback_text?: string | null
           id?: string
           is_addressed?: boolean | null
-          rating?: number
+          rating?: number | null
           updated_at?: string | null
           user_id?: string
         }
