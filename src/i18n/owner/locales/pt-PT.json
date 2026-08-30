@@ -457,6 +457,7 @@
         "pendingCommentsCount_one": "{{count}} comentário privado ainda sem resposta",
         "pendingCommentsCount_other": "{{count}} comentários privados ainda sem resposta",
         "pendingCommentsQuote": "\"{{quote}}\"",
+        "pendingCommentsHasContact": "Contacto deixado para retorno",
         "pendingCommentsAction": "Ver e responder",
         "queueTitle": "Fila de respostas",
         "queueSubtitle": "Uma decisão de cada vez, com texto e evidência quando a leitura oficial estiver disponível.",

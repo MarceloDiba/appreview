@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,24 @@ interface CasesListProps {
 const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
   const { t, i18n } = useOwnerTranslation();
   const { loading, cases, error, resolvingId, resolveCase } = useInternalFeedback(userId);
+  // O caso sem tratar é o que ainda tem prazo; o caso já tratado é histórico.
+  // Por isso a lista deixa de ser só created_at desc: casos sem tratar vêm
+  // primeiro, do mais antigo (o mais perto de o cliente ter ido embora) para
+  // o mais novo, e só depois os já tratados, na ordem que a busca devolveu.
+  // Quem chega desta página pelo bloco da Visão geral encontra aqui, no
+  // topo, exatamente o caso que o bloco apontou. Esta ordem vale para toda
+  // visita à página, não só para quem chega pelo bloco.
+  const orderedCases = useMemo(() => {
+    const pending = cases
+      .filter((item) => !item.is_addressed)
+      .sort((a, b) => {
+        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return aTime - bTime;
+      });
+    const resolved = cases.filter((item) => item.is_addressed);
+    return [...pending, ...resolved];
+  }, [cases]);
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
     return new Intl.DateTimeFormat(i18n.resolvedLanguage || i18n.language).format(
@@ -55,7 +73,7 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
 
   return (
     <div className="space-y-4">
-      {cases.map((item) => {
+      {orderedCases.map((item) => {
         const isAddressed = !!item.is_addressed;
         return (
           <Card key={item.id}>

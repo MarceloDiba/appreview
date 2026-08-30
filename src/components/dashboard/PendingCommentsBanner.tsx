@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { MailWarning } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useInternalFeedback } from '@/hooks/useInternalFeedback';
+import { useInternalFeedback, type InternalCase } from '@/hooks/useInternalFeedback';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 /**
@@ -18,7 +18,23 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
  *
  * Reaproveita `useInternalFeedback`, a mesma fonte usada em `/reviews`, para
  * não criar um segundo caminho de leitura para o mesmo dado.
+ *
+ * `customer_email` guarda hoje o WhatsApp escrito pelo cliente no formulário
+ * (o campo mudou de "WhatsApp ou e-mail" para só WhatsApp), não um e-mail.
+ * Um caso com esse contato pode ser resolvido com uma ligação nos próximos
+ * minutos; um caso sem contato só pode ser aprendido, não respondido. Por
+ * isso o caso com contato tem prioridade sobre o mais antigo sem contato ao
+ * escolher o que este bloco destaca, e ganha um rótulo dizendo isso.
  */
+const hasContact = (item: InternalCase) => !!item.customer_email && item.customer_email.trim() !== '';
+
+const oldestOf = (items: InternalCase[]) =>
+  items.reduce((older, current) => {
+    const olderTime = older.created_at ? new Date(older.created_at).getTime() : 0;
+    const currentTime = current.created_at ? new Date(current.created_at).getTime() : 0;
+    return currentTime < olderTime ? current : older;
+  });
+
 const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
   const { t, i18n } = useOwnerTranslation();
   const { loading, cases } = useInternalFeedback(userId || '');
@@ -28,16 +44,13 @@ const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
   const pending = cases.filter((item) => !item.is_addressed);
   if (pending.length === 0) return null;
 
-  const oldest = pending.reduce((older, current) => {
-    const olderTime = older.created_at ? new Date(older.created_at).getTime() : 0;
-    const currentTime = current.created_at ? new Date(current.created_at).getTime() : 0;
-    return currentTime < olderTime ? current : older;
-  });
-  const quote = oldest.feedback_text?.trim();
-  const who = oldest.customer_name?.trim() || t('dashboard.cockpit.layout.anonymousReviewer');
+  const withContact = pending.filter(hasContact);
+  const highlighted = withContact.length > 0 ? oldestOf(withContact) : oldestOf(pending);
+  const quote = highlighted.feedback_text?.trim();
+  const who = highlighted.customer_name?.trim() || t('dashboard.cockpit.layout.anonymousReviewer');
   const locale = i18n.resolvedLanguage || i18n.language;
-  const dateLabel = oldest.created_at
-    ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(oldest.created_at))
+  const dateLabel = highlighted.created_at
+    ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(highlighted.created_at))
     : '';
 
   return (
@@ -55,10 +68,17 @@ const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
               {t('dashboard.cockpit.layout.pendingCommentsCount', { count: pending.length })}
             </p>
             <div className="mt-3 rounded-lg bg-white/70 p-3 text-sm leading-5 text-slate-700">
-              <p className="font-medium text-slate-900">
-                {who}
-                {dateLabel ? ` · ${dateLabel}` : ''}
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium text-slate-900">
+                  {who}
+                  {dateLabel ? ` · ${dateLabel}` : ''}
+                </p>
+                {hasContact(highlighted) && (
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
+                    {t('dashboard.cockpit.layout.pendingCommentsHasContact')}
+                  </span>
+                )}
+              </div>
               {quote && (
                 <p className="mt-1">
                   {t('dashboard.cockpit.layout.pendingCommentsQuote', { quote })}
@@ -67,7 +87,7 @@ const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
             </div>
             <div className="mt-4">
               <Button asChild className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]">
-                <Link to="/reviews">{t('dashboard.cockpit.layout.pendingCommentsAction')}</Link>
+                <Link to="/reviews#casos-internos">{t('dashboard.cockpit.layout.pendingCommentsAction')}</Link>
               </Button>
             </div>
           </div>

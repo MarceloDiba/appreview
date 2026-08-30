@@ -457,7 +457,10 @@ Produção: https://appreview-flame.vercel.app
 
 - Review gating corrigido.
 - QR code real, gerado localmente, com cartão A6 pronto para imprimir.
-- Dashboard e Central de Atenção com dados reais.
+- Dashboard com dados reais. Casos internos (comentário privado, nota, contato)
+  ficam em `/reviews`, na lista `CasesList`; a Visão geral do `/dashboard`
+  ganhou o bloco condicional "Comentários que pedem atenção" acima da fila de
+  respostas, visível só quando há caso sem tratar.
 - Avaliações reais do Google existentes em cache. Novas importações dependem da
   migração preparada para Place Details (New).
 - Sugestões de resposta editáveis, sem publicação automática.

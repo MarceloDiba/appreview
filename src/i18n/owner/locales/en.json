@@ -457,6 +457,7 @@
         "pendingCommentsCount_one": "{{count}} private comment still without a reply",
         "pendingCommentsCount_other": "{{count}} private comments still without a reply",
         "pendingCommentsQuote": "\"{{quote}}\"",
+        "pendingCommentsHasContact": "Contact left for a callback",
         "pendingCommentsAction": "View and reply",
         "queueTitle": "Reply queue",
         "queueSubtitle": "One decision at a time, with text and evidence once the official reading is available.",

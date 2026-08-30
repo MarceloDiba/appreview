@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
 import GoogleBusinessReviewQueue from '@/components/dashboard/GoogleBusinessReviewQueue';
@@ -7,8 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
+const casesAnchorId = 'casos-internos';
+
 const Reviews = () => {
   const { t } = useOwnerTranslation();
+  const location = useLocation();
   const [userId, setUserId] = useState<string | null>(null);
   const [businessName, setBusinessName] = useState('');
 
@@ -28,6 +32,22 @@ const Reviews = () => {
 
     void fetchUser();
   }, []);
+
+  // Quem chega pelo bloco "Comentários que pedem atenção" da Visão geral traz
+  // `#casos-internos` na URL. Sem isto, o toque cai no topo da página, acima
+  // da fila do Google e das avaliações públicas, e o dono volta a rolar a
+  // tela até achar o caso, exatamente o problema que o bloco existe para
+  // evitar. Roda de novo quando `userId` chega porque é o que muda a altura
+  // do bloco do Google acima e pode deslocar o alvo do scroll.
+  useEffect(() => {
+    if (location.hash !== `#${casesAnchorId}`) return;
+    const target = document.getElementById(casesAnchorId);
+    if (!target) return;
+    const raf = requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [location.hash, userId]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -50,7 +70,7 @@ const Reviews = () => {
 
           {userId && <div className="mb-8"><GoogleReviews userId={userId} /></div>}
 
-          <Tabs defaultValue="internal">
+          <Tabs defaultValue="internal" id={casesAnchorId} className="scroll-mt-24">
             <TabsList className="mb-4">
               <TabsTrigger value="internal">{t('reviews.casesTab')}</TabsTrigger>
             </TabsList>
