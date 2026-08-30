@@ -7,6 +7,12 @@ const dashboard = read('src/components/dashboard/ApprovedCockpitDashboard.tsx');
 const pendingCommentsBanner = read('src/components/dashboard/PendingCommentsBanner.tsx');
 const dashboardPage = read('src/pages/Dashboard.tsx');
 const collector = read('supabase/functions/sync-experimental-apify/index.ts');
+// A janela de 24h e o teto mensal viraram núcleo partilhado em 30/08/2026
+// (decisão de coleta automática no cadastro), para que a coleta automática do
+// cadastro não possa, por construção, reimplementar ou contornar o que a
+// coleta manual já respeita. As duas asserções abaixo que citam esses limites
+// leem o núcleo partilhado, não mais este arquivo.
+const collectorCore = read('supabase/functions/_shared/experimentalApifyCollection.ts');
 const advisorReading = read('src/lib/advisorReading.ts');
 const estilos = read('src/index.css');
 
@@ -58,7 +64,7 @@ const requirements = [
   ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner userId={userId} />') && dashboard.includes('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />') && dashboard.indexOf('<PendingCommentsBanner userId={userId} />') < dashboard.lastIndexOf('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />')],
   ['coleta pede nome público', collector.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
   ['coleta aceita somente campos específicos de permalink', collector.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !collector.includes("'reviewUri', 'url'")],
-  ['coleta temporária continua sem agenda e com limite explícito', collector.includes("maxReviews: 50") && collector.includes("APIFY_EXPERIMENTAL_COOLDOWN")],
+  ['coleta temporária continua sem agenda e com limite explícito', collectorCore.includes("maxReviews: 50") && collectorCore.includes("APIFY_EXPERIMENTAL_COOLDOWN")],
   // O contrato fixa violeta #6D43C0 como assinatura e azul #2457D6 para acoes,
   // e ate 30/08/2026 nada verificava isso. O token --primary tinha derivado
   // para #6C45BA, que e o violeta que slider, switch, badge e barra de
