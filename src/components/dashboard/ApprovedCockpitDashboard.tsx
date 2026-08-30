@@ -64,16 +64,16 @@ const normalizeObserved = (review: ExperimentalObservedReview): QueueReview => r
  * oficial, completo ou real sem estar identificada.
  *
  * No piloto Apify a distribuicao por nota, o tempo medio de resposta, as
- * avaliacoes dos ultimos 30 dias e os temas sao calculados sobre no maximo 50
- * avaliacoes publicas. No caminho oficial as mesmas medidas saem de todas as
- * avaliacoes do negocio. Um negocio com 400 avaliacoes mostrava uma
+ * avaliações dos últimos 30 dias e os temas são calculados sobre no máximo 50
+ * avaliações públicas. No caminho oficial as mesmas medidas saem de todas as
+ * avaliações do negócio. Um negócio com 400 avaliações mostrava uma
  * distribuicao oito vezes menor que a realidade, sem nada dizendo isso.
  *
- * A nota e o total de avaliacoes NAO levam esta etiqueta: mesmo vindos do
- * Apify eles sao os numeros do negocio inteiro, lidos do proprio perfil.
+ * A nota e o total de avaliações NAO levam esta etiqueta: mesmo vindos do
+ * Apify eles são os números do negócio inteiro, lidos do próprio perfil.
  *
  * A etiqueta e aditiva por exigencia do contrato: um rodape discreto dentro do
- * cartao que ja existe, sem redesenhar, fundir, esconder ou deslocar modulo
+ * cartão que já existe, sem redesenhar, fundir, esconder ou deslocar módulo
  * nenhum.
  */
 const SampleSourceNote = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {

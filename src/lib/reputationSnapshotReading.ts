@@ -121,42 +121,134 @@ export const buildSnapshotFromPersistedRow = (
   };
 };
 
-const snapshotTime = (snapshot: ExperimentalApifySnapshot | null) => {
+/**
+ * Teto de avaliações que a coleta Apify pede ao Actor. O mesmo número esta em
+ * `supabase/functions/_shared/experimentalApifyCollection.ts` (`maxItems` e
+ * `maxReviews`), e ali ele já e protegido por
+ * `scripts/check-binno-product-contract.mjs`.
+ */
+export const APIFY_SAMPLE_CAP = 50;
+
+/**
+ * Tolerancia de relógio para a data do retrato do navegador. Um retrato com
+ * data no futuro além disto não e adiantamento de relógio: é valor editado a
+ * mao ou relógio quebrado, e sem este limite ele venceria o banco para sempre.
+ */
+const CLOCK_SKEW_TOLERANCE_MS = 10 * 60 * 1_000;
+
+const persistedTimeOf = (snapshot: ExperimentalApifySnapshot | null) => {
   if (!snapshot) return null;
   const parsed = new Date(snapshot.fetchedAt).getTime();
   return Number.isFinite(parsed) ? parsed : null;
 };
 
 /**
- * Escolhe o retrato mais recente entre o do navegador e o que veio do banco.
- *
- * A precedência não pode ser fixa. A coleta diária no servidor grava apenas a
- * linha persistida, sem passar por navegador nenhum: com o navegador vencendo
- * sempre, um cliente que paga por coleta diária continuaria vendo um retrato
- * de dias atrás enquanto os números novos já estariam no banco.
- *
- * A comparação é entre o `fetchedAt` do retrato do navegador e o `captured_at`
- * da linha persistida, que `buildSnapshotFromPersistedRow` copia para o
- * `fetchedAt` do retrato que devolve. Empate fica com o navegador: é a mesma
- * coleta dos dois lados, e o lado do navegador ainda traz o histórico semanal
- * que a linha do banco não guarda.
- *
- * Data ausente ou ilegível no navegador conta como mais ANTIGA, nunca como
- * mais nova: na dúvida vence a linha do banco, que sempre tem `captured_at`.
- *
- * A fila de respostas continua vindo do `localStorage` qualquer que seja o
- * vencedor: nome, texto e URL de avaliação nunca foram gravados (contrato de
- * produto, linhas 39 a 41).
+ * Data do retrato do navegador, ou nulo quando não da para confiar nela.
+ * Ausente, ilegível ou no futuro além da tolerância de relógio contam todas
+ * como nulo, e nulo perde: na dúvida vence a linha do banco, que tem
+ * `captured_at` gravado pelo servidor.
  */
-export const chooseFreshestSnapshot = (
+const browserTimeOf = (snapshot: ExperimentalApifySnapshot | null, now: number) => {
+  const parsed = persistedTimeOf(snapshot);
+  if (parsed === null || parsed > now + CLOCK_SKEW_TOLERANCE_MS) return null;
+  return parsed;
+};
+
+/**
+ * Escolhe de onde vem o AGREGADO, e só ele. A coleta diária no servidor grava
+ * apenas a linha persistida, sem passar por navegador nenhum: com precedência
+ * fixa, quem paga por coleta diária continuaria vendo números de dias atras.
+ *
+ * A comparação e entre o `fetchedAt` do retrato do navegador e o `captured_at`
+ * da linha persistida, que `buildSnapshotFromPersistedRow` copia para o
+ * `fetchedAt` do retrato que devolve.
+ *
+ * Empate deixou de ser um caso especial. Antes o navegador precisava ganhar o
+ * empate para não levar junto a fila de respostas e o histórico semanal; agora
+ * esses dois são compostos a parte, então empate fica com a linha do banco e
+ * nada se perde por causa disso.
+ */
+const freshestAggregates = (
   browserSnapshot: ExperimentalApifySnapshot | null,
   persistedSnapshot: ExperimentalApifySnapshot | null,
+  now: number,
 ): ExperimentalApifySnapshot | null => {
   if (!browserSnapshot) return persistedSnapshot;
   if (!persistedSnapshot) return browserSnapshot;
-  const browserTime = snapshotTime(browserSnapshot);
-  const persistedTime = snapshotTime(persistedSnapshot);
+  const browserTime = browserTimeOf(browserSnapshot, now);
+  const persistedTime = persistedTimeOf(persistedSnapshot);
   if (browserTime === null) return persistedSnapshot;
   if (persistedTime === null) return browserSnapshot;
-  return browserTime >= persistedTime ? browserSnapshot : persistedSnapshot;
+  return browserTime > persistedTime ? browserSnapshot : persistedSnapshot;
+};
+
+const weeklyHistoryOwner = (
+  aggregates: ExperimentalApifySnapshot | null,
+  browserSnapshot: ExperimentalApifySnapshot | null,
+) => [aggregates, browserSnapshot].find((candidato) => candidato?.sample.insights?.history?.weeks?.length) || null;
+
+/**
+ * A amostra do Apify são as até 50 avaliações MAIS RECENTES. Quando ela bate
+ * no teto, as semanas mais antigas da janela ficam sem as avaliações que o
+ * teto cortou, e a comparação de varias semanas mostra uma queda que e
+ * artefato do corte, não do negócio. Uma observacao que falta e aceitavel;
+ * uma fragilidade inventada não e, e o contrato já diz isso do Radar.
+ *
+ * Abaixo do teto nada foi cortado: a janela esta coberta de verdade e os
+ * números podem ser desenhados normalmente. No caminho oficial a leitura vem
+ * de todas as avaliações, então não existe corte nenhum.
+ */
+const historyCoversWindow = (owner: ExperimentalApifySnapshot) =>
+  owner.source !== 'apify-experimental' || owner.sample.reviewCount < APIFY_SAMPLE_CAP;
+
+/**
+ * Monta a leitura que o cockpit desenha a partir das três fontes possíveis,
+ * em vez de escolher um retrato inteiro entre elas.
+ *
+ * Escolher um retrato inteiro juntava, num objeto só, coisas com tempos de
+ * vida e regras de proveniência diferentes: quando a linha do banco vencia, a
+ * fila de respostas sumia da tela, ainda que estivesse intacta no
+ * `localStorage`. E o caso da linha do banco vencer e exatamente o da coleta
+ * diária, ou seja, quem paga era quem perdia a fila.
+ *
+ * Composicao:
+ *   - o AGREGADO vem da fonte mais recente (navegador ou banco), ou do resumo
+ *     neutro do negócio quando não existe nenhuma coleta;
+ *   - a FILA DE RESPOSTAS vem sempre do `localStorage`, em todos os ramos,
+ *     independente de qual agregado venceu. Nome, texto e URL de avaliação só
+ *     existem ali (contrato de produto, linhas 39 a 41);
+ *   - o HISTORICO SEMANAL vem de quem o tiver, porque a linha do banco não
+ *     guarda semanas, e só quando a amostra que o gerou cobre a janela.
+ */
+export const composeCockpitSnapshot = ({
+  browserSnapshot,
+  persistedSnapshot,
+  fallbackSnapshot,
+  now = Date.now(),
+}: {
+  browserSnapshot: ExperimentalApifySnapshot | null;
+  persistedSnapshot: ExperimentalApifySnapshot | null;
+  fallbackSnapshot: ExperimentalApifySnapshot | null;
+  now?: number;
+}): ExperimentalApifySnapshot | null => {
+  const aggregates = freshestAggregates(browserSnapshot, persistedSnapshot, now) || fallbackSnapshot;
+  if (!aggregates) return null;
+
+  const observedReviews = browserSnapshot?.sample.observedReviews;
+  const owner = weeklyHistoryOwner(aggregates, browserSnapshot);
+  const history = owner && historyCoversWindow(owner) ? owner.sample.insights?.history : undefined;
+
+  return {
+    ...aggregates,
+    sample: {
+      ...aggregates.sample,
+      observedReviews,
+      insights: {
+        reviewsLast30Days: aggregates.sample.insights?.reviewsLast30Days ?? null,
+        averageResponseHours: aggregates.sample.insights?.averageResponseHours ?? null,
+        topics: aggregates.sample.insights?.topics || [],
+        history,
+      },
+    },
+  };
 };

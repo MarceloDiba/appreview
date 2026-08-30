@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import { ExperimentalApifySnapshot, loadExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
 import { useReputationSnapshot } from '@/hooks/useReputationSnapshot';
-import { buildSnapshotFromPersistedRow, chooseFreshestSnapshot } from '@/lib/reputationSnapshotReading';
+import { buildSnapshotFromPersistedRow, composeCockpitSnapshot } from '@/lib/reputationSnapshotReading';
 
 const emptyBreakdown = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 } as const;
 
@@ -70,9 +70,9 @@ const Dashboard = () => {
   const setup = useSetupStatus(userId || undefined);
   const outcome = useGoogleOutcome(userId || undefined);
   // O agregado da coleta vive no banco desde 30/08/2026. Ele e o que faz o
-  // painel encher em qualquer aparelho do dono, e nao so naquele que pediu a
+  // painel encher em qualquer aparelho do dono, e não só naquele que pediu a
   // coleta. A fila de respostas continua vindo do navegador: nome, texto e URL
-  // de avaliacao nunca foram gravados (contrato, linhas 39 a 41).
+  // de avaliação nunca foram gravados (contrato, linhas 39 a 41).
   const persisted = useReputationSnapshot(userId || undefined);
   const persistedSnapshot = useMemo(
     () => buildSnapshotFromPersistedRow(persisted.row, { businessName: businessName || t('dashboard.workspace.fallbackName') }),
@@ -102,11 +102,17 @@ const Dashboard = () => {
     };
   }, [businessName, outcome.data, t]);
 
-  // Vence o retrato mais recente, nao o do navegador por definicao. A coleta
-  // diaria no servidor grava so a linha do banco; com precedencia fixa, quem
-  // paga por coleta diaria continuaria vendo um retrato de dias atras.
-  const activeSnapshot = useMemo(
-    () => chooseFreshestSnapshot(experimentalSnapshot, persistedSnapshot) || approvedFallbackSnapshot,
+  // A leitura do cockpit e composta, não escolhida. O agregado vem da fonte
+  // mais recente; a fila de respostas vem sempre do localStorage, qualquer que
+  // seja a fonte que venceu; o histórico semanal vem de quem o tiver. Escolher
+  // um retrato inteiro fazia a fila sumir da tela justamente quando a linha do
+  // banco vencia, que e o caso da coleta diária.
+  const cockpitSnapshot = useMemo(
+    () => composeCockpitSnapshot({
+      browserSnapshot: experimentalSnapshot,
+      persistedSnapshot,
+      fallbackSnapshot: approvedFallbackSnapshot,
+    }),
     [approvedFallbackSnapshot, experimentalSnapshot, persistedSnapshot],
   );
 
@@ -157,8 +163,8 @@ const Dashboard = () => {
 
           {loadingExperimentalSnapshot || outcome.loading || persisted.loading ? (
             <Card className="h-72 animate-pulse border-slate-200 bg-white" />
-          ) : activeSnapshot ? (
-            <ExperimentalCockpitDashboard snapshot={activeSnapshot} userId={userId || undefined} />
+          ) : cockpitSnapshot ? (
+            <ExperimentalCockpitDashboard snapshot={cockpitSnapshot} userId={userId || undefined} />
           ) : (
             <Card className="border-slate-200 bg-white"><CardContent className="p-6"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.googleOutcome.emptyTitle')}</h2><p className="mt-2 text-sm text-slate-600">{t('dashboard.googleOutcome.empty')}</p><Button asChild className="mt-5"><Link to="/settings">{t('dashboard.googleOutcome.configure')}</Link></Button></CardContent></Card>
           )}

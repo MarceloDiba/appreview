@@ -50,7 +50,7 @@ export const parseGoogleUrl = (value: unknown): string | null => {
  * the Actor. `share.google` first lands on a Google Search knowledge card,
  * which the Actor does not accept as a start URL; in that one case we preserve
  * Google's search query and turn it into the equivalent Maps search URL.
- * Redirects remain constrained to Google-owned hosts so this is never an open
+ * Redirects remain constrained to Google-owned hosts só this is never an open
  * proxy for a supplied URL.
  */
 export const resolveGoogleMapsUrl = async (initialUrl: string): Promise<string> => {
@@ -428,9 +428,9 @@ const persistAggregateSnapshot = async ({
       topics: insights.topics ?? [],
       source: APIFY_SNAPSHOT_SOURCE,
     });
-    if (error) console.error('Agregado da coleta Apify nao foi persistido', error.code || error.message);
+    if (error) console.error('Agregado da coleta Apify não foi persistido', error.code || error.message);
   } catch (error) {
-    console.error('Agregado da coleta Apify nao foi persistido', error instanceof Error ? error.message : 'erro desconhecido');
+    console.error('Agregado da coleta Apify não foi persistido', error instanceof Error ? error.message : 'erro desconhecido');
   }
 };
 
