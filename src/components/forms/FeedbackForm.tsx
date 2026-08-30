@@ -122,16 +122,6 @@ const FeedbackForm = ({
           <X size={20} />
         </button>
 
-        {/* Botão Enviar */}
-        <button
-          type="submit"
-          onClick={handleSubmit}
-          disabled={enviando}
-          className="absolute right-4 top-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-medium"
-        >
-          {enviando ? t('formSending') : t('formSend')}
-        </button>
-
         {/* Cabeçalho */}
         <div className="flex flex-col items-start gap-3 pt-10 pb-6">
           <div className="text-left">
@@ -223,6 +213,21 @@ const FeedbackForm = ({
             </Link>
             .
           </p>
+
+          {/*
+            O botao de enviar ficava fixado no canto superior direito, colado no
+            X de fechar e acima do campo de texto. No primeiro uso real, em
+            30/08/2026, o gestor escreveu o comentario e nao achou como enviar.
+            A acao principal de um formulario pertence ao fim dele, onde a
+            pessoa termina de escrever, e nao ao canto onde se espera fechar.
+          */}
+          <button
+            type="submit"
+            disabled={enviando}
+            className="w-full rounded-xl bg-blue-600 px-4 py-3 text-base font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+          >
+            {enviando ? t('formSending') : t('formSend')}
+          </button>
         </form>
 
         {/*

@@ -302,15 +302,27 @@ const QRCodeGenerator = ({
           </CardContent>
 
           {lastCreated && (
-            <CardFooter className="flex flex-wrap justify-center gap-2">
-              <Button onClick={() => printCard(lastCreated)}>
-                <Printer className="mr-2 h-4 w-4" aria-hidden="true" />
-                {t('qrcodes.printCard')}
-              </Button>
-              <Button variant="outline" onClick={() => downloadForPrint(lastCreated)}>
-                <Download className="mr-2 h-4 w-4" aria-hidden="true" />
-                {t('qrcodes.download')}
-              </Button>
+            /*
+              Dois artefatos diferentes, e a decisao registrada no HANDOFF diz
+              qual e o principal: o cartao com moldura e o formato de impressao,
+              e o PNG puro serve para outros materiais. Ate 30/08/2026 os
+              rotulos diziam o contrario, "Imprimir" contra "Baixar imagem", e
+              no primeiro uso real o gestor baixou o QR sozinho achando que
+              levava o cartao. A dica abaixo existe para que a escolha nao
+              dependa de adivinhar o que cada botao produz.
+            */
+            <CardFooter className="flex flex-col items-center gap-3">
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button onClick={() => printCard(lastCreated)}>
+                  <Printer className="mr-2 h-4 w-4" aria-hidden="true" />
+                  {t('qrcodes.printCard')}
+                </Button>
+                <Button variant="outline" onClick={() => downloadForPrint(lastCreated)}>
+                  <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+                  {t('qrcodes.download')}
+                </Button>
+              </div>
+              <p className="max-w-md text-center text-xs leading-5 text-gray-500">{t('qrcodes.cardHint')}</p>
             </CardFooter>
           )}
         </Card>
