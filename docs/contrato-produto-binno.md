@@ -60,6 +60,28 @@ A Visão geral segue esta ordem, inclusive na primeira dobra:
 5. Coluna lateral: **Reputação no Google**, **Resumo no WhatsApp**, **Boas
    práticas**, **Completude do perfil** e **O que mudou na semana**.
 
+### Exceção aprovada em 30/08/2026: comentários que pedem atenção
+
+Esta é a única exceção à ordem fixa acima, e existe porque o comentário
+privado com nota baixa é a única coisa do produto que expira: o cliente ainda
+está no restaurante, ou acabou de sair. Uma avaliação no Google pode ser
+respondida amanhã sem perda; um comentário privado sem resposta não pode
+esperar até o dono abrir a aba certa por conta própria. No primeiro uso real
+do produto, o dono recebeu o alerta no WhatsApp de um comentário privado nota
+3, abriu o `/dashboard` e não encontrou nada para agir: o comentário existia
+em `/reviews`, dentro de uma aba, mas o painel que ele abre primeiro não tinha
+superfície nenhuma para isso.
+
+O bloco **Comentários que pedem atenção**
+(`src/components/dashboard/PendingCommentsBanner.tsx`) aparece acima da Fila
+de respostas somente quando existe pelo menos um caso em
+`internal_feedback.is_addressed` diferente de verdadeiro. Um toque leva o
+dono direto a `/reviews`, onde o caso pode ser tratado. Sem nenhum comentário
+pendente, o bloco não renderiza nada e a Visão geral fica exatamente como a
+ordem descrita acima, byte a byte. A exceção não desloca, esconde ou
+substitui a Fila de respostas nem qualquer outro módulo desta lista; ela some
+sozinha quando deixa de haver algo com prazo.
+
 O painel não pode regredir para uma primeira dobra composta apenas por nota,
 total de avaliações e gráficos genéricos do Google. Fila, resposta sugerida,
 forças, fragilidades e próximo passo são o centro do produto.
@@ -174,7 +196,9 @@ forças, fragilidades e próximo passo são o centro do produto.
 `npm run verify` executa `npm run check:product-contract`. Ele protege os
 trechos verificáveis deste contrato: composição consolidada, presença
 permanente do Radar/Plano/Resultado, integração do telefone de onboarding,
-ação de resposta com permalink individual, coleta de nome público e rejeição
-do URL genérico. O teste não substitui revisão de produto: qualquer mudança
-visual ou de fluxo ainda deve ser comparada com este documento antes de ser
+ação de resposta com permalink individual, coleta de nome público, rejeição
+do URL genérico e a única exceção à primeira dobra: o bloco de comentários
+que pedem atenção some por completo sem caso sem tratar e, quando existe,
+fica antes da fila de respostas. O teste não substitui revisão de produto:
+qualquer mudança visual ou de fluxo ainda deve ser comparada com este documento antes de ser
 aceita.

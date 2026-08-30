@@ -8,8 +8,8 @@
  * Deliberadamente determinístico: sem IA, sem API externa, sem chave paga e sem
  * latência. As regras são as mesmas que um consultor de reputação usaria —
  * reconhecer o que foi dito, nunca discutir em público, e levar o caso para
- * fora da vitrina. Mesma decisão tomada na Central de Atenção
- * (`useAttentionInsights`), pela mesma razão: o produto tem de funcionar com o
+ * fora da vitrina. Mesma decisão tomada no bloco de comentários que pedem
+ * atenção da Visão geral, pela mesma razão: o produto tem de funcionar com o
  * banco em pé e mais nada.
  *
  * A resposta sai no idioma em que o cliente escreveu. Em Lisboa, metade das

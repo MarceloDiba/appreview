@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import { useInternalFeedback } from '@/hooks/useInternalFeedback';
+import { orderPendingCasesByUrgency } from '@/lib/internalCasePriority';
 import ReplySuggestions from '@/components/dashboard/ReplySuggestions';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
@@ -16,6 +17,20 @@ interface CasesListProps {
 const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
   const { t, i18n } = useOwnerTranslation();
   const { loading, cases, error, resolvingId, resolveCase } = useInternalFeedback(userId);
+  // O caso sem tratar é o que ainda tem prazo; o caso já tratado é histórico.
+  // Por isso a lista deixa de ser só created_at desc: casos sem tratar vêm
+  // primeiro, na mesma ordem de urgência de `orderPendingCasesByUrgency`
+  // (`src/lib/internalCasePriority.ts`), e só depois os já tratados, na
+  // ordem que a busca devolveu. Quem chega pelo bloco "Comentários que pedem
+  // atenção" da Visão geral encontra aqui, no topo, o mesmo caso que o
+  // bloco destacou, porque os dois consomem a mesma função: não há uma
+  // segunda cópia da regra para divergir. Esta ordem vale para toda visita
+  // à página, não só para quem chega pelo bloco.
+  const orderedCases = useMemo(() => {
+    const pending = orderPendingCasesByUrgency(cases);
+    const resolved = cases.filter((item) => item.is_addressed);
+    return [...pending, ...resolved];
+  }, [cases]);
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
     return new Intl.DateTimeFormat(i18n.resolvedLanguage || i18n.language).format(
@@ -55,7 +70,7 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
 
   return (
     <div className="space-y-4">
-      {cases.map((item) => {
+      {orderedCases.map((item) => {
         const isAddressed = !!item.is_addressed;
         return (
           <Card key={item.id}>

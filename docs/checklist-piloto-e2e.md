@@ -133,16 +133,20 @@ só passou a funcionar de ponta a ponta em 29/08/2026
   esse comentário. O gatilho só age em nota 3 ou menos; nota 4 é elogio com
   ressalva e fica só no painel.
 
-## 6. Central de Atenção
+## 6. Comentários que pedem atenção
 
-- [ ] Voltar ao painel, abrir a Central de Atenção em `/reviews`
-  (`src/components/dashboard/AttentionCenter.tsx`, lista dos casos em
-  `src/components/dashboard/cases/CasesList.tsx`) e confirmar que o
-  comentário, a nota, o negócio e o estado do caso do passo 4 aparecem
-  corretamente.
+- [ ] Voltar à Visão geral do painel (`/dashboard`) e confirmar que o bloco
+  **Comentários que pedem atenção**
+  (`src/components/dashboard/PendingCommentsBanner.tsx`), acima da fila de
+  respostas, aparece com o caso do passo 4 e que um toque no botão leva à
+  aba Avaliações com esse caso visível.
+- [ ] Confirmar que a lista completa dos casos internos em `/reviews`
+  (`src/components/dashboard/cases/CasesList.tsx`) mostra o mesmo comentário,
+  a mesma nota, o mesmo negócio e o mesmo estado do caso do passo 4.
 - [ ] Marcar o caso como tratado e confirmar que o estado persiste depois de
   atualizar a página (o estado é gravado em `internal_feedback.is_addressed`
-  no Supabase, não só na tela).
+  no Supabase, não só na tela) e que o bloco da Visão geral desaparece quando
+  não houver mais nenhum caso pendente.
 
 ## 7. Encerrar sessão
 

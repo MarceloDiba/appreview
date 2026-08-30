@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 const root = process.cwd();
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const dashboard = read('src/components/dashboard/ApprovedCockpitDashboard.tsx');
+const pendingCommentsBanner = read('src/components/dashboard/PendingCommentsBanner.tsx');
 const dashboardPage = read('src/pages/Dashboard.tsx');
 const collector = read('supabase/functions/sync-experimental-apify/index.ts');
 const advisorReading = read('src/lib/advisorReading.ts');
@@ -20,6 +21,16 @@ const requirements = [
   ['telefone do onboarding é reutilizado no WhatsApp', dashboard.includes('onboardingPhone={onboardingPhone}')],
   ['fila oferece copiar e abrir somente com permalink individual', dashboard.includes("selected.reviewUrl ? <Button asChild") && dashboard.includes("copyAndOpenReview")],
   ['fila não inventa nome quando a fonte não o devolve', dashboard.includes("t('dashboard.cockpit.layout.anonymousReviewer')")],
+  // O comentario privado com nota baixa expira: o cliente ainda esta no
+  // restaurante, ou acabou de sair. Por isso o contrato abre uma unica
+  // excecao a primeira dobra fixada: um bloco de comentarios pendentes acima
+  // da fila, que so existe enquanto houver caso sem tratar. As duas linhas
+  // abaixo protegem exatamente essa condicional: a primeira exige que o
+  // bloco retorne nulo sem caso pendente, a segunda exige que ele fique
+  // sempre antes da fila quando existir, sem deslocar a fila da posicao
+  // dela quando ele nao existir.
+  ['bloco de comentários pendentes some por completo sem caso sem tratar', pendingCommentsBanner.includes('if (pendingOrdered.length === 0) return null;')],
+  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.indexOf('<PendingCommentsBanner userId={userId} />') < dashboard.lastIndexOf('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />')],
   ['coleta pede nome público', collector.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
   ['coleta aceita somente campos específicos de permalink', collector.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !collector.includes("'reviewUri', 'url'")],
   ['coleta temporária continua sem agenda e com limite explícito', collector.includes("maxReviews: 50") && collector.includes("APIFY_EXPERIMENTAL_COOLDOWN")],

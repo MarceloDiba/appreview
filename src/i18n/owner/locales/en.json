@@ -101,78 +101,6 @@
     "and": "and the",
     "privacy": "Privacy Policy"
   },
-  "attention": {
-    "andOthers": "and others",
-    "ui": {
-      "analyzing": "Analysing your week...",
-      "heading": "Attention centre",
-      "last7": "Last 7 days",
-      "priorityNow": "Your priority right now",
-      "openCases": "Open cases",
-      "oldest_one": "Oldest one {{count}} day ago",
-      "oldest_other": "Oldest one {{count}} days ago",
-      "nothingPending": "Nothing pending",
-      "awaitingReturn": "Awaiting a reply",
-      "leftContact": "Left a contact",
-      "weekAverage": "This week's average",
-      "prevAverage": "Previous average {{value}}",
-      "noHistory": "Not enough history",
-      "resolutionRate": "Resolution rate",
-      "resolvedTotal_one": "{{count}} resolved in total",
-      "resolvedTotal_other": "{{count}} resolved in total",
-      "openCasesBtn": "Open the cases",
-      "alsoWorth": "Also worth your attention"
-    },
-    "label": {
-      "awaiting": "No reply",
-      "stale": "Stalled case",
-      "ratingDrop": "Off pattern",
-      "volume": "Volume up",
-      "open": "Open",
-      "allClear": "All clear"
-    },
-    "awaiting": {
-      "title_one": "{{count}} customer left a contact and hasn't heard back",
-      "title_other": "{{count}} customers left a contact and haven't heard back",
-      "detailNames": "Includes {{names}}.",
-      "detailGeneric": "They took the time to write and left a way to reach them.",
-      "action": "Reply today, even without a solution yet. A same-day contact usually wins the customer back; a week of silence rarely does."
-    },
-    "stale": {
-      "someone": "A customer",
-      "title_one": "{{who}} has been waiting for {{count}} day",
-      "title_other": "{{who}} has been waiting for {{count}} days",
-      "detailQuote": "\"{{quote}}\"",
-      "detailGeneric": "The case is still open on your dashboard.",
-      "action": "Resolve it or mark it resolved with a note of what you did. The record is what proves you acted."
-    },
-    "ratingDrop": {
-      "title": "This week's average dropped to {{average}}",
-      "detail": "Over the previous four weeks it was {{baseline}}. That's a drop of {{drop}} point.",
-      "action": "Read this week's cases looking for what repeats. A sudden drop usually has a single cause: a shift, a dish, a person."
-    },
-    "volume": {
-      "title_one": "{{count}} case this week, against an average of {{average}}",
-      "title_other": "{{count}} cases this week, against an average of {{average}}",
-      "detail": "The number of unhappy customers rose compared with previous weeks.",
-      "action": "Check whether something changed in the operation over the last seven days — team, supplier, hours, menu."
-    },
-    "open": {
-      "title_one": "{{count}} open case with no customer contact",
-      "title_other": "{{count}} open cases with no customer contact",
-      "detail": "You can't reply to these, but the report still counts as a signal.",
-      "action": "Read them, fix what's operational, and mark them resolved to keep the dashboard clean."
-    },
-    "allClear": {
-      "titleEmpty": "No cases yet",
-      "titleClear": "No open cases this week",
-      "detailEmpty": "As soon as someone rates \"Bad\" on the QR code, the case shows up here instantly.",
-      "detailResolved_one": "You've resolved {{count}} case in total.",
-      "detailResolved_other": "You've resolved {{count}} cases in total.",
-      "actionEmpty": "Make sure the QR code is visible on the table or the counter — it's what feeds this page.",
-      "actionClear": "Take the chance to ask for a public review from anyone who had a good time. It's the best moment."
-    }
-  },
   "dashboard": {
     "greetingNamed": "Hello, {{name}}",
     "greetingGeneric": "Your dashboard",
@@ -525,6 +453,12 @@
         "priorityBody": "The Apify collection read {{count}} reviews, but it does not contain author, text, or reply status.",
         "prioritySampleBody": "{{count}} sampled reviews appear to have no reply, but the individual queue still depends on the official reading.",
         "priorityAction": "View official connection",
+        "pendingCommentsTitle": "Comments that need attention",
+        "pendingCommentsCount_one": "{{count}} private comment still without a reply",
+        "pendingCommentsCount_other": "{{count}} private comments still without a reply",
+        "pendingCommentsQuote": "\"{{quote}}\"",
+        "pendingCommentsHasContact": "Contact left for a callback",
+        "pendingCommentsAction": "View and reply",
         "queueTitle": "Reply queue",
         "queueSubtitle": "One decision at a time, with text and evidence once the official reading is available.",
         "queueUnavailableTitle": "The individual queue is not available yet",
