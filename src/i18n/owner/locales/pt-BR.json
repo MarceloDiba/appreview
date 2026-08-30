@@ -327,38 +327,132 @@
         "hideEvidence": "Fechar evidência"
       },
       "statePicker": "Estados ilustrativos do Radar",
-      "tabs": { "stable": "Tudo em dia", "risk": "Mudança a observar", "strength": "O que funciona", "opportunity": "Oportunidade" },
+      "tabs": {
+        "stable": "Tudo em dia",
+        "risk": "Mudança a observar",
+        "strength": "O que funciona",
+        "opportunity": "Oportunidade"
+      },
       "actionNote": "O Radar escolhe uma prioridade. Ele não cria uma lista de tarefas.",
       "disclaimer": "Demonstração com dados ilustrativos. No produto, cada sinal mostrará fonte, período e data da última sincronização.",
       "states": {
-        "stable": { "eyebrow": "Situação da semana", "title": "Sua reputação está estável", "body": "Não há avaliação sem resposta nem mudança relevante no período. Você não precisa abrir o Google hoje.", "action": "Ver painel", "detail": "94 avaliações lidas · nenhuma prioridade encontrada" },
-        "risk": { "eyebrow": "Mudança a observar", "title": "Demora reapareceu em 3 avaliações", "body": "O mesmo tema apareceu em avaliações recentes. Ainda não prova uma causa, mas vale uma leitura antes que vire padrão.", "action": "Revisar respostas", "detail": "3 menções em 12 dias · antes disso, nenhuma no período comparável" },
-        "strength": { "eyebrow": "O que funciona", "title": "Atendimento é sua força mais percebida", "body": "Clientes mencionaram cordialidade e atenção de forma positiva repetidas vezes. É um sinal real do que o negócio entrega bem.", "action": "Ver painel", "detail": "18 menções positivas em 30 dias · base: 94 avaliações lidas" },
-        "opportunity": { "eyebrow": "Uma oportunidade concreta", "title": "O prato executivo é elogiado, mas não aparece no perfil", "body": "Há elogios recorrentes a esse item e nenhuma foto recente que o mostre. Atualizar uma foto aproxima o Perfil da Empresa do que os clientes já valorizam.", "action": "Ver painel", "detail": "Uma sugestão baseada em elogios e dados do perfil — não uma promessa de ranking" }
+        "stable": {
+          "eyebrow": "Situação da semana",
+          "title": "Sua reputação está estável",
+          "body": "Não há avaliação sem resposta nem mudança relevante no período. Você não precisa abrir o Google hoje.",
+          "action": "Ver painel",
+          "detail": "94 avaliações lidas · nenhuma prioridade encontrada"
+        },
+        "risk": {
+          "eyebrow": "Mudança a observar",
+          "title": "Demora reapareceu em 3 avaliações",
+          "body": "O mesmo tema apareceu em avaliações recentes. Ainda não prova uma causa, mas vale uma leitura antes que vire padrão.",
+          "action": "Revisar respostas",
+          "detail": "3 menções em 12 dias · antes disso, nenhuma no período comparável"
+        },
+        "strength": {
+          "eyebrow": "O que funciona",
+          "title": "Atendimento é sua força mais percebida",
+          "body": "Clientes mencionaram cordialidade e atenção de forma positiva repetidas vezes. É um sinal real do que o negócio entrega bem.",
+          "action": "Ver painel",
+          "detail": "18 menções positivas em 30 dias · base: 94 avaliações lidas"
+        },
+        "opportunity": {
+          "eyebrow": "Uma oportunidade concreta",
+          "title": "O prato executivo é elogiado, mas não aparece no perfil",
+          "body": "Há elogios recorrentes a esse item e nenhuma foto recente que o mostre. Atualizar uma foto aproxima o Perfil da Empresa do que os clientes já valorizam.",
+          "action": "Ver painel",
+          "detail": "Uma sugestão baseada em elogios e dados do perfil — não uma promessa de ranking"
+        }
       },
       "riskEvidence": {
-        "title": "De onde veio o sinal", "subtitle": "Trechos de avaliações recentes que mencionam demora.",
-        "mariana": { "name": "Mariana Souza", "date": "12 ago", "quote": "Esperei bastante para ser atendida." },
-        "ricardo": { "name": "Ricardo Lima", "date": "08 ago", "quote": "O pedido demorou mais do que o esperado." },
-        "bia": { "name": "Bia Martins", "date": "02 ago", "quote": "Boa comida, mas a espera foi longa." }
+        "title": "De onde veio o sinal",
+        "subtitle": "Trechos de avaliações recentes que mencionam demora.",
+        "mariana": {
+          "name": "Mariana Souza",
+          "date": "12 ago",
+          "quote": "Esperei bastante para ser atendida."
+        },
+        "ricardo": {
+          "name": "Ricardo Lima",
+          "date": "08 ago",
+          "quote": "O pedido demorou mais do que o esperado."
+        },
+        "bia": {
+          "name": "Bia Martins",
+          "date": "02 ago",
+          "quote": "Boa comida, mas a espera foi longa."
+        }
       },
-      "strengthEvidence": { "metric": "Menções positivas", "metricDetail": "sobre atendimento", "title": "O que os clientes mais reconhecem", "body": "O Radar agrupa termos recorrentes para revelar a percepção que já existe — sem inventar elogios nem chamar uma tendência de resultado definitivo.", "topics": { "cordialidade": "Cordialidade", "agilidade": "Agilidade", "atenção": "Atenção" } },
-      "opportunityEvidence": { "title": "Por que esta é a única oportunidade agora", "body": "O perfil não precisa de uma reforma. Basta aproximar o que ele mostra do que os clientes já citam com entusiasmo.", "praise": "elogios ao prato executivo", "photos": "fotos recentes desse item" },
-      "sources": { "title": "Como o Radar chegou aqui", "subtitle": "Toda recomendação precisa explicar a própria evidência.", "period": "Período", "reviews": "Avaliações lidas", "profile": "Perfil do Google", "profileValue": "Dados ilustrativos" },
-      "quiet": { "title": "Silencioso por padrão", "body": "Se não houver risco ou oportunidade relevante, o Binno apenas confirma que está tudo em dia." }
+      "strengthEvidence": {
+        "metric": "Menções positivas",
+        "metricDetail": "sobre atendimento",
+        "title": "O que os clientes mais reconhecem",
+        "body": "O Radar agrupa termos recorrentes para revelar a percepção que já existe — sem inventar elogios nem chamar uma tendência de resultado definitivo.",
+        "topics": {
+          "cordialidade": "Cordialidade",
+          "agilidade": "Agilidade",
+          "atenção": "Atenção"
+        }
+      },
+      "opportunityEvidence": {
+        "title": "Por que esta é a única oportunidade agora",
+        "body": "O perfil não precisa de uma reforma. Basta aproximar o que ele mostra do que os clientes já citam com entusiasmo.",
+        "praise": "elogios ao prato executivo",
+        "photos": "fotos recentes desse item"
+      },
+      "sources": {
+        "title": "Como o Radar chegou aqui",
+        "subtitle": "Toda recomendação precisa explicar a própria evidência.",
+        "period": "Período",
+        "reviews": "Avaliações lidas",
+        "profile": "Perfil do Google",
+        "profileValue": "Dados ilustrativos"
+      },
+      "quiet": {
+        "title": "Silencioso por padrão",
+        "body": "Se não houver risco ou oportunidade relevante, o Binno apenas confirma que está tudo em dia."
+      }
     },
     "radarLive": {
       "title": "Radar de Reputação",
       "error": "Não foi possível ler o Radar agora. Tente novamente mais tarde.",
-      "connection": { "title": "Conecte o Perfil para ativar o Radar", "body": "O Radar só calcula pendências e padrões quando todas as avaliações do Perfil da Empresa foram importadas.", "action": "Conectar Perfil" },
-      "syncing": { "title": "O Radar ainda está terminando a leitura", "body": "Enquanto a sincronização não chega ao fim, não mostramos contagens ou padrões que possam estar incompletos.", "action": "Ver avaliações" },
-      "priority": { "title_one": "1 avaliação aguarda resposta", "title_other": "{{count}} avaliações aguardam resposta", "body": "{{count}} com nota até 3. Comece por elas para cuidar do que seus clientes já disseram.", "action": "Revisar avaliações" },
-      "clear": { "title": "Nenhuma avaliação aguarda resposta", "body": "A fila importada está em dia. O Radar continua acompanhando novas avaliações e mudanças recorrentes." },
+      "connection": {
+        "title": "Conecte o Perfil para ativar o Radar",
+        "body": "O Radar só calcula pendências e padrões quando todas as avaliações do Perfil da Empresa foram importadas.",
+        "action": "Conectar Perfil"
+      },
+      "syncing": {
+        "title": "O Radar ainda está terminando a leitura",
+        "body": "Enquanto a sincronização não chega ao fim, não mostramos contagens ou padrões que possam estar incompletos.",
+        "action": "Ver avaliações"
+      },
+      "priority": {
+        "title_one": "1 avaliação aguarda resposta",
+        "title_other": "{{count}} avaliações aguardam resposta",
+        "body": "{{count}} com nota até 3. Comece por elas para cuidar do que seus clientes já disseram.",
+        "action": "Revisar avaliações"
+      },
+      "clear": {
+        "title": "Nenhuma avaliação aguarda resposta",
+        "body": "A fila importada está em dia. O Radar continua acompanhando novas avaliações e mudanças recorrentes."
+      },
       "source": "Base: {{count}} avaliações importadas",
       "lastSynced": "atualizado {{date}}",
       "noPatterns": "Ainda não há um padrão recorrente com evidência suficiente para destacar.",
-      "signals": { "concernLabel": "Mudança a observar", "strengthLabel": "O que funciona", "concernTitle": "{{theme}} reaparece em avaliações recentes", "strengthTitle": "{{theme}} é uma força reconhecida", "evidence": "{{count}} menções em {{days}} dias" },
-      "themes": { "service": "Atendimento", "wait": "Demora", "food": "Comida", "cleanliness": "Limpeza" }
+      "signals": {
+        "concernLabel": "Mudança a observar",
+        "strengthLabel": "O que funciona",
+        "concernTitle": "{{theme}} reaparece em avaliações recentes",
+        "strengthTitle": "{{theme}} é uma força reconhecida",
+        "evidence": "{{count}} menções em {{days}} dias"
+      },
+      "themes": {
+        "service": "Atendimento",
+        "wait": "Demora",
+        "food": "Comida",
+        "cleanliness": "Limpeza"
+      }
     },
     "experimental": {
       "source": "Fonte experimental · Apify",
@@ -377,9 +471,18 @@
       "summarySubtitle": "Como o negócio aparece no Google, com uma leitura experimental limitada.",
       "summaryDisclaimer": "A nota e o total são públicos. A distribuição vem de uma amostra limitada e não substitui histórico, fila ou Radar oficial.",
       "disclaimer": "Mostra dados públicos observados e uma amostra limitada. Não mede fila completa, tendências, ranking ou respostas pendentes.",
-      "available": { "title": "O painel já ganha contexto", "body": "Nota, volume, distribuição e respostas vistas ficam reunidos sem abrir o Google." },
-      "attention": { "title": "Atenção na amostra", "body": "{{count}} avaliações de uma ou duas estrelas foram observadas." },
-      "replies": { "title": "Respostas vistas", "body": "{{count}} respostas do dono na amostra ({{rate}}%)." },
+      "available": {
+        "title": "O painel já ganha contexto",
+        "body": "Nota, volume, distribuição e respostas vistas ficam reunidos sem abrir o Google."
+      },
+      "attention": {
+        "title": "Atenção na amostra",
+        "body": "{{count}} avaliações de uma ou duas estrelas foram observadas."
+      },
+      "replies": {
+        "title": "Respostas vistas",
+        "body": "{{count}} respostas do dono na amostra ({{rate}}%)."
+      },
       "priority": {
         "title": "{{count}} avaliações de nota baixa aparecem na amostra",
         "body": "É um sinal para acompanhar, mas a coleta não guarda autor ou texto. Por segurança, o Binno não sugere nem publica uma resposta sem a conexão oficial.",
@@ -401,28 +504,329 @@
         "waitingBody": "Assim que o QR estiver em uso, o Binno mostra como as pessoas avançam até o Google.",
         "action": "Ver QR Codes"
       },
-      "official": { "title": "O próximo nível depende da conexão oficial", "body": "A aprovação do Perfil da Empresa libera fila completa, Radar com evidência e publicação confirmada de respostas. Até lá, o Binno não inventa esses dados." }
+      "official": {
+        "title": "O próximo nível depende da conexão oficial",
+        "body": "A aprovação do Perfil da Empresa libera fila completa, Radar com evidência e publicação confirmada de respostas. Até lá, o Binno não inventa esses dados."
+      }
     },
     "cockpit": {
-      "tabs": { "overview": "Visão geral", "reviews": "Avaliações", "questions": "Perguntas", "photos": "Fotos", "performance": "Desempenho", "practices": "Boas práticas", "whatsapp": "WhatsApp" },
-      "layout": { "navigation": "Seções do painel", "priorityTitle": "{{count}} notas baixas pedem uma leitura", "priorityBody": "A coleta Apify leu {{count}} avaliações, mas não traz autor, texto ou status de resposta.", "prioritySampleBody": "{{count}} avaliações da amostra parecem não ter resposta, mas a fila individual ainda depende da leitura oficial.", "priorityAction": "Ver conexão oficial", "queueTitle": "Fila de respostas", "queueSubtitle": "Uma decisão por vez, com texto e evidência quando a leitura oficial estiver disponível.", "queueUnavailableTitle": "A fila individual ainda não está disponível", "queueUnavailableBody": "As {{count}} notas baixas são um sinal na amostra, não uma fila real. O Binno não inventa autor ou comentário.", "queueLive": "Fila oficial sincronizada", "anonymousReviewer": "Cliente sem nome disponível", "dateUnavailable": "Data não disponível", "commentUnavailable": "O Google não disponibilizou o comentário desta avaliação.", "editBeforePublish": "edite antes de publicar", "openQueue": "Abrir avaliações", "queueSampleCount": "avaliações observadas na amostra", "queueSampleUnanswered": "sem resposta observada na amostra", "queueSampleReplies": "respostas observadas na amostra", "queueSampleBody": "Estes totais vêm de 49 avaliações observadas pelo Apify. Eles ajudam a medir o tamanho da oportunidade, mas não identificam quais clientes aguardam resposta. A fila individual só aparece depois da sincronização oficial.", "replyTitle": "Resposta sugerida", "replyWaiting": "aguardando avaliação completa", "replyBody": "Conecte o Perfil da Empresa para revisar o comentário, editar o rascunho e decidir se quer publicar.", "volumeTitle": "Volume de avaliações", "volumeSubtitle": "Mudança observável somente com leituras comparáveis.", "waiting": "Aguardando próxima leitura", "firstReading": "1 leitura disponível", "volumeObserved": "avaliações lidas na amostra", "volumeCollectedAt": "Leitura registrada em {{date}}", "volumeBody": "Ainda há uma única leitura experimental. O Binno não chama isso de queda ou aumento até haver um período comparável.", "distributionTitle": "Cada nota separada", "distributionBody": "{{count}} notas de uma ou duas estrelas aparecem em {{total}} avaliações observadas. Sem histórico, isso não prova mudança nem causa.", "qrSubtitle": "O funil termina no clique para o Google.", "eventsLoading": "Lendo os eventos observados nos últimos 30 dias…", "eventsUnavailable": "Os eventos do QR não puderam ser lidos agora. Tente atualizar a página.", "qrContinuation": "Continuaram para o Google", "qrPeriod": "Eventos observados nos últimos 30 dias.", "topicsTitle": "Temas mais citados", "topicsSubtitle": "Temas só aparecem com comentários completos.", "analyzableComments": "comentários com texto disponíveis", "topicsBody": "A coleta Apify foi sanitizada e não trouxe texto dos comentários. Por isso ainda não seria responsável nomear atendimento, comida ou outro tema.", "googleBreakdown": "Distribuição por nota na amostra", "averageReplyTime": "Tempo médio de resposta", "newReviews30d": "Novas avaliações (30 dias)", "metricNeedsResponseDates": "A fonte atual não trouxe datas de resposta.", "metricNeedsReviewDates": "A fonte atual não trouxe datas das avaliações.", "googleTitle": "Google lido via Apify", "googleRead": "Leitura experimental concluída", "googleAction": "Ver conexão oficial", "whatsappReady": "Canal local conectado. O teste manual está disponível; resumo recorrente continua sem agendamento.", "profileTitle": "Completude do perfil", "profileBody": "Ainda não conseguimos medir horários, fotos ou descrição sem a conexão oficial do Perfil da Empresa.", "profileAction": "Ver o que falta", "changeTitle": "O que mudou nesta semana", "changePeriod": "Sinais disponíveis, sem comparar períodos", "changeReading": "Amostra Apify lida em {{date}}.", "changeOpens": "{{count}} abertura(s) de QR registrada(s) nos últimos 30 dias.", "changeClicks": "{{count}} clique(s) para o Google registrado(s) nos últimos 30 dias.", "changeWaiting": "Ainda não há uma segunda leitura para afirmar tendência.", "changeBody": "Uma leitura pública experimental foi registrada. A próxima coleta permitirá comparar volume e distribuição sem inventar tendência." },
-      "assisted": { "badge": "Fila pública observada", "queueSubtitle": "Leitura experimental: você decide, copia e publica no Google.", "priorityBody": "{{count}} avaliações com texto estão prontas para uma resposta assistida nesta leitura pública.", "openQueue": "Responder agora", "reviewLabel": "Avaliação de {{rating}} estrelas", "reviewerUnavailable": "Nome não disponível nesta leitura", "editLocal": "edite antes de copiar", "copy": "Copiar resposta", "copyAndOpenReview": "Copiar e abrir esta avaliação", "openGoogle": "Abrir Google", "openReview": "Abrir esta avaliação no Google", "openGoogleFallback": "Abrir perfil no Google", "markResponded": "Marcar como respondida", "status": { "draft": "Rascunho pronto", "copied": "Resposta copiada", "manager-confirmed": "Marcada pelo gestor", "observed": "Resposta observada" }, "managerNote": "Este estado foi informado pelo gestor. A confirmação automática continua dependendo da conexão oficial.", "observedNote": "Uma resposta estava visível nesta leitura pública. Não é uma confirmação da API do Google.", "retention": "Nome, texto e link desta leitura ficam somente neste navegador até {{date}}.", "briefingTitle": "Briefing desta leitura", "useBriefing": "Usar este briefing", "briefing": "Binno — leitura pública experimental de {{business}}\nNota pública: {{rating}} ({{total}} avaliações no perfil).\nNa amostra, {{low}} nota(s) baixa(s) pedem atenção e {{queue}} comentário(s) com texto ainda não mostram resposta observada.\nAbra o painel para revisar uma resposta por vez." },
-      "practice": { "eyebrow": "Orientação do dia", "daily": "Uma por vez", "next": "Ver outra dica", "disclaimer": "Quando há uma avaliação na fila, ela recebe prioridade. As demais são boas práticas gerais e não prometem posição no Google.", "items": { "reply": { "title": "{{count}} avaliação(ões) com texto ainda não mostram resposta", "body": "Abra uma avaliação, ajuste o rascunho e publique manualmente no Google quando estiver satisfeito.", "action": "Revisar fila" }, "hours": { "title": "Confira horários e dados do negócio", "body": "Informações completas e precisas ajudam as pessoas a entender seu negócio antes de visitar.", "action": "Conferir dados" }, "photos": { "title": "Planeje uma foto recente da experiência", "body": "Uma foto atual ajuda a mostrar o que o cliente encontra hoje, sem prometer ganho de posição.", "action": "Abrir perfil" }, "invite": { "title": "Convide avaliações sem pedir uma nota", "body": "Use o QR para levar cada cliente ao Google, sem filtrar experiências nem oferecer recompensa.", "action": "Ver QR Codes" } } },
-      "locked": { "title": "Este módulo precisa da conexão oficial", "body": "A fonte experimental mostra somente uma leitura agregada. Fila, perguntas, fotos e desempenho detalhado entram depois da autorização do Perfil da Empresa.", "action": "Ver status da conexão" },
-      "topicLabels": { "service": "atendimento", "wait": "tempo de espera", "food": "comida", "cleanliness": "limpeza", "price": "preço", "atmosphere": "ambiente", "delivery": "entrega" },
-      "priority": { "eyebrow": "Prioridade agora", "title": "Comece pela fila e pela resposta", "subtitle": "O Binno só prepara uma resposta quando consegue mostrar a avaliação e a evidência que a motivou.", "waitingBadge": "Fila aguardando conexão oficial", "partialTitle": "{{count}} notas baixas aparecem na amostra", "partialBody": "São um sinal para investigar, mas a coleta parcial não traz texto, autor ou resposta publicada.", "replyTitle": "A resposta sugerida ainda não pode ser preparada", "replyBody": "Conecte o Perfil da Empresa para carregar a fila completa, editar o rascunho e decidir se quer publicar no Google.", "action": "Conectar Perfil" },
-      "signals": { "eyebrow": "Forças e fragilidades", "title": "O que está ajudando — e o que merece cuidado", "strengthTitle": "Ainda não há base para afirmar uma força", "strengthBody": "A fonte experimental não preserva os comentários. O Binno espera os textos completos antes de atribuir um elogio ao atendimento, comida ou qualquer outro tema.", "fragilityTitle": "{{count}} notas baixas exigem leitura", "fragilityBody": "Elas estão dentro de uma amostra de {{count}} avaliações. Sem tendência, texto e período comparável, não atribuímos uma causa.", "evidence": "Quando a sincronização oficial terminar, cada força ou fragilidade mostrará comentários, período e quantidade de menções que sustentam a leitura." },
-      "plan": { "eyebrow": "Plano de melhoria do Perfil Google", "title": "Uma ação concreta por vez", "subtitle": "Priorizado por impacto provável e esforço, sem prometer posição no ranking.", "source": "Ver orientação oficial do Google", "impact": { "high": "impacto alto", "medium": "impacto médio" }, "effort": { "low": "esforço baixo" }, "tasks": { "connect": { "title": "Conectar o Perfil da Empresa", "body": "Libera a fila real, respostas editáveis e a evidência do Radar.", "action": "Conectar" }, "hours": { "title": "Conferir horários e informações", "body": "Dados completos e precisos ajudam as pessoas a entender o negócio antes de visitar.", "action": "Conferir" }, "photos": { "title": "Planejar fotos atuais do negócio", "body": "A conexão oficial mostra o que já existe antes de sugerir uma atualização.", "action": "Ver perfil" } } },
-      "support": { "eyebrow": "Métricas de apoio", "title": "Os números que ajudam a explicar a prioridade", "profileMetricDetail": "nota pública observada no perfil" },
-      "summary": { "title": "Resumo da reputação", "subtitle": "Como sua empresa aparece hoje para quem busca no Google.", "observed": "Leitura experimental", "profileCount": "{{count}} avaliações", "sampleDistribution": "Distribuição da amostra · {{count}}", "trend": "Tendência observada", "trendWaiting": "Aguardando a próxima leitura", "trendBody": "Precisamos de uma segunda coleta para mostrar evolução sem inventar tendência." },
-      "metrics": { "lowRatings": "Notas baixas na amostra", "lowRatingsDetail": "em {{count}} avaliações observadas", "observedReplies": "Respostas observadas", "observedRepliesDetail": "{{rate}}% da amostra", "sampleRating": "Nota da amostra", "sampleRatingDetail": "não representa período completo", "newReviews": "Novas avaliações no mês", "connectionRequired": "Requer conexão oficial" },
-      "reviews": { "title": "Últimas avaliações", "subtitle": "As mais recentes primeiro, com o status de resposta de cada uma.", "lockedBadge": "Conexão necessária", "lockedTitle": "A fila individual ainda não está disponível", "lockedBody": "A coleta experimental não guarda autores, textos ou links de avaliações. Assim que o Perfil da Empresa for autorizado, a fila aparece aqui com respostas editáveis.", "action": "Ver conexão" },
-      "path": { "title": "Como as pessoas chegam até você", "subtitle": "Do QR code na loja até a página da empresa no Google.", "opens": "QR code aberto", "clicks": "Clicaram para avaliar no Google", "published": "Avaliações publicadas", "waiting": "Aguardando os primeiros acessos", "officialOnly": "Confirmação depende do Google", "disclaimer": "Abertura e clique mostram intenção. O Binno não conclui que uma pessoa publicou uma avaliação a partir do QR.", "action": "Ver QR Codes" },
-      "topics": { "title": "O que os clientes mais comentam", "subtitle": "Assuntos que aparecem nas avaliações recentes.", "body": "Os temas só serão destacados depois da sincronização oficial, quando houver avaliações completas e contexto suficiente para não tirar conclusões de uma amostra." },
-      "attention": { "title": "Precisa de você agora", "body": "Há {{count}} avaliações de uma ou duas estrelas na amostra. Sem o texto e o autor, não seria responsável sugerir uma resposta específica.", "action": "Ver status da conexão" },
-      "health": { "title": "Seu perfil no Google", "subtitle": "Sinais de presença e atendimento que merecem acompanhamento.", "responses": "Respostas a avaliações", "photos": "Fotos recentes", "info": "Informações do negócio", "connection": "Requer conexão ao Perfil da Empresa", "review": "Revisar horários e dados" },
-      "changes": { "title": "O que mudou nesta leitura", "snapshot": "Uma leitura experimental do perfil foi carregada.", "lowRatings": "{{count}} notas baixas apareceram na amostra.", "official": "Fila, Radar e respostas aguardam a conexão oficial." },
-      "whatsapp": { "title": "Resumo e prioridades no WhatsApp", "body": "Conecte o canal para definir o que chega ao gestor e quando.", "notificationsTitle": "Configuração das notificações", "notificationsBody": "Escolha o que deve chegar ao gestor. Nesta etapa, as preferências são locais: nada é agendado ou enviado automaticamente.", "weeklyTitle": "Resumo semanal", "weeklyBody": "Inclui nota, volume, respostas e prioridades quando houver dados suficientes.", "priorityTitle": "Alertas de prioridade", "priorityBody": "Prioriza novas avaliações sem resposta e sinais que exigem atenção.", "notificationsConsent": "Confirmo que tenho consentimento para receber estas notificações neste número. Salvar não ativa envios automáticos.", "preferencesSaved": "Preferências salvas localmente. A entrega recorrente continua desligada.", "summaryTitle": "Resumo WhatsApp", "summaryReady": "O canal local está pronto para teste, mas ainda não há dados completos nem consentimento para programar um resumo.", "summaryWaiting": "O resumo só será oferecido depois de haver dados suficientes, consentimento e um canal configurado.", "notConnected": "Não conectado", "scheduled": "Agenda local pronta", "connect": "Configurar WhatsApp", "manage": "Gerenciar envio", "workspaceTitle": "WhatsApp do gestor", "workspaceBody": "Escolha quando o resumo deve chegar. A entrega real só é ativada depois do provedor, consentimento e número verificado.", "frequency": "Frequência", "time": "Horário", "schedule": { "monday": "Toda segunda-feira", "friday": "Toda sexta-feira" }, "previewTitle": "Prévia da mensagem", "previewBody": "Bom dia! Quando a integração estiver ativa, você receberá aqui uma leitura curta da reputação e do que merece atenção.", "saveLocal": "Salvar programação local", "save": "Atualizar programação local", "localDisclaimer": "Esta programação é somente uma prévia local. Nenhuma mensagem foi enviada nem será enviada sem a conexão do provedor e seu consentimento.", "historyTitle": "Mensagens enviadas", "historyEmpty": "Nenhuma mensagem foi enviada. O histórico começa somente depois da conexão real do WhatsApp.", "connectionTitle": "Limites deste piloto", "connectionBody": "O canal é temporário, local e manual. Não há agenda, webhook, importação de conversas ou entrega recorrente.", "status": { "checking": "Verificando canal local", "ready": "Canal local conectado", "not-connected": "Canal local não vinculado", "unavailable": "Canal temporário indisponível" }, "localCardReady": "Canal temporário pronto para um envio manual e confirmado.", "openTest": "Abrir teste de entrega", "localTitle": "Teste de entrega local", "localBody": "Valide o envio manual do painel sem ativar agenda, automação ou integração publicada.", "refresh": "Atualizar estado", "readyBody": "A sessão local está vinculada. O envio abaixo ainda exige número e confirmação explícita.", "unavailableBody": "Inicie o OpenWA local e o proxy de desenvolvimento para testar este canal.", "recipient": "Número para teste", "recipientHint": "Use formato internacional, por exemplo +351 911 056 526. O número não é salvo pelo Binno.", "message": "Mensagem", "defaultMessage": "Binno: teste manual enviado pelo painel local. Nenhuma automação foi ativada.", "confirmation": "Confirmo que este é um envio único e manual para o número informado.", "sendTest": "Enviar mensagem de teste", "sending": "Enviando…", "sendError": "Não foi possível enviar a mensagem de teste.", "sent": "Mensagem de teste enviada em {{time}} para {{recipient}}.", "historyLive": "Um envio manual foi registrado nesta sessão local.", "historyEmpty": "Nenhuma mensagem foi enviada por este painel nesta sessão." }
+      "tabs": {
+        "overview": "Visão geral",
+        "reviews": "Avaliações",
+        "questions": "Perguntas",
+        "photos": "Fotos",
+        "performance": "Desempenho",
+        "practices": "Boas práticas",
+        "whatsapp": "WhatsApp"
+      },
+      "layout": {
+        "navigation": "Seções do painel",
+        "priorityTitle": "{{count}} notas baixas pedem uma leitura",
+        "priorityBody": "A coleta Apify leu {{count}} avaliações, mas não traz autor, texto ou status de resposta.",
+        "prioritySampleBody": "{{count}} avaliações da amostra parecem não ter resposta, mas a fila individual ainda depende da leitura oficial.",
+        "priorityAction": "Ver conexão oficial",
+        "queueTitle": "Fila de respostas",
+        "queueSubtitle": "Uma decisão por vez, com texto e evidência quando a leitura oficial estiver disponível.",
+        "queueUnavailableTitle": "A fila individual ainda não está disponível",
+        "queueUnavailableBody": "As {{count}} notas baixas são um sinal na amostra, não uma fila real. O Binno não inventa autor ou comentário.",
+        "queueLive": "Fila oficial sincronizada",
+        "anonymousReviewer": "Cliente sem nome disponível",
+        "dateUnavailable": "Data não disponível",
+        "commentUnavailable": "O Google não disponibilizou o comentário desta avaliação.",
+        "editBeforePublish": "edite antes de publicar",
+        "openQueue": "Abrir avaliações",
+        "queueSampleCount": "avaliações observadas na amostra",
+        "queueSampleUnanswered": "sem resposta observada na amostra",
+        "queueSampleReplies": "respostas observadas na amostra",
+        "queueSampleBody": "Estes totais vêm de 49 avaliações observadas pelo Apify. Eles ajudam a medir o tamanho da oportunidade, mas não identificam quais clientes aguardam resposta. A fila individual só aparece depois da sincronização oficial.",
+        "replyTitle": "Resposta sugerida",
+        "replyWaiting": "aguardando avaliação completa",
+        "replyBody": "Conecte o Perfil da Empresa para revisar o comentário, editar o rascunho e decidir se quer publicar.",
+        "volumeTitle": "Volume de avaliações",
+        "volumeSubtitle": "Mudança observável somente com leituras comparáveis.",
+        "waiting": "Aguardando próxima leitura",
+        "firstReading": "1 leitura disponível",
+        "volumeObserved": "avaliações lidas na amostra",
+        "volumeCollectedAt": "Leitura registrada em {{date}}",
+        "volumeBody": "Ainda há uma única leitura experimental. O Binno não chama isso de queda ou aumento até haver um período comparável.",
+        "distributionTitle": "Cada nota separada",
+        "distributionBody": "{{count}} notas de uma ou duas estrelas aparecem em {{total}} avaliações observadas. Sem histórico, isso não prova mudança nem causa.",
+        "qrSubtitle": "O funil termina no clique para o Google.",
+        "eventsLoading": "Lendo os eventos observados nos últimos 30 dias…",
+        "eventsUnavailable": "Os eventos do QR não puderam ser lidos agora. Tente atualizar a página.",
+        "qrContinuation": "Continuaram para o Google",
+        "qrPeriod": "Eventos observados nos últimos 30 dias.",
+        "topicsTitle": "Temas mais citados",
+        "topicsSubtitle": "Temas só aparecem com comentários completos.",
+        "analyzableComments": "comentários com texto disponíveis",
+        "topicsBody": "A coleta Apify foi sanitizada e não trouxe texto dos comentários. Por isso ainda não seria responsável nomear atendimento, comida ou outro tema.",
+        "googleBreakdown": "Distribuição por nota na amostra",
+        "averageReplyTime": "Tempo médio de resposta",
+        "newReviews30d": "Novas avaliações (30 dias)",
+        "metricNeedsResponseDates": "A fonte atual não trouxe datas de resposta.",
+        "metricNeedsReviewDates": "A fonte atual não trouxe datas das avaliações.",
+        "googleTitle": "Google lido via Apify",
+        "googleRead": "Leitura experimental concluída",
+        "googleAction": "Ver conexão oficial",
+        "whatsappReady": "Canal local conectado. O teste manual está disponível; resumo recorrente continua sem agendamento.",
+        "profileTitle": "Completude do perfil",
+        "profileBody": "Ainda não conseguimos medir horários, fotos ou descrição sem a conexão oficial do Perfil da Empresa.",
+        "profileAction": "Ver o que falta",
+        "changeTitle": "O que mudou nesta semana",
+        "changePeriod": "Sinais disponíveis, sem comparar períodos",
+        "changeReading": "Amostra Apify lida em {{date}}.",
+        "changeOpens": "{{count}} abertura(s) de QR registrada(s) nos últimos 30 dias.",
+        "changeClicks": "{{count}} clique(s) para o Google registrado(s) nos últimos 30 dias.",
+        "changeWaiting": "Ainda não há uma segunda leitura para afirmar tendência.",
+        "changeBody": "Uma leitura pública experimental foi registrada. A próxima coleta permitirá comparar volume e distribuição sem inventar tendência."
+      },
+      "assisted": {
+        "badge": "Fila pública observada",
+        "queueSubtitle": "Leitura experimental: você decide, copia e publica no Google.",
+        "priorityBody": "{{count}} avaliações com texto estão prontas para uma resposta assistida nesta leitura pública.",
+        "openQueue": "Responder agora",
+        "reviewLabel": "Avaliação de {{rating}} estrelas",
+        "reviewerUnavailable": "Nome não disponível nesta leitura",
+        "editLocal": "edite antes de copiar",
+        "copy": "Copiar resposta",
+        "copyAndOpenReview": "Copiar e abrir esta avaliação",
+        "openGoogle": "Abrir Google",
+        "openReview": "Abrir esta avaliação no Google",
+        "openGoogleFallback": "Abrir perfil no Google",
+        "markResponded": "Marcar como respondida",
+        "status": {
+          "draft": "Rascunho pronto",
+          "copied": "Resposta copiada",
+          "manager-confirmed": "Marcada pelo gestor",
+          "observed": "Resposta observada"
+        },
+        "managerNote": "Este estado foi informado pelo gestor. A confirmação automática continua dependendo da conexão oficial.",
+        "observedNote": "Uma resposta estava visível nesta leitura pública. Não é uma confirmação da API do Google.",
+        "retention": "Nome, texto e link desta leitura ficam somente neste navegador até {{date}}.",
+        "briefingTitle": "Briefing desta leitura",
+        "useBriefing": "Usar este briefing",
+        "briefing": "Binno — leitura pública experimental de {{business}}\nNota pública: {{rating}} ({{total}} avaliações no perfil).\nNa amostra, {{low}} nota(s) baixa(s) pedem atenção e {{queue}} comentário(s) com texto ainda não mostram resposta observada.\nAbra o painel para revisar uma resposta por vez."
+      },
+      "practice": {
+        "eyebrow": "Orientação do dia",
+        "daily": "Uma por vez",
+        "next": "Ver outra dica",
+        "disclaimer": "Quando há uma avaliação na fila, ela recebe prioridade. As demais são boas práticas gerais e não prometem posição no Google.",
+        "items": {
+          "reply": {
+            "title": "{{count}} avaliação(ões) com texto ainda não mostram resposta",
+            "body": "Abra uma avaliação, ajuste o rascunho e publique manualmente no Google quando estiver satisfeito.",
+            "action": "Revisar fila"
+          },
+          "hours": {
+            "title": "Confira horários e dados do negócio",
+            "body": "Informações completas e precisas ajudam as pessoas a entender seu negócio antes de visitar.",
+            "action": "Conferir dados"
+          },
+          "photos": {
+            "title": "Planeje uma foto recente da experiência",
+            "body": "Uma foto atual ajuda a mostrar o que o cliente encontra hoje, sem prometer ganho de posição.",
+            "action": "Abrir perfil"
+          },
+          "invite": {
+            "title": "Convide avaliações sem pedir uma nota",
+            "body": "Use o QR para levar cada cliente ao Google, sem filtrar experiências nem oferecer recompensa.",
+            "action": "Ver QR Codes"
+          }
+        }
+      },
+      "locked": {
+        "title": "Este módulo precisa da conexão oficial",
+        "body": "A fonte experimental mostra somente uma leitura agregada. Fila, perguntas, fotos e desempenho detalhado entram depois da autorização do Perfil da Empresa.",
+        "action": "Ver status da conexão"
+      },
+      "topicLabels": {
+        "service": "atendimento",
+        "wait": "tempo de espera",
+        "food": "comida",
+        "cleanliness": "limpeza",
+        "price": "preço",
+        "atmosphere": "ambiente",
+        "delivery": "entrega"
+      },
+      "priority": {
+        "eyebrow": "Prioridade agora",
+        "title": "Comece pela fila e pela resposta",
+        "subtitle": "O Binno só prepara uma resposta quando consegue mostrar a avaliação e a evidência que a motivou.",
+        "waitingBadge": "Fila aguardando conexão oficial",
+        "partialTitle": "{{count}} notas baixas aparecem na amostra",
+        "partialBody": "São um sinal para investigar, mas a coleta parcial não traz texto, autor ou resposta publicada.",
+        "replyTitle": "A resposta sugerida ainda não pode ser preparada",
+        "replyBody": "Conecte o Perfil da Empresa para carregar a fila completa, editar o rascunho e decidir se quer publicar no Google.",
+        "action": "Conectar Perfil"
+      },
+      "signals": {
+        "eyebrow": "Forças e fragilidades",
+        "title": "O que está ajudando — e o que merece cuidado",
+        "strengthTitle": "Ainda não há base para afirmar uma força",
+        "strengthBody": "A fonte experimental não preserva os comentários. O Binno espera os textos completos antes de atribuir um elogio ao atendimento, comida ou qualquer outro tema.",
+        "fragilityTitle": "{{count}} notas baixas exigem leitura",
+        "fragilityBody": "Elas estão dentro de uma amostra de {{count}} avaliações. Sem tendência, texto e período comparável, não atribuímos uma causa.",
+        "evidence": "Quando a sincronização oficial terminar, cada força ou fragilidade mostrará comentários, período e quantidade de menções que sustentam a leitura."
+      },
+      "plan": {
+        "eyebrow": "Plano de melhoria do Perfil Google",
+        "title": "Uma ação concreta por vez",
+        "subtitle": "Priorizado por impacto provável e esforço, sem prometer posição no ranking.",
+        "source": "Ver orientação oficial do Google",
+        "impact": {
+          "high": "impacto alto",
+          "medium": "impacto médio"
+        },
+        "effort": {
+          "low": "esforço baixo"
+        },
+        "tasks": {
+          "connect": {
+            "title": "Conectar o Perfil da Empresa",
+            "body": "Libera a fila real, respostas editáveis e a evidência do Radar.",
+            "action": "Conectar"
+          },
+          "hours": {
+            "title": "Conferir horários e informações",
+            "body": "Dados completos e precisos ajudam as pessoas a entender o negócio antes de visitar.",
+            "action": "Conferir"
+          },
+          "photos": {
+            "title": "Planejar fotos atuais do negócio",
+            "body": "A conexão oficial mostra o que já existe antes de sugerir uma atualização.",
+            "action": "Ver perfil"
+          }
+        }
+      },
+      "support": {
+        "eyebrow": "Métricas de apoio",
+        "title": "Os números que ajudam a explicar a prioridade",
+        "profileMetricDetail": "nota pública observada no perfil"
+      },
+      "summary": {
+        "title": "Resumo da reputação",
+        "subtitle": "Como sua empresa aparece hoje para quem busca no Google.",
+        "observed": "Leitura experimental",
+        "profileCount": "{{count}} avaliações",
+        "sampleDistribution": "Distribuição da amostra · {{count}}",
+        "trend": "Tendência observada",
+        "trendWaiting": "Aguardando a próxima leitura",
+        "trendBody": "Precisamos de uma segunda coleta para mostrar evolução sem inventar tendência."
+      },
+      "metrics": {
+        "lowRatings": "Notas baixas na amostra",
+        "lowRatingsDetail": "em {{count}} avaliações observadas",
+        "observedReplies": "Respostas observadas",
+        "observedRepliesDetail": "{{rate}}% da amostra",
+        "sampleRating": "Nota da amostra",
+        "sampleRatingDetail": "não representa período completo",
+        "newReviews": "Novas avaliações no mês",
+        "connectionRequired": "Requer conexão oficial"
+      },
+      "reviews": {
+        "title": "Últimas avaliações",
+        "subtitle": "As mais recentes primeiro, com o status de resposta de cada uma.",
+        "lockedBadge": "Conexão necessária",
+        "lockedTitle": "A fila individual ainda não está disponível",
+        "lockedBody": "A coleta experimental não guarda autores, textos ou links de avaliações. Assim que o Perfil da Empresa for autorizado, a fila aparece aqui com respostas editáveis.",
+        "action": "Ver conexão"
+      },
+      "path": {
+        "title": "Como as pessoas chegam até você",
+        "subtitle": "Do QR code na loja até a página da empresa no Google.",
+        "opens": "QR code aberto",
+        "clicks": "Clicaram para avaliar no Google",
+        "published": "Avaliações publicadas",
+        "waiting": "Aguardando os primeiros acessos",
+        "officialOnly": "Confirmação depende do Google",
+        "disclaimer": "Abertura e clique mostram intenção. O Binno não conclui que uma pessoa publicou uma avaliação a partir do QR.",
+        "action": "Ver QR Codes"
+      },
+      "topics": {
+        "title": "O que os clientes mais comentam",
+        "subtitle": "Assuntos que aparecem nas avaliações recentes.",
+        "body": "Os temas só serão destacados depois da sincronização oficial, quando houver avaliações completas e contexto suficiente para não tirar conclusões de uma amostra."
+      },
+      "attention": {
+        "title": "Precisa de você agora",
+        "body": "Há {{count}} avaliações de uma ou duas estrelas na amostra. Sem o texto e o autor, não seria responsável sugerir uma resposta específica.",
+        "action": "Ver status da conexão"
+      },
+      "health": {
+        "title": "Seu perfil no Google",
+        "subtitle": "Sinais de presença e atendimento que merecem acompanhamento.",
+        "responses": "Respostas a avaliações",
+        "photos": "Fotos recentes",
+        "info": "Informações do negócio",
+        "connection": "Requer conexão ao Perfil da Empresa",
+        "review": "Revisar horários e dados"
+      },
+      "changes": {
+        "title": "O que mudou nesta leitura",
+        "snapshot": "Uma leitura experimental do perfil foi carregada.",
+        "lowRatings": "{{count}} notas baixas apareceram na amostra.",
+        "official": "Fila, Radar e respostas aguardam a conexão oficial."
+      },
+      "whatsapp": {
+        "title": "Resumo e prioridades no WhatsApp",
+        "body": "Conecte o canal para definir o que chega ao gestor e quando.",
+        "notificationsTitle": "Configuração das notificações",
+        "notificationsBody": "Escolha o que deve chegar ao gestor. Nesta etapa, as preferências são locais: nada é agendado ou enviado automaticamente.",
+        "weeklyTitle": "Resumo semanal",
+        "weeklyBody": "Inclui nota, volume, respostas e prioridades quando houver dados suficientes.",
+        "priorityTitle": "Alertas de prioridade",
+        "priorityBody": "Prioriza novas avaliações sem resposta e sinais que exigem atenção.",
+        "notificationsConsent": "Confirmo que tenho consentimento para receber estas notificações neste número. Salvar não ativa envios automáticos.",
+        "preferencesSaved": "Preferências salvas localmente. A entrega recorrente continua desligada.",
+        "summaryTitle": "Resumo WhatsApp",
+        "summaryReady": "O canal local está pronto para teste, mas ainda não há dados completos nem consentimento para programar um resumo.",
+        "summaryWaiting": "O resumo só será oferecido depois de haver dados suficientes, consentimento e um canal configurado.",
+        "notConnected": "Não conectado",
+        "scheduled": "Agenda local pronta",
+        "connect": "Configurar WhatsApp",
+        "manage": "Gerenciar envio",
+        "workspaceTitle": "WhatsApp do gestor",
+        "workspaceBody": "Escolha quando o resumo deve chegar. A entrega real só é ativada depois do provedor, consentimento e número verificado.",
+        "frequency": "Frequência",
+        "time": "Horário",
+        "schedule": {
+          "monday": "Toda segunda-feira",
+          "friday": "Toda sexta-feira"
+        },
+        "previewTitle": "Prévia da mensagem",
+        "previewBody": "Bom dia! Quando a integração estiver ativa, você receberá aqui uma leitura curta da reputação e do que merece atenção.",
+        "saveLocal": "Salvar programação local",
+        "save": "Atualizar programação local",
+        "localDisclaimer": "Esta programação é somente uma prévia local. Nenhuma mensagem foi enviada nem será enviada sem a conexão do provedor e seu consentimento.",
+        "historyTitle": "Mensagens enviadas",
+        "historyEmpty": "Nenhuma mensagem foi enviada por este painel nesta sessão.",
+        "connectionTitle": "Limites deste piloto",
+        "connectionBody": "O canal é temporário, local e manual. Não há agenda, webhook, importação de conversas ou entrega recorrente.",
+        "status": {
+          "checking": "Verificando canal local",
+          "ready": "Canal local conectado",
+          "not-connected": "Canal local não vinculado",
+          "unavailable": "Canal temporário indisponível"
+        },
+        "localCardReady": "Canal temporário pronto para um envio manual e confirmado.",
+        "openTest": "Abrir teste de entrega",
+        "localTitle": "Teste de entrega local",
+        "localBody": "Valide o envio manual do painel sem ativar agenda, automação ou integração publicada.",
+        "refresh": "Atualizar estado",
+        "readyBody": "A sessão local está vinculada. O envio abaixo ainda exige número e confirmação explícita.",
+        "unavailableBody": "Inicie o OpenWA local e o proxy de desenvolvimento para testar este canal.",
+        "recipient": "Número para teste",
+        "recipientHint": "Use formato internacional, por exemplo +351 911 056 526. O número não é salvo pelo Binno.",
+        "message": "Mensagem",
+        "defaultMessage": "Binno: teste manual enviado pelo painel local. Nenhuma automação foi ativada.",
+        "confirmation": "Confirmo que este é um envio único e manual para o número informado.",
+        "sendTest": "Enviar mensagem de teste",
+        "sending": "Enviando…",
+        "sendError": "Não foi possível enviar a mensagem de teste.",
+        "sent": "Mensagem de teste enviada em {{time}} para {{recipient}}.",
+        "historyLive": "Um envio manual foi registrado nesta sessão local."
+      }
     },
     "advisorPilot": {
       "radarTitle": "Radar do Binno",
@@ -642,8 +1046,8 @@
       "notAuthenticated": "Sua sessão terminou. Entre novamente para ver as avaliações.",
       "linkMissing": "Você ainda não configurou um link do Google. Vá para Configurações e adicione o link do seu negócio.",
       "placeIdMissing": "Não foi possível identificar o Place ID no link salvo. Atualize o link do Google em Configurações.",
-      "noPlaceId": "Configure o Place ID antes de atualizar as avaliações."
-      ,"official": {
+      "noPlaceId": "Configure o Place ID antes de atualizar as avaliações.",
+      "official": {
         "title": "Fila de respostas no Google",
         "connectFirst": "Conecte o Perfil da Empresa para carregar todas as avaliações e as respostas já publicadas.",
         "connectAction": "Conectar Perfil do Google",
@@ -711,10 +1115,10 @@
     "namePlaceholder": "Ex: Mesa 1, Balcão, Área externa",
     "creating": "Criando...",
     "create": "Criar QR code",
-    "printCard": "Imprimir cartão de mesa",
-    "download": "Baixar imagem",
-    "print": "Imprimir",
-    "downloadSr": "Baixar {{name}}",
+    "printCard": "Cartão de mesa para impressão",
+    "download": "Baixar só o QR",
+    "print": "Cartão de mesa",
+    "downloadSr": "Baixar só o QR de {{name}}",
     "removeSr": "Remover {{name}}",
     "savedTitle": "Meus QR codes",
     "savedDesc": "Imprima, baixe ou remova os códigos que já criou.",
@@ -727,8 +1131,8 @@
     "createdTitle": "QR code criado",
     "createdToast": "\"{{name}}\" está pronto para imprimir.",
     "removedToast": "QR code removido",
-    "downloadTitle": "Download iniciado",
-    "downloadStarted": "{{size}} px — pronto para imprimir.",
+    "downloadTitle": "Imagem do QR baixada",
+    "downloadStarted": "{{size}} px. Serve para outros materiais. Para a mesa, use o cartão.",
     "popupBlocked": "Bloqueado pelo navegador",
     "popupHint": "Permita janelas pop-up para imprimir.",
     "howToTitle": "Como usar os QR codes",
@@ -740,7 +1144,8 @@
     "online": "Online",
     "onlineDesc": "Compartilhe a imagem do QR code nas suas redes sociais, site, e-mails ou newsletters para clientes que visitaram o seu negócio.",
     "tipTitle": "Dica profissional",
-    "tipDesc": "Crie QR codes específicos para diferentes pontos do seu negócio ou diferentes campanhas. Isso ajuda a comparar aberturas e cliques para o Google em cada ponto de contato."
+    "tipDesc": "Crie QR codes específicos para diferentes pontos do seu negócio ou diferentes campanhas. Isso ajuda a comparar aberturas e cliques para o Google em cada ponto de contato.",
+    "cardHint": "O cartão de mesa abre numa janela de impressão, onde dá para imprimir ou salvar em PDF. É o formato pronto para pôr na mesa, com o pedido de avaliação e a assinatura."
   },
   "reply": {
     "cta": "Sugerir resposta",

@@ -327,38 +327,132 @@
         "hideEvidence": "Hide evidence"
       },
       "statePicker": "Illustrative Radar states",
-      "tabs": { "stable": "All clear", "risk": "Change to watch", "strength": "What works", "opportunity": "Opportunity" },
+      "tabs": {
+        "stable": "All clear",
+        "risk": "Change to watch",
+        "strength": "What works",
+        "opportunity": "Opportunity"
+      },
       "actionNote": "The Radar selects one priority. It does not create a task list.",
       "disclaimer": "Demo with illustrative data. In the product, every signal will show source, period and last synchronization time.",
       "states": {
-        "stable": { "eyebrow": "This week's status", "title": "Your reputation is stable", "body": "There are no unanswered reviews or relevant changes in this period. You do not need to open Google today.", "action": "View dashboard", "detail": "94 reviews read · no priority found" },
-        "risk": { "eyebrow": "Change to watch", "title": "Waiting time reappeared in 3 reviews", "body": "The same theme appeared in recent reviews. It does not prove a cause yet, but deserves a read before it becomes a pattern.", "action": "Review replies", "detail": "3 mentions in 12 days · none in the comparable prior period" },
-        "strength": { "eyebrow": "What works", "title": "Service is your most visible strength", "body": "Customers mentioned kindness and care positively more than once. It is a real sign of what the business delivers well.", "action": "View dashboard", "detail": "18 positive mentions in 30 days · base: 94 reviews read" },
-        "opportunity": { "eyebrow": "One concrete opportunity", "title": "Your lunch special is praised but absent from the profile", "body": "This item is praised repeatedly and no recent photo shows it. Adding one photo brings Business Profile closer to what customers already value.", "action": "View dashboard", "detail": "A suggestion based on praise and profile data — not a ranking promise" }
+        "stable": {
+          "eyebrow": "This week's status",
+          "title": "Your reputation is stable",
+          "body": "There are no unanswered reviews or relevant changes in this period. You do not need to open Google today.",
+          "action": "View dashboard",
+          "detail": "94 reviews read · no priority found"
+        },
+        "risk": {
+          "eyebrow": "Change to watch",
+          "title": "Waiting time reappeared in 3 reviews",
+          "body": "The same theme appeared in recent reviews. It does not prove a cause yet, but deserves a read before it becomes a pattern.",
+          "action": "Review replies",
+          "detail": "3 mentions in 12 days · none in the comparable prior period"
+        },
+        "strength": {
+          "eyebrow": "What works",
+          "title": "Service is your most visible strength",
+          "body": "Customers mentioned kindness and care positively more than once. It is a real sign of what the business delivers well.",
+          "action": "View dashboard",
+          "detail": "18 positive mentions in 30 days · base: 94 reviews read"
+        },
+        "opportunity": {
+          "eyebrow": "One concrete opportunity",
+          "title": "Your lunch special is praised but absent from the profile",
+          "body": "This item is praised repeatedly and no recent photo shows it. Adding one photo brings Business Profile closer to what customers already value.",
+          "action": "View dashboard",
+          "detail": "A suggestion based on praise and profile data — not a ranking promise"
+        }
       },
       "riskEvidence": {
-        "title": "Where the signal came from", "subtitle": "Recent review excerpts that mention waiting time.",
-        "mariana": { "name": "Mariana Souza", "date": "Aug 12", "quote": "I waited quite a while to be served." },
-        "ricardo": { "name": "Ricardo Lima", "date": "Aug 08", "quote": "The order took longer than expected." },
-        "bia": { "name": "Bia Martins", "date": "Aug 02", "quote": "Good food, but the wait was long." }
+        "title": "Where the signal came from",
+        "subtitle": "Recent review excerpts that mention waiting time.",
+        "mariana": {
+          "name": "Mariana Souza",
+          "date": "Aug 12",
+          "quote": "I waited quite a while to be served."
+        },
+        "ricardo": {
+          "name": "Ricardo Lima",
+          "date": "Aug 08",
+          "quote": "The order took longer than expected."
+        },
+        "bia": {
+          "name": "Bia Martins",
+          "date": "Aug 02",
+          "quote": "Good food, but the wait was long."
+        }
       },
-      "strengthEvidence": { "metric": "Positive mentions", "metricDetail": "about service", "title": "What customers recognise most", "body": "Radar groups recurring terms to reveal an existing perception — without inventing praise or calling a trend a definitive result.", "topics": { "cordialidade": "Kindness", "agilidade": "Speed", "atenção": "Care" } },
-      "opportunityEvidence": { "title": "Why this is the one opportunity now", "body": "The profile does not need an overhaul. It just needs to show what customers already describe enthusiastically.", "praise": "praises for the lunch special", "photos": "recent photos of this item" },
-      "sources": { "title": "How Radar got here", "subtitle": "Every recommendation must explain its evidence.", "period": "Period", "reviews": "Reviews read", "profile": "Google Profile", "profileValue": "Illustrative data" },
-      "quiet": { "title": "Quiet by default", "body": "If there is no relevant risk or opportunity, Binno simply confirms that everything is on track." }
+      "strengthEvidence": {
+        "metric": "Positive mentions",
+        "metricDetail": "about service",
+        "title": "What customers recognise most",
+        "body": "Radar groups recurring terms to reveal an existing perception — without inventing praise or calling a trend a definitive result.",
+        "topics": {
+          "cordialidade": "Kindness",
+          "agilidade": "Speed",
+          "atenção": "Care"
+        }
+      },
+      "opportunityEvidence": {
+        "title": "Why this is the one opportunity now",
+        "body": "The profile does not need an overhaul. It just needs to show what customers already describe enthusiastically.",
+        "praise": "praises for the lunch special",
+        "photos": "recent photos of this item"
+      },
+      "sources": {
+        "title": "How Radar got here",
+        "subtitle": "Every recommendation must explain its evidence.",
+        "period": "Period",
+        "reviews": "Reviews read",
+        "profile": "Google Profile",
+        "profileValue": "Illustrative data"
+      },
+      "quiet": {
+        "title": "Quiet by default",
+        "body": "If there is no relevant risk or opportunity, Binno simply confirms that everything is on track."
+      }
     },
     "radarLive": {
       "title": "Reputation Radar",
       "error": "The Radar could not be read right now. Please try again later.",
-      "connection": { "title": "Connect your Profile to activate the Radar", "body": "The Radar only calculates pending replies and patterns after every Business Profile review has been imported.", "action": "Connect Profile" },
-      "syncing": { "title": "The Radar is still finishing its reading", "body": "Until synchronization is complete, we do not show counts or patterns that might be incomplete.", "action": "View reviews" },
-      "priority": { "title_one": "1 review is awaiting a reply", "title_other": "{{count}} reviews are awaiting replies", "body": "{{count}} have a rating of 3 or lower. Start there to take care of what customers have already said.", "action": "Review reviews" },
-      "clear": { "title": "No review is awaiting a reply", "body": "The imported queue is up to date. The Radar keeps watching for new reviews and recurring changes." },
+      "connection": {
+        "title": "Connect your Profile to activate the Radar",
+        "body": "The Radar only calculates pending replies and patterns after every Business Profile review has been imported.",
+        "action": "Connect Profile"
+      },
+      "syncing": {
+        "title": "The Radar is still finishing its reading",
+        "body": "Until synchronization is complete, we do not show counts or patterns that might be incomplete.",
+        "action": "View reviews"
+      },
+      "priority": {
+        "title_one": "1 review is awaiting a reply",
+        "title_other": "{{count}} reviews are awaiting replies",
+        "body": "{{count}} have a rating of 3 or lower. Start there to take care of what customers have already said.",
+        "action": "Review reviews"
+      },
+      "clear": {
+        "title": "No review is awaiting a reply",
+        "body": "The imported queue is up to date. The Radar keeps watching for new reviews and recurring changes."
+      },
       "source": "Source: {{count}} imported reviews",
       "lastSynced": "updated {{date}}",
       "noPatterns": "There is not yet a recurring pattern with enough evidence to highlight.",
-      "signals": { "concernLabel": "Change to watch", "strengthLabel": "What works", "concernTitle": "{{theme}} appears again in recent reviews", "strengthTitle": "{{theme}} is a recognized strength", "evidence": "{{count}} mentions in {{days}} days" },
-      "themes": { "service": "Service", "wait": "Wait time", "food": "Food", "cleanliness": "Cleanliness" }
+      "signals": {
+        "concernLabel": "Change to watch",
+        "strengthLabel": "What works",
+        "concernTitle": "{{theme}} appears again in recent reviews",
+        "strengthTitle": "{{theme}} is a recognized strength",
+        "evidence": "{{count}} mentions in {{days}} days"
+      },
+      "themes": {
+        "service": "Service",
+        "wait": "Wait time",
+        "food": "Food",
+        "cleanliness": "Cleanliness"
+      }
     },
     "experimental": {
       "source": "Experimental source · Apify",
@@ -377,9 +471,18 @@
       "summarySubtitle": "How the business appears on Google, with a limited experimental reading.",
       "summaryDisclaimer": "The rating and total are public. The distribution comes from a limited sample and does not replace history, a queue, or the official Radar.",
       "disclaimer": "Shows observed public data and a limited sample. It does not measure a complete queue, trends, ranking, or unanswered reviews.",
-      "available": { "title": "The dashboard already has context", "body": "Rating, volume, distribution, and observed owner replies are together without opening Google." },
-      "attention": { "title": "Attention in the sample", "body": "{{count}} one- or two-star reviews were observed." },
-      "replies": { "title": "Observed owner replies", "body": "{{count}} owner replies in the sample ({{rate}}%)." },
+      "available": {
+        "title": "The dashboard already has context",
+        "body": "Rating, volume, distribution, and observed owner replies are together without opening Google."
+      },
+      "attention": {
+        "title": "Attention in the sample",
+        "body": "{{count}} one- or two-star reviews were observed."
+      },
+      "replies": {
+        "title": "Observed owner replies",
+        "body": "{{count}} owner replies in the sample ({{rate}}%)."
+      },
       "priority": {
         "title": "{{count}} low-rated reviews appear in the sample",
         "body": "It is a signal to follow, but the collection does not keep author or text. For safety, Binno does not suggest or publish a reply without the official connection.",
@@ -401,28 +504,329 @@
         "waitingBody": "Once the QR code is in use, Binno shows how people move on to Google.",
         "action": "View QR codes"
       },
-      "official": { "title": "The next level needs the official connection", "body": "Business Profile approval unlocks the full queue, evidence-based Radar, and confirmed reply publication. Until then, Binno does not invent those data points." }
+      "official": {
+        "title": "The next level needs the official connection",
+        "body": "Business Profile approval unlocks the full queue, evidence-based Radar, and confirmed reply publication. Until then, Binno does not invent those data points."
+      }
     },
     "cockpit": {
-      "tabs": { "overview": "Overview", "reviews": "Reviews", "questions": "Questions", "photos": "Photos", "performance": "Performance", "practices": "Best practices", "whatsapp": "WhatsApp" },
-      "layout": { "navigation": "Dashboard sections", "priorityTitle": "{{count}} low ratings need a closer look", "priorityBody": "The Apify collection read {{count}} reviews, but it does not contain author, text, or reply status.", "prioritySampleBody": "{{count}} sampled reviews appear to have no reply, but the individual queue still depends on the official reading.", "priorityAction": "View official connection", "queueTitle": "Reply queue", "queueSubtitle": "One decision at a time, with text and evidence once the official reading is available.", "queueUnavailableTitle": "The individual queue is not available yet", "queueUnavailableBody": "The {{count}} low ratings are a signal in the sample, not a real queue. Binno does not invent an author or review.", "queueLive": "Official queue synced", "anonymousReviewer": "Customer name unavailable", "dateUnavailable": "Date unavailable", "commentUnavailable": "Google did not provide the comment for this review.", "editBeforePublish": "edit before publishing", "openQueue": "Open reviews", "queueSampleCount": "reviews observed in the sample", "queueSampleUnanswered": "without an observed reply in the sample", "queueSampleReplies": "replies observed in the sample", "queueSampleBody": "These totals come from 49 reviews observed through Apify. They help size the opportunity, but do not identify which customers are awaiting a reply. The individual queue appears only after official sync.", "replyTitle": "Suggested reply", "replyWaiting": "waiting for a complete review", "replyBody": "Connect the Business Profile to review the comment, edit the draft, and decide whether to publish.", "volumeTitle": "Review volume", "volumeSubtitle": "Change is observable only with comparable readings.", "waiting": "Waiting for the next reading", "firstReading": "1 reading available", "volumeObserved": "reviews read in the sample", "volumeCollectedAt": "Reading recorded on {{date}}", "volumeBody": "There is only one experimental reading. Binno does not call this a decrease or increase before there is a comparable period.", "distributionTitle": "Each rating separately", "distributionBody": "{{count}} one- or two-star ratings appear in {{total}} observed reviews. Without history, this does not prove a change or cause.", "qrSubtitle": "The funnel ends at the click through to Google.", "eventsLoading": "Reading observed events from the last 30 days…", "eventsUnavailable": "QR events could not be read right now. Try refreshing the page.", "qrContinuation": "Continued to Google", "qrPeriod": "Events observed in the last 30 days.", "topicsTitle": "Most mentioned topics", "topicsSubtitle": "Topics appear only with complete review text.", "analyzableComments": "comments with text available", "topicsBody": "The Apify collection was sanitized and brought no review text. It would not be responsible to name service, food, or any other topic yet.", "googleBreakdown": "Rating distribution in the sample", "averageReplyTime": "Average reply time", "newReviews30d": "New reviews (30 days)", "metricNeedsResponseDates": "The current source did not provide reply dates.", "metricNeedsReviewDates": "The current source did not provide review dates.", "googleTitle": "Google read via Apify", "googleRead": "Experimental reading completed", "googleAction": "View official connection", "whatsappReady": "Local channel connected. The manual test is available; recurring summary remains unscheduled.", "profileTitle": "Profile completeness", "profileBody": "We still cannot measure hours, photos, or description without the official Business Profile connection.", "profileAction": "See what is missing", "changeTitle": "What changed this week", "changePeriod": "Available signals, without comparing periods", "changeReading": "Apify sample read on {{date}}.", "changeOpens": "{{count}} QR open(s) recorded in the last 30 days.", "changeClicks": "{{count}} click(s) through to Google recorded in the last 30 days.", "changeWaiting": "There is not a second reading yet to state a trend.", "changeBody": "An experimental public reading was recorded. The next collection will allow volume and distribution comparison without inventing a trend." },
-      "assisted": { "badge": "Observed public queue", "queueSubtitle": "Experimental reading: decide, copy, and publish on Google.", "priorityBody": "{{count}} text reviews are ready for an assisted reply in this public reading.", "openQueue": "Reply now", "reviewLabel": "{{rating}}-star review", "reviewerUnavailable": "Name unavailable in this reading", "editLocal": "edit before copying", "copy": "Copy reply", "copyAndOpenReview": "Copy and open this review", "openGoogle": "Open Google", "openReview": "Open this review on Google", "openGoogleFallback": "Open Google profile", "markResponded": "Mark as replied", "status": { "draft": "Draft ready", "copied": "Reply copied", "manager-confirmed": "Marked by owner", "observed": "Reply observed" }, "managerNote": "This state was reported by the owner. Automatic confirmation still depends on the official connection.", "observedNote": "A reply was visible in this public reading. It is not a Google API confirmation.", "retention": "Name, text and link from this reading remain only in this browser until {{date}}.", "briefingTitle": "Briefing from this reading", "useBriefing": "Use this briefing", "briefing": "Binno — experimental public reading for {{business}}\nPublic rating: {{rating}} ({{total}} reviews on the profile).\nIn the sample, {{low}} low rating(s) need attention and {{queue}} text review(s) do not yet show an observed reply.\nOpen the dashboard to review one reply at a time." },
-      "practice": { "eyebrow": "Today's guidance", "daily": "One at a time", "next": "See another tip", "disclaimer": "When there is a review in the queue, it takes priority. Other items are general best practices and do not promise a Google ranking position.", "items": { "reply": { "title": "{{count}} text review(s) still show no reply", "body": "Open one review, adjust the draft, and publish it manually on Google when you are satisfied.", "action": "Review queue" }, "hours": { "title": "Check business hours and details", "body": "Complete, accurate information helps people understand the business before visiting.", "action": "Check details" }, "photos": { "title": "Plan a recent photo of the experience", "body": "A current photo helps show what a customer finds today, without promising a ranking gain.", "action": "Open profile" }, "invite": { "title": "Invite reviews without asking for a rating", "body": "Use the QR to take every customer to Google, without filtering experiences or offering a reward.", "action": "View QR codes" } } },
-      "locked": { "title": "This module needs the official connection", "body": "The experimental source shows only an aggregated reading. Queue, questions, photos, and detailed performance arrive after Business Profile authorization.", "action": "View connection status" },
-      "topicLabels": { "service": "service", "wait": "waiting time", "food": "food", "cleanliness": "cleanliness", "price": "price", "atmosphere": "atmosphere", "delivery": "delivery" },
-      "priority": { "eyebrow": "Priority now", "title": "Start with the queue and the reply", "subtitle": "Binno only prepares a reply when it can show the review and the evidence behind it.", "waitingBadge": "Queue awaiting official connection", "partialTitle": "{{count}} low ratings appear in the sample", "partialBody": "They are a signal to investigate, but the partial collection has no text, author or published reply.", "replyTitle": "A suggested reply cannot be prepared yet", "replyBody": "Connect the Business Profile to load the full queue, edit a draft and decide whether to publish it on Google.", "action": "Connect profile" },
-      "signals": { "eyebrow": "Strengths and fragilities", "title": "What is helping — and what needs care", "strengthTitle": "There is not enough evidence to claim a strength", "strengthBody": "The experimental source does not retain review text. Binno waits for complete text before assigning praise to service, food or any other topic.", "fragilityTitle": "{{count}} low ratings need reading", "fragilityBody": "They are inside a sample of {{count}} reviews. Without trend, text and a comparable period, we do not assign a cause.", "evidence": "Once official sync finishes, every strength or fragility will show reviews, period and mention count supporting the reading." },
-      "plan": { "eyebrow": "Google Profile improvement plan", "title": "One concrete action at a time", "subtitle": "Prioritized by likely impact and effort, without promising ranking position.", "source": "View Google official guidance", "impact": { "high": "high impact", "medium": "medium impact" }, "effort": { "low": "low effort" }, "tasks": { "connect": { "title": "Connect the Business Profile", "body": "Unlocks the real queue, editable replies and Radar evidence.", "action": "Connect" }, "hours": { "title": "Check hours and information", "body": "Complete, accurate information helps people understand the business before visiting.", "action": "Check" }, "photos": { "title": "Plan current business photos", "body": "The official connection shows what already exists before suggesting an update.", "action": "View profile" } } },
-      "support": { "eyebrow": "Supporting metrics", "title": "Numbers that help explain the priority", "profileMetricDetail": "public rating observed on the profile" },
-      "summary": { "title": "Reputation summary", "subtitle": "How your business appears today to people searching on Google.", "observed": "Experimental reading", "profileCount": "{{count}} reviews", "sampleDistribution": "Sample distribution · {{count}}", "trend": "Observed trend", "trendWaiting": "Waiting for the next reading", "trendBody": "A second collection is needed to show change without inventing a trend." },
-      "metrics": { "lowRatings": "Low ratings in sample", "lowRatingsDetail": "in {{count}} observed reviews", "observedReplies": "Observed replies", "observedRepliesDetail": "{{rate}}% of sample", "sampleRating": "Sample rating", "sampleRatingDetail": "not a full-period result", "newReviews": "New reviews this month", "connectionRequired": "Official connection required" },
-      "reviews": { "title": "Latest reviews", "subtitle": "Most recent first, with each reply status.", "lockedBadge": "Connection required", "lockedTitle": "The individual queue is not available yet", "lockedBody": "The experimental collection does not keep review authors, text, or links. Once Business Profile is authorized, the queue appears here with editable replies.", "action": "View connection" },
-      "path": { "title": "How people reach you", "subtitle": "From the QR code in store to the business page on Google.", "opens": "QR code opened", "clicks": "Clicked to review on Google", "published": "Published reviews", "waiting": "Waiting for the first visits", "officialOnly": "Confirmation depends on Google", "disclaimer": "An open and a click show intent. Binno does not conclude that a person published a review from the QR.", "action": "View QR codes" },
-      "topics": { "title": "What customers mention most", "subtitle": "Topics appearing in recent reviews.", "body": "Topics are highlighted only after official sync, when complete reviews and enough context exist to avoid drawing conclusions from a sample." },
-      "attention": { "title": "Needs you now", "body": "There are {{count}} one- or two-star reviews in the sample. Without text and author, suggesting a specific reply would not be responsible.", "action": "View connection status" },
-      "health": { "title": "Your Google profile", "subtitle": "Presence and service signals worth monitoring.", "responses": "Review replies", "photos": "Recent photos", "info": "Business information", "connection": "Business Profile connection required", "review": "Review hours and details" },
-      "changes": { "title": "What changed in this reading", "snapshot": "An experimental profile reading was loaded.", "lowRatings": "{{count}} low ratings appeared in the sample.", "official": "Queue, Radar, and replies await the official connection." },
-      "whatsapp": { "title": "WhatsApp summary and priorities", "body": "Connect the channel to choose what reaches the owner and when.", "notificationsTitle": "Notification settings", "notificationsBody": "Choose what should reach the owner. At this stage, preferences are local: nothing is scheduled or sent automatically.", "weeklyTitle": "Weekly summary", "weeklyBody": "Includes rating, volume, replies, and priorities when sufficient data exists.", "priorityTitle": "Priority alerts", "priorityBody": "Prioritizes new unanswered reviews and signals requiring attention.", "notificationsConsent": "I confirm I have consent to receive these notifications at this number. Saving does not enable automatic delivery.", "preferencesSaved": "Preferences saved locally. Recurring delivery remains off.", "summaryTitle": "WhatsApp summary", "summaryReady": "The local channel is ready for testing, but there is no complete data or consent to schedule a summary yet.", "summaryWaiting": "A summary will only be offered after sufficient data, consent and a configured channel.", "notConnected": "Not connected", "scheduled": "Local schedule ready", "connect": "Configure WhatsApp", "manage": "Manage delivery", "workspaceTitle": "Owner WhatsApp", "workspaceBody": "Choose when the summary should arrive. Actual delivery starts only after provider, consent, and verified number.", "frequency": "Frequency", "time": "Time", "schedule": { "monday": "Every Monday", "friday": "Every Friday" }, "previewTitle": "Message preview", "previewBody": "Good morning! When the integration is active, you will receive a short reputation reading and what needs attention here.", "saveLocal": "Save local schedule", "save": "Update local schedule", "localDisclaimer": "This schedule is only a local preview. No message was sent or will be sent without the provider connection and your consent.", "historyTitle": "Sent messages", "historyEmpty": "No message has been sent. History starts only after a real WhatsApp connection.", "connectionTitle": "Pilot limits", "connectionBody": "This channel is temporary, local, and manual. There is no schedule, webhook, conversation import, or recurring delivery.", "status": { "checking": "Checking local channel", "ready": "Local channel connected", "not-connected": "Local channel not linked", "unavailable": "Temporary channel unavailable" }, "localCardReady": "The temporary channel is ready for one confirmed manual send.", "openTest": "Open delivery test", "localTitle": "Local delivery test", "localBody": "Validate manual sending from the dashboard without enabling scheduling, automation, or a published integration.", "refresh": "Refresh status", "readyBody": "The local session is linked. The send below still requires a number and explicit confirmation.", "unavailableBody": "Start local OpenWA and the development proxy to test this channel.", "recipient": "Test number", "recipientHint": "Use international format, for example +351 911 056 526. Binno does not save this number.", "message": "Message", "defaultMessage": "Binno: manual test sent from the local dashboard. No automation was enabled.", "confirmation": "I confirm this is a single manual send to the number entered.", "sendTest": "Send test message", "sending": "Sending…", "sendError": "The test message could not be sent.", "sent": "Test message sent at {{time}} to {{recipient}}.", "historyLive": "One manual send was recorded in this local session.", "historyEmpty": "No message was sent by this dashboard in this session." }
+      "tabs": {
+        "overview": "Overview",
+        "reviews": "Reviews",
+        "questions": "Questions",
+        "photos": "Photos",
+        "performance": "Performance",
+        "practices": "Best practices",
+        "whatsapp": "WhatsApp"
+      },
+      "layout": {
+        "navigation": "Dashboard sections",
+        "priorityTitle": "{{count}} low ratings need a closer look",
+        "priorityBody": "The Apify collection read {{count}} reviews, but it does not contain author, text, or reply status.",
+        "prioritySampleBody": "{{count}} sampled reviews appear to have no reply, but the individual queue still depends on the official reading.",
+        "priorityAction": "View official connection",
+        "queueTitle": "Reply queue",
+        "queueSubtitle": "One decision at a time, with text and evidence once the official reading is available.",
+        "queueUnavailableTitle": "The individual queue is not available yet",
+        "queueUnavailableBody": "The {{count}} low ratings are a signal in the sample, not a real queue. Binno does not invent an author or review.",
+        "queueLive": "Official queue synced",
+        "anonymousReviewer": "Customer name unavailable",
+        "dateUnavailable": "Date unavailable",
+        "commentUnavailable": "Google did not provide the comment for this review.",
+        "editBeforePublish": "edit before publishing",
+        "openQueue": "Open reviews",
+        "queueSampleCount": "reviews observed in the sample",
+        "queueSampleUnanswered": "without an observed reply in the sample",
+        "queueSampleReplies": "replies observed in the sample",
+        "queueSampleBody": "These totals come from 49 reviews observed through Apify. They help size the opportunity, but do not identify which customers are awaiting a reply. The individual queue appears only after official sync.",
+        "replyTitle": "Suggested reply",
+        "replyWaiting": "waiting for a complete review",
+        "replyBody": "Connect the Business Profile to review the comment, edit the draft, and decide whether to publish.",
+        "volumeTitle": "Review volume",
+        "volumeSubtitle": "Change is observable only with comparable readings.",
+        "waiting": "Waiting for the next reading",
+        "firstReading": "1 reading available",
+        "volumeObserved": "reviews read in the sample",
+        "volumeCollectedAt": "Reading recorded on {{date}}",
+        "volumeBody": "There is only one experimental reading. Binno does not call this a decrease or increase before there is a comparable period.",
+        "distributionTitle": "Each rating separately",
+        "distributionBody": "{{count}} one- or two-star ratings appear in {{total}} observed reviews. Without history, this does not prove a change or cause.",
+        "qrSubtitle": "The funnel ends at the click through to Google.",
+        "eventsLoading": "Reading observed events from the last 30 days…",
+        "eventsUnavailable": "QR events could not be read right now. Try refreshing the page.",
+        "qrContinuation": "Continued to Google",
+        "qrPeriod": "Events observed in the last 30 days.",
+        "topicsTitle": "Most mentioned topics",
+        "topicsSubtitle": "Topics appear only with complete review text.",
+        "analyzableComments": "comments with text available",
+        "topicsBody": "The Apify collection was sanitized and brought no review text. It would not be responsible to name service, food, or any other topic yet.",
+        "googleBreakdown": "Rating distribution in the sample",
+        "averageReplyTime": "Average reply time",
+        "newReviews30d": "New reviews (30 days)",
+        "metricNeedsResponseDates": "The current source did not provide reply dates.",
+        "metricNeedsReviewDates": "The current source did not provide review dates.",
+        "googleTitle": "Google read via Apify",
+        "googleRead": "Experimental reading completed",
+        "googleAction": "View official connection",
+        "whatsappReady": "Local channel connected. The manual test is available; recurring summary remains unscheduled.",
+        "profileTitle": "Profile completeness",
+        "profileBody": "We still cannot measure hours, photos, or description without the official Business Profile connection.",
+        "profileAction": "See what is missing",
+        "changeTitle": "What changed this week",
+        "changePeriod": "Available signals, without comparing periods",
+        "changeReading": "Apify sample read on {{date}}.",
+        "changeOpens": "{{count}} QR open(s) recorded in the last 30 days.",
+        "changeClicks": "{{count}} click(s) through to Google recorded in the last 30 days.",
+        "changeWaiting": "There is not a second reading yet to state a trend.",
+        "changeBody": "An experimental public reading was recorded. The next collection will allow volume and distribution comparison without inventing a trend."
+      },
+      "assisted": {
+        "badge": "Observed public queue",
+        "queueSubtitle": "Experimental reading: decide, copy, and publish on Google.",
+        "priorityBody": "{{count}} text reviews are ready for an assisted reply in this public reading.",
+        "openQueue": "Reply now",
+        "reviewLabel": "{{rating}}-star review",
+        "reviewerUnavailable": "Name unavailable in this reading",
+        "editLocal": "edit before copying",
+        "copy": "Copy reply",
+        "copyAndOpenReview": "Copy and open this review",
+        "openGoogle": "Open Google",
+        "openReview": "Open this review on Google",
+        "openGoogleFallback": "Open Google profile",
+        "markResponded": "Mark as replied",
+        "status": {
+          "draft": "Draft ready",
+          "copied": "Reply copied",
+          "manager-confirmed": "Marked by owner",
+          "observed": "Reply observed"
+        },
+        "managerNote": "This state was reported by the owner. Automatic confirmation still depends on the official connection.",
+        "observedNote": "A reply was visible in this public reading. It is not a Google API confirmation.",
+        "retention": "Name, text and link from this reading remain only in this browser until {{date}}.",
+        "briefingTitle": "Briefing from this reading",
+        "useBriefing": "Use this briefing",
+        "briefing": "Binno — experimental public reading for {{business}}\nPublic rating: {{rating}} ({{total}} reviews on the profile).\nIn the sample, {{low}} low rating(s) need attention and {{queue}} text review(s) do not yet show an observed reply.\nOpen the dashboard to review one reply at a time."
+      },
+      "practice": {
+        "eyebrow": "Today's guidance",
+        "daily": "One at a time",
+        "next": "See another tip",
+        "disclaimer": "When there is a review in the queue, it takes priority. Other items are general best practices and do not promise a Google ranking position.",
+        "items": {
+          "reply": {
+            "title": "{{count}} text review(s) still show no reply",
+            "body": "Open one review, adjust the draft, and publish it manually on Google when you are satisfied.",
+            "action": "Review queue"
+          },
+          "hours": {
+            "title": "Check business hours and details",
+            "body": "Complete, accurate information helps people understand the business before visiting.",
+            "action": "Check details"
+          },
+          "photos": {
+            "title": "Plan a recent photo of the experience",
+            "body": "A current photo helps show what a customer finds today, without promising a ranking gain.",
+            "action": "Open profile"
+          },
+          "invite": {
+            "title": "Invite reviews without asking for a rating",
+            "body": "Use the QR to take every customer to Google, without filtering experiences or offering a reward.",
+            "action": "View QR codes"
+          }
+        }
+      },
+      "locked": {
+        "title": "This module needs the official connection",
+        "body": "The experimental source shows only an aggregated reading. Queue, questions, photos, and detailed performance arrive after Business Profile authorization.",
+        "action": "View connection status"
+      },
+      "topicLabels": {
+        "service": "service",
+        "wait": "waiting time",
+        "food": "food",
+        "cleanliness": "cleanliness",
+        "price": "price",
+        "atmosphere": "atmosphere",
+        "delivery": "delivery"
+      },
+      "priority": {
+        "eyebrow": "Priority now",
+        "title": "Start with the queue and the reply",
+        "subtitle": "Binno only prepares a reply when it can show the review and the evidence behind it.",
+        "waitingBadge": "Queue awaiting official connection",
+        "partialTitle": "{{count}} low ratings appear in the sample",
+        "partialBody": "They are a signal to investigate, but the partial collection has no text, author or published reply.",
+        "replyTitle": "A suggested reply cannot be prepared yet",
+        "replyBody": "Connect the Business Profile to load the full queue, edit a draft and decide whether to publish it on Google.",
+        "action": "Connect profile"
+      },
+      "signals": {
+        "eyebrow": "Strengths and fragilities",
+        "title": "What is helping — and what needs care",
+        "strengthTitle": "There is not enough evidence to claim a strength",
+        "strengthBody": "The experimental source does not retain review text. Binno waits for complete text before assigning praise to service, food or any other topic.",
+        "fragilityTitle": "{{count}} low ratings need reading",
+        "fragilityBody": "They are inside a sample of {{count}} reviews. Without trend, text and a comparable period, we do not assign a cause.",
+        "evidence": "Once official sync finishes, every strength or fragility will show reviews, period and mention count supporting the reading."
+      },
+      "plan": {
+        "eyebrow": "Google Profile improvement plan",
+        "title": "One concrete action at a time",
+        "subtitle": "Prioritized by likely impact and effort, without promising ranking position.",
+        "source": "View Google official guidance",
+        "impact": {
+          "high": "high impact",
+          "medium": "medium impact"
+        },
+        "effort": {
+          "low": "low effort"
+        },
+        "tasks": {
+          "connect": {
+            "title": "Connect the Business Profile",
+            "body": "Unlocks the real queue, editable replies and Radar evidence.",
+            "action": "Connect"
+          },
+          "hours": {
+            "title": "Check hours and information",
+            "body": "Complete, accurate information helps people understand the business before visiting.",
+            "action": "Check"
+          },
+          "photos": {
+            "title": "Plan current business photos",
+            "body": "The official connection shows what already exists before suggesting an update.",
+            "action": "View profile"
+          }
+        }
+      },
+      "support": {
+        "eyebrow": "Supporting metrics",
+        "title": "Numbers that help explain the priority",
+        "profileMetricDetail": "public rating observed on the profile"
+      },
+      "summary": {
+        "title": "Reputation summary",
+        "subtitle": "How your business appears today to people searching on Google.",
+        "observed": "Experimental reading",
+        "profileCount": "{{count}} reviews",
+        "sampleDistribution": "Sample distribution · {{count}}",
+        "trend": "Observed trend",
+        "trendWaiting": "Waiting for the next reading",
+        "trendBody": "A second collection is needed to show change without inventing a trend."
+      },
+      "metrics": {
+        "lowRatings": "Low ratings in sample",
+        "lowRatingsDetail": "in {{count}} observed reviews",
+        "observedReplies": "Observed replies",
+        "observedRepliesDetail": "{{rate}}% of sample",
+        "sampleRating": "Sample rating",
+        "sampleRatingDetail": "not a full-period result",
+        "newReviews": "New reviews this month",
+        "connectionRequired": "Official connection required"
+      },
+      "reviews": {
+        "title": "Latest reviews",
+        "subtitle": "Most recent first, with each reply status.",
+        "lockedBadge": "Connection required",
+        "lockedTitle": "The individual queue is not available yet",
+        "lockedBody": "The experimental collection does not keep review authors, text, or links. Once Business Profile is authorized, the queue appears here with editable replies.",
+        "action": "View connection"
+      },
+      "path": {
+        "title": "How people reach you",
+        "subtitle": "From the QR code in store to the business page on Google.",
+        "opens": "QR code opened",
+        "clicks": "Clicked to review on Google",
+        "published": "Published reviews",
+        "waiting": "Waiting for the first visits",
+        "officialOnly": "Confirmation depends on Google",
+        "disclaimer": "An open and a click show intent. Binno does not conclude that a person published a review from the QR.",
+        "action": "View QR codes"
+      },
+      "topics": {
+        "title": "What customers mention most",
+        "subtitle": "Topics appearing in recent reviews.",
+        "body": "Topics are highlighted only after official sync, when complete reviews and enough context exist to avoid drawing conclusions from a sample."
+      },
+      "attention": {
+        "title": "Needs you now",
+        "body": "There are {{count}} one- or two-star reviews in the sample. Without text and author, suggesting a specific reply would not be responsible.",
+        "action": "View connection status"
+      },
+      "health": {
+        "title": "Your Google profile",
+        "subtitle": "Presence and service signals worth monitoring.",
+        "responses": "Review replies",
+        "photos": "Recent photos",
+        "info": "Business information",
+        "connection": "Business Profile connection required",
+        "review": "Review hours and details"
+      },
+      "changes": {
+        "title": "What changed in this reading",
+        "snapshot": "An experimental profile reading was loaded.",
+        "lowRatings": "{{count}} low ratings appeared in the sample.",
+        "official": "Queue, Radar, and replies await the official connection."
+      },
+      "whatsapp": {
+        "title": "WhatsApp summary and priorities",
+        "body": "Connect the channel to choose what reaches the owner and when.",
+        "notificationsTitle": "Notification settings",
+        "notificationsBody": "Choose what should reach the owner. At this stage, preferences are local: nothing is scheduled or sent automatically.",
+        "weeklyTitle": "Weekly summary",
+        "weeklyBody": "Includes rating, volume, replies, and priorities when sufficient data exists.",
+        "priorityTitle": "Priority alerts",
+        "priorityBody": "Prioritizes new unanswered reviews and signals requiring attention.",
+        "notificationsConsent": "I confirm I have consent to receive these notifications at this number. Saving does not enable automatic delivery.",
+        "preferencesSaved": "Preferences saved locally. Recurring delivery remains off.",
+        "summaryTitle": "WhatsApp summary",
+        "summaryReady": "The local channel is ready for testing, but there is no complete data or consent to schedule a summary yet.",
+        "summaryWaiting": "A summary will only be offered after sufficient data, consent and a configured channel.",
+        "notConnected": "Not connected",
+        "scheduled": "Local schedule ready",
+        "connect": "Configure WhatsApp",
+        "manage": "Manage delivery",
+        "workspaceTitle": "Owner WhatsApp",
+        "workspaceBody": "Choose when the summary should arrive. Actual delivery starts only after provider, consent, and verified number.",
+        "frequency": "Frequency",
+        "time": "Time",
+        "schedule": {
+          "monday": "Every Monday",
+          "friday": "Every Friday"
+        },
+        "previewTitle": "Message preview",
+        "previewBody": "Good morning! When the integration is active, you will receive a short reputation reading and what needs attention here.",
+        "saveLocal": "Save local schedule",
+        "save": "Update local schedule",
+        "localDisclaimer": "This schedule is only a local preview. No message was sent or will be sent without the provider connection and your consent.",
+        "historyTitle": "Sent messages",
+        "historyEmpty": "No message was sent by this dashboard in this session.",
+        "connectionTitle": "Pilot limits",
+        "connectionBody": "This channel is temporary, local, and manual. There is no schedule, webhook, conversation import, or recurring delivery.",
+        "status": {
+          "checking": "Checking local channel",
+          "ready": "Local channel connected",
+          "not-connected": "Local channel not linked",
+          "unavailable": "Temporary channel unavailable"
+        },
+        "localCardReady": "The temporary channel is ready for one confirmed manual send.",
+        "openTest": "Open delivery test",
+        "localTitle": "Local delivery test",
+        "localBody": "Validate manual sending from the dashboard without enabling scheduling, automation, or a published integration.",
+        "refresh": "Refresh status",
+        "readyBody": "The local session is linked. The send below still requires a number and explicit confirmation.",
+        "unavailableBody": "Start local OpenWA and the development proxy to test this channel.",
+        "recipient": "Test number",
+        "recipientHint": "Use international format, for example +351 911 056 526. Binno does not save this number.",
+        "message": "Message",
+        "defaultMessage": "Binno: manual test sent from the local dashboard. No automation was enabled.",
+        "confirmation": "I confirm this is a single manual send to the number entered.",
+        "sendTest": "Send test message",
+        "sending": "Sending…",
+        "sendError": "The test message could not be sent.",
+        "sent": "Test message sent at {{time}} to {{recipient}}.",
+        "historyLive": "One manual send was recorded in this local session."
+      }
     },
     "advisorPilot": {
       "radarTitle": "Binno Radar",
@@ -642,8 +1046,8 @@
       "notAuthenticated": "Your session has ended. Sign in again to view reviews.",
       "linkMissing": "You haven't set up a Google link yet. Go to Settings and add your business link.",
       "placeIdMissing": "The Place ID couldn't be identified from the saved link. Update the Google link in Settings.",
-      "noPlaceId": "Set up the Place ID before refreshing reviews."
-      ,"official": {
+      "noPlaceId": "Set up the Place ID before refreshing reviews.",
+      "official": {
         "title": "Google reply queue",
         "connectFirst": "Connect Business Profile to load all reviews and replies already published.",
         "connectAction": "Connect Google Profile",
@@ -711,10 +1115,10 @@
     "namePlaceholder": "e.g. Table 1, Counter, Patio",
     "creating": "Creating...",
     "create": "Create QR code",
-    "printCard": "Print table card",
-    "download": "Download image",
-    "print": "Print",
-    "downloadSr": "Download {{name}}",
+    "printCard": "Table card for printing",
+    "download": "Download the QR only",
+    "print": "Table card",
+    "downloadSr": "Download the QR only for {{name}}",
     "removeSr": "Remove {{name}}",
     "savedTitle": "My QR codes",
     "savedDesc": "Print, download or remove the codes you've already created.",
@@ -727,8 +1131,8 @@
     "createdTitle": "QR code created",
     "createdToast": "\"{{name}}\" is ready to print.",
     "removedToast": "QR code removed",
-    "downloadTitle": "Download started",
-    "downloadStarted": "{{size}} px — ready to print.",
+    "downloadTitle": "QR image downloaded",
+    "downloadStarted": "{{size}} px. Use it for other materials. For the table, use the card.",
     "popupBlocked": "Blocked by the browser",
     "popupHint": "Allow pop-up windows to print.",
     "howToTitle": "How to use QR codes",
@@ -740,7 +1144,8 @@
     "online": "Online",
     "onlineDesc": "Share the QR code image on your social media, website, emails or newsletters for customers who visited your business.",
     "tipTitle": "Pro tip",
-    "tipDesc": "Create specific QR codes for different spots in your business or campaigns. This helps compare opens and clicks through to Google at each touchpoint."
+    "tipDesc": "Create specific QR codes for different spots in your business or campaigns. This helps compare opens and clicks through to Google at each touchpoint.",
+    "cardHint": "The table card opens in a print window, where you can print it or save it as a PDF. It is the format ready for the table, with the review request and the signature."
   },
   "reply": {
     "cta": "Suggest a reply",
