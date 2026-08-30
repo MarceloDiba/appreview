@@ -1,5 +1,5 @@
 /**
- * A urgência de um caso interno sem tratar segue uma única regra, usada pelo
+ * A ordem de um caso interno sem tratar segue uma única regra, usada pelo
  * bloco "Comentários que pedem atenção" da Visão geral
  * (`PendingCommentsBanner.tsx`) e pela lista de casos em `/reviews`
  * (`CasesList.tsx`). As duas telas importam esta função em vez de
@@ -7,10 +7,23 @@
  * cópias da mesma regra, uma no bloco e outra na lista, que o bloco passou a
  * destacar um caso diferente do primeiro card que o dono via ao chegar.
  *
- * A regra: quem deixou contato vem antes de quem não deixou, porque só o
- * primeiro pode ser resolvido com uma ligação agora; um caso sem contato só
- * pode ser aprendido, não respondido. Dentro de cada grupo, o mais antigo
- * vem primeiro, por ser o mais perto de o cliente ter ido embora.
+ * A regra, decidida em 30/08/2026 (`docs/decisoes-30-08-ordem-e-navegacao.md`,
+ * secção 1): o mais recente primeiro. Ninguém abre esta lista para ver a
+ * reclamação mais antiga; o dono chega vindo de um aviso sobre um comentário
+ * que acabou de entrar e espera encontrá-lo no topo.
+ *
+ * Isto reverte uma escolha anterior deste mesmo arquivo, em que quem deixara
+ * contato vinha sempre antes de quem não deixara. Essa escolha foi tomada por
+ * uma razão técnica (fazer o bloco e a lista concordarem sobre qual caso é o
+ * primeiro), e estava errada para quem usa: um comentário de ontem com
+ * contato passava na frente de um de agora sem contato. O selo de contato
+ * continua a aparecer (ver `caseHasContact`), mas parou de reordenar a lista.
+ * É a troca que o dono aceitou: ordem previsível vale mais do que priorizar
+ * quem é mais fácil de responder.
+ *
+ * Quando dois casos têm o mesmo `created_at`, o desempate é por `id`, em
+ * ordem crescente: sem significado para o dono, só existe para a ordem ser
+ * sempre a mesma nas duas telas.
  *
  * Este arquivo não importa nada além do necessário para o tipo, para poder
  * ser carregado direto pelo guarda `scripts/check-shared-case-ordering.mjs`
@@ -32,16 +45,17 @@ const createdAtTime = (item: PrioritizableCase): number =>
   item.created_at ? new Date(item.created_at).getTime() : 0;
 
 /**
- * Casos sem tratar, do mais urgente para o menos urgente: contato antes de
- * sem contato, e dentro de cada grupo o mais antigo primeiro. Quem consome
- * isto para destacar um único caso usa o item `[0]`; quem consome para uma
- * lista usa o array inteiro.
+ * Casos sem tratar, do mais recente para o mais antigo. O contato não entra
+ * no critério: um caso com contato mantém o selo, mas não pula a fila por
+ * causa dele. Empate de `created_at` desempata por `id` crescente, só para a
+ * ordem ser determinística. Quem consome isto para destacar um único caso
+ * usa o item `[0]`; quem consome para uma lista usa o array inteiro.
  */
-export const orderPendingCasesByUrgency = <T extends PrioritizableCase>(cases: T[]): T[] => {
+export const orderPendingCasesByRecency = <T extends PrioritizableCase>(cases: T[]): T[] => {
   const pending = cases.filter((item) => !item.is_addressed);
   return [...pending].sort((a, b) => {
-    const contactRank = (caseHasContact(a) ? 0 : 1) - (caseHasContact(b) ? 0 : 1);
-    if (contactRank !== 0) return contactRank;
-    return createdAtTime(a) - createdAtTime(b);
+    const recency = createdAtTime(b) - createdAtTime(a);
+    if (recency !== 0) return recency;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
   });
 };

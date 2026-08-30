@@ -3,7 +3,7 @@ import { MailWarning } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useInternalFeedback } from '@/hooks/useInternalFeedback';
-import { caseHasContact, orderPendingCasesByUrgency } from '@/lib/internalCasePriority';
+import { caseHasContact, orderPendingCasesByRecency } from '@/lib/internalCasePriority';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 /**
@@ -20,12 +20,11 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
  * Reaproveita `useInternalFeedback`, a mesma fonte usada em `/reviews`, para
  * não criar um segundo caminho de leitura para o mesmo dado.
  *
- * A ordem de urgência (quem tem contato antes de quem não tem, mais antigo
- * primeiro dentro de cada grupo) vem de `orderPendingCasesByUrgency`, em
- * `src/lib/internalCasePriority.ts`. O caso que este bloco destaca é o
- * primeiro item dessa ordem, o mesmo primeiro item que `CasesList.tsx` usa
- * em `/reviews`: as duas telas leem a mesma função, então não podem divergir
- * sobre qual caso é o mais urgente.
+ * A ordem (mais recente primeiro; contato só marca o selo, não reordena) vem
+ * de `orderPendingCasesByRecency`, em `src/lib/internalCasePriority.ts`. O
+ * caso que este bloco destaca é o primeiro item dessa ordem, o mesmo primeiro
+ * item que `CasesList.tsx` usa em `/reviews`: as duas telas leem a mesma
+ * função, então não podem divergir sobre qual caso é o mais recente.
  */
 const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
   const { t, i18n } = useOwnerTranslation();
@@ -33,7 +32,7 @@ const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
 
   if (loading) return null;
 
-  const pendingOrdered = orderPendingCasesByUrgency(cases);
+  const pendingOrdered = orderPendingCasesByRecency(cases);
   if (pendingOrdered.length === 0) return null;
 
   const highlighted = pendingOrdered[0];
