@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import { useInternalFeedback } from '@/hooks/useInternalFeedback';
+import { orderPendingCasesByUrgency } from '@/lib/internalCasePriority';
 import ReplySuggestions from '@/components/dashboard/ReplySuggestions';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
@@ -18,19 +19,15 @@ const CasesList: React.FC<CasesListProps> = ({ userId, businessName }) => {
   const { loading, cases, error, resolvingId, resolveCase } = useInternalFeedback(userId);
   // O caso sem tratar é o que ainda tem prazo; o caso já tratado é histórico.
   // Por isso a lista deixa de ser só created_at desc: casos sem tratar vêm
-  // primeiro, do mais antigo (o mais perto de o cliente ter ido embora) para
-  // o mais novo, e só depois os já tratados, na ordem que a busca devolveu.
-  // Quem chega desta página pelo bloco da Visão geral encontra aqui, no
-  // topo, exatamente o caso que o bloco apontou. Esta ordem vale para toda
-  // visita à página, não só para quem chega pelo bloco.
+  // primeiro, na mesma ordem de urgência de `orderPendingCasesByUrgency`
+  // (`src/lib/internalCasePriority.ts`), e só depois os já tratados, na
+  // ordem que a busca devolveu. Quem chega pelo bloco "Comentários que pedem
+  // atenção" da Visão geral encontra aqui, no topo, o mesmo caso que o
+  // bloco destacou, porque os dois consomem a mesma função: não há uma
+  // segunda cópia da regra para divergir. Esta ordem vale para toda visita
+  // à página, não só para quem chega pelo bloco.
   const orderedCases = useMemo(() => {
-    const pending = cases
-      .filter((item) => !item.is_addressed)
-      .sort((a, b) => {
-        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
-        return aTime - bTime;
-      });
+    const pending = orderPendingCasesByUrgency(cases);
     const resolved = cases.filter((item) => item.is_addressed);
     return [...pending, ...resolved];
   }, [cases]);

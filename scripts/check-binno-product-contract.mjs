@@ -29,7 +29,7 @@ const requirements = [
   // bloco retorne nulo sem caso pendente, a segunda exige que ele fique
   // sempre antes da fila quando existir, sem deslocar a fila da posicao
   // dela quando ele nao existir.
-  ['bloco de comentários pendentes some por completo sem caso sem tratar', pendingCommentsBanner.includes('if (pending.length === 0) return null;')],
+  ['bloco de comentários pendentes some por completo sem caso sem tratar', pendingCommentsBanner.includes('if (pendingOrdered.length === 0) return null;')],
   ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.indexOf('<PendingCommentsBanner userId={userId} />') < dashboard.lastIndexOf('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />')],
   ['coleta pede nome público', collector.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
   ['coleta aceita somente campos específicos de permalink', collector.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !collector.includes("'reviewUri', 'url'")],

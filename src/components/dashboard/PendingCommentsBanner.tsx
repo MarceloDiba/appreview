@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import { MailWarning } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useInternalFeedback, type InternalCase } from '@/hooks/useInternalFeedback';
+import { useInternalFeedback } from '@/hooks/useInternalFeedback';
+import { caseHasContact, orderPendingCasesByUrgency } from '@/lib/internalCasePriority';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 /**
@@ -19,33 +20,23 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
  * Reaproveita `useInternalFeedback`, a mesma fonte usada em `/reviews`, para
  * não criar um segundo caminho de leitura para o mesmo dado.
  *
- * `customer_email` guarda hoje o WhatsApp escrito pelo cliente no formulário
- * (o campo mudou de "WhatsApp ou e-mail" para só WhatsApp), não um e-mail.
- * Um caso com esse contato pode ser resolvido com uma ligação nos próximos
- * minutos; um caso sem contato só pode ser aprendido, não respondido. Por
- * isso o caso com contato tem prioridade sobre o mais antigo sem contato ao
- * escolher o que este bloco destaca, e ganha um rótulo dizendo isso.
+ * A ordem de urgência (quem tem contato antes de quem não tem, mais antigo
+ * primeiro dentro de cada grupo) vem de `orderPendingCasesByUrgency`, em
+ * `src/lib/internalCasePriority.ts`. O caso que este bloco destaca é o
+ * primeiro item dessa ordem, o mesmo primeiro item que `CasesList.tsx` usa
+ * em `/reviews`: as duas telas leem a mesma função, então não podem divergir
+ * sobre qual caso é o mais urgente.
  */
-const hasContact = (item: InternalCase) => !!item.customer_email && item.customer_email.trim() !== '';
-
-const oldestOf = (items: InternalCase[]) =>
-  items.reduce((older, current) => {
-    const olderTime = older.created_at ? new Date(older.created_at).getTime() : 0;
-    const currentTime = current.created_at ? new Date(current.created_at).getTime() : 0;
-    return currentTime < olderTime ? current : older;
-  });
-
 const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
   const { t, i18n } = useOwnerTranslation();
   const { loading, cases } = useInternalFeedback(userId || '');
 
   if (loading) return null;
 
-  const pending = cases.filter((item) => !item.is_addressed);
-  if (pending.length === 0) return null;
+  const pendingOrdered = orderPendingCasesByUrgency(cases);
+  if (pendingOrdered.length === 0) return null;
 
-  const withContact = pending.filter(hasContact);
-  const highlighted = withContact.length > 0 ? oldestOf(withContact) : oldestOf(pending);
+  const highlighted = pendingOrdered[0];
   const quote = highlighted.feedback_text?.trim();
   const who = highlighted.customer_name?.trim() || t('dashboard.cockpit.layout.anonymousReviewer');
   const locale = i18n.resolvedLanguage || i18n.language;
@@ -65,7 +56,7 @@ const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
               {t('dashboard.cockpit.layout.pendingCommentsTitle')}
             </h2>
             <p className="mt-1 text-sm leading-5 text-slate-700">
-              {t('dashboard.cockpit.layout.pendingCommentsCount', { count: pending.length })}
+              {t('dashboard.cockpit.layout.pendingCommentsCount', { count: pendingOrdered.length })}
             </p>
             <div className="mt-3 rounded-lg bg-white/70 p-3 text-sm leading-5 text-slate-700">
               <div className="flex flex-wrap items-center gap-2">
@@ -73,7 +64,7 @@ const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
                   {who}
                   {dateLabel ? ` · ${dateLabel}` : ''}
                 </p>
-                {hasContact(highlighted) && (
+                {caseHasContact(highlighted) && (
                   <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
                     {t('dashboard.cockpit.layout.pendingCommentsHasContact')}
                   </span>

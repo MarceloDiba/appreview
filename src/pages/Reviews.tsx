@@ -37,17 +37,53 @@ const Reviews = () => {
   // `#casos-internos` na URL. Sem isto, o toque cai no topo da página, acima
   // da fila do Google e das avaliações públicas, e o dono volta a rolar a
   // tela até achar o caso, exatamente o problema que o bloco existe para
-  // evitar. Roda de novo quando `userId` chega porque é o que muda a altura
-  // do bloco do Google acima e pode deslocar o alvo do scroll.
+  // evitar.
+  //
+  // `GoogleBusinessReviewQueue` e `GoogleReviews` carregam por hooks
+  // próprios, sem relação com o estado `userId` deste componente. Um scroll
+  // disparado num único instante acerta ou erra dependendo de qual desses
+  // dois já carregou naquele momento, e numa rede de restaurante lenta, no
+  // celular, isto é a regra e não a exceção. Em vez de adivinhar o instante
+  // certo, observa-se a altura da página: toda vez que algo acima do alvo
+  // muda de tamanho, rola-se de novo. Para quando a altura fica quieta por
+  // 400ms (conteúdo assentou) ou depois de 8s (limite para não perseguir um
+  // carregamento que nunca termina).
   useEffect(() => {
     if (location.hash !== `#${casesAnchorId}`) return;
-    const target = document.getElementById(casesAnchorId);
-    if (!target) return;
-    const raf = requestAnimationFrame(() => {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const scrollToTarget = () => {
+      document.getElementById(casesAnchorId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    scrollToTarget();
+
+    if (typeof ResizeObserver === 'undefined') return;
+
+    let settleTimer: number | undefined;
+    let stopped = false;
+
+    const stop = () => {
+      if (stopped) return;
+      stopped = true;
+      observer.disconnect();
+      if (settleTimer) window.clearTimeout(settleTimer);
+    };
+
+    const observer = new ResizeObserver(() => {
+      if (stopped) return;
+      scrollToTarget();
+      if (settleTimer) window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(stop, 400);
     });
-    return () => cancelAnimationFrame(raf);
-  }, [location.hash, userId]);
+    observer.observe(document.body);
+
+    const maxTimer = window.setTimeout(stop, 8000);
+
+    return () => {
+      stop();
+      window.clearTimeout(maxTimer);
+    };
+  }, [location.hash]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
