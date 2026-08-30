@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import { ExperimentalApifySnapshot, loadExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
 import { useReputationSnapshot } from '@/hooks/useReputationSnapshot';
-import { buildSnapshotFromPersistedRow } from '@/lib/reputationSnapshotReading';
+import { buildSnapshotFromPersistedRow, chooseFreshestSnapshot } from '@/lib/reputationSnapshotReading';
 
 const emptyBreakdown = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 } as const;
 
@@ -102,6 +102,14 @@ const Dashboard = () => {
     };
   }, [businessName, outcome.data, t]);
 
+  // Vence o retrato mais recente, nao o do navegador por definicao. A coleta
+  // diaria no servidor grava so a linha do banco; com precedencia fixa, quem
+  // paga por coleta diaria continuaria vendo um retrato de dias atras.
+  const activeSnapshot = useMemo(
+    () => chooseFreshestSnapshot(experimentalSnapshot, persistedSnapshot) || approvedFallbackSnapshot,
+    [approvedFallbackSnapshot, experimentalSnapshot, persistedSnapshot],
+  );
+
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f7f9]">
       <Navbar userRole="business" businessName={businessName || undefined} />
@@ -149,8 +157,8 @@ const Dashboard = () => {
 
           {loadingExperimentalSnapshot || outcome.loading || persisted.loading ? (
             <Card className="h-72 animate-pulse border-slate-200 bg-white" />
-          ) : experimentalSnapshot || persistedSnapshot || approvedFallbackSnapshot ? (
-            <ExperimentalCockpitDashboard snapshot={experimentalSnapshot || persistedSnapshot || approvedFallbackSnapshot} userId={userId || undefined} />
+          ) : activeSnapshot ? (
+            <ExperimentalCockpitDashboard snapshot={activeSnapshot} userId={userId || undefined} />
           ) : (
             <Card className="border-slate-200 bg-white"><CardContent className="p-6"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.googleOutcome.emptyTitle')}</h2><p className="mt-2 text-sm text-slate-600">{t('dashboard.googleOutcome.empty')}</p><Button asChild className="mt-5"><Link to="/settings">{t('dashboard.googleOutcome.configure')}</Link></Button></CardContent></Card>
           )}

@@ -143,6 +143,12 @@ const instrucoesSqlDaTabela = () => {
 };
 
 const nucleoDeColeta = read('supabase/functions/_shared/experimentalApifyCollection.ts');
+const coletorManual = read('supabase/functions/sync-experimental-apify/index.ts');
+const drenadorAutomatico = read('supabase/functions/apify-auto-collect-on-signup/index.ts');
+const paginaDoPainel = read('src/pages/Dashboard.tsx');
+const leituraDoAgregado = read('src/lib/reputationSnapshotReading.ts');
+const cockpitRenderizado = read('src/components/dashboard/ApprovedCockpitDashboard.tsx');
+const cockpitIntermediario = read('src/components/dashboard/ExperimentalCockpitDashboard.tsx');
 
 // Trecho entre dois marcadores literais, o segundo procurado a partir do fim
 // do primeiro. Isola uma parte do arquivo pelo texto que já a delimita, em vez
@@ -170,23 +176,37 @@ const requisitos = [
   // exigida dentro do trecho que vai da auditoria bem-sucedida até o retorno
   // de sucesso, que é o único ponto em que o agregado existe.
   (() => {
-    const rotulo = 'os dois caminhos de coleta gravam o agregado pelo núcleo partilhado, e a gravação é mesmo CHAMADA no caminho de sucesso, entre a auditoria concluída e o retorno';
+    const rotulo = 'os dois chamadores (piloto manual e drenador do cadastro) coletam pelo núcleo partilhado, e o núcleo grava o agregado no caminho de sucesso, entre a auditoria concluída e o retorno';
+    // Contar inserts no repositório não prova nada sobre os chamadores: o
+    // núcleo mais o caminho oficial já somam dois sozinhos. Se o drenador
+    // automático deixasse de passar pelo núcleo, a coleta automática voltaria
+    // a gastar sem persistir e a contagem continuaria a mesma. Por isso os
+    // dois arquivos são abertos e a CHAMADA é exigida em cada um.
     const escritaNoNucleo = escritas.some((escrita) => escrita.caminho === 'supabase/functions/_shared/experimentalApifyCollection.ts');
+    const manualPassaPeloNucleo = /await runExperimentalApifyCollection\(/.test(coletorManual);
+    const automaticoPassaPeloNucleo = /await runExperimentalApifyCollection\(/.test(drenadorAutomatico);
     const caminhoDeSucesso = extrairEntre(nucleoDeColeta, "status: 'succeeded',", 'return { ok: true');
     const chamada = Boolean(caminhoDeSucesso) && /await persistAggregateSnapshot\(\{[^}]*aggregateSnapshot[^}]*\}\)/.test(caminhoDeSucesso);
-    return [rotulo, escritaNoNucleo && escritas.length >= 2 && chamada];
+    return [rotulo, escritaNoNucleo && manualPassaPeloNucleo && automaticoPassaPeloNucleo && chamada];
   })(),
 
   // O Apify já cobrou quando a gravação acontece. Se ela puder derrubar a
   // coleta, o chamador trata como falha e tenta de novo, gastando de novo. A
   // função de gravação engole a própria falha: registra e segue.
   (() => {
-    const rotulo = 'falha ao gravar o agregado é registrada e nunca propagada: a coleta já paga não vira coleta falhada';
+    const rotulo = 'falha ao gravar o agregado é REGISTRADA (as duas formas de falha) e nunca propagada: a coleta já paga não vira coleta falhada';
     const corpo = extrairEntre(nucleoDeColeta, 'const persistAggregateSnapshot = async ({', '\n};');
     if (!corpo) return [rotulo, false];
-    const capturaTudo = /try \{/.test(corpo) && /\} catch \(error\) \{/.test(corpo);
+    // "Registrada" precisa ser verificada, não prometida no rótulo: esvaziar o
+    // catch e apagar o console.error deixava a versão anterior deste teste
+    // verde, e uma gravação que falha em silêncio é indistinguível de uma que
+    // nunca aconteceu. As duas formas de falha são exigidas: o erro devolvido
+    // pelo supabase-js e a exceção de rede.
+    const erroDevolvidoRegistrado = /if \(error\) console\.error\(/.test(corpo);
+    const capturaBloco = extrairEntre(corpo, '} catch (error) {', '\n  }');
+    const excecaoRegistrada = Boolean(capturaBloco) && /console\.error\(/.test(capturaBloco);
     const relanca = /throw\b/.test(corpo);
-    return [rotulo, capturaTudo && !relanca];
+    return [rotulo, erroDevolvidoRegistrado && excecaoRegistrada && !relanca];
   })(),
 
   (() => {
@@ -241,6 +261,74 @@ const requisitos = [
       const filtraPorFonte = /\.eq\(\s*['"]source['"]/.test(trecho);
       return linhaUnica || filtraPorFonte;
     })],
+
+  // ------------------------------------------------------------------
+  // GUARDA 3: o painel mostra o retrato mais recente, não o do navegador
+  // por definição.
+  // ------------------------------------------------------------------
+
+  // A coleta diária no servidor grava só a linha persistida. Com precedência
+  // fixa (`navegador || banco`), quem paga por coleta diária continuaria vendo
+  // um retrato de dias atrás enquanto os números novos já estariam no banco.
+  (() => {
+    const rotulo = 'o painel escolhe entre navegador e banco pelo mais recente, e não por precedência fixa: sem `experimentalSnapshot || persistedSnapshot` em lugar nenhum';
+    const usaEscolha = /chooseFreshestSnapshot\(experimentalSnapshot, persistedSnapshot\)/.test(paginaDoPainel);
+    const semPrecedenciaFixa = !/experimentalSnapshot \|\| persistedSnapshot/.test(paginaDoPainel);
+    const renderizaOEscolhido = /snapshot=\{activeSnapshot\}/.test(paginaDoPainel);
+    return [rotulo, usaEscolha && semPrecedenciaFixa && renderizaOEscolhido];
+  })(),
+
+  // Chamar a função não basta: ela precisa mesmo comparar as duas datas. Uma
+  // versão que devolvesse sempre o primeiro argumento teria o mesmo nome e o
+  // mesmo ponto de chamada.
+  (() => {
+    const rotulo = 'a escolha compara de verdade as datas dos dois retratos (`fetchedAt` do navegador contra `captured_at` da linha), e data ilegível no navegador conta como mais antiga, nunca como mais nova';
+    const leitorDeData = extrairEntre(leituraDoAgregado, 'const snapshotTime = (', '\n};');
+    const leData = Boolean(leitorDeData) && /new Date\(snapshot\.fetchedAt\)\.getTime\(\)/.test(leitorDeData) && /Number\.isFinite/.test(leitorDeData);
+    const corpo = extrairEntre(leituraDoAgregado, 'export const chooseFreshestSnapshot = (', '\n};');
+    if (!corpo) return [rotulo, false];
+    const compara = /browserTime\s*>=\s*persistedTime \? browserSnapshot : persistedSnapshot/.test(corpo);
+    const dataIlegivelPerde = /if \(browserTime === null\) return persistedSnapshot;/.test(corpo);
+    return [rotulo, leData && compara && dataIlegivelPerde];
+  })(),
+
+  // ------------------------------------------------------------------
+  // GUARDA 4: amostra nunca aparece como dado completo no painel.
+  // ------------------------------------------------------------------
+
+  // Guardar o componente errado seria um teste vazio: `LegacyExperimentalCockpitDashboard`
+  // não é renderizado por ninguém. Esta linha prende o guarda ao componente
+  // que o painel realmente desenha.
+  ['o cockpit guardado é o que o painel realmente renderiza (Dashboard -> ExperimentalCockpitDashboard -> ApprovedCockpitDashboard)',
+    /<ExperimentalCockpitDashboard snapshot=/.test(paginaDoPainel)
+    && /<ApprovedCockpitDashboard snapshot=\{snapshot\} userId=\{userId\} \/>/.test(cockpitIntermediario)],
+
+  // Contrato de produto, linha 30: amostra não pode aparecer como dado
+  // oficial, completo ou real sem estar identificada. Um negócio com 400
+  // avaliações mostrava a distribuição de 50 sem nada dizendo isso.
+  (() => {
+    const rotulo = 'o cockpit renderizado lê a proveniência do retrato e só identifica como amostra o que veio do piloto Apify';
+    const corpo = extrairEntre(cockpitRenderizado, 'const SampleSourceNote = ({ snapshot }', '\n};');
+    if (!corpo) return [rotulo, false];
+    const leAProveniencia = /snapshot\.source !== 'apify-experimental'/.test(corpo);
+    const somenteComAmostra = /return null;/.test(corpo);
+    const usaAChave = /t\('dashboard\.cockpit\.layout\.sampleSourceNote'/.test(corpo);
+    return [rotulo, leAProveniencia && somenteComAmostra && usaAChave];
+  })(),
+
+  // A etiqueta tem que estar DENTRO de cada módulo que desenha uma das cinco
+  // medidas de amostra: distribuição por nota (reputação e cada nota
+  // separada), tempo médio de resposta e novas avaliações de 30 dias
+  // (reputação) e temas. Nota e total de avaliações ficam de fora de
+  // propósito: são os números do negócio inteiro, mesmo vindos do Apify.
+  (() => {
+    const rotulo = 'os módulos que desenham medidas de amostra (reputação, cada nota separada, temas) carregam a identificação de proveniência dentro do próprio cartão';
+    const modulos = ['const ReputationCard = ({ snapshot }', 'const RatingTrends = ({ weeks, snapshot }', 'const TopicsCard = ({ snapshot }'];
+    return [rotulo, modulos.every((marcador) => {
+      const corpo = extrairEntre(cockpitRenderizado, marcador, '\n};');
+      return Boolean(corpo) && corpo.includes('<SampleSourceNote snapshot={snapshot} />');
+    })];
+  })(),
 ];
 
 const reprovados = requisitos.filter(([, ok]) => !ok).map(([rotulo]) => rotulo);

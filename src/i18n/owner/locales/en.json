@@ -494,6 +494,7 @@
         "qrPeriod": "Events observed in the last 30 days.",
         "topicsTitle": "Most mentioned topics",
         "topicsSubtitle": "Topics appear only with complete review text.",
+        "sampleSourceNote": "Based on a sample of {{sample}} public reviews collected, not the profile total.",
         "analyzableComments": "comments with text available",
         "topicsBody": "The Apify collection was sanitized and brought no review text. It would not be responsible to name service, food, or any other topic yet.",
         "googleBreakdown": "Rating distribution in the sample",

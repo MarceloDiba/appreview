@@ -120,3 +120,43 @@ export const buildSnapshotFromPersistedRow = (
     },
   };
 };
+
+const snapshotTime = (snapshot: ExperimentalApifySnapshot | null) => {
+  if (!snapshot) return null;
+  const parsed = new Date(snapshot.fetchedAt).getTime();
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+/**
+ * Escolhe o retrato mais recente entre o do navegador e o que veio do banco.
+ *
+ * A precedência não pode ser fixa. A coleta diária no servidor grava apenas a
+ * linha persistida, sem passar por navegador nenhum: com o navegador vencendo
+ * sempre, um cliente que paga por coleta diária continuaria vendo um retrato
+ * de dias atrás enquanto os números novos já estariam no banco.
+ *
+ * A comparação é entre o `fetchedAt` do retrato do navegador e o `captured_at`
+ * da linha persistida, que `buildSnapshotFromPersistedRow` copia para o
+ * `fetchedAt` do retrato que devolve. Empate fica com o navegador: é a mesma
+ * coleta dos dois lados, e o lado do navegador ainda traz o histórico semanal
+ * que a linha do banco não guarda.
+ *
+ * Data ausente ou ilegível no navegador conta como mais ANTIGA, nunca como
+ * mais nova: na dúvida vence a linha do banco, que sempre tem `captured_at`.
+ *
+ * A fila de respostas continua vindo do `localStorage` qualquer que seja o
+ * vencedor: nome, texto e URL de avaliação nunca foram gravados (contrato de
+ * produto, linhas 39 a 41).
+ */
+export const chooseFreshestSnapshot = (
+  browserSnapshot: ExperimentalApifySnapshot | null,
+  persistedSnapshot: ExperimentalApifySnapshot | null,
+): ExperimentalApifySnapshot | null => {
+  if (!browserSnapshot) return persistedSnapshot;
+  if (!persistedSnapshot) return browserSnapshot;
+  const browserTime = snapshotTime(browserSnapshot);
+  const persistedTime = snapshotTime(persistedSnapshot);
+  if (browserTime === null) return persistedSnapshot;
+  if (persistedTime === null) return browserSnapshot;
+  return browserTime >= persistedTime ? browserSnapshot : persistedSnapshot;
+};
