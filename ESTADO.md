@@ -3,6 +3,65 @@
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
+## 29 de agosto de 2026
+
+Dia em que a primeira mensagem de WhatsApp do produto chegou a um telefone e o
+caminho completo, painel ate confirmacao de entrega, ficou provado. Vinte e dois
+commits. Detalhe do piloto em `docs/estado-do-piloto-whatsapp.md`.
+
+### Provado, com evidencia
+
+- [x] Entrega de WhatsApp ponta a ponta pela fila do produto. Tres linhas de
+  `whatsapp_outbox` contam: as de 11h42 e 11h52 falharam com `fetch failed`
+  depois de 300,6 s; a de 14h07 ficou `accepted` em 4,9 s; a de 14h21 chegou a
+  **`delivered`**. Antes disso nenhuma linha da tabela tinha tido sucesso.
+- [x] Sessao do OpenWA sobe sozinha apos reinicio do container.
+  `AUTO_START_SESSIONS=true` no `.env` da VPS. Log `Session ready: 557991986091`
+  e `engineLoaded: true`, sem chamada manual a `/start`.
+- [x] Relay com limite de tempo em producao. `AbortSignal.timeout(20000)`
+  confirmado no container em execucao.
+- [x] `relay.binno.pro` resolve. Registro A criado na GoDaddy apontando para
+  `72.61.131.23`. O webhook voltou a devolver `{"success":true,"statusCode":204}`.
+- [x] Varredura da fila de 60 s para 10 s, configuravel por
+  `BINNO_DISPATCH_INTERVAL_MS`. A espera na fila caiu de 54,0 s para 0,5 s.
+- [x] O painel passou a dizer quanto esperar depois de enfileirar.
+- [x] QR criado fora de `binno.pro` exige confirmacao consciente, uma por QR.
+  Loopback continua bloqueado. `www.binno.pro` entrou como origem canonica.
+- [x] Idioma do cartao impresso passa a seguir `profiles.business_country`, com
+  o telefone so como reserva. O cartao da Noa sairia em ingles porque o telefone
+  esta gravado sem `+55`.
+- [x] Casa da documentacao consolidada em `~/binno`, fora do iCloud.
+
+### Configurado, ainda nao observado
+
+- [~] `WWEBJS_ONBOARDING_CONTINUE_LABELS` preenchida na VPS. Cobre a proxima
+  reconexao automatica do WhatsApp Web, mas nenhuma reconexao aconteceu desde a
+  mudanca. E configuracao aplicada, nao comportamento visto.
+
+### Aberto
+
+- [ ] **A tabela `review_funnel_events` esta vazia desde que o produto existe**,
+  em todas as contas. Ninguem nunca escaneou um QR e teve o evento registrado. O
+  funil que o painel mostra nunca mediu nada.
+- [ ] Ensaio na conta da Noa antes da Casa Due: corrigir o telefone com `+55`,
+  criar um QR a partir de `binno.pro`, imprimir o cartao e escanear. Quatro
+  cliques que dependem de sessao autenticada.
+- [ ] Primeiro cliente brasileiro: **Casa Due**, em Aracaju. Falta o link de
+  avaliacao no formato que abre a caixa de estrelas, o WhatsApp do dono com
+  consentimento, e a confirmacao de que ele administra o perfil no Google.
+- [ ] Algo apagou o DNS de `relay.binno.pro` em 26/08. O numero de serie da zona
+  e o ultimo disparo do webhook apontam para o mesmo dia. Sem saber o que foi,
+  pode cair de novo.
+- [ ] Fase 5, higiene: rotacionar `GOOGLE_PLACES_API_KEY`, cinco erros de lint
+  herdados, renomear `EmojiRating`.
+
+### Achado de produto, sem decisao
+
+O botao de teste ficava ate um minuto em silencio e por isso parecia quebrado.
+Foi corrigido para dez segundos, mas a solucao completa e o botao acionar o
+relay na hora, em vez de esperar o tique. Nao foi feito hoje de proposito: o
+caminho de envio tinha comecado a funcionar havia duas horas.
+
 ## Prontidão para venda — 27 de agosto de 2026
 
 - [x] Definir cobrança pelo país onde o negócio opera: esse país, salvo em
