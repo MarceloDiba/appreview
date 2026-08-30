@@ -15,6 +15,7 @@ const Reviews = () => {
   const location = useLocation();
   const [userId, setUserId] = useState<string | null>(null);
   const [businessName, setBusinessName] = useState('');
+  const [businessCountry, setBusinessCountry] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -24,10 +25,11 @@ const Reviews = () => {
       setUserId(user.id);
       const { data: profile } = await supabase
         .from('profiles')
-        .select('business_name')
+        .select('business_name, business_country')
         .eq('id', user.id)
         .maybeSingle();
       if (profile?.business_name) setBusinessName(profile.business_name);
+      if (profile?.business_country) setBusinessCountry(profile.business_country);
     };
 
     void fetchUser();
@@ -98,7 +100,7 @@ const Reviews = () => {
 
           <div className="mb-8">
             {userId ? (
-              <GoogleBusinessReviewQueue userId={userId} businessName={businessName || undefined} />
+              <GoogleBusinessReviewQueue userId={userId} businessName={businessName || undefined} businessCountry={businessCountry || undefined} />
             ) : (
               <div className="py-8 text-center text-gray-500">{t('reviews.loading')}</div>
             )}
@@ -112,7 +114,7 @@ const Reviews = () => {
             </TabsList>
             <TabsContent value="internal">
               {userId ? (
-                <CasesList userId={userId} businessName={businessName || undefined} />
+                <CasesList userId={userId} businessName={businessName || undefined} businessCountry={businessCountry || undefined} />
               ) : (
                 <div className="py-8 text-center text-gray-500">{t('reviews.loading')}</div>
               )}

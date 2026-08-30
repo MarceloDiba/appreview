@@ -18,6 +18,8 @@ interface ReplySuggestionsProps {
   customerName?: string | null;
   customerEmail?: string | null;
   businessName?: string | null;
+  /** `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão. */
+  businessCountry?: string | null;
   channel: ReplyChannel;
 }
 
@@ -38,6 +40,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
   customerName,
   customerEmail,
   businessName,
+  businessCountry,
   channel,
 }) => {
   const { t } = useOwnerTranslation();
@@ -53,10 +56,11 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
         text,
         customerName,
         businessName,
+        businessCountry,
         channel,
         locale,
       }),
-    [rating, text, customerName, businessName, channel, locale]
+    [rating, text, customerName, businessName, businessCountry, channel, locale]
   );
 
   const bodyOf = (id: string, fallback: string) => drafts[`${locale}:${id}`] ?? fallback;
