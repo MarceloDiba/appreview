@@ -9,6 +9,8 @@ import { useGoogleOutcome } from '@/hooks/useGoogleOutcome';
 import { supabase } from '@/integrations/supabase/client';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import { ExperimentalApifySnapshot, loadExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
+import { useReputationSnapshot } from '@/hooks/useReputationSnapshot';
+import { buildSnapshotFromPersistedRow, composeCockpitSnapshot } from '@/lib/reputationSnapshotReading';
 
 const emptyBreakdown = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 } as const;
 
@@ -67,6 +69,15 @@ const Dashboard = () => {
 
   const setup = useSetupStatus(userId || undefined);
   const outcome = useGoogleOutcome(userId || undefined);
+  // O agregado da coleta vive no banco desde 30/08/2026. Ele e o que faz o
+  // painel encher em qualquer aparelho do dono, e não só naquele que pediu a
+  // coleta. A fila de respostas continua vindo do navegador: nome, texto e URL
+  // de avaliação nunca foram gravados (contrato, linhas 39 a 41).
+  const persisted = useReputationSnapshot(userId || undefined);
+  const persistedSnapshot = useMemo(
+    () => buildSnapshotFromPersistedRow(persisted.row, { businessName: businessName || t('dashboard.workspace.fallbackName') }),
+    [businessName, persisted.row, t],
+  );
   const approvedFallbackSnapshot = useMemo<ExperimentalApifySnapshot | null>(() => {
     if (!outcome.data) return null;
     return {
@@ -90,6 +101,20 @@ const Dashboard = () => {
       },
     };
   }, [businessName, outcome.data, t]);
+
+  // A leitura do cockpit e composta, não escolhida. O agregado vem da fonte
+  // mais recente; a fila de respostas vem sempre do localStorage, qualquer que
+  // seja a fonte que venceu; o histórico semanal vem de quem o tiver. Escolher
+  // um retrato inteiro fazia a fila sumir da tela justamente quando a linha do
+  // banco vencia, que e o caso da coleta diária.
+  const cockpitSnapshot = useMemo(
+    () => composeCockpitSnapshot({
+      browserSnapshot: experimentalSnapshot,
+      persistedSnapshot,
+      fallbackSnapshot: approvedFallbackSnapshot,
+    }),
+    [approvedFallbackSnapshot, experimentalSnapshot, persistedSnapshot],
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f7f9]">
@@ -136,10 +161,10 @@ const Dashboard = () => {
             </Card>
           )}
 
-          {loadingExperimentalSnapshot || outcome.loading ? (
+          {loadingExperimentalSnapshot || outcome.loading || persisted.loading ? (
             <Card className="h-72 animate-pulse border-slate-200 bg-white" />
-          ) : experimentalSnapshot || approvedFallbackSnapshot ? (
-            <ExperimentalCockpitDashboard snapshot={experimentalSnapshot || approvedFallbackSnapshot} userId={userId || undefined} />
+          ) : cockpitSnapshot ? (
+            <ExperimentalCockpitDashboard snapshot={cockpitSnapshot} userId={userId || undefined} />
           ) : (
             <Card className="border-slate-200 bg-white"><CardContent className="p-6"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.googleOutcome.emptyTitle')}</h2><p className="mt-2 text-sm text-slate-600">{t('dashboard.googleOutcome.empty')}</p><Button asChild className="mt-5"><Link to="/settings">{t('dashboard.googleOutcome.configure')}</Link></Button></CardContent></Card>
           )}

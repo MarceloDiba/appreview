@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdvisorObservedResult, markAdvisorAction } from '@/lib/advisorPilot';
 import { getAdvisorReading } from '@/lib/advisorReading';
 import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
+import { sampleWasTruncated } from '@/lib/reputationSnapshotReading';
 
 type QueueReview = {
   id: string;
@@ -58,6 +59,35 @@ const formatAge = (value: string | null, locale: string) => value
   : '—';
 
 const normalizeObserved = (review: ExperimentalObservedReview): QueueReview => review;
+
+/**
+ * Contrato de produto, linha 30: amostra nunca pode aparecer como dado
+ * oficial, completo ou real sem estar identificada.
+ *
+ * No piloto Apify a distribuição por nota, o tempo médio de resposta, as
+ * avaliações dos últimos 30 dias e os temas são calculados sobre a amostra
+ * coletada. Um negócio com 400 avaliações mostrava a distribuição de 50 sem
+ * nada dizendo isso, oito vezes menor que a realidade.
+ *
+ * A etiqueta aparece exatamente quando houve corte, e não sempre que a leitura
+ * veio do Apify. A coleta pede no máximo 50 e recebe o que existir: um negócio
+ * com 20 avaliações recebe as 20, e aí a leitura está completa. Chamar isso de
+ * amostra subestimaria, na frente de um cliente, um dado que está inteiro. Por
+ * isso a condição é a mesma que decide o histórico semanal, e vem da mesma
+ * função: `sampleWasTruncated`.
+ *
+ * A nota e o total de avaliações nunca levam a etiqueta: mesmo vindos do
+ * Apify eles são os números do negócio inteiro, lidos do próprio perfil.
+ *
+ * A etiqueta é aditiva por exigência do contrato: um rodapé discreto dentro do
+ * cartão que já existe, sem redesenhar, fundir, esconder ou deslocar módulo
+ * nenhum.
+ */
+const SampleSourceNote = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
+  const { t } = useOwnerTranslation();
+  if (!sampleWasTruncated(snapshot)) return null;
+  return <p className="mt-4 text-xs leading-4 text-slate-500">{t('dashboard.cockpit.layout.sampleSourceNote', { sample: snapshot.sample.reviewCount })}</p>;
+};
 
 const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }: { snapshot: ExperimentalApifySnapshot; userId?: string; demo?: boolean; demoFunnel?: ReviewFunnelMetrics }) => {
   const official = useGoogleBusinessReviewQueue(import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined);
@@ -241,7 +271,7 @@ const RatingTrends = ({ weeks, snapshot }: { weeks: Week[]; snapshot: Experiment
   const lowCurrent = rows.filter((row) => row.rating === '1' || row.rating === '2').reduce((sum, row) => sum + (row.current || 0), 0);
   const lowPrevious = rows.filter((row) => row.rating === '1' || row.rating === '2').reduce((sum, row) => sum + (row.previous || 0), 0);
   const needsAttention = hasHistory && five.current < (five.previous || 0) || hasHistory && lowCurrent > lowPrevious;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="text-lg font-semibold text-slate-950">Cada nota separada</h2><span className="text-sm text-slate-500">sem empilhamento</span></div><div className="mt-5 divide-y divide-slate-200">{rows.map((row) => { const risk = hasHistory && row.current !== null && (row.rating === '5' ? row.current < (row.previous || 0) : Number(row.rating) <= 2 && row.current > (row.previous || 0)); return <div key={row.rating} className="grid grid-cols-[52px_1fr_auto] items-center gap-3 py-3"><span className="text-sm font-semibold text-slate-800">{row.rating}<Star className="ml-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" /></span><div className="h-8 min-w-24">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={row.series}><Line type="monotone" dataKey="value" stroke={risk ? '#C2413A' : '#D4A72C'} strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><span className="whitespace-nowrap text-xs text-slate-500"><strong className="text-slate-900">{row.current === null ? '—' : `${row.current}%`}</strong> antes {row.previous === null ? '—' : `${row.previous}%`} {risk && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-red-700">atenção</span>}</span></div>; })}</div>{needsAttention && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p>As 5 estrelas mudaram de {five.previous}% para {five.current}% e as notas 1 e 2 mudaram de {lowPrevious}% para {lowCurrent}% nas últimas 4 semanas.</p></div>}</CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="text-lg font-semibold text-slate-950">Cada nota separada</h2><span className="text-sm text-slate-500">sem empilhamento</span></div><div className="mt-5 divide-y divide-slate-200">{rows.map((row) => { const risk = hasHistory && row.current !== null && (row.rating === '5' ? row.current < (row.previous || 0) : Number(row.rating) <= 2 && row.current > (row.previous || 0)); return <div key={row.rating} className="grid grid-cols-[52px_1fr_auto] items-center gap-3 py-3"><span className="text-sm font-semibold text-slate-800">{row.rating}<Star className="ml-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" /></span><div className="h-8 min-w-24">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={row.series}><Line type="monotone" dataKey="value" stroke={risk ? '#C2413A' : '#D4A72C'} strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><span className="whitespace-nowrap text-xs text-slate-500"><strong className="text-slate-900">{row.current === null ? '—' : `${row.current}%`}</strong> antes {row.previous === null ? '—' : `${row.previous}%`} {risk && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-red-700">atenção</span>}</span></div>; })}</div>{needsAttention && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p>As 5 estrelas mudaram de {five.previous}% para {five.current}% e as notas 1 e 2 mudaram de {lowPrevious}% para {lowCurrent}% nas últimas 4 semanas.</p></div>}<SampleSourceNote snapshot={snapshot} /></CardContent></Card>;
 };
 
 const ReputationCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
@@ -250,7 +280,7 @@ const ReputationCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) =
   const replyHours = snapshot.sample.insights?.averageResponseHours;
   const last30 = snapshot.sample.insights?.reviewsLast30Days;
   const hasDistribution = snapshot.sample.reviewCount > 0;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">Reputação no Google</h2><span className="text-xs text-slate-500">últimos dados</span></div><div className="mt-4 flex items-end gap-3"><p className="text-4xl font-medium tracking-tight text-slate-950">{decimal.format(snapshot.business.googleRating)}</p><Stars rating={Math.round(snapshot.business.googleRating)} medium /></div><p className="mt-1 text-sm text-slate-600">{integer.format(snapshot.business.googleReviewCount)} avaliações no total</p>{hasDistribution ? <div className="mt-5 space-y-2">{ratings.map((rating) => { const count = snapshot.sample.ratingBreakdown[rating]; const width = Math.round((count / snapshot.sample.reviewCount) * 100); return <div key={rating} className="grid grid-cols-[28px_1fr_36px] items-center gap-2 text-xs"><span>{rating}★</span><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`${Number(rating) <= 2 ? 'bg-red-500' : 'bg-amber-400'} h-full rounded-full`} style={{ width: `${width}%` }} /></div><span className="text-right text-slate-600">{width}%</span></div>; })}</div> : <p className="mt-5 text-sm text-slate-500">—</p>}<div className="mt-5 grid grid-cols-2 gap-3"><Metric label="Tempo médio de resposta" value={replyHours === null || replyHours === undefined ? '—' : `${Math.round(replyHours)} h`} /><Metric label="Novas avaliações (30 dias)" value={last30 === null || last30 === undefined ? '—' : `+${last30}`} tone="positive" /></div></CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">Reputação no Google</h2><span className="text-xs text-slate-500">últimos dados</span></div><div className="mt-4 flex items-end gap-3"><p className="text-4xl font-medium tracking-tight text-slate-950">{decimal.format(snapshot.business.googleRating)}</p><Stars rating={Math.round(snapshot.business.googleRating)} medium /></div><p className="mt-1 text-sm text-slate-600">{integer.format(snapshot.business.googleReviewCount)} avaliações no total</p>{hasDistribution ? <div className="mt-5 space-y-2">{ratings.map((rating) => { const count = snapshot.sample.ratingBreakdown[rating]; const width = Math.round((count / snapshot.sample.reviewCount) * 100); return <div key={rating} className="grid grid-cols-[28px_1fr_36px] items-center gap-2 text-xs"><span>{rating}★</span><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`${Number(rating) <= 2 ? 'bg-red-500' : 'bg-amber-400'} h-full rounded-full`} style={{ width: `${width}%` }} /></div><span className="text-right text-slate-600">{width}%</span></div>; })}</div> : <p className="mt-5 text-sm text-slate-500">—</p>}<div className="mt-5 grid grid-cols-2 gap-3"><Metric label="Tempo médio de resposta" value={replyHours === null || replyHours === undefined ? '—' : `${Math.round(replyHours)} h`} /><Metric label="Novas avaliações (30 dias)" value={last30 === null || last30 === undefined ? '—' : `+${last30}`} tone="positive" /></div><SampleSourceNote snapshot={snapshot} /></CardContent></Card>;
 };
 
 const Metric = ({ label, value, tone }: { label: string; value: string; tone?: 'positive' }) => <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs leading-4 text-slate-500">{label}</p><p className={`mt-2 text-xl font-semibold ${tone === 'positive' ? 'text-emerald-700' : 'text-slate-950'}`}>{value}</p></div>;
@@ -311,7 +341,7 @@ const TopicsCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
       : reading.kind === 'strength'
         ? <><p className="text-xs font-semibold text-emerald-700">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions })}</p></>
         : null;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.topicsTitle')}</h2>{topics.length ? <div className="mt-5 flex flex-wrap gap-2">{topics.map((topic) => <span key={topic.id} className={`rounded-full px-3 py-1.5 text-xs font-medium ${topic.sentiment === 'negative' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>{t(`dashboard.cockpit.topicLabels.${topic.id}`)} · {topic.count}</span>)}</div> : <p className="mt-4 text-sm text-slate-500">—</p>}{detail && <div className="mt-5 border-t border-slate-200 pt-4">{detail}</div>}</CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.topicsTitle')}</h2>{topics.length ? <div className="mt-5 flex flex-wrap gap-2">{topics.map((topic) => <span key={topic.id} className={`rounded-full px-3 py-1.5 text-xs font-medium ${topic.sentiment === 'negative' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>{t(`dashboard.cockpit.topicLabels.${topic.id}`)} · {topic.count}</span>)}</div> : <p className="mt-4 text-sm text-slate-500">—</p>}{detail && <div className="mt-5 border-t border-slate-200 pt-4">{detail}</div>}<SampleSourceNote snapshot={snapshot} /></CardContent></Card>;
 };
 
 export default ApprovedCockpitDashboard;

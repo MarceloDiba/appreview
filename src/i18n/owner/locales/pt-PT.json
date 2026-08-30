@@ -494,6 +494,7 @@
         "qrPeriod": "Eventos observados nos últimos 30 dias.",
         "topicsTitle": "Temas mais citados",
         "topicsSubtitle": "Os temas só aparecem com comentários completos.",
+        "sampleSourceNote": "Base: amostra de {{sample}} avaliações públicas recolhidas, não o total do perfil.",
         "analyzableComments": "comentários com texto disponíveis",
         "topicsBody": "A recolha Apify foi sanitizada e não trouxe texto dos comentários. Por isso ainda não seria responsável nomear atendimento, comida ou outro tema.",
         "googleBreakdown": "Distribuição por classificação na amostra",
