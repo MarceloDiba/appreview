@@ -150,7 +150,7 @@ const Dashboard = () => {
                         missing.length <= 1
                           ? missing.join('')
                           : `${missing.slice(0, -1).join(', ')} ${t('dashboard.setupBanner.and')} ${missing[missing.length - 1]}`;
-                      return `${list} ${t('dashboard.setupBanner.suffix')}`;
+                      return `${list}. ${t('dashboard.setupBanner.suffix')}`;
                     })()}
                   </p>
                 </div>

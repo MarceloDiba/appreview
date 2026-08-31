@@ -243,6 +243,26 @@ forças, fragilidades e próximo passo são o centro do produto.
 - Até isso acontecer, o Binno não deve esconder a limitação nem prometer que
   sincronizou uma fila completa.
 
+### Quem entrega hoje (decisão de 30/08/2026)
+
+A ordem das duas fontes acima está invertida em relação ao que o painel dizia
+até esta data, e a inversão é do dono.
+
+- Quem entrega hoje é a coleta própria. Ela traz nome público, texto, link e o
+  estado de resposta de cada avaliação, que é tudo o que a fila precisa.
+- O Binno nunca publica uma resposta no Google: ele leva a resposta até lá. O
+  único valor que a API oficial acrescenta é ler, e a coleta própria já lê.
+  Por isso a conexão oficial é um **upgrade** (histórico completo do perfil,
+  em vez das mais recentes), nunca um pré-requisito.
+- Consequência para o texto do painel: nenhum módulo pode ser escrito na voz de
+  quem espera pelo Google. Um estado vazio diz o que aparece ali quando houver
+  algo, e o que o dono faz agora para que apareça. A conexão oficial só pode
+  ser mencionada como o passo que melhora, nunca como o passo que falta.
+- O que continua sendo dito: o teto de 50 avaliações por busca, a retenção de
+  14 dias no navegador, a ausência de agenda e o fato de o Binno não publicar
+  nada no lugar do dono. Limite real continua escrito; o que sai é o tom de
+  pedido de desculpa por existir.
+
 ## 6. Regra de apresentação
 
 - Linguagem curta, orientada a decisão e sem blocos de jargão técnico para o

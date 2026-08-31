@@ -86,9 +86,15 @@ if (calculo) {
 // 6. A linha de "Cada nota separada" estourava a largura do cartão no celular
 // porque proibia a quebra de linha numa grade de três colunas. O texto que
 // vazava era o rótulo "atenção".
-const linhaDasNotas = painel.match(/grid-cols-\[40px_1fr_auto\][\s\S]{0,1400}?atenção/);
+//
+// Em 30/08/2026 esse rótulo saiu do JSX e foi para os catálogos do painel,
+// junto com os outros textos que estavam fixos aqui em pt-BR. A âncora do
+// guarda acompanha: em vez do texto traduzido, ela fixa a chave que o desenha.
+// A força é a mesma, e um pouco maior: apagar a chave do JSX quebra este
+// guarda, e apagá-la dos catálogos quebra o check:i18n-owner.
+const linhaDasNotas = painel.match(/grid-cols-\[40px_1fr_auto\][\s\S]{0,1400}?approved\.ratingsAttention/);
 exigir(linhaDasNotas !== null,
-  'A linha de "Cada nota separada" perdeu a grade estreita do celular, que é o que a impede de estourar a largura do cartão.');
+  'A linha de "Cada nota separada" perdeu a grade estreita do celular, ou perdeu o rótulo de atenção que ela precisa caber, que é o que a impede de estourar a largura do cartão.');
 if (linhaDasNotas) {
   exigir(!/whitespace-nowrap/.test(linhaDasNotas[0]),
     'whitespace-nowrap voltou à linha de "Cada nota separada": no celular ela força a grade além da largura do cartão e o rótulo "atenção" vaza para fora.');
