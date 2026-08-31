@@ -9,9 +9,11 @@ interface ReviewsListProps {
   formatDate: (dateString: string) => string;
   /** Nome do negócio, para assinar as respostas sugeridas. */
   businessName?: string | null;
+  /** `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão. */
+  businessCountry: string | null;
 }
 
-const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate, businessName }) => {
+const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate, businessName, businessCountry }) => {
   const { t } = useOwnerTranslation();
   if (reviews.length === 0) {
     return (
@@ -29,6 +31,7 @@ const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate, business
           review={review} 
           formatDate={formatDate} 
           businessName={businessName}
+          businessCountry={businessCountry}
         />
       ))}
     </div>

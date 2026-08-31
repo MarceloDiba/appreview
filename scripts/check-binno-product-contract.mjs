@@ -21,8 +21,28 @@ const estilos = read('src/index.css');
 // guarda passa sem checar nada. As duas comparacoes de ordem abaixo exigem
 // presenca dos dois lados antes de comparar posicao, para nao depender de um
 // guarda vizinho contar as ocorrencias por acidente.
+// A fila de respostas do painel ganhou uma prop em 30/08/2026:
+// `businessCountry`, o `profiles.business_country` que decide se a resposta
+// sugerida sai em português do Brasil ou de Portugal. O campo passou a ser
+// obrigatório em `ReplySuggestionInput` justamente porque quatro das sete
+// chamadas do projeto o esqueciam em silêncio.
+//
+// As três asserções abaixo casavam a tag inteira, letra a letra, e por isso
+// ficariam vermelhas com a mudança aprovada. Elas passam a casar a tag pelo
+// mesmo conteúdo de sempre MAIS a prop nova: continuam a exigir que a fila
+// receba `queue`, `snapshot` e `demo` (trocar `queue` por outra coisa continua
+// a quebrar), continuam a contar ocorrências (a antiga aba "Avaliações" não
+// pode voltar a duplicar a fila) e ganham a exigência de o país do negócio
+// chegar à fila. É mais apertado do que antes, não menos.
+const FILA_DO_PAINEL = /<ResponseQueue reviews=\{queue\} snapshot=\{snapshot\} demo=\{demo\} businessCountry=\{businessCountry\} \/>/g;
+const filaDoPainel = (fonte) => (fonte.match(FILA_DO_PAINEL) || []);
+const posicaoDaFila = (fonte) => {
+  const encontrada = filaDoPainel(fonte)[0];
+  return encontrada ? fonte.indexOf(encontrada) : -1;
+};
+
 const requirements = [
-  ['painel mantém a fila antes das métricas', dashboard.includes('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />') && dashboard.includes('<VolumeCard weeks={history} />') && dashboard.indexOf('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />') < dashboard.indexOf('<VolumeCard weeks={history} />')],
+  ['painel mantém a fila antes das métricas', filaDoPainel(dashboard).length > 0 && dashboard.includes('<VolumeCard weeks={history} />') && posicaoDaFila(dashboard) < dashboard.indexOf('<VolumeCard weeks={history} />')],
   ['painel mantém volume, notas, QR e temas', ['<VolumeCard weeks={history} />', '<RatingTrends weeks={history} snapshot={snapshot} />', '<QrCard funnel={funnel.data} />', '<TopicsCard snapshot={snapshot} />'].every((token) => dashboard.includes(token))],
   ['coluna lateral mantém reputação, WhatsApp, boas práticas, completude e semana', ['<ReputationCard snapshot={snapshot} />', '<WhatsAppCard localWhatsApp={whatsApp}', '<DailyPractice snapshot={snapshot}', '<ProfileCompleteness connected={official.syncComplete} />', '<WeeklyChange weeks={history} />'].every((token) => dashboard.includes(token))],
   // Decisão de 30/08/2026: a navegação em três abas (Visão geral, Avaliações,
@@ -40,7 +60,8 @@ const requirements = [
   // atalho e não navegação. A proibição continua valendo para qualquer outro,
   // e é por isso que a contagem é exata e o único permitido é nomeado.
   ['o único <nav> do painel é o índice do celular aprovado', (dashboard.match(/<nav/g) || []).length === 1 && /const MobileIndex[\s\S]{0,400}<nav/.test(dashboard)],
-  ['fila de respostas aparece uma única vez: a antiga aba "Avaliações" não duplica a seção', (dashboard.match(/<ResponseQueue reviews=\{queue\} snapshot=\{snapshot\} demo=\{demo\} \/>/g) || []).length === 1],
+  ['fila de respostas aparece uma única vez: a antiga aba "Avaliações" não duplica a seção', filaDoPainel(dashboard).length === 1],
+  ['a fila do painel recebe o país do negócio, para a resposta sugerida sair na variante certa do português', /const \[businessCountry, setBusinessCountry\] = useState<string \| null>/.test(dashboard) && /select\('phone, business_country'\)/.test(dashboard)],
   ['fila de respostas, QR/temas e configuração do WhatsApp têm âncora própria e única na página', (dashboard.match(/id=\{QUEUE_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{QR_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{WHATSAPP_ANCHOR_ID\}/g) || []).length === 1],
   ['Plano de hoje e Resumo no WhatsApp linkam para a âncora certa em vez de trocar de aba', (dashboard.match(/href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/g) || []).length >= 1 && (dashboard.match(/href=\{`#\$\{WHATSAPP_ANCHOR_ID\}`\}/g) || []).length === 1],
   // A faixa-resumo do celular acrescentou um segundo link para a fila, por isso
@@ -71,7 +92,7 @@ const requirements = [
   // sempre antes da fila quando existir, sem deslocar a fila da posicao
   // dela quando ele nao existir.
   ['bloco de comentários pendentes some por completo sem caso sem tratar', pendingCommentsBanner.includes('if (pendingOrdered.length === 0) return null;')],
-  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner userId={userId} />') && dashboard.includes('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />') && dashboard.indexOf('<PendingCommentsBanner userId={userId} />') < dashboard.lastIndexOf('<ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} />')],
+  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner userId={userId} />') && filaDoPainel(dashboard).length > 0 && dashboard.indexOf('<PendingCommentsBanner userId={userId} />') < posicaoDaFila(dashboard)],
   ['coleta pede nome público', collector.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
   ['coleta aceita somente campos específicos de permalink', collector.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !collector.includes("'reviewUri', 'url'")],
   ['coleta temporária continua sem agenda e com limite explícito', collectorCore.includes("maxReviews: 50") && collectorCore.includes("APIFY_EXPERIMENTAL_COOLDOWN")],

@@ -19,8 +19,14 @@ interface ReplySuggestionsProps {
   customerName?: string | null;
   customerEmail?: string | null;
   businessName?: string | null;
-  /** `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão. */
-  businessCountry?: string | null;
+  /**
+   * `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão.
+   * Obrigatório, como em `ReplySuggestionInput`: se este componente pudesse
+   * omiti-lo, o campo voltaria a ser esquecível uma casa acima do lugar onde
+   * o tornámos obrigatório, e o dono brasileiro voltaria a ver português de
+   * Portugal. Quem não sabe o país escreve `null` e a escolha fica à vista.
+   */
+  businessCountry: string | null;
   channel: ReplyChannel;
 }
 
@@ -152,8 +158,17 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
                 aria-label={t('reply.textareaLabel', { title: suggestion.title })}
               />
 
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={() => handleCopy(suggestion.id, body)}>
+              {/*
+                `flex flex-wrap` sozinho não salva um botão mais largo do que
+                a caixa: a quebra acontece ENTRE botões, e um item que não
+                cabe na linha continua a transbordar. "Abrir o Google para
+                responder" é longo, `whitespace-nowrap` vem do próprio Button,
+                e esta caixa está dentro de dois padding (o cartão do item e
+                este painel). No celular cada botão ocupa a largura toda e
+                empilha; a partir de `sm` volta a ser a linha de sempre.
+              */}
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                <Button size="sm" variant="outline" className="w-full sm:w-auto" onClick={() => handleCopy(suggestion.id, body)}>
                   {isCopied ? (
                     <Check size={14} className="mr-2" aria-hidden="true" />
                   ) : (
@@ -163,7 +178,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
                 </Button>
 
                 {channel === 'private' && customerEmail && (
-                  <Button size="sm" variant="outline" asChild>
+                  <Button size="sm" variant="outline" className="w-full sm:w-auto" asChild>
                     <a href={mailtoHref(body)}>
                       <Mail size={14} className="mr-2" aria-hidden="true" />
                       {t('reply.sendEmail')}
@@ -172,7 +187,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
                 )}
 
                 {channel === 'public' && (
-                  <Button size="sm" variant="ghost" asChild>
+                  <Button size="sm" variant="ghost" className="w-full sm:w-auto" asChild>
                     <a
                       href="https://business.google.com/reviews"
                       target="_blank"

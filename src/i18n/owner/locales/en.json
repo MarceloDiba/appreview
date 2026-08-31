@@ -1013,11 +1013,21 @@
   },
   "reviews": {
     "title": "Reviews",
-    "subtitle": "Track real Google reviews and prepare better replies.",
+    "subtitle": "Everything waiting for a reply in one place, newest first, with its source on every item.",
     "refreshing": "Refreshing...",
     "refresh": "Refresh",
     "refreshedToast": "Reviews refreshed successfully!",
-    "casesTab": "Private feedback",
+    "queue": {
+      "title": "Reply queue",
+      "pending_one": "1 waiting for a reply",
+      "pending_other": "{{count}} waiting for a reply",
+      "emptyTitle": "Nothing waiting for a reply",
+      "emptyBody": "When someone leaves a comment on the table QR code or a review on your Google profile, it shows up here with a suggested reply ready for you to adjust. Keep the QR code in sight on the table and at the counter: that is what brings the first one.",
+      "originPrivate": "Private comment",
+      "originGoogle": "Google",
+      "publicUnknownState": "For reviews Binno reads from your public profile, Google does not say which ones you already answered. They stay on the list until you check.",
+      "handledTitle": "Already handled"
+    },
     "loading": "Loading...",
     "google": {
       "title": "Google reviews",

@@ -11,9 +11,11 @@ interface ReviewCardProps {
   formatDate: (dateString: string) => string;
   /** Usado para assinar a resposta sugerida. */
   businessName?: string | null;
+  /** `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão. */
+  businessCountry: string | null;
 }
 
-const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessName }) => {
+const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessName, businessCountry }) => {
   const { t } = useOwnerTranslation();
   const renderStars = (rating: number) => {
     return (
@@ -89,6 +91,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessNam
         text={review.text}
         customerName={review.author_name}
         businessName={businessName}
+        businessCountry={businessCountry}
       />
     </div>
   );

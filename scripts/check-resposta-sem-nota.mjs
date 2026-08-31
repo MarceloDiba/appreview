@@ -140,7 +140,15 @@ if (gravar) {
 
 const { lerNotaDoCaso } = await import(pathToFileURL(COMENTARIO).href);
 
-const listaDeCasos = readFileSync(resolve(raiz, 'src/components/dashboard/cases/CasesList.tsx'), 'utf8');
+// A lista de casos de `/reviews` virou a fila única de respostas em
+// 30/08/2026 (`docs/contrato-produto-binno.md`, "Uma fila só para responder"):
+// o comentário privado passou a aparecer somado às avaliações do Google, numa
+// tela só. A regra protegida aqui não mudou nem um pouco, e é a mesma de
+// sempre: um item sem nota não pode desenhar a escala de cinco estrelas
+// apagadas, porque é isso que uma nota 1 desenha. Só mudou o arquivo onde ela
+// vive, e é ele que este guarda passa a ler. Fixar o arquivo antigo deixaria o
+// guarda verde num arquivo apagado, ou vermelho por uma mudança aprovada.
+const filaDeRespostas = readFileSync(resolve(raiz, 'src/components/dashboard/reviews/FilaDeRespostas.tsx'), 'utf8');
 const componenteResposta = readFileSync(
   resolve(raiz, 'src/components/dashboard/ReplySuggestions.tsx'),
   'utf8'
@@ -251,16 +259,24 @@ exigir('lerNotaDoCaso: 3 é nota 3', lerNotaDoCaso(3).tipo === 'nota' && lerNota
 exigir('lerNotaDoCaso: 1 é nota 1', lerNotaDoCaso(1).tipo === 'nota' && lerNotaDoCaso(1).valor === 1);
 
 exigir(
-  'CasesList decide as estrelas por lerNotaDoCaso',
-  /lerNotaDoCaso\s*\(/.test(listaDeCasos)
+  'a fila de respostas decide as estrelas por lerNotaDoCaso',
+  /lerNotaDoCaso\s*\(/.test(filaDeRespostas)
 );
 exigir(
-  'CasesList não compara mais estrela com a nota crua (null acende zero estrelas)',
-  !/star\s*<=\s*item\.rating/.test(listaDeCasos)
+  'a fila de respostas não compara estrela com a nota crua (null acenderia zero estrelas)',
+  !/<=\s*(item\.rating|valor\b|item\.nota)/.test(filaDeRespostas)
 );
 exigir(
-  'CasesList mostra um rótulo de ausência de nota, em vez de uma escala vazia',
-  /reviews\.cases\.noRating/.test(listaDeCasos)
+  'a fila de respostas mostra um rótulo de ausência de nota, em vez de uma escala vazia',
+  /reviews\.cases\.noRating/.test(filaDeRespostas)
+);
+// O item sem nota da fila somada pode vir de qualquer origem, e a escala só
+// pode ser desenhada depois de `lerNotaDoCaso` dizer que existe nota. Se o
+// desenho das estrelas voltar a ficar antes do portão, é porque alguém
+// desenhou primeiro e perguntou depois.
+exigir(
+  'na fila de respostas o portão de ausência de nota vem antes do desenho das estrelas',
+  filaDeRespostas.indexOf("reviews.cases.noRating") < filaDeRespostas.indexOf('fill-yellow-400')
 );
 exigir(
   'ReplySuggestions aceita caso sem nota no seu tipo',

@@ -59,10 +59,20 @@ export interface ReplySuggestionInput {
    * `profiles.business_country` do negócio (ex.: 'BR', 'PT'), o mesmo campo
    * que decide pt-BR vs. pt-PT em `src/lib/businessLocale.ts`. Decide a
    * variante do português da resposta publicada em nome do dono; não muda a
-   * deteção do idioma do cliente. Ausente, vazio ou diferente de 'BR' cai no
-   * português de hoje (Portugal).
+   * deteção do idioma do cliente. Vazio ou diferente de 'BR' cai no português
+   * de hoje (Portugal).
+   *
+   * OBRIGATÓRIO, e sem valor por omissão, desde 30/08/2026. Enquanto era
+   * opcional, quatro das sete chamadas do projeto simplesmente não o passavam,
+   * e o esquecimento não tinha sintoma nenhum em código: a função devolvia
+   * português de Portugal e seguia. O sintoma aparecia no fim, na tela de um
+   * dono brasileiro, com "casa de banho" a caminho de um cliente em Aracaju.
+   *
+   * Quem não sabe o país escreve `null` de propósito, e a escolha fica à
+   * vista de quem lê a chamada. Esquecer passou a ser erro de compilação, que
+   * é o único momento em que isto ainda é barato de corrigir.
    */
-  businessCountry?: string | null;
+  businessCountry: string | null;
 }
 
 /**
@@ -530,7 +540,7 @@ const VARIANTS: Record<ReplyChannel, Record<Sentiment, Variant[]>> = {
  * vazio ou qualquer outro país cai no português de hoje (Portugal), para que
  * um país desconhecido nunca vire um brasileirismo indevido nem o contrário.
  */
-const resolveContentLocale = (locale: ReplyLocale, businessCountry?: string | null): ContentLocale =>
+const resolveContentLocale = (locale: ReplyLocale, businessCountry: string | null): ContentLocale =>
   locale === 'pt' && businessCountry === 'BR' ? 'pt-BR' : locale;
 
 export const buildReplySuggestions = (input: ReplySuggestionInput): ReplySuggestion[] => {

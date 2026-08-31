@@ -1013,11 +1013,21 @@
   },
   "reviews": {
     "title": "Avaliações",
-    "subtitle": "Acompanhe as avaliações reais do Google e prepare respostas melhores.",
+    "subtitle": "Tudo o que espera resposta num lugar só, do mais recente para o mais antigo, com a origem em cada item.",
     "refreshing": "Atualizando...",
     "refresh": "Atualizar",
     "refreshedToast": "Avaliações atualizadas com sucesso!",
-    "casesTab": "Comentários diretos",
+    "queue": {
+      "title": "Fila de respostas",
+      "pending_one": "1 esperando resposta",
+      "pending_other": "{{count}} esperando resposta",
+      "emptyTitle": "Nada esperando resposta agora",
+      "emptyBody": "Quando alguém deixar um comentário no QR da mesa ou uma avaliação no seu perfil do Google, ela aparece aqui, com a resposta sugerida pronta para você ajustar. Deixe o QR à vista na mesa e no balcão: é ele que traz o primeiro.",
+      "originPrivate": "Comentário privado",
+      "originGoogle": "Google",
+      "publicUnknownState": "Nas avaliações que o Binno lê do seu perfil público, o Google não informa quais você já respondeu. Elas ficam na lista até você conferir.",
+      "handledTitle": "Já tratados"
+    },
     "loading": "Carregando...",
     "google": {
       "title": "Avaliações do Google",

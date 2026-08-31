@@ -22,9 +22,12 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
  *
  * A ordem (mais recente primeiro; contato só marca o selo, não reordena) vem
  * de `orderPendingCasesByRecency`, em `src/lib/internalCasePriority.ts`. O
- * caso que este bloco destaca é o primeiro item dessa ordem, o mesmo primeiro
- * item que `CasesList.tsx` usa em `/reviews`: as duas telas leem a mesma
- * função, então não podem divergir sobre qual caso é o mais recente.
+ * caso que este bloco destaca é o primeiro item dessa ordem, e a fila única
+ * de `/reviews` (`src/lib/filaDeRespostas.ts`) ordena pela mesma função: as
+ * duas telas não podem divergir sobre qual comentário é o mais recente.
+ *
+ * O link leva à âncora da fila (`#fila-de-respostas`), onde o caso destacado
+ * aparece somado às outras origens desde 30/08/2026.
  */
 const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
   const { t, i18n } = useOwnerTranslation();
@@ -88,7 +91,7 @@ const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
             </div>
             <div className="mt-4">
               <Button asChild className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]">
-                <Link to="/reviews#casos-internos">{t('dashboard.cockpit.layout.pendingCommentsAction')}</Link>
+                <Link to="/reviews#fila-de-respostas">{t('dashboard.cockpit.layout.pendingCommentsAction')}</Link>
               </Button>
             </div>
           </div>

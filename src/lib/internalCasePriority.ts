@@ -1,11 +1,13 @@
 /**
  * A ordem de um caso interno sem tratar segue uma única regra, usada pelo
  * bloco "Comentários que pedem atenção" da Visão geral
- * (`PendingCommentsBanner.tsx`) e pela lista de casos em `/reviews`
- * (`CasesList.tsx`). As duas telas importam esta função em vez de
- * reimplementar a ordem cada uma à sua maneira: foi exatamente com duas
- * cópias da mesma regra, uma no bloco e outra na lista, que o bloco passou a
- * destacar um caso diferente do primeiro card que o dono via ao chegar.
+ * (`PendingCommentsBanner.tsx`) e pela fila única de `/reviews`
+ * (`filaDeRespostas.ts`, que desde 30/08/2026 soma o comentário privado, a
+ * fila oficial do Google e a leitura pública numa lista só). As duas telas
+ * importam esta função em vez de reimplementar a ordem cada uma à sua
+ * maneira: foi exatamente com duas cópias da mesma regra, uma no bloco e
+ * outra na lista, que o bloco passou a destacar um caso diferente do
+ * primeiro card que o dono via ao chegar.
  *
  * A regra, decidida em 30/08/2026 (`docs/decisoes-30-08-ordem-e-navegacao.md`,
  * secção 1): o mais recente primeiro. Ninguém abre esta lista para ver a
