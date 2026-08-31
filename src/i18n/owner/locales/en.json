@@ -774,6 +774,7 @@
         "ratingsAttention": "attention",
         "ratingsShift": "Five stars moved from {{fiveBefore}}% to {{fiveNow}}%, and one- and two-star ratings moved from {{lowBefore}}% to {{lowNow}}% over the last 4 weeks.",
         "reputationTitle": "Google reputation",
+        "topicsEmpty": "Not enough review text yet to group topics.",
         "reputationFreshness": "from the latest fetch",
         "reviewsTotal": "reviews in total",
         "practiceTitle": "Good practice",
