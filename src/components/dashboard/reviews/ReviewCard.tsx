@@ -4,6 +4,7 @@ import { ExternalLink, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { GoogleReview } from '@/hooks/useGoogleReviews';
 import ReplySuggestions from '@/components/dashboard/ReplySuggestions';
+import { idDaFila } from '@/lib/filaDeRespostas';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface ReviewCardProps {
@@ -92,7 +93,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessNam
         mesma avaliação: partilhando a chave, ela é lida uma vez e não duas.
       */}
       <ReplySuggestions
-        reviewId={`google-publico:${review.review_id}`}
+        reviewId={idDaFila('google-publico', review.review_id)}
         channel="public"
         rating={review.rating}
         text={review.text}

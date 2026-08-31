@@ -36,8 +36,8 @@
 //
 // AS MUTAÇOES QUE PROVARAM CADA VERMELHO
 //
-// Cinquenta e cinco, uma por caminho de codigo, todas confirmadas vermelhas
-// PELA asserçao que nomeiam e todas revertidas depois. Onde uma asserçao e gerada em
+// Setenta e tres, uma por caminho de codigo, todas confirmadas vermelhas PELA
+// asserçao que nomeiam e todas revertidas depois. Onde uma asserçao e gerada em
 // laço (as seis falhas da regra 2, as tres chaves nos tres catalogos), foi
 // provado um membro por caminho, que e provar o gerador.
 //
@@ -63,18 +63,44 @@
 //            `rascunhoNaTela`; apagar o import da politica; apagar o import da
 //            etiqueta; escrever uma etiqueta local; chamar a funçao por fora da
 //            porta partilhada.
+//   funcao   apagar a entrada de espanhol e a de ingles da lista de recusa;
+//            neutralizar uma palavra de cada idioma; fazer a lista recusar
+//            tudo (nenhum rascunho chegaria ao dono); apagar a advertencia de
+//            que ela e uma lista de bloqueio.
+//   copiar   voltar a gravar o texto do ecra como autoria; voltar a tornar
+//            `draft` obrigatorio; voltar a ler o formato antigo do localStorage.
+//   id       passar o id cru das linhas oficiais e do piloto; montar o id a
+//            mao noutro arquivo.
+//   demo     estampar a etiqueta na demonstraçao publica.
 //   /reviews por o texto do modelo debaixo do titulo de uma variante do molde;
 //            dar o resultado do modelo as variantes; por o idioma na chave do
 //            cartao do modelo; mandar o comentario privado ao modelo; apagar o
 //            portao do `open`, o do texto curto, o `reviewId` obrigatorio, o id
 //            que a fila passa e o prefixo do id da leitura publica.
 //
-// Duas asserçoes NAO passaram nesta prova na primeira tentativa e foram
-// substituidas, nao removidas: `/pedirRascunhoAoBinno/.test(painel)` ficava
-// verde com o transporte trocado, porque a linha de import contem o nome; e a
-// busca por "travessao" no arquivo da funçao ficava verde com a recusa apagada,
-// porque a palavra esta no cabeçalho que a explica. Ver os comentarios nos dois
-// lugares.
+// ASSERÇOES QUE JA ESTIVERAM VERDES COM A REGRA QUEBRADA
+//
+// Cinco, e ficam escritas porque a forma delas repete-se:
+//
+//   `/pedirRascunhoAoBinno/.test(painel)`  ficava verde com o transporte
+//     trocado: a LINHA DE IMPORT contem o nome. Passou a medir o argumento.
+//   a busca por "travessao" no arquivo da funçao  ficava verde com a recusa
+//     apagada: a palavra esta no comentario que a explica. Passou a correr a
+//     lista.
+//   "o cartao do modelo e ADICIONAL"  media so as variantes do molde, e ficava
+//     verde com o cartao do modelo a usar `suggestions[0].title`, que e a regra
+//     que ela nomeia a ser quebrada. Passou a medir dentro do cartao do modelo.
+//   "o comentario privado nao e mandado a funçao publica"  guardava so o portao
+//     DENTRO do painel, e ficava verde com a fila reescrita para
+//     `channel="public"`. Passou a medir o chamador, que e quem decide.
+//   "a funçao recusa a segunda forma de reparaçao em es"  usava a palavra
+//     "reembolso", que a entrada PORTUGUESA tambem apanha: apagar o espanhol
+//     deixava-a verde. Passou a usar uma palavra so do espanhol, e a comparar o
+//     motivo em vez de conferir apenas que houve recusa.
+//
+// A licao comum: medir a metade da regra que e facil de escrever deixa a outra
+// metade sem guarda nenhum. As quatro primeiras foram achadas por auditoria; a
+// quinta pela propria prova de mutaçao, que e para o que ela serve.
 //
 // `scripts/snapshots/` nao entra aqui: nao ha copy nova a congelar.
 
@@ -469,12 +495,50 @@ for (const [nome, esperado] of [['rascunhoNaTela', POLITICA], ['OrigemDoRascunho
 //    descrever um texto que o molde nao produziu: "Curta e directa" por cima de
 //    um paragrafo que pode nao ser nem curto nem directo.
 exigir(
-  '/reviews: o cartao do modelo e ADICIONAL, e as variantes do molde entram inteiras a seguir',
+  '/reviews: as variantes do molde entram inteiras, com o titulo e a dica delas',
   /\.\.\.suggestions\.map\(\(suggestion\) => \(\{/.test(sugestoes)
   && /title: suggestion\.title,/.test(sugestoes)
   && /hint: suggestion\.hint,/.test(sugestoes)
   && /padrao: suggestion\.body,/.test(sugestoes),
 );
+
+// A METADE QUE FALTAVA, e que a auditoria de 31/08/2026 encontrou.
+//
+// A asserçao acima mede so as variantes do molde. Ela ficava verde com o cartao
+// do modelo a usar `suggestions[0].title` e `suggestions[0].hint`, que e
+// exatamente a regra que ela diz proteger a ser quebrada: o texto do modelo
+// desenhado debaixo de "Curta e directa", um rotulo do molde a descrever um
+// paragrafo que o molde nao escreveu. O cabeçalho deste guarda chegou a
+// afirmar que essa mutaçao tinha ficado vermelha; nao tinha.
+//
+// Passa a medir DENTRO do cartao do modelo: ele tem de ter nome proprio.
+const cartaoDoModelo = sugestoes.match(/\{\s*id: 'do-modelo',[\s\S]*?\n\s*\}\]/);
+exigir('/reviews: o cartao do modelo deixou de existir.', cartaoDoModelo !== null);
+if (cartaoDoModelo) {
+  exigir(
+    '/reviews: o cartao do modelo tem nome proprio, e nao o titulo de uma variante do molde',
+    /title: t\('reply\.modelTitle'\),/.test(cartaoDoModelo[0])
+    && !/title: suggestions\[0\]/.test(cartaoDoModelo[0]),
+  );
+  exigir(
+    '/reviews: o cartao do modelo tem dica propria, e nao a dica de uma variante do molde',
+    /hint: t\('reply\.modelHint'\),/.test(cartaoDoModelo[0])
+    && !/hint: suggestions\[0\]/.test(cartaoDoModelo[0]),
+  );
+}
+// As duas chaves do cartao do modelo nao tinham asserçao nenhuma, enquanto as
+// tres da etiqueta tinham nos tres catalogos. Uma chave sem texto desenha-se a
+// si propria na tela do dono.
+for (const chave of ['modelTitle', 'modelHint']) {
+  for (const idioma of ['pt-BR', 'pt-PT', 'en']) {
+    const catalogo = JSON.parse(ler(`src/i18n/owner/locales/${idioma}.json`));
+    const valor = catalogo?.reply?.[chave];
+    exigir(
+      `/reviews: ${idioma}.json tem texto para reply.${chave}`,
+      typeof valor === 'string' && valor.trim().length > 0,
+    );
+  }
+}
 // A metade que faz a regra valer: nenhuma variante do molde recebe o texto do
 // modelo. Exatamente um cartao carrega o resultado do modelo, e e o dele.
 exigir(
@@ -504,8 +568,22 @@ if (chaveDoModelo) {
 //    promessa de reparacao, que em privado e a coisa certa a dizer e tem uma
 //    variante inteira do molde (`com-reparacao`).
 exigir(
-  '/reviews: o comentario privado nao e mandado a uma funcao afinada para o publico',
+  '/reviews: o painel de sugestoes recusa pedir rascunho fora do canal publico',
   /if \(channel !== 'public'\) return;/.test(sugestoes),
+);
+// A METADE QUE FALTAVA, e que a auditoria de 31/08/2026 encontrou.
+//
+// A asserçao acima guarda so o portao DENTRO do painel. Quem decide o canal e o
+// chamador: reescrever a fila para `channel="public"` mandava todo comentario
+// privado do QR para a funçao afinada para o publico, com o portao intacto e
+// todas as asserçoes verdes. Um portao que obedece nao prova quem manda.
+exigir(
+  '/reviews: a fila decide o canal pela ORIGEM do item, e nao por um literal',
+  /channel=\{item\.origem === 'comentario-privado' \? 'private' : 'public'\}/.test(fila),
+);
+exigir(
+  '/reviews: a fila nao fixa o canal num literal, o que mandaria o comentario privado ao publico',
+  !/channel="(public|private)"/.test(fila),
 );
 
 // 4. Uma chamada por avaliacao, e so quando o dono ABRE o painel. Pedir no
@@ -537,7 +615,84 @@ exigir(
 // vez, e nao uma vez por tela.
 exigir(
   'a leitura publica usa o mesmo espaco de identificadores da fila somada',
-  /reviewId=\{`google-publico:\$\{review\.review_id\}`\}/.test(cartaoPublico),
+  /reviewId=\{idDaFila\('google-publico', review\.review_id\)\}/.test(cartaoPublico),
+);
+
+// ---------------------------------------------------------------------------
+// Copiar nao e escrever (correçao de 31/08/2026)
+// ---------------------------------------------------------------------------
+//
+// `copyReply` gravava `{ ...currentAction, copied: true }`, e `currentAction.draft`
+// era o que estivesse no ecra. Carregar em "Copiar e abrir avaliaçao" ANTES da
+// resposta do modelo persistia o TEXTO PADRAO como se fosse autoria do dono, no
+// estado e no localStorage. O portao do efeito passava a tratar a avaliaçao como
+// escrita para sempre, e ela nunca mais podia ser lida, em nenhuma sessao
+// seguinte. Toda avaliaçao com que o dono ensaiou nascia morta.
+
+const corpoDoCopiar = painel.match(/const copyReply = async \(\) => \{([\s\S]*?)\n  \};/);
+exigir('a fila do painel deixou de ter copyReply.', corpoDoCopiar !== null);
+if (corpoDoCopiar) {
+  exigir(
+    'copiar marca apenas que o dono copiou',
+    /copied: true/.test(corpoDoCopiar[1]),
+  );
+  exigir(
+    'copiar NAO grava rascunho: gravar o que esta no ecra tornaria o texto padrao autoria do dono',
+    !/draft/.test(corpoDoCopiar[1]),
+  );
+}
+// Se `draft` voltasse a ser obrigatorio, `save({ copied: true })` deixaria de
+// compilar e a correcçao seria desfeita para o fazer compilar de novo.
+exigir(
+  'o rascunho guardado e opcional: so existe quando o dono escreveu',
+  /type ActionState = \{ draft\?: string; copied\?: boolean \};/.test(painel),
+);
+// O formato antigo nao distingue copiado de escrito. Le-lo manteria mortas
+// exatamente as avaliaçoes que o defeito matou.
+exigir(
+  'a fila do painel deixou de ler o formato antigo, que nao distingue copiado de escrito',
+  /binno\.approved-cockpit-actions\.v2/.test(painel),
+);
+
+// ---------------------------------------------------------------------------
+// Uma avaliaçao, um identificador (correçao de 31/08/2026)
+// ---------------------------------------------------------------------------
+//
+// A fila somada e a leitura publica usavam `google-oficial:`/`google-publico:`;
+// a fila do painel passava o `review.id` cru, das MESMAS linhas de
+// `useGoogleBusinessReviewQueue`. Uma avaliaçao, duas chaves: paga duas vezes, e
+// com `temperature` 0.4 dois textos diferentes para o mesmo cliente em duas
+// telas do mesmo produto.
+
+exigir(
+  'a fila do painel poe as avaliaçoes oficiais no espaco de identificadores partilhado',
+  /idDaFila\('google-oficial', review\.id\)/.test(painel),
+);
+exigir(
+  'a fila do painel poe o piloto Apify no espaco partilhado, com fonte propria',
+  /idDaFila\('piloto-apify', review\.id\)/.test(painel),
+);
+// A rede que apanha o proximo: ninguem volta a escrever este id a mao, em
+// arquivo nenhum. `idDaFila` monta `${fonte}:${idNaFonte}`, que nao casa aqui.
+const MOLDE_A_MAO = /`(comentario-privado|google-oficial|google-publico|piloto-apify):\$\{/;
+const aMao = arquivosDeSrc.filter((caminho) => MOLDE_A_MAO.test(semComentarios(readFileSync(caminho, 'utf8'))));
+exigir(
+  'ninguem monta o identificador de avaliaçao a mao: ele sai todo de idDaFila',
+  aMao.length === 0,
+);
+if (aMao.length) console.error(`  montam a mao: ${aMao.map((c) => c.replace(`${raiz}/`, '')).join(', ')}`);
+
+// ---------------------------------------------------------------------------
+// A demonstraçao publica mostra o produto, nao o nosso plano B
+// ---------------------------------------------------------------------------
+//
+// A etiqueta era estampada sem condiçao, e `BinnoDemoCockpit` desenha esta
+// mesma fila em `binno.pro` e em `/demo`. Sem dono e sem modelo, ela dizia
+// "Texto padrao" ao possivel cliente, no lugar onde ele devia estar a ver o
+// produto a funcionar.
+exigir(
+  'a etiqueta de origem nao aparece na demonstraçao publica',
+  /\{!demo && <OrigemDoRascunho origem=\{naTela\.origem\} \/>\}/.test(painel),
 );
 
 // ---------------------------------------------------------------------------
@@ -563,8 +718,9 @@ exigir(
 
 exigir(
   'o que esta na caixa e o que `rascunhoNaTela` decidiu, e nao uma segunda decisao escrita no painel',
-  /draft: naTela\.texto/.test(painel)
-  && /const naTela = rascunhoNaTela\(/.test(painel),
+  /const naTela = rascunhoNaTela\(/.test(painel)
+  && /<Textarea value=\{naTela\.texto\}/.test(painel)
+  && />\{naTela\.texto\}<\/p>/.test(painel),
 );
 
 // O template entra como ULTIMO argumento, que e a posiçao do chao: e o que
@@ -594,7 +750,7 @@ exigir(
 // Custo: nao se pede o que nao pode entrar na tela. Com rascunho do dono, com a
 // demonstraçao publica, ou com uma avaliaçao que e so nota, a chamada nao sai.
 for (const [nome, padrao] of [
-  ['com rascunho do dono nesta avaliaçao', /if \(actions\[selected\.id\] !== undefined\) return;/],
+  ['com rascunho ESCRITO pelo dono nesta avaliaçao', /if \(actions\[selected\.id\]\?\.draft !== undefined\) return;/],
   ['na demonstraçao publica', /if \(demo \|\| !selected\) return;/],
   ['numa avaliaçao sem texto escrito', /if \(selected\.comment\.trim\(\)\.length < 3\) return;/],
 ]) {
@@ -610,29 +766,98 @@ exigir(
   /\}, \[selected\?\.id, demo\]\);/.test(painel),
 );
 
-// A funçao existe, esta neste repositorio, e continua a recusar o que nao pode
-// chegar ao dono. Sem esta linha, apagar as verificaçoes de la deixaria este
-// guarda verde com um travessao a caminho da pagina do negocio.
+// ---------------------------------------------------------------------------
+// A recusa da funçao, EXECUTADA, e em cada idioma que o produto atende
+// ---------------------------------------------------------------------------
 //
-// A versao anterior procurava as palavras "travessao", "promessa de reparacao" e
-// "revela automacao" no arquivo INTEIRO, comentarios incluidos. Nao conseguia
-// falhar: as tres palavras aparecem no cabeçalho que explica cada regra, entao
-// apagar as regras de verdade deixava o guarda verde. Passa a ler o codigo sem
-// comentarios, e a exigir os PADROES, que sao o que faz a recusa acontecer.
-const funcaoSemComentarios = semComentarios(funcao);
-for (const [nome, padrao] of [
-  ['travessao e meio-risco', /\[\$\{TRAVESSAO\}\$\{MEIO_RISCO\}\]/],
-  ['promessa de reparaçao', /reembols\|devolu/],
-  ['revelar que e automaçao', /intelig\[e/],
-]) {
+// A versao anterior procurava pedaços da expressao como texto. Isso nao provava
+// que ela recusa coisa nenhuma: prova-se que a linha existe, nao que ela apanha
+// o que devia. E nao teria apanhado o defeito que a auditoria de 31/08/2026
+// encontrou, que era a lista existir e falar so portugues enquanto o pedido
+// manda o modelo responder na lingua do cliente.
+//
+// Agora a lista e extraida do arquivo e CORRIDA contra rascunhos de verdade.
+
+const blocoProibido = funcao.match(/const PROIBIDO[^=]*= (\[[\s\S]*?\n\]);/);
+exigir('a lista de recusa da funçao continua a existir e a ser legivel', blocoProibido !== null);
+
+if (blocoProibido) {
+  const TRAVESSAO = String.fromCharCode(0x2014);
+  const MEIO_RISCO = String.fromCharCode(0x2013);
+  const PROIBIDO = new Function('TRAVESSAO', 'MEIO_RISCO', `return ${blocoProibido[1]}`)(TRAVESSAO, MEIO_RISCO);
+  const recusa = (texto) => (PROIBIDO.find(({ padrao }) => padrao.test(texto)) || {}).motivo || null;
+
+  // Uma promessa de reparaçao por idioma. Cada sonda foi escolhida para ser
+  // apanhada SO pela entrada do seu idioma: se fosse apanhada por outra, apagar
+  // a entrada que ela nomeia deixaria esta asserçao verde.
+  for (const [idioma, sonda] of [
+    ['pt', 'Peço desculpa. Na próxima visita a sobremesa fica por nossa conta. Casa do Forno'],
+    ['es', 'Lamento la espera. Le ofrecemos un descuento en su próxima visita. Casa do Forno'],
+    ['en', 'I am sorry about the wait. Your next dessert is on the house. Casa do Forno'],
+  ]) {
+    exigir(
+      `a funçao recusa promessa de reparaçao escrita em ${idioma}`,
+      recusa(sonda) === `promessa de reparacao (${idioma})`,
+    );
+  }
+
+  // Mais uma por idioma, com outra palavra, para a asserçao nao ficar presa a
+  // uma unica expressao dentro da entrada.
+  //
+  // A sonda espanhola dizia "reembolso", e essa palavra tambem esta na entrada
+  // portuguesa (`reembols`): neutralizar o espanhol deixava a asserçao verde,
+  // porque o portugues apanhava a frase. Passou a "obsequio", que so existe na
+  // entrada espanhola. E o motivo passou a ser comparado em vez de se conferir
+  // apenas que houve recusa, que era o que escondia a sobreposiçao.
+  for (const [idioma, sonda] of [
+    ['pt', 'Vamos fazer a devolução do valor da refeição. Casa do Forno'],
+    ['es', 'Le enviaremos un obsequio por las molestias. Casa do Forno'],
+    ['en', 'We will send you a voucher for your next visit. Casa do Forno'],
+  ]) {
+    exigir(
+      `a funçao recusa a segunda forma de reparaçao em ${idioma}`,
+      recusa(sonda) === `promessa de reparacao (${idioma})`,
+    );
+  }
+
+  // O contraprova: um rascunho bom NAO e recusado. Sem isto, uma expressao que
+  // apanhasse tudo deixaria as seis asserçoes acima verdes e a funçao inutil,
+  // porque nenhum rascunho chegaria ao dono.
+  for (const [idioma, sonda] of [
+    ['pt', 'Obrigado por escrever. Já revi o tempo de espera com a equipa e ajustámos a escala. Casa do Forno'],
+    ['es', 'Gracias por escribir. Ya he revisado los tiempos con el equipo y hemos ajustado los turnos. Casa do Forno'],
+    ['en', 'Thank you for writing. I went through the wait times with the team and changed the rota. Please feel free to ask for me next time. Casa do Forno'],
+  ]) {
+    exigir(`uma resposta boa em ${idioma} continua a passar, em vez de ser recusada`, recusa(sonda) === null);
+  }
+
   exigir(
-    `a funçao sugerir-resposta continua a recusar o rascunho que contem ${nome}`,
-    padrao.test(funcaoSemComentarios),
+    'a funçao recusa o travessao, que e a marca mais reconhecivel de texto gerado',
+    recusa(`Obrigado pela visita ${TRAVESSAO} volte sempre.`) === 'travessao',
   );
+  for (const [idioma, sonda] of [
+    ['pt', 'Sou uma inteligência artificial a responder por este negócio.'],
+    ['es', 'Soy un asistente virtual del negocio.'],
+    ['en', 'I am an AI writing on behalf of the business.'],
+  ]) {
+    exigir(`a funçao recusa revelar automaçao em ${idioma}`, recusa(sonda) === 'revela automacao');
+  }
 }
+
 exigir(
-  'a funçao sugerir-resposta continua a devolver o rascunho recusado como erro, em vez de o entregar',
-  /RASCUNHO_RECUSADO/.test(funcaoSemComentarios),
+  'a funçao continua a devolver o rascunho recusado como erro, em vez de o entregar',
+  /RASCUNHO_RECUSADO/.test(semComentarios(funcao)),
+);
+
+// Lido COM comentarios de proposito: o que se exige aqui e a advertencia, e ela
+// e um comentario. Quem ler a lista a seguir tem de ler primeiro que ela e uma
+// lista de bloqueio, e nao uma garantia: um rascunho que prometa reparaçao por
+// outras palavras passa inteiro, e a ultima defesa continua a ser o dono ler
+// antes de enviar.
+exigir(
+  'a funçao diz, onde a lista vive, que e uma lista de bloqueio e nao uma garantia',
+  /LISTA DE BLOQUEIO, NAO UMA GARANTIA/.test(funcao)
+  && /nao substitui a ultima defesa/.test(funcao),
 );
 
 // ---------------------------------------------------------------------------

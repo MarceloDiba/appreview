@@ -173,7 +173,7 @@ const requirements = [
   // é a posição do chão. Quem prova a precedência inteira, com o módulo a
   // correr, é `scripts/check-rascunho-que-le.mjs`.
   ['a fila do painel usa o país do negócio na chamada que monta o texto padrão da resposta', /buildReplySuggestions\(\{[^}]*businessCountry[^}]*\}\)/.test(dashboardCodigo)],
-  ['o texto padrão da fila do painel continua alcançável: ele chega à caixa do dono como o chão do rascunho do modelo', /rascunhoNaTela\([\s\S]{0,300}?\n\s*suggestion,\n\s*\);/.test(dashboardCodigo) && /draft: naTela\.texto/.test(dashboardCodigo)],
+  ['o texto padrão da fila do painel continua alcançável: ele chega à caixa do dono como o chão do rascunho do modelo', /rascunhoNaTela\([\s\S]{0,300}?\n\s*suggestion,\n\s*\);/.test(dashboardCodigo) && /<Textarea value=\{naTela\.texto\}/.test(dashboardCodigo)],
   // A âncora do WhatsApp saiu desta linha em vez de ser reapontada: ela deixou
   // de existir com a tela, e uma asserção sobre um id que ninguém desenha fica
   // verde sem proteger nada.

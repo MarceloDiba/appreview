@@ -41,16 +41,45 @@ const MEIO_RISCO = String.fromCharCode(0x2013);
 
 /**
  * O que o rascunho nao pode conter, e por que cada um esta aqui.
+ *
+ * ISTO E UMA LISTA DE BLOQUEIO, NAO UMA GARANTIA
+ *
+ * Uma lista de palavras so apanha as palavras que estao nela. Ela nao entende o
+ * texto: um rascunho que prometa reparacao por outras palavras ("passe ca
+ * amanha que resolvemos", "falamos sobre o valor") passa por aqui inteiro. O
+ * que ela garante e o caso comum e barato, nao o caso adversarial.
+ *
+ * Por isso ela nao substitui a ultima defesa, que e o dono ler antes de enviar.
+ * O Binno nao publica nada em nome dele exatamente por isso.
+ *
+ * POR QUE HA TRES IDIOMAS, E NAO UM
+ *
+ * O pedido manda o modelo responder NO IDIOMA EM QUE O CLIENTE ESCREVEU, que e
+ * a razao de esta funcao existir. Enquanto a lista so tinha portugues, uma
+ * avaliacao em ingles ou espanhol podia voltar a prometer um "discount", um
+ * "refund", um "descuento" ou uma "devolucion", passar por todas as
+ * verificacoes e chegar ao dono como rascunho pronto a publicar em nome do
+ * negocio dele. Uma divida que ele nunca autorizou, numa lingua que a defesa
+ * nao lia. Achado na auditoria de 31/08/2026.
+ *
+ * Portugues, espanhol e ingles sao as tres linguas que o produto tem hoje (as
+ * mesmas de `src/lib/replySuggestions.ts` e dos catalogos do painel). Uma
+ * quarta lingua de cliente entra aqui ANTES de entrar no resto.
+ *
+ * As entradas ficam separadas por idioma, e nao somadas numa expressao so, para
+ * que o guarda possa provar cada uma vermelha por si.
  */
 const PROIBIDO: Array<{ padrao: RegExp; motivo: string }> = [
   // Marcelo, em 30/08/2026: "usam travessao, nunca usaria isso, ja deixa claro
   // que e IA". O tracinho longo e a marca mais reconhecivel de texto gerado.
   { padrao: new RegExp(`[${TRAVESSAO}${MEIO_RISCO}]`), motivo: 'travessao' },
   // O dono nao autorizou reparacao nenhuma. Prometer em nome dele cria uma
-  // divida que ele nao sabe que tem.
-  { padrao: /\b(reembols|devolu[cç]|desconto|cortesia|brinde|gr[aá]tis|compensa[cç])/i, motivo: 'promessa de reparacao' },
-  // Dizer que e um assistente quebra a voz do negocio.
-  { padrao: /\b(intelig[eê]ncia artificial|assistente virtual|sou uma? (IA|intelig))/i, motivo: 'revela automacao' },
+  // divida que ele nao sabe que tem. Uma vez por idioma que o produto atende.
+  { padrao: /\b(reembols|devolu[cç]|desconto|cortesia|brinde|gr[aá]tis|compensa[cç]|por (nossa|minha) conta|sem custo|sem qualquer custo|oferta da casa|vale de)/i, motivo: 'promessa de reparacao (pt)' },
+  { padrao: /\b(descuento|reembols|devoluci|cortes[ií]a|obsequio|gratis|compensaci|sin (coste|cargo|costo)|invita la casa|vale de)/i, motivo: 'promessa de reparacao (es)' },
+  { padrao: /\b(refund|discount|voucher|coupon|rebate|reimburs|compensat|complimentary|on the house|free of charge|for free|at no (cost|charge)|free (meal|drink|dessert|night|stay|room)|gift (card|voucher))/i, motivo: 'promessa de reparacao (en)' },
+  // Dizer que e um assistente quebra a voz do negocio, em qualquer lingua.
+  { padrao: /\b(intelig[eê]ncia artificial|assistente virtual|sou uma? (IA|intelig)|inteligencia artificial|asistente virtual|artificial intelligence|virtual assistant|language model|an? AI\b)/i, motivo: 'revela automacao' },
 ];
 
 // Escolhido em 31/08/2026 comparando tres modelos com os comentarios reais da
@@ -77,7 +106,7 @@ Regras, todas obrigatórias:
 - Responda no MESMO idioma em que o cliente escreveu. Se ele escreveu em espanhol, responda em espanhol.
 - Responda ao que ele disse de facto. Cite o assunto concreto que ele mencionou. Nada de texto que serviria para qualquer avaliação.
 - Fale como um dono de negócio pequeno fala: simples, direto, sem palavras corporativas.
-- Nunca prometa reembolso, desconto, cortesia ou qualquer reparação.
+- Nunca prometa reembolso, desconto, cortesia ou qualquer reparação, em nenhum idioma.
 - Nunca invente facto sobre o negócio que não esteja no que o cliente escreveu.
 - Nunca diga ou sugira que é uma inteligência artificial.
 - Não use travessão nem meio-risco. Use vírgula ou ponto.

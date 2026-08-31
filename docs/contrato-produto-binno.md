@@ -631,6 +631,26 @@ encolhe é a ausência de leitura, não o resultado baixo.
   sabe o que correu mal"). Pôr o texto do modelo debaixo desses rótulos seria uma
   etiqueta a mentir sobre o que está na caixa. O cartão do modelo entra à frente,
   com nome próprio, e as variantes ficam intactas por baixo.
+- **A recusa da função cobre português, espanhol e inglês.** A função manda o
+  modelo responder no idioma do cliente, então uma lista de bloqueio só em
+  português deixava passar um *discount*, um *refund*, um *descuento* ou uma
+  *devolución*: uma dívida que o dono nunca autorizou, na língua que a defesa não
+  lia. Uma quarta língua de cliente entra na lista antes de entrar no resto. A
+  lista é um bloqueio, não uma garantia: ela não entende o texto, e a última
+  defesa continua a ser o dono ler antes de enviar, que é por que o Binno não
+  publica.
+- **Copiar não é escrever.** O rascunho guardado por avaliação só existe quando
+  o dono escreveu na caixa. Enquanto copiar gravava o que estava no ecrã, um
+  toque em "Copiar e abrir avaliação" transformava o texto padrão em autoria
+  dele, e a avaliação nunca mais podia ser lida pelo modelo, em nenhuma sessão.
+- **Uma avaliação, um identificador.** `idDaFila` monta a chave de toda
+  avaliação, em todas as telas. Com duas chaves para a mesma avaliação ela era
+  paga duas vezes e rendia dois textos diferentes, para o mesmo cliente, em duas
+  telas do mesmo produto.
+- **A demonstração pública mostra o produto, não o plano B.** A etiqueta de
+  origem é para o dono. Em `binno.pro` e `/demo` não há dono nem modelo, e
+  estampar "Texto padrão" ali explicava o nosso plano B a quem devia estar a ver
+  o produto a funcionar.
 - **O comentário privado não passa pelo modelo.** `channel === 'private'` é uma
   mensagem directa a quem deixou contacto no QR, não uma resposta publicada. A
   função `sugerir-resposta` está escrita e implantada para o público: pede "a
