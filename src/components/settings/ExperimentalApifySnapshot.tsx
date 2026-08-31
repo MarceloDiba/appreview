@@ -10,10 +10,22 @@ import type { ExperimentalApifySnapshot as ExperimentalApifySnapshotData } from 
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 /**
- * This flag is deliberately separate from the official Google connection.
- * It must be enabled at build time and paired with server-only Apify secrets.
+ * Quem decide se a coleta está ativada é o servidor, e só ele.
+ *
+ * Havia aqui um segundo interruptor, de tempo de compilação, que escondia o
+ * cartão inteiro quando desligado. Dois interruptores para a mesma coisa podem
+ * discordar em silêncio, e discordaram: em 30/08/2026 o servidor estava ligado
+ * e o site publicado não trazia o botão, enquanto o resto do painel mandava o
+ * dono vir aqui fazer a coleta. Ele procurou e não achou, porque o botão tinha
+ * sido removido do pacote na compilação.
+ *
+ * Agora o cartão aparece sempre no painel autenticado e a resposta vem de quem
+ * sabe: a função devolve `APIFY_EXPERIMENTAL_DISABLED` com uma frase legível
+ * quando a coleta não está ativada, e essa frase é mostrada ao dono.
+ *
+ * A separação em relação à conexão oficial do Google continua valendo: são
+ * caminhos diferentes, com segredos diferentes, e um nunca liga o outro.
  */
-export const isExperimentalApifyAvailable = import.meta.env.VITE_APIFY_EXPERIMENTAL_ENABLED === 'true';
 
 type ExperimentalApifySnapshotProps = {
   googleReviewUrl?: string;
@@ -23,9 +35,10 @@ const ExperimentalApifySnapshot = ({ googleReviewUrl }: ExperimentalApifySnapsho
   const { t } = useOwnerTranslation();
   const navigate = useNavigate();
   const [collecting, setCollecting] = useState(false);
-  const isLocalPreview = import.meta.env.DEV && !isExperimentalApifyAvailable;
-
-  if (!isExperimentalApifyAvailable && !isLocalPreview) return null;
+  // Só em desenvolvimento, e só quando a coleta não está configurada na
+  // máquina de quem programa, o cartão oferece a amostra ilustrativa em vez de
+  // gastar. Em produção o botão é sempre o de coletar.
+  const isLocalPreview = import.meta.env.DEV && import.meta.env.VITE_APIFY_EXPERIMENTAL_ENABLED !== 'true';
 
   const openLocalSample = () => navigate('/demo?view=snapshot');
 
