@@ -91,19 +91,38 @@ Regras que a faixa-resumo não pode quebrar, e que têm guarda própria em
 - Quando a fila de respostas não existe neste aparelho, a faixa diz isso. Nunca
   mostra zero, que afirmaria "nada a responder" sem ter como saber.
 
-A ordem dos módulos, então, é:
+A ordem dos módulos vem da regra de "Ordem por decisão", abaixo, e é esta:
 
-1. **Fila de respostas** — uma avaliação por vez, comentário, nota, nome público
-   quando disponível e resposta sugerida editável.
-2. **Volume de avaliações** — leitura em 12 semanas; quedas só quando há períodos
-   comparáveis.
-3. **Cada nota separada** — curvas não empilhadas de 5 a 1 estrelas, com alerta
+**Faixa de Ação**, o que o dono precisa de decidir ou fazer agora:
+
+1. **Radar do Binno**, quando e só quando ele tem alerta.
+2. **Comentários internos**, quando há comentário privado sem tratar.
+3. **Avaliações no Google**: uma avaliação por vez, comentário, nota, nome
+   público quando disponível e resposta sugerida editável.
+
+**Faixa de Mudança**, o que se mexeu desde a última vez:
+
+4. **Volume de avaliações**: leitura em 12 semanas; quedas só quando há
+   períodos comparáveis.
+5. **Cada nota separada**: curvas não empilhadas de 5 a 1 estrelas, com alerta
    somente quando o histórico sustenta a comparação.
-4. **Do QR ao Google** e **Temas mais citados** — o primeiro mede intenção; o
+6. **O que mudou na semana**.
+
+**Faixa de Referência**, o que ele consulta em vez de agir:
+
+7. **Reputação no Google**.
+8. **Do QR ao Google** e **Temas mais citados**: o primeiro mede intenção; o
    segundo conecta comentários a temas operacionais apenas quando há texto
    suficiente.
-5. Coluna lateral: **Reputação no Google**, **Boas práticas** e **O que mudou
-   na semana**.
+9. **Boas práticas**.
+10. **Radar do Binno**, quando não há alerta.
+
+**Mudança de 31/08/2026, autorizada por Marcelo.** Até "Ordem por decisão" esta
+lista tinha cinco itens e outra sequência: a fila, o volume, as notas, o QR e os
+temas, e uma coluna lateral com reputação, boas práticas e o que mudou na
+semana. O Radar ficava sempre acima de tudo, com alerta ou sem ele, e a coluna
+lateral abria com um **Plano de hoje**, que saiu inteiro no mesmo dia. A razão
+das duas coisas está abaixo.
 
 **Mudança de 31/08/2026, autorizada por Marcelo.** A coluna lateral tinha mais
 dois cartões, **Resumo no WhatsApp** e **Completude do perfil**, e a página
@@ -156,12 +175,27 @@ pública pode esperar um dia. A configuração do WhatsApp não expira nunca, e 
 por isso que vinha por último; desde 31/08/2026 ela nem sequer está nesta
 página, que é a forma mais forte da mesma regra.
 
+**Superado em 31/08/2026, autorizado por Marcelo.** A regra acima é a mesma
+intuição que "Ordem por decisão" leva até o fim, e fica escrita porque é dela
+que a outra nasce. O que ela não fazia era ordenar o resto: tudo o que não tinha
+prazo caía num mesmo balde de "leitura", e dentro desse balde a página
+continuava a ser o inventário dos módulos na sequência em que foram
+construídos. As três faixas dizem o que a regra do prazo deixava por dizer.
+
 Os cartões que antes trocavam de aba (**Plano de hoje** e **Boas práticas**,
 ambos na coluna lateral) agora levam a uma âncora na própria página
 (`#fila-de-respostas`) por link nativo, não por clique de estado. Nenhum deles
 fica sem destino. O terceiro era o **Resumo no WhatsApp**, que apontava para
 `#configuracao-whatsapp`; os dois saíram juntos em 31/08/2026, o cartão e a
 âncora, e a asserção que os protegia foi apagada em vez de reapontada.
+
+**Mudança de 31/08/2026, autorizada por Marcelo.** O **Plano de hoje** saiu do
+painel em "Ordem por decisão", e a sua asserção foi apagada em vez de
+reapontada, pela mesma razão que a do Resumo no WhatsApp. Restam as **Boas
+práticas**, que continuam a levar por link nativo à âncora que o próprio texto
+promete. O rótulo do botão delas na variante de oportunidade era "Plano de
+hoje", nome do cartão que saiu; passou a ser o mesmo rótulo da variante de força
+observada, que diz o que o botão faz.
 
 ### Exceção aprovada em 30/08/2026: comentários que pedem atenção
 
@@ -439,6 +473,82 @@ O painel não pode regredir para uma primeira dobra composta apenas por nota,
 total de avaliações e gráficos genéricos do Google. Fila, resposta sugerida,
 forças, fragilidades e próximo passo são o centro do produto.
 
+### Ordem por decisão (decisão de 31/08/2026)
+
+**Aprovado por Marcelo em 31/08/2026**, no mesmo dia em que o painel foi revisto
+no telemóvel dele, com a demonstração a um interessado marcada para a quarta
+seguinte, num portátil e num telemóvel.
+
+**A regra:** a página começa pelo que muda o dia do dono e termina no que ele
+apenas consulta.
+
+Ela substitui a ordem anterior, e é preciso dizer o que essa ordem era, porque
+ninguém a tinha decidido: era o inventário dos módulos na sequência em que foram
+construídos, escrita para um portátil e depois congelada neste contrato. Cada
+correção da semana encurtou a página num cartão, e no dia seguinte ela estava
+longa outra vez, porque o problema nunca foi o número de cartões. Era a ordem.
+
+São três faixas:
+
+- **Ação.** O que ele precisa de decidir ou fazer agora: os comentários internos
+  à espera, as avaliações do Google à espera de resposta, e o Radar quando ele
+  tem um alerta de verdade.
+- **Mudança.** O que se mexeu desde a última vez: o volume de avaliações, cada
+  nota separada, o que mudou na semana. Só quando existe histórico que sustente
+  a comparação; sem ele, estes módulos dizem isso e ficam pequenos.
+- **Referência.** O que ele consulta em vez de agir: a reputação no Google, o QR
+  para o Google, os temas mais citados, as boas práticas, e o Radar quando ele
+  está calmo.
+
+**O Radar muda de faixa conforme o que tem a dizer.** É o mesmo módulo e a mesma
+regra de conteúdo: ele nunca inventa uma fragilidade, e quando está calmo diz
+isso numa linha. O que muda é o lugar. Um alerta é decisão de hoje e abre a
+página; "nada precisa de você agora" é leitura de consulta e fecha. Ocupar a
+primeira dobra do telemóvel para dizer que não há nada a fazer é o mesmo defeito
+de tamanho que a decisão de "Painel que cabe no celular" já tinha atacado, só
+que noutro formato.
+
+**As faixas são declaradas no DOM, não num comentário.** Cada uma é uma
+`<section data-faixa="acao|mudanca|referencia">`. Um comentário a dizer onde
+começa a Referência desaparece na primeira refatoração sem que nada perceba; um
+atributo é uma construção que o guarda lê e que qualquer pessoa vê no inspetor.
+Não há rótulo visível de faixa na tela: a ordem é a regra, e um título a dizer
+"Ação" acima de um cartão que já diz "Avaliações no Google" é o mesmo tipo de
+texto que Marcelo mandou sair do painel no mesmo dia.
+
+**Isto é uma reordenação, não um corte.** Nenhum módulo sai da tela por causa
+desta decisão, e nenhum deixa de aparecer numa das duas versões. A do ecrã
+grande e a do telemóvel mostram os mesmos módulos na mesma sequência. A coluna
+lateral única deixou de existir: cada faixa tem a sua, com os cartões curtos
+daquela faixa, para que o portátil não fique com uma coluna de cartões largos e
+a ordem continue a mesma nos dois aparelhos.
+
+**O "Plano de hoje" sai, em todas as versões.** Nas palavras de Marcelo, ele
+"não soma em nada".
+Ele lia a mesma `getAdvisorReading` do Radar e escrevia o que já estava na tela:
+com o Radar calmo repetia o Radar; com alerta repetia o alerta; nas variantes de
+oportunidade e de força observada o corpo dele era, palavra por palavra, o corpo
+das Boas práticas, porque os dois cartões liam as mesmas chaves. A única coisa
+que era só dele, o botão "Marcar como feito", já não tinha leitor desde que o
+"Deu resultado?" saiu, horas antes; ver a linha sobre a marcação em "Camada de
+assessoria adicionada".
+
+**Um módulo sem evidência continua presente e encolhe para uma linha.** O padrão
+nasceu nos "Temas mais citados" em 31/08/2026 e passa a valer para todo módulo
+que possa ficar vazio: em vez de um cartão inteiro com um traço dentro, uma
+linha que diz o que aparece ali quando houver algo e o que o dono faz para que
+apareça, na voz de "Quem entrega hoje". Isto não é esconder: o título continua
+na tela, na faixa dele. Vale para o volume, para cada nota separada, para o que
+mudou na semana, para o QR e para as duas metades da reputação que dependem da
+amostra. A nota e o total de avaliações nunca encolhem, porque são lidos do
+próprio perfil e nunca faltam.
+
+Onde a evidência é parcial, o módulo não encolhe. "Cada nota separada" com
+distribuição e sem histórico mostra a percentagem de cada nota, que é evidência
+de verdade, e deixa o "antes" em traço. "Do QR ao Google" com zero aberturas
+mostra zero, porque zero é uma medida: o QR está na mesa e ninguém o leu. O que
+encolhe é a ausência de leitura, não o resultado baixo.
+
 ### Camada de assessoria adicionada
 
 - A fila de respostas, volume, notas, QR, temas, reputação e alteração semanal
@@ -450,21 +560,30 @@ forças, fragilidades e próximo passo são o centro do produto.
   autenticado a renderizar a arquitetura legada. Quando só houver resumo já
   confirmado do negócio, o mesmo cockpit aprovado é exibido com `—` nos
   módulos sem evidência; a tela antiga não é um fallback permitido.
-- O **Radar do Binno** é uma faixa adicional antes desses módulos e permanece
+  **Mudança de 31/08/2026:** o módulo sem evidência continua presente, mas
+  encolhe para uma linha honesta em vez de desenhar um traço num cartão
+  inteiro; ver "Ordem por decisão".
+- O **Radar do Binno** é uma faixa adicional aos módulos aprovados e permanece
   visível. Com evidência, mostra risco, oportunidade ou força observada; sem
   evidência suficiente, usa um estado curto de acompanhamento e não inventa
   uma fragilidade. **Mudança de 31/08/2026:** essa faixa passa a ser, no
   máximo, uma linha, e o ícone só aparece quando há alerta; ver "Painel que
-  cabe no celular". O **Plano de hoje** é um cartão adicional na coluna lateral
-  e também permanece visível, levando à próxima revisão útil.
-- Esta camada é obrigatoriamente adicional: Radar acima da grade; Plano de hoje
-  na coluna lateral. Eles não podem deslocar, esconder ou substituir fila,
-  volume, notas, QR, temas, reputação ou boas práticas. **Mudança de
-  31/08/2026:** o **Resultado observado**, que ficava depois da mudança
-  semanal, saiu do painel; ver "Painel que cabe no celular".
-- Ação marcada pelo gestor é um toque local, não cria caso, responsável, prazo
-  ou burocracia. A leitura seguinte só pode dizer que o sinal voltou ou não
-  voltou a aparecer; nunca confirma sozinho uma melhoria operacional.
+  cabe no celular". **Mudança de 31/08/2026:** ela deixa de ficar sempre acima
+  de tudo e passa a mudar de faixa conforme o que tem a dizer, com alerta em
+  Ação e sem alerta em Referência; ver "Ordem por decisão". O **Plano de hoje**
+  saiu do painel na mesma decisão, e a frase que o dava como permanente nesta
+  linha saiu com ele.
+- Esta camada é obrigatoriamente adicional. Ela não pode deslocar, esconder ou
+  substituir fila, volume, notas, QR, temas, reputação ou boas práticas.
+  **Mudança de 31/08/2026:** o **Resultado observado**, que ficava depois da
+  mudança semanal, saiu do painel; ver "Painel que cabe no celular".
+- **Marcar uma ação como feita deixou de existir em 31/08/2026**, autorizado
+  por Marcelo. A regra era que a marcação fosse um toque local, sem criar caso,
+  responsável, prazo ou burocracia, e que a leitura seguinte só pudesse dizer se
+  o sinal voltou a aparecer. O botão vivia no **Plano de hoje** e quem lia a
+  marcação era o **Resultado observado**; os dois saíram, e desde o primeiro a
+  marcação já não tinha leitor nenhum. Fica escrita aqui, e não apagada, porque
+  a regra continua a valer no dia em que a marcação voltar a ter para onde ir.
 - Uma oportunidade positiva pode complementar Boas práticas com uma expressão
   repetida em elogios reais. Nunca cria uma prova social a partir de texto ou
   nome de avaliador sem aprovação explícita do gestor.
@@ -585,7 +704,7 @@ até esta data, e a inversão é do dono.
 
 `npm run verify` executa `npm run check:product-contract`. Ele protege os
 trechos verificáveis deste contrato: composição consolidada, presença
-permanente do Radar/Plano/Resultado, integração do telefone de onboarding,
+permanente do Radar, integração do telefone de onboarding,
 ação de resposta com permalink individual, coleta de nome público, rejeição
 do URL genérico e a única exceção à primeira dobra: o bloco de comentários
 que pedem atenção some por completo sem caso sem tratar e, quando existe,
@@ -649,6 +768,43 @@ Em 31/08/2026 esse mesmo guarda ganhou o cartão de origens: as duas contagens
 nascem da fila somada, o filtro começa vazio, filtrar não reordena, e a frase
 que explicava que o Google não devolve as respostas já publicadas não pode
 voltar a nenhum dos três catálogos.
+
+**Mudança de 31/08/2026 nos guardas, pela ordem por decisão.** Vale aqui a mesma
+regra do bloco anterior: reapontar cada asserção fazia parte da decisão. O que
+mudou, e por quê:
+
+- `npm run verify` passou a executar `npm run check:ordem-por-decisao`, um
+  guarda novo. Ele exige que as três faixas existam na ordem certa, que cada
+  módulo esteja na sua, e que cada módulo continue a ser desenhado uma única vez
+  (sem esta segunda metade, apagar um módulo deixava a asserção da faixa verde
+  por vacuidade). Exige também as duas colocações do Radar a partir do mesmo
+  booleano, uma negada, que é o que garante que ele aparece exatamente uma vez;
+  que o "Plano de hoje" não deixe restos no código nem nos três catálogos; e que
+  cada módulo que pode ficar vazio calcule o vazio a partir da ausência da
+  evidência, desenhe a linha honesta nesse ramo e mantenha o corpo pesado fora
+  de alcance quando não há o que mostrar.
+- A asserção "painel mantém a fila antes das métricas" ficou como estava. Ela
+  continua verdadeira por outra razão: a fila é a faixa de Ação e o volume é a
+  de Mudança. Quem prova as faixas inteiras é o guarda novo.
+- A asserção da coluna lateral deixou de falar em coluna lateral, porque a
+  coluna única deixou de existir: os três cartões que ela guardava vivem agora
+  em faixas diferentes. O que ela media de verdade era "os três continuam na
+  página", e é isso que ela passa a dizer.
+- A asserção "Plano de hoje linka para a âncora da fila" foi apagada em vez de
+  reapontada. O componente saiu, e ela lia o corpo de um componente ausente como
+  string vazia: uma asserção que fica verde sem proteger nada.
+- A asserção dos três cartões removidos passou a ser dos quatro, com o "Plano de
+  hoje" na lista de proibidos, pela mesma razão dos outros: um cartão removido
+  por decisão volta sozinho na próxima refatoração se nada o proibir.
+- A asserção "Radar e Plano de hoje são adicionais" perdeu o Plano e ficou só
+  com o Radar.
+- A asserção "Radar e Plano permanecem visíveis sem alerta severo" foi
+  reescrita, porque não conseguia falhar pela regra que dizia proteger: ela
+  conferia que uma chamada a `getAdvisorReading` existia em algum lugar do
+  arquivo, e essa chamada existe em três componentes. Agora ela lê o corpo do
+  Radar e exige que a linha de acompanhamento seja a última alternativa da
+  cadeia, sem retorno nulo antes dela. Devolver `null` no estado calmo, que é a
+  forma óbvia de o esconder, fica vermelho.
 
 O teste não substitui
 revisão de produto: qualquer mudança visual ou de fluxo ainda deve ser

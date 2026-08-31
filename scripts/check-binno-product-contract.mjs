@@ -109,6 +109,10 @@ const posicaoDaFila = (fonte) => {
 };
 
 const requirements = [
+  // A fila continua antes das métricas, mas por outra razão desde a ordem por
+  // decisão de 31/08/2026: ela é a faixa de Ação e o volume é a de Mudança. A
+  // asserção fica como está porque a regra nova contém a antiga; quem prova as
+  // faixas inteiras é `scripts/check-ordem-por-decisao.mjs`.
   ['painel mantém a fila antes das métricas', filaDoPainel(dashboard).length > 0 && dashboard.includes('<VolumeCard weeks={history} />') && posicaoDaFila(dashboard) < dashboard.indexOf('<VolumeCard weeks={history} />')],
   ['painel mantém volume, notas, QR e temas', ['<VolumeCard weeks={history} />', '<RatingTrends weeks={history} snapshot={snapshot} />', '<QrCard funnel={funnel.data} />', '<TopicsCard snapshot={snapshot} />'].every((token) => dashboard.includes(token))],
   // Em 31/08/2026 Marcelo tirou da coluna lateral o "Resumo no WhatsApp" (era
@@ -118,8 +122,21 @@ const requirements = [
   // em conta real). A asserção deixou de os exigir; se parasse aí, os três
   // voltavam sozinhos na próxima refatoração, porque nada os proibiria. Por
   // isso ela tem duas metades: o que fica, e o que não pode voltar.
-  ['coluna lateral mantém reputação, boas práticas e semana', ['<ReputationCard snapshot={snapshot} />', '<DailyPractice snapshot={snapshot}', '<WeeklyChange weeks={history} />'].every((token) => dashboard.includes(token))],
-  ['os três cartões removidos em 31/08/2026 não voltam ao painel', !['<WhatsAppCard', '<ProfileCompleteness', '<ObservedResult'].some((token) => dashboardCodigo.includes(token))],
+  //
+  // A coluna lateral única deixou de existir com a ordem por decisão de
+  // 31/08/2026: os três cartões que ela guardava vivem agora em faixas
+  // diferentes (a semana em Mudança, a reputação e as boas práticas em
+  // Referência). O que esta linha media de verdade era "os três continuam na
+  // página", e é isso que ela passa a dizer; em que faixa cada um está é medido
+  // no guarda da ordem.
+  ['reputação, boas práticas e semana continuam na página', ['<ReputationCard snapshot={snapshot} />', '<DailyPractice snapshot={snapshot}', '<WeeklyChange weeks={history} />'].every((token) => dashboard.includes(token))],
+  // O "Plano de hoje" entrou nesta lista em 31/08/2026, pela mesma razão dos
+  // outros três. Nas palavras de Marcelo, "não soma em nada": ele lia a mesma
+  // `getAdvisorReading` do Radar e repetia o que já estava na tela, e o único
+  // botão que era só dele ("Marcar como feito") ficou sem leitor quando o
+  // "Deu resultado?" saiu. Sem esta proibição ele volta na próxima vez que
+  // alguém quiser um cartão de "o que fazer hoje" na lateral.
+  ['os quatro cartões removidos em 31/08/2026 não voltam ao painel', !['<WhatsAppCard', '<ProfileCompleteness', '<ObservedResult', '<TodayPlan'].some((token) => dashboardCodigo.includes(token))],
   // Decisão de 30/08/2026: a navegação em três abas (Visão geral, Avaliações,
   // WhatsApp) virou uma tela única. A aba Avaliações não sobrevive como seção
   // porque já era, byte a byte, a mesma <ResponseQueue> da Visão geral; a aba
@@ -151,7 +168,11 @@ const requirements = [
   // quebrar a de um deles deixava a asserção verde: ela não conseguia falhar
   // pela regra que dizia proteger. Passa a medir DENTRO do corpo de cada
   // componente que promete esse destino.
-  ['Plano de hoje linka para a âncora da fila em vez de trocar de aba', /href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/.test(corpoDaDeclaracao(dashboardCodigo, 'TodayPlan') || '')],
+  //
+  // A linha do "Plano de hoje" foi APAGADA em 31/08/2026, em vez de reapontada:
+  // o cartão saiu, e uma asserção sobre o corpo de um componente que não existe
+  // lê a string vazia e fica verde sem proteger nada. Quem impede o cartão de
+  // voltar é a proibição acima.
   ['a faixa-resumo do celular linka para a âncora da fila', /href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/.test(corpoDaDeclaracao(dashboardCodigo, 'MobileSummary') || '')],
   // A faixa-resumo do celular acrescentou um segundo link para a fila, por isso
   // a contagem acima deixou de ser exata. O que a contagem media de verdade era
@@ -173,9 +194,19 @@ const requirements = [
   ['o WhatsApp é uma rota própria e protegida por autenticação', /<Route path="\/whatsapp" element=\{\s*<ProtectedRoute>\s*<WhatsApp \/>/.test(rotas)],
   ['o menu principal leva ao WhatsApp no ecrã grande e no celular', (menu.match(/to="\/whatsapp"/g) || []).length === 2],
   // O Resultado observado saiu desta linha em 31/08/2026 e virou proibição, na
-  // asserção dos três cartões removidos, acima.
-  ['Radar e Plano de hoje são adicionais aos módulos aprovados', ['<RadarNow snapshot={snapshot} />', '<TodayPlan snapshot={snapshot}'].every((token) => dashboard.includes(token))],
-  ['Radar e Plano permanecem visíveis sem alerta severo', dashboard.includes('const reading = getAdvisorReading(snapshot);') && !dashboard.includes('if (!alert && !opportunity) return null;')],
+  // asserção dos quatro cartões removidos, acima. O Plano de hoje saiu no mesmo
+  // dia e pelo mesmo caminho, e o que sobra é o Radar.
+  ['o Radar é adicional aos módulos aprovados', dashboard.includes('<RadarNow snapshot={snapshot} />')],
+  // A versão anterior desta linha conferia que uma chamada a `getAdvisorReading`
+  // existia em algum lugar do arquivo e que uma condição antiga não voltava. As
+  // duas metades eram cegas ao Radar: a chamada existe em três componentes, e
+  // uma condição com outro nome escondia o Radar calmo com o guarda verde.
+  //
+  // Ela passa a ler o corpo do Radar. Sem alerta, o Radar tem de continuar a
+  // desenhar a sua linha: a última alternativa da cadeia é `radarLineMonitor`, e
+  // não há retorno nulo nenhum antes dela. Devolver `null` no estado calmo, que
+  // é a forma óbvia de o esconder, fica vermelho.
+  ['o Radar permanece visível sem alerta severo, com a linha de acompanhamento', corpoDoRadar !== '' && !/return null/.test(corpoDoRadar) && /:\s*t\('dashboard\.advisorPilot\.radarLineMonitor'\)/.test(corpoDoRadar)],
   ['assessor só usa força positiva agregada ou critérios de alerta existentes', advisorReading.includes("topic.sentiment === 'positive' && topic.count >= 3") && advisorReading.includes("if (alert)") && advisorReading.includes("return { kind: 'monitor' }")],
   ['dashboard autenticado não retorna ao layout legado quando falta snapshot', dashboardPage.includes('approvedFallbackSnapshot') && !['GoogleOutcomeCard', 'ReputationRadarCard', 'ReputationAdvisorCard', 'ProfileHealthCard'].some((token) => dashboardPage.includes(token))],
   // A secção 4 do contrato continua a mandar que o telefone do onboarding seja

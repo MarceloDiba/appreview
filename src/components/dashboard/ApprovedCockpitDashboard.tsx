@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Copy, ExternalLink, Star } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, Copy, ExternalLink, Star } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +11,6 @@ import { useGoogleBusinessReviewQueue } from '@/hooks/useGoogleBusinessReviewQue
 import { useReviewFunnelMetrics, type ReviewFunnelMetrics } from '@/hooks/useReviewFunnelMetrics';
 import { buildReplySuggestions } from '@/lib/replySuggestions';
 import { supabase } from '@/integrations/supabase/client';
-import { markAdvisorAction } from '@/lib/advisorPilot';
 import { getAdvisorReading } from '@/lib/advisorReading';
 import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
 import { sampleWasTruncated } from '@/lib/reputationSnapshotReading';
@@ -104,12 +103,15 @@ const SampleSourceNote = ({ snapshot }: { snapshot: ExperimentalApifySnapshot })
  */
 
 /**
- * Faixa-resumo do celular, só abaixo de `lg`. Adiciona, nunca substitui: os
- * módulos abaixo continuam inteiros e na ordem aprovada.
+ * Faixa-resumo do celular, só abaixo de `lg`. Adiciona, nunca substitui: as três
+ * faixas abaixo continuam inteiras e na ordem decidida, e ela precede-as, como o
+ * contrato aprovou em 30/08/2026.
  *
- * A fila de respostas vive apenas no navegador que fez a coleta, por contrato
- * (linhas 39 a 41). Num segundo aparelho ela não existe, e a faixa diz isso em
- * vez de mostrar zero, que seria afirmar "nada a responder" sem saber.
+ * A parte deste comentário que dizia que a fila só existe no navegador que fez a
+ * coleta saiu em 31/08/2026: ela deixou de ser verdade quando a fila passou a
+ * viver no banco. O que a faixa distingue continua a ser o mesmo, com outro
+ * motivo: fila ausente não é fila vazia, e sem busca nenhuma ela diz o que fazer
+ * em vez de mostrar zero, que afirmaria "nada a responder" sem saber.
  */
 const MobileSummary = ({ snapshot, queue, temFila }: { snapshot: ExperimentalApifySnapshot; queue: QueueReview[]; temFila: boolean }) => {
   const { t } = useOwnerTranslation();
@@ -191,50 +193,73 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
     : observed;
   const history = useMemo(() => snapshot.sample.insights?.history?.weeks || [], [snapshot.sample.insights?.history?.weeks]);
 
-  // Uma só tela, sem seletor de abas. A ordem segue a decisão de 30/08/2026:
-  // o que tem prazo primeiro (comentários pendentes, depois a fila de
-  // respostas) e o que é informativo depois (volume, notas, QR e temas, mais
-  // a coluna lateral já fixada pelo contrato). A antiga aba "Avaliações" não
-  // vira uma seção própria porque já era, byte a byte, a mesma <ResponseQueue>
-  // que a Visão geral sempre mostrou; a aba só duplicava o que já estava na
-  // tela.
+  // A página começa pelo que muda o dia do dono e termina no que ele apenas
+  // consulta. Decisão de 31/08/2026, autorizada por Marcelo; ver "Ordem por
+  // decisão" em docs/contrato-produto-binno.md.
   //
-  // Em 31/08/2026 a configuração do WhatsApp, que era o último bloco desta
-  // página, mudou-se para `/whatsapp`. A regra de 30/08 dizia que configuração
-  // vem por último porque não tem prazo; dar-lhe destino próprio é a forma mais
-  // forte da mesma regra. Saíram também o índice do celular, o cartão "Resumo
-  // no WhatsApp", a completude do perfil e o "Deu resultado?".
-  return <div className="space-y-5">
+  // Até aqui a ordem era o inventário dos módulos na sequência em que foram
+  // construídos, escrita para um portátil. No telemóvel isso vira um rolo em
+  // que o dono passa por gráficos e por leituras de consulta antes de chegar à
+  // única coisa que ele abriu o painel para fazer, que é responder alguém.
+  //
+  // As três faixas são declaradas no DOM (`data-faixa`) em vez de ficarem só
+  // num comentário: assim a regra é uma construção que o guarda lê e que
+  // qualquer pessoa vê no inspetor, e não uma promessa escrita ao lado do
+  // código.
+  //
+  // O Radar muda de faixa conforme o que ele tem a dizer, e é o mesmo
+  // componente nas duas: com alerta ele é decisão de hoje e abre a página; sem
+  // alerta ele é leitura de consulta e fecha. `radarEmAcao` e a sua negação
+  // garantem que ele aparece uma vez, sempre.
+  const radarEmAcao = getAdvisorReading(snapshot).kind === 'alert';
+  return <div className="space-y-6">
     <MobileSummary snapshot={snapshot} queue={queue} temFila={temFila} />
-    <RadarNow snapshot={snapshot} />
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <section className="min-w-0 space-y-5">
-        {!demo && <PendingCommentsBanner userId={userId} />}
-        <div id={QUEUE_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} /></div>
+
+    {/* Ação: o que ele precisa de decidir ou fazer agora. */}
+    <section data-faixa="acao" className="space-y-5">
+      {radarEmAcao && <RadarNow snapshot={snapshot} />}
+      {!demo && <PendingCommentsBanner userId={userId} />}
+      <div id={QUEUE_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} /></div>
+    </section>
+
+    {/* Mudança: o que se mexeu desde a última vez. */}
+    <section data-faixa="mudanca" className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="min-w-0 space-y-5">
         <VolumeCard weeks={history} />
         <RatingTrends weeks={history} snapshot={snapshot} />
-        <div id={QR_ANCHOR_ID} className="grid scroll-mt-16 gap-5 md:grid-cols-2 lg:scroll-mt-4"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
-      </section>
-      <aside className="space-y-5">
-        <TodayPlan snapshot={snapshot} />
+      </div>
+      <div className="space-y-5"><WeeklyChange weeks={history} /></div>
+    </section>
+
+    {/* Referência: o que ele consulta em vez de agir. */}
+    <section data-faixa="referencia" className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="min-w-0 space-y-5">
         <ReputationCard snapshot={snapshot} />
+        <div id={QR_ANCHOR_ID} className="grid scroll-mt-16 gap-5 md:grid-cols-2 lg:scroll-mt-4"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
+      </div>
+      <div className="space-y-5">
         <DailyPractice snapshot={snapshot} />
-        <WeeklyChange weeks={history} />
-      </aside>
-    </div>
+        {!radarEmAcao && <RadarNow snapshot={snapshot} />}
+      </div>
+    </section>
   </div>;
 };
 
 /**
  * O Radar, em no máximo uma linha (decisão de 31/08/2026).
  *
- * Ele continua a ser a faixa que abre a página e continua proibido de inventar
- * uma fragilidade: os critérios de alerta, oportunidade e força observada
- * seguem inteiros em `getAdvisorReading`, e o estado de acompanhamento continua
- * a dizer que segue acompanhando. O que mudou é o tamanho. No telemóvel do dono
- * a versão anterior enchia a primeira dobra com quatro linhas para dizer que
- * não havia nada a fazer, e a fila de respostas, que é o centro do produto,
- * ficava abaixo do fim da tela.
+ * Continua proibido de inventar uma fragilidade: os critérios de alerta,
+ * oportunidade e força observada seguem inteiros em `getAdvisorReading`, e o
+ * estado de acompanhamento continua a dizer que segue acompanhando. O que mudou
+ * é o tamanho. No telemóvel do dono a versão anterior enchia a primeira dobra
+ * com quatro linhas para dizer que não havia nada a fazer, e a fila de
+ * respostas, que é o centro do produto, ficava abaixo do fim da tela.
+ *
+ * O que mudou depois, na ordem por decisão de 31/08/2026, foi o lugar. Com
+ * alerta ele abre a página, na faixa de Ação, porque um alerta é decisão de
+ * hoje. Sem alerta ele fecha a página, na faixa de Referência: "nada precisa de
+ * você agora" é leitura de consulta, e ocupar a primeira dobra com isso é o
+ * mesmo defeito de tamanho noutro formato.
  *
  * O ícone só existe no alerta. Ali ele carrega a severidade, que o texto sozinho
  * não carrega; nos outros três estados era enfeite a comer largura.
@@ -257,30 +282,23 @@ const RadarNow = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   </p>;
 };
 
-const TodayPlan = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
-  const { t } = useOwnerTranslation();
-  const reading = getAdvisorReading(snapshot);
-  const topic = reading.kind === 'alert' || reading.kind === 'strength' ? t(`dashboard.cockpit.topicLabels.${reading.topic}`) : null;
-  // A marcação continua a ser um toque local, como o contrato manda. O que
-  // deixou de existir é o cartão "Deu resultado?" que a lia: ele só tinha o que
-  // dizer depois de uma leitura seguinte, que nunca chegou em conta real.
-  const [marcado, setMarcado] = useState(false);
-  const mark = () => {
-    if (reading.kind !== 'alert') return;
-    const alert = snapshot.sample.advisor?.alert;
-    if (!alert) return;
-    markAdvisorAction(snapshot, alert);
-    setMarcado(true);
-  };
-  const body = reading.kind === 'alert'
-    ? t('dashboard.advisorPilot.planBody', { topic })
-    : reading.kind === 'opportunity'
-      ? t('dashboard.advisorPilot.opportunityAction')
-      : reading.kind === 'strength'
-        ? t('dashboard.advisorPilot.strengthAction', { topic })
-        : t('dashboard.advisorPilot.monitorAction');
-  return <Card className="border-violet-200 bg-violet-50/40 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.planTitle')}</h2><p className="mt-4 text-sm font-medium leading-5 text-slate-900">{body}</p>{reading.kind === 'alert' ? <Button onClick={mark} disabled={marcado} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />{marcado ? t('dashboard.advisorPilot.markedDone') : t('dashboard.advisorPilot.markDone')}</Button> : <Button asChild variant="outline" className="mt-4"><a href={`#${QUEUE_ANCHOR_ID}`}>{t('dashboard.advisorPilot.reviewEvidence')}</a></Button>}</CardContent></Card>;
-};
+/*
+ * Aqui vivia o "Plano de hoje", removido em 31/08/2026 por decisão de Marcelo.
+ * Nas palavras dele: "não soma em nada".
+ *
+ * Ele lia `getAdvisorReading`, a mesma leitura do Radar, e escrevia o mesmo que
+ * já estava na tela. Com o Radar calmo repetia o Radar; com alerta repetia o
+ * alerta; nas variantes de oportunidade e de força observada o corpo dele era,
+ * palavra por palavra, o corpo de "Boas práticas" (`opportunityAction` e
+ * `strengthAction`), porque os dois cartões liam as mesmas chaves.
+ *
+ * A única coisa que ele carregava sozinho era o botão "Marcar como feito", que
+ * escrevia em `binno.advisor-pilot-actions`. Quem lia essa marcação era o
+ * cartão "Deu resultado?", removido em 31/08/2026 mais cedo: desde então a
+ * marcação já não tinha leitor nenhum, e o toque devolvia ao dono um botão
+ * desativado e mais nada. `src/lib/advisorPilot.ts` saiu junto, porque ficou
+ * sem nenhum chamador.
+ */
 
 const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean; businessCountry: string | null }) => {
   const { t, i18n } = useOwnerTranslation();
@@ -341,38 +359,64 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
   </CardContent></Card>;
 };
 
+/**
+ * Sem semana nenhuma no histórico este cartão desenhava uma caixa de gráfico
+ * vazia, um traço no lugar do número e a janela de "12 semanas" a prometer uma
+ * leitura que não existe. O padrão de 31/08/2026 é o mesmo dos "Temas mais
+ * citados": o módulo continua presente, encolhido numa linha honesta que diz o
+ * que aparece ali e o que o dono faz para que apareça.
+ */
 const VolumeCard = ({ weeks }: { weeks: Week[] }) => {
   const { t } = useOwnerTranslation();
-  const hasHistory = weeks.length > 0;
+  const semEvidencia = weeks.length === 0;
   const current = weeks.at(-1) || { reviewCount: 0 };
   const previous = weeks.slice(-9, -1);
   const average = previous.length ? previous.reduce((sum, week) => sum + week.reviewCount, 0) / previous.length : 0;
-  const change = hasHistory && average > 0 ? Math.round(((current.reviewCount - average) / average) * 100) : null;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.volumeTitle')}</h2><span className="whitespace-nowrap text-sm text-slate-500">{t('dashboard.cockpit.approved.volumeWindow')}</span></div><div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center"><div className="h-12 w-40 shrink-0">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={weeks}><Line type="monotone" dataKey="reviewCount" stroke="#2457D6" strokeWidth={3} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><p className="text-lg font-semibold text-slate-950">{hasHistory ? current.reviewCount : '—'} <span className="text-sm font-normal text-slate-600">{t('dashboard.cockpit.approved.volumeThisWeek')}{hasHistory ? ` ${t('dashboard.cockpit.approved.volumeAverage', { average: Math.round(average) })}` : ''}</span></p></div>{change !== null && change <= -25 && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p><strong>{t('dashboard.cockpit.approved.volumeDrop', { percent: Math.abs(change) })}</strong> {t('dashboard.cockpit.approved.volumeDropRest')}</p></div>}</CardContent></Card>;
+  const change = !semEvidencia && average > 0 ? Math.round(((current.reviewCount - average) / average) * 100) : null;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.volumeTitle')}</h2>{semEvidencia ? null : <span className="whitespace-nowrap text-sm text-slate-500">{t('dashboard.cockpit.approved.volumeWindow')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.volumeEmpty')}</p> : <><div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center"><div className="h-12 w-40 shrink-0"><ResponsiveContainer width="100%" height="100%"><LineChart data={weeks}><Line type="monotone" dataKey="reviewCount" stroke="#2457D6" strokeWidth={3} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div><p className="text-lg font-semibold text-slate-950">{current.reviewCount} <span className="text-sm font-normal text-slate-600">{t('dashboard.cockpit.approved.volumeThisWeek')} {t('dashboard.cockpit.approved.volumeAverage', { average: Math.round(average) })}</span></p></div>{change !== null && change <= -25 && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p><strong>{t('dashboard.cockpit.approved.volumeDrop', { percent: Math.abs(change) })}</strong> {t('dashboard.cockpit.approved.volumeDropRest')}</p></div>}</>}</CardContent></Card>;
 };
 
 const share = (weeks: Week[], rating: Rating) => weeks.reduce((sum, week) => sum + week.ratingBreakdown[rating], 0) / Math.max(1, weeks.reduce((sum, week) => sum + week.reviewCount, 0));
 
+/**
+ * Sem histórico e sem distribuição na amostra, as cinco linhas deste cartão
+ * desenhavam um traço no lugar da percentagem de hoje e outro no lugar da de
+ * antes, cinco vezes, com cinco caixas de gráfico vazias: era o módulo mais
+ * alto do painel a dizer que não sabia nada. Encolhe pela mesma regra dos
+ * outros, e continua presente.
+ *
+ * Com distribuição e sem histórico ele NÃO encolhe: a percentagem de cada nota
+ * na amostra é evidência de verdade, e o "antes" é que fica em traço.
+ */
 const RatingTrends = ({ weeks, snapshot }: { weeks: Week[]; snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
   const hasHistory = weeks.length > 0;
   const current = weeks.slice(-4);
   const previous = weeks.slice(-8, -4);
   const hasDistribution = snapshot.sample.reviewCount > 0;
+  const semEvidencia = !hasHistory && !hasDistribution;
   const rows = ratings.map((rating) => ({ rating, current: hasHistory ? Math.round(share(current, rating) * 100) : hasDistribution ? Math.round((snapshot.sample.ratingBreakdown[rating] / snapshot.sample.reviewCount) * 100) : null, previous: hasHistory ? Math.round(share(previous, rating) * 100) : null, series: weeks.map((week) => ({ value: week.reviewCount ? Math.round((week.ratingBreakdown[rating] / week.reviewCount) * 100) : 0 })) }));
   const five = rows[0];
   const lowCurrent = rows.filter((row) => row.rating === '1' || row.rating === '2').reduce((sum, row) => sum + (row.current || 0), 0);
   const lowPrevious = rows.filter((row) => row.rating === '1' || row.rating === '2').reduce((sum, row) => sum + (row.previous || 0), 0);
   const needsAttention = hasHistory && five.current < (five.previous || 0) || hasHistory && lowCurrent > lowPrevious;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.distributionTitle')}</h2><span className="text-sm text-slate-500">{t('dashboard.cockpit.approved.ratingsNoStacking')}</span></div><div className="mt-5 divide-y divide-slate-200">{rows.map((row) => { const risk = hasHistory && row.current !== null && (row.rating === '5' ? row.current < (row.previous || 0) : Number(row.rating) <= 2 && row.current > (row.previous || 0)); return <div key={row.rating} className="grid grid-cols-[40px_1fr_auto] items-center gap-2 py-3 sm:grid-cols-[52px_1fr_auto] sm:gap-3"><span className="text-sm font-semibold text-slate-800">{row.rating}<Star className="ml-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" /></span><div className="h-8 min-w-16 sm:min-w-24">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={row.series}><Line type="monotone" dataKey="value" stroke={risk ? '#C2413A' : '#D4A72C'} strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><span className="text-right text-xs leading-5 text-slate-500"><strong className="text-slate-900">{row.current === null ? '—' : `${row.current}%`}</strong> {t('dashboard.cockpit.approved.ratingsBefore')} {row.previous === null ? '—' : `${row.previous}%`} {risk && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-red-700">{t('dashboard.cockpit.approved.ratingsAttention')}</span>}</span></div>; })}</div>{needsAttention && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p>{t('dashboard.cockpit.approved.ratingsShift', { fiveBefore: five.previous, fiveNow: five.current, lowBefore: lowPrevious, lowNow: lowCurrent })}</p></div>}<SampleSourceNote snapshot={snapshot} /></CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.distributionTitle')}</h2>{semEvidencia ? null : <span className="text-sm text-slate-500">{t('dashboard.cockpit.approved.ratingsNoStacking')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.distributionEmpty')}</p> : <><div className="mt-5 divide-y divide-slate-200">{rows.map((row) => { const risk = hasHistory && row.current !== null && (row.rating === '5' ? row.current < (row.previous || 0) : Number(row.rating) <= 2 && row.current > (row.previous || 0)); return <div key={row.rating} className="grid grid-cols-[40px_1fr_auto] items-center gap-2 py-3 sm:grid-cols-[52px_1fr_auto] sm:gap-3"><span className="text-sm font-semibold text-slate-800">{row.rating}<Star className="ml-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" /></span><div className="h-8 min-w-16 sm:min-w-24">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={row.series}><Line type="monotone" dataKey="value" stroke={risk ? '#C2413A' : '#D4A72C'} strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><span className="text-right text-xs leading-5 text-slate-500"><strong className="text-slate-900">{row.current === null ? '—' : `${row.current}%`}</strong> {t('dashboard.cockpit.approved.ratingsBefore')} {row.previous === null ? '—' : `${row.previous}%`} {risk && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-red-700">{t('dashboard.cockpit.approved.ratingsAttention')}</span>}</span></div>; })}</div>{needsAttention && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p>{t('dashboard.cockpit.approved.ratingsShift', { fiveBefore: five.previous, fiveNow: five.current, lowBefore: lowPrevious, lowNow: lowCurrent })}</p></div>}<SampleSourceNote snapshot={snapshot} /></>}</CardContent></Card>;
 };
 
+/**
+ * A nota e o total nunca faltam: são lidos do próprio perfil e ficam sempre.
+ * O que falta às vezes é o que vem da amostra, e era isso que desenhava um
+ * traço solto no lugar das barras e dois mosaicos com um traço cada. Cada uma
+ * dessas duas metades encolhe para a sua linha honesta, em vez de ocupar o
+ * espaço de quando tem conteúdo.
+ */
 const ReputationCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
   const replyHours = snapshot.sample.insights?.averageResponseHours;
   const last30 = snapshot.sample.insights?.reviewsLast30Days;
   const hasDistribution = snapshot.sample.reviewCount > 0;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.reputationTitle')}</h2><span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.reputationFreshness')}</span></div><div className="mt-4 hidden items-end gap-3 lg:flex"><p className="text-4xl font-medium tracking-tight text-slate-950">{decimal.format(snapshot.business.googleRating)}</p><Stars rating={Math.round(snapshot.business.googleRating)} medium /></div><p className="mt-1 hidden text-sm text-slate-600 lg:block">{integer.format(snapshot.business.googleReviewCount)} {t('dashboard.cockpit.approved.reviewsTotal')}</p>{hasDistribution ? <div className="mt-5 space-y-2">{ratings.map((rating) => { const count = snapshot.sample.ratingBreakdown[rating]; const width = Math.round((count / snapshot.sample.reviewCount) * 100); return <div key={rating} className="grid grid-cols-[28px_1fr_36px] items-center gap-2 text-xs"><span>{rating}★</span><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`${Number(rating) <= 2 ? 'bg-red-500' : 'bg-amber-400'} h-full rounded-full`} style={{ width: `${width}%` }} /></div><span className="text-right text-slate-600">{width}%</span></div>; })}</div> : <p className="mt-5 text-sm text-slate-500">—</p>}<div className="mt-5 grid grid-cols-2 gap-3"><Metric label={t('dashboard.cockpit.layout.averageReplyTime')} value={replyHours === null || replyHours === undefined ? '—' : `${Math.round(replyHours)} h`} /><Metric label={t('dashboard.cockpit.layout.newReviews30d')} value={last30 === null || last30 === undefined ? '—' : `+${last30}`} tone="positive" /></div><SampleSourceNote snapshot={snapshot} /></CardContent></Card>;
+  const semMedidas = (replyHours === null || replyHours === undefined) && (last30 === null || last30 === undefined);
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.reputationTitle')}</h2><span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.reputationFreshness')}</span></div><div className="mt-4 hidden items-end gap-3 lg:flex"><p className="text-4xl font-medium tracking-tight text-slate-950">{decimal.format(snapshot.business.googleRating)}</p><Stars rating={Math.round(snapshot.business.googleRating)} medium /></div><p className="mt-1 hidden text-sm text-slate-600 lg:block">{integer.format(snapshot.business.googleReviewCount)} {t('dashboard.cockpit.approved.reviewsTotal')}</p>{hasDistribution ? <div className="mt-5 space-y-2">{ratings.map((rating) => { const count = snapshot.sample.ratingBreakdown[rating]; const width = Math.round((count / snapshot.sample.reviewCount) * 100); return <div key={rating} className="grid grid-cols-[28px_1fr_36px] items-center gap-2 text-xs"><span>{rating}★</span><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`${Number(rating) <= 2 ? 'bg-red-500' : 'bg-amber-400'} h-full rounded-full`} style={{ width: `${width}%` }} /></div><span className="text-right text-slate-600">{width}%</span></div>; })}</div> : <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.reputationBreakdownEmpty')}</p>}{semMedidas ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.reputationMetricsEmpty')}</p> : <div className="mt-5 grid grid-cols-2 gap-3"><Metric label={t('dashboard.cockpit.layout.averageReplyTime')} value={replyHours === null || replyHours === undefined ? '—' : `${Math.round(replyHours)} h`} /><Metric label={t('dashboard.cockpit.layout.newReviews30d')} value={last30 === null || last30 === undefined ? '—' : `+${last30}`} tone="positive" /></div>}<SampleSourceNote snapshot={snapshot} /></CardContent></Card>;
 };
 
 const Metric = ({ label, value, tone }: { label: string; value: string; tone?: 'positive' }) => <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs leading-4 text-slate-500">{label}</p><p className={`mt-2 text-xl font-semibold ${tone === 'positive' ? 'text-emerald-700' : 'text-slate-950'}`}>{value}</p></div>;
@@ -393,8 +437,12 @@ const DailyPractice = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) =>
   // mas sempre levava para a fila (herdado de quando só existia setTab para
   // a aba de avaliações). Cada variante aponta para a âncora que o próprio
   // texto promete.
+  //
+  // O rótulo da variante de oportunidade era "Plano de hoje", nome do cartão
+  // que saiu em 31/08/2026. Ele já apontava para a fila, então passa a dizer o
+  // que faz, com o mesmo rótulo da variante de força observada.
   const practice = reading.kind === 'opportunity'
-    ? { title: t('dashboard.advisorPilot.opportunityBody', { phrase: reading.phrase, mentions: reading.mentions }), body: t('dashboard.advisorPilot.opportunityAction'), action: t('dashboard.advisorPilot.planTitle'), target: QUEUE_ANCHOR_ID }
+    ? { title: t('dashboard.advisorPilot.opportunityBody', { phrase: reading.phrase, mentions: reading.mentions }), body: t('dashboard.advisorPilot.opportunityAction'), action: t('dashboard.advisorPilot.reviewEvidence'), target: QUEUE_ANCHOR_ID }
     : reading.kind === 'strength'
       ? { title: t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions }), body: t('dashboard.advisorPilot.strengthAction', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`) }), action: t('dashboard.advisorPilot.reviewEvidence'), target: QUEUE_ANCHOR_ID }
     : unresolved ? { title: t('dashboard.cockpit.approved.practiceUnansweredTitle', { count: unresolved }), body: t('dashboard.cockpit.approved.practiceUnansweredBody'), action: t('dashboard.cockpit.approved.practiceUnansweredAction'), target: QUEUE_ANCHOR_ID } : { title: t('dashboard.cockpit.approved.practicePhotoTitle'), body: t('dashboard.cockpit.approved.practicePhotoBody'), action: t('dashboard.cockpit.approved.practicePhotoAction'), target: QR_ANCHOR_ID };
@@ -408,10 +456,16 @@ const DailyPractice = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) =>
  * zero, e uma barra vazia não é um estado neutro, é uma acusação sem prova.
  */
 
+/**
+ * Sem semana nenhuma, a caixa do gráfico continuava a ocupar a linha inteira
+ * vazia ao lado do texto. Encolhe pela mesma regra: fica a linha honesta e mais
+ * nada.
+ */
 const WeeklyChange = ({ weeks }: { weeks: Week[] }) => {
   const current = weeks.at(-1)?.ownerReplies || 0;
   const { t } = useOwnerTranslation();
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.weekTitle')}</h2><span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.weekWindow')}</span></div><div className="mt-4 flex items-center gap-3"><div className="h-8 w-20">{weeks.length > 0 && <ResponsiveContainer width="100%" height="100%"><LineChart data={weeks}><Line type="monotone" dataKey="ownerReplies" stroke="#2457D6" strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><p className="text-sm leading-5 text-slate-600">{weeks.length ? (current ? t('dashboard.cockpit.approved.weekReplies', { count: current }) : t('whatsappPilot.weeklyChangeEmpty')) : t('whatsappPilot.weeklyChangeEmpty')}</p></div></CardContent></Card>;
+  const semEvidencia = weeks.length === 0;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.weekTitle')}</h2>{semEvidencia ? null : <span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.weekWindow')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('whatsappPilot.weeklyChangeEmpty')}</p> : <div className="mt-4 flex items-center gap-3"><div className="h-8 w-20"><ResponsiveContainer width="100%" height="100%"><LineChart data={weeks}><Line type="monotone" dataKey="ownerReplies" stroke="#2457D6" strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div><p className="text-sm leading-5 text-slate-600">{current ? t('dashboard.cockpit.approved.weekReplies', { count: current }) : t('whatsappPilot.weeklyChangeEmpty')}</p></div>}</CardContent></Card>;
 };
 
 /*
@@ -421,9 +475,15 @@ const WeeklyChange = ({ weeks }: { weeks: Week[] }) => {
  * lá ocupava um cartão inteiro para dizer que ainda não sabe.
  */
 
+/**
+ * Zero aberturas é evidência: o QR está na mesa e ninguém o leu. Nenhuma
+ * leitura de funil é outra coisa, e era essa que desenhava dois mosaicos com um
+ * traço em cada. Só a segunda encolhe.
+ */
 const QrCard = ({ funnel }: { funnel: { qrOpens: number; googleClicks: number } | null }) => {
   const { t } = useOwnerTranslation();
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.approved.qrTitle')}</h2><dl className="mt-5 space-y-3"><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrOpened')}</dt><dd className="font-semibold text-slate-950">{funnel?.qrOpens ?? '—'}</dd></div><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrClicked')}</dt><dd className="font-semibold text-slate-950">{funnel?.googleClicks ?? '—'}</dd></div></dl></CardContent></Card>;
+  const semEvidencia = funnel === null;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.approved.qrTitle')}</h2>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.qrEmpty')}</p> : <dl className="mt-5 space-y-3"><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrOpened')}</dt><dd className="font-semibold text-slate-950">{funnel.qrOpens}</dd></div><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrClicked')}</dt><dd className="font-semibold text-slate-950">{funnel.googleClicks}</dd></div></dl>}</CardContent></Card>;
 };
 
 /**
