@@ -64,12 +64,28 @@ serve(async (request) => {
   const admin = createClient(supabaseUrl, serviceRoleKey);
   const body = await request.json().catch(() => ({})) as Record<string, unknown>;
 
+  const COLUNAS_DA_ENTREGA = 'id, kind, status, recipient_e164, provider_message_id, last_error_code, created_at, updated_at';
+
   if (body.action === 'get') {
-    const [{ data: preferences }, { data: deliveries }] = await Promise.all([
+    /**
+     * Duas consultas, e não uma, porque a tela faz duas perguntas diferentes.
+     *
+     * `deliveries` é o histórico recente, de qualquer tipo, para a linha "a
+     * última mensagem foi...". `last_test` é o estado da ligação, e só o teste
+     * do dono responde por ele.
+     *
+     * Até 31/08/2026 havia só a primeira, e a tela pescava o teste de dentro
+     * dela com um `find`. Dez avisos mais recentes empurravam o teste para fora
+     * da janela de dez linhas, e um dono com ligação a funcionar via a tela
+     * dizer que ele nunca tinha testado. Quanto mais o produto entrega, mais
+     * depressa isso acontece: era um defeito que piorava com o uso.
+     */
+    const [{ data: preferences }, { data: deliveries }, { data: lastTest }] = await Promise.all([
       admin.from('whatsapp_notification_preferences').select('*').eq('user_id', user.id).maybeSingle(),
-      admin.from('whatsapp_outbox').select('id, kind, status, recipient_e164, provider_message_id, last_error_code, created_at, updated_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
+      admin.from('whatsapp_outbox').select(COLUNAS_DA_ENTREGA).eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
+      admin.from('whatsapp_outbox').select(COLUNAS_DA_ENTREGA).eq('user_id', user.id).eq('kind', 'test').order('created_at', { ascending: false }).limit(1).maybeSingle(),
     ]);
-    return json({ preferences, deliveries: deliveries || [] });
+    return json({ preferences, deliveries: deliveries || [], last_test: lastTest || null });
   }
 
   if (body.action === 'save-preferences') {

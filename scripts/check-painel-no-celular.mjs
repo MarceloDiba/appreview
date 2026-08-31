@@ -38,33 +38,34 @@ const corpoDaDeclaracao = (fonte, nome) => {
 };
 
 const falhas = [];
-const exigir = (condicao, mensagem) => { if (!condicao) falhas.push(mensagem); };
+let verificadas = 0;
+const exigir = (condicao, mensagem) => { verificadas += 1; if (!condicao) falhas.push(mensagem); };
 
 const painel = semComentarios(readFileSync(PAINEL, 'utf8'));
 const contrato = readFileSync(CONTRATO, 'utf8');
 
-// 1 e 2. Os dois blocos existem e são exclusivos do celular. Sem `lg:hidden`
-// eles apareceriam também no ecrã grande, deslocando a ordem aprovada, que é
+// 1. A faixa-resumo existe e é exclusiva do celular. Sem `lg:hidden` ela
+// apareceria também no ecrã grande, deslocando a ordem aprovada, que é
 // exatamente o que o contrato proíbe.
-for (const nome of ['MobileIndex', 'MobileSummary']) {
-  const corpo = corpoDaDeclaracao(painel, nome);
-  exigir(corpo !== null, `${nome} sumiu de ${PAINEL}.`);
-  if (corpo) {
-    exigir(corpo.includes('lg:hidden'),
-      `${nome} deixou de ser exclusivo do celular: sem lg:hidden ele aparece no ecrã grande e desloca a ordem aprovada.`);
-  }
+const corpoDaFaixa = corpoDaDeclaracao(painel, 'MobileSummary');
+exigir(corpoDaFaixa !== null, `MobileSummary sumiu de ${PAINEL}.`);
+if (corpoDaFaixa) {
+  exigir(corpoDaFaixa.includes('lg:hidden'),
+    'MobileSummary deixou de ser exclusivo do celular: sem lg:hidden ele aparece no ecrã grande e desloca a ordem aprovada.');
 }
 
-// 3. Todo atalho do índice aponta para um módulo que existe na página. Um id
-// órfão vira um atalho que não leva a lugar nenhum.
-const listaDeSecoes = corpoDaDeclaracao(painel, 'MOBILE_SECTIONS') || '';
-const idsDoIndice = [...listaDeSecoes.matchAll(/id:\s*([A-Z_]+)/g)].map((m) => m[1]);
-exigir(idsDoIndice.length >= 4,
-  `O índice do celular ficou com ${idsDoIndice.length} atalhos. Abaixo de quatro ele deixa de resolver o rolo longo que motivou o contrato.`);
-for (const id of idsDoIndice) {
-  exigir(new RegExp(`id=\\{${id}\\}`).test(painel),
-    `O atalho ${id} não corresponde a nenhum id na página: o índice levaria a lugar nenhum.`);
-}
+// 2. O índice fixo do celular saiu em 31/08/2026, por decisão de Marcelo:
+// aparecia cortado no telemóvel dele, e o menu principal já leva a pessoa a
+// cada destino. As três asserções que o protegiam (existe, é exclusivo do
+// celular, cada atalho aponta para um id real) foram APAGADAS em vez de
+// reapontadas, porque o módulo que elas mediam deixou de existir e uma
+// asserção sobre código ausente fica verde sem proteger nada.
+//
+// No lugar delas fica a proibição de ele voltar. Sem isto, o índice regressa na
+// próxima vez que alguém tentar resolver o rolo longo do celular, que é
+// exatamente como ele nasceu.
+exigir(!/MobileIndex|MOBILE_SECTIONS/.test(painel),
+  'O índice fixo do celular voltou ao painel. Ele saiu em 31/08/2026 porque aparecia cortado no telemóvel do dono e duplicava o menu principal.');
 
 // 4. Fila ausente e fila vazia não são a mesma coisa. A faixa precisa
 // distinguir as duas, senão um segundo aparelho mostra "nenhuma esperando"
@@ -105,9 +106,14 @@ if (linhaDasNotas) {
 exigir(/apenas no celular/.test(contrato) && /faixa-resumo/.test(contrato),
   `${CONTRATO} deixou de registrar a exceção do celular aprovada em 30/08/2026.`);
 
+// 8. E precisa registrar também a remoção do índice, com a data. Uma regra
+// apagada do código e viva no documento é a mesma contradição, ao contrário.
+exigir(/Painel que cabe no celular \(decisões de 31\/08\/2026\)/.test(contrato),
+  `${CONTRATO} deixou de registrar as decisões de 31/08/2026 que tiraram o índice do celular.`);
+
 if (falhas.length) {
   console.error('Painel no celular: %d proteção(ões) falharam.\n', falhas.length);
   for (const falha of falhas) console.error(' - %s', falha);
   process.exit(1);
 }
-console.log('Painel no celular: 7 proteções verdes.');
+console.log('Painel no celular: %d proteções verdes.', verificadas);

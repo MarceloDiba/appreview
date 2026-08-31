@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Copy, ExternalLink, Info, Lightbulb, MessageCircle, QrCode, Sparkles, Star } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Copy, ExternalLink, Info, Star } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,10 +10,8 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import { useGoogleBusinessReviewQueue } from '@/hooks/useGoogleBusinessReviewQueue';
 import { useReviewFunnelMetrics, type ReviewFunnelMetrics } from '@/hooks/useReviewFunnelMetrics';
 import { buildReplySuggestions } from '@/lib/replySuggestions';
-import { LocalWhatsAppState, useLocalWhatsApp } from '@/hooks/useLocalWhatsApp';
-import { WhatsAppNotificationWorkspace } from '@/components/dashboard/WhatsAppNotificationWorkspace';
 import { supabase } from '@/integrations/supabase/client';
-import { getAdvisorObservedResult, markAdvisorAction } from '@/lib/advisorPilot';
+import { markAdvisorAction } from '@/lib/advisorPilot';
 import { getAdvisorReading } from '@/lib/advisorReading';
 import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
 import { sampleWasTruncated } from '@/lib/reputationSnapshotReading';
@@ -36,27 +34,14 @@ const actionStorageKey = 'binno.approved-cockpit-actions';
 const integer = new Intl.NumberFormat();
 const decimal = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 // Âncoras que substituem as antigas abas. Os cartões que antes trocavam de
-// aba (fila e WhatsApp) agora levam a estes ids por link nativo
-// (href="#..."), sem estado de aba nem JavaScript para funcionar.
+// aba agora levam a estes ids por link nativo (href="#..."), sem estado de aba
+// nem JavaScript para funcionar.
+//
+// Em 31/08/2026 a âncora do WhatsApp saiu daqui junto com a configuração, que
+// virou destino próprio do menu (`/whatsapp`). As âncoras do Radar, do volume
+// e das notas saíram com o índice do celular: elas só existiam para ele.
 const QUEUE_ANCHOR_ID = 'fila-de-respostas';
 const QR_ANCHOR_ID = 'qr-e-temas';
-const WHATSAPP_ANCHOR_ID = 'configuracao-whatsapp';
-const RADAR_ANCHOR_ID = 'radar-do-binno';
-const VOLUME_ANCHOR_ID = 'volume-de-avaliacoes';
-const RATINGS_ANCHOR_ID = 'cada-nota-separada';
-
-// Índice do celular. A ordem aqui repete a ordem da página e nunca a
-// reordena: cada atalho leva a um módulo que continua exatamente onde o
-// contrato mandou. Nada é escondido, fundido nem deslocado; no ecrã grande
-// o índice não existe, porque lá a página inteira já cabe à vista.
-const MOBILE_SECTIONS = [
-  { id: RADAR_ANCHOR_ID, labelKey: 'dashboard.cockpit.approved.sectionRadar' },
-  { id: QUEUE_ANCHOR_ID, labelKey: 'dashboard.cockpit.approved.sectionQueue' },
-  { id: VOLUME_ANCHOR_ID, labelKey: 'dashboard.cockpit.approved.sectionVolume' },
-  { id: RATINGS_ANCHOR_ID, labelKey: 'dashboard.cockpit.approved.sectionRatings' },
-  { id: QR_ANCHOR_ID, labelKey: 'dashboard.cockpit.approved.sectionQr' },
-  { id: WHATSAPP_ANCHOR_ID, labelKey: 'dashboard.cockpit.approved.sectionWhatsapp' },
-] as const;
 
 const readActions = (): Record<string, ActionState> => {
   try {
@@ -110,33 +95,13 @@ const SampleSourceNote = ({ snapshot }: { snapshot: ExperimentalApifySnapshot })
   return <p className="mt-4 text-xs leading-4 text-slate-500">{t('dashboard.cockpit.layout.sampleSourceNote', { sample: snapshot.sample.reviewCount })}</p>;
 };
 
-/**
- * Índice do celular, só abaixo de `lg`. É atalho, não navegação: rola até um
- * módulo que continua na página, na mesma ordem. Links nativos, sem estado e
- * sem JavaScript, como as âncoras que já substituíram as abas.
+/*
+ * Aqui vivia o índice fixo do celular (`MobileIndex`), aprovado em 30/08/2026
+ * e removido em 31/08/2026 por decisão de Marcelo, depois de o ver cortado no
+ * próprio telemóvel. O menu principal já leva a pessoa a cada destino, e um
+ * segundo nível de navegação por cima dele custava a primeira dobra inteira.
+ * Ver "Painel que cabe no celular" no contrato de produto.
  */
-const MobileIndex = () => {
-  const { t } = useOwnerTranslation();
-  return (
-  <nav
-    aria-label={t('dashboard.cockpit.approved.mobileIndexLabel')}
-    className="sticky top-0 z-30 -mx-4 border-b border-slate-200 bg-white/95 backdrop-blur lg:hidden"
-  >
-    <ul className="flex gap-1 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {MOBILE_SECTIONS.map((section) => (
-        <li key={section.id}>
-          <a
-            href={`#${section.id}`}
-            className="flex min-h-11 items-center whitespace-nowrap rounded-full px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-          >
-            {t(section.labelKey)}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-  );
-};
 
 /**
  * Faixa-resumo do celular, só abaixo de `lg`. Adiciona, nunca substitui: os
@@ -180,31 +145,27 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
   const official = useGoogleBusinessReviewQueue(import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined);
   const liveFunnel = useReviewFunnelMetrics(userId);
   const funnel = demoFunnel ? { ...liveFunnel, data: demoFunnel } : liveFunnel;
-  const liveWhatsApp = useLocalWhatsApp();
-  const whatsApp: LocalWhatsAppState = demo
-    ? { status: 'unavailable', session: null, detail: null, refresh: async () => {} }
-    : liveWhatsApp;
-  const [onboardingPhone, setOnboardingPhone] = useState('');
   // `profiles.business_country` decide a variante do português da resposta
   // sugerida (pt-BR vs. pt-PT), pela mesma regra do cartão impresso em
   // `src/lib/businessLocale.ts`. Fica em `null` enquanto o perfil não
   // responde, e continua `null` na demonstração pública, onde não há dono
   // nem país para ler: `null` é a afirmação de que não se sabe, e o texto
   // cai no português de Portugal, que é o padrão histórico.
+  //
+  // O telefone do onboarding saía desta mesma leitura, para a configuração do
+  // WhatsApp que vivia ao fim da página. Em 31/08/2026 a configuração mudou-se
+  // para `/whatsapp` e leva o telefone consigo; aqui ficou só o país.
   const [businessCountry, setBusinessCountry] = useState<string | null>(null);
-  const [advisorActionVersion, setAdvisorActionVersion] = useState(0);
   useEffect(() => {
     if (!userId) return;
     let active = true;
     const loadProfile = async () => {
       try {
-        const { data } = await supabase.from('profiles').select('phone, business_country').eq('id', userId).maybeSingle();
+        const { data } = await supabase.from('profiles').select('business_country').eq('id', userId).maybeSingle();
         if (!active) return;
-        setOnboardingPhone(data?.phone || '');
         setBusinessCountry(data?.business_country || null);
       } catch {
         if (!active) return;
-        setOnboardingPhone('');
         setBusinessCountry(null);
       }
     };
@@ -223,64 +184,84 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
 
   // Uma só tela, sem seletor de abas. A ordem segue a decisão de 30/08/2026:
   // o que tem prazo primeiro (comentários pendentes, depois a fila de
-  // respostas), o que é informativo depois (volume, notas, QR e temas, mais
-  // a coluna lateral já fixada pelo contrato) e o que é configuração por
-  // último (WhatsApp). A antiga aba "Avaliações" não vira uma seção própria
-  // porque já era, byte a byte, a mesma <ResponseQueue> que a Visão geral
-  // sempre mostrou; a aba só duplicava o que já estava na tela.
+  // respostas) e o que é informativo depois (volume, notas, QR e temas, mais
+  // a coluna lateral já fixada pelo contrato). A antiga aba "Avaliações" não
+  // vira uma seção própria porque já era, byte a byte, a mesma <ResponseQueue>
+  // que a Visão geral sempre mostrou; a aba só duplicava o que já estava na
+  // tela.
+  //
+  // Em 31/08/2026 a configuração do WhatsApp, que era o último bloco desta
+  // página, mudou-se para `/whatsapp`. A regra de 30/08 dizia que configuração
+  // vem por último porque não tem prazo; dar-lhe destino próprio é a forma mais
+  // forte da mesma regra. Saíram também o índice do celular, o cartão "Resumo
+  // no WhatsApp", a completude do perfil e o "Deu resultado?".
   return <div className="space-y-5">
-    <MobileIndex />
     <MobileSummary snapshot={snapshot} queue={queue} queueOnThisDevice={queueOnThisDevice} />
-    <div id={RADAR_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><RadarNow snapshot={snapshot} /></div>
+    <RadarNow snapshot={snapshot} />
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <section className="min-w-0 space-y-5">
         {!demo && <PendingCommentsBanner userId={userId} />}
         <div id={QUEUE_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} /></div>
-        <div id={VOLUME_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><VolumeCard weeks={history} /></div>
-        <div id={RATINGS_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><RatingTrends weeks={history} snapshot={snapshot} /></div>
+        <VolumeCard weeks={history} />
+        <RatingTrends weeks={history} snapshot={snapshot} />
         <div id={QR_ANCHOR_ID} className="grid scroll-mt-16 gap-5 md:grid-cols-2 lg:scroll-mt-4"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
       </section>
       <aside className="space-y-5">
-        <TodayPlan snapshot={snapshot} onMarked={() => setAdvisorActionVersion((current) => current + 1)} />
+        <TodayPlan snapshot={snapshot} />
         <ReputationCard snapshot={snapshot} />
-        <WhatsAppCard localWhatsApp={whatsApp} />
         <DailyPractice snapshot={snapshot} />
-        {demo ? <ProfileCompleteness connected={official.syncComplete} demo /> : <ProfileCompleteness connected={official.syncComplete} />}
         <WeeklyChange weeks={history} />
-        <ObservedResult snapshot={snapshot} version={advisorActionVersion} />
       </aside>
-    </div>
-    <div id={WHATSAPP_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4">
-      <WhatsAppNotificationWorkspace localWhatsApp={whatsApp} onboardingPhone={onboardingPhone} demoPhone={demo ? '+351 911 000 000' : undefined} demo={demo} />
     </div>
   </div>;
 };
 
+/**
+ * O Radar, em no máximo uma linha (decisão de 31/08/2026).
+ *
+ * Ele continua a ser a faixa que abre a página e continua proibido de inventar
+ * uma fragilidade: os critérios de alerta, oportunidade e força observada
+ * seguem inteiros em `getAdvisorReading`, e o estado de acompanhamento continua
+ * a dizer que segue acompanhando. O que mudou é o tamanho. No telemóvel do dono
+ * a versão anterior enchia a primeira dobra com quatro linhas para dizer que
+ * não havia nada a fazer, e a fila de respostas, que é o centro do produto,
+ * ficava abaixo do fim da tela.
+ *
+ * O ícone só existe no alerta. Ali ele carrega a severidade, que o texto sozinho
+ * não carrega; nos outros três estados era enfeite a comer largura.
+ */
 const RadarNow = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
   const reading = getAdvisorReading(snapshot);
   const topic = reading.kind === 'alert' || reading.kind === 'strength' ? t(`dashboard.cockpit.topicLabels.${reading.topic}`) : null;
   const urgent = reading.kind === 'alert';
-  const content = reading.kind === 'alert'
-    ? <><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.alertTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.alertBody', { low: reading.lowRatingCount, topic, mentions: reading.mentions })}</p></>
+  const linha = reading.kind === 'alert'
+    ? t('dashboard.advisorPilot.radarLineAlert', { low: reading.lowRatingCount, topic, mentions: reading.mentions })
     : reading.kind === 'opportunity'
-      ? <><p className="mt-1 text-sm font-medium text-slate-800">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.opportunityBody', { phrase: reading.phrase, mentions: reading.mentions })}</p></>
+      ? t('dashboard.advisorPilot.radarLineOpportunity', { phrase: reading.phrase, mentions: reading.mentions })
       : reading.kind === 'strength'
-        ? <><p className="mt-1 text-sm font-medium text-slate-800">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.strengthBody', { topic, mentions: reading.mentions })}</p></>
-        : <><p className="mt-1 text-sm font-medium text-slate-800">{t('dashboard.advisorPilot.monitorTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-600">{t('dashboard.advisorPilot.monitorBody')}</p></>;
-  return <Card className={`shadow-[0_1px_3px_rgba(15,23,42,0.08)] ${urgent ? 'border-red-200 bg-red-50/60' : 'border-violet-200 bg-violet-50/50'}`}><CardContent className="flex items-start gap-3 p-4"><span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${urgent ? 'bg-red-100 text-red-700' : 'bg-violet-100 text-violet-800'}`}>{urgent ? <AlertTriangle className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}</span><div><p className="text-sm font-semibold text-slate-950">{t('dashboard.advisorPilot.radarTitle')}</p>{content}</div></CardContent></Card>;
+        ? t('dashboard.advisorPilot.radarLineStrength', { topic, mentions: reading.mentions })
+        : t('dashboard.advisorPilot.radarLineMonitor');
+  return <p className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm leading-5 ${urgent ? 'border-red-200 bg-red-50/60 text-red-950' : 'border-violet-200 bg-violet-50/50 text-slate-700'}`}>
+    {urgent ? <AlertTriangle className="h-4 w-4 shrink-0 text-red-700" aria-hidden="true" /> : null}
+    <span className="min-w-0">{linha}</span>
+  </p>;
 };
 
-const TodayPlan = ({ snapshot, onMarked }: { snapshot: ExperimentalApifySnapshot; onMarked: () => void }) => {
+const TodayPlan = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
   const reading = getAdvisorReading(snapshot);
   const topic = reading.kind === 'alert' || reading.kind === 'strength' ? t(`dashboard.cockpit.topicLabels.${reading.topic}`) : null;
+  // A marcação continua a ser um toque local, como o contrato manda. O que
+  // deixou de existir é o cartão "Deu resultado?" que a lia: ele só tinha o que
+  // dizer depois de uma leitura seguinte, que nunca chegou em conta real.
+  const [marcado, setMarcado] = useState(false);
   const mark = () => {
     if (reading.kind !== 'alert') return;
     const alert = snapshot.sample.advisor?.alert;
     if (!alert) return;
     markAdvisorAction(snapshot, alert);
-    onMarked();
+    setMarcado(true);
   };
   const body = reading.kind === 'alert'
     ? t('dashboard.advisorPilot.planBody', { topic })
@@ -289,7 +270,7 @@ const TodayPlan = ({ snapshot, onMarked }: { snapshot: ExperimentalApifySnapshot
       : reading.kind === 'strength'
         ? t('dashboard.advisorPilot.strengthAction', { topic })
         : t('dashboard.advisorPilot.monitorAction');
-  return <Card className="border-violet-200 bg-violet-50/40 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.planTitle')}</h2></div><p className="mt-4 text-sm font-medium leading-5 text-slate-900">{body}</p>{reading.kind === 'alert' ? <Button onClick={mark} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><CheckCircle2 className="mr-2 h-4 w-4" />{t('dashboard.advisorPilot.markDone')}</Button> : <Button asChild variant="outline" className="mt-4"><a href={`#${QUEUE_ANCHOR_ID}`}>{t('dashboard.advisorPilot.reviewEvidence')}</a></Button>}</CardContent></Card>;
+  return <Card className="border-violet-200 bg-violet-50/40 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.planTitle')}</h2><p className="mt-4 text-sm font-medium leading-5 text-slate-900">{body}</p>{reading.kind === 'alert' ? <Button onClick={mark} disabled={marcado} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />{marcado ? t('dashboard.advisorPilot.markedDone') : t('dashboard.advisorPilot.markDone')}</Button> : <Button asChild variant="outline" className="mt-4"><a href={`#${QUEUE_ANCHOR_ID}`}>{t('dashboard.advisorPilot.reviewEvidence')}</a></Button>}</CardContent></Card>;
 };
 
 const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean; businessCountry: string | null }) => {
@@ -390,10 +371,13 @@ const ReputationCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) =
 
 const Metric = ({ label, value, tone }: { label: string; value: string; tone?: 'positive' }) => <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs leading-4 text-slate-500">{label}</p><p className={`mt-2 text-xl font-semibold ${tone === 'positive' ? 'text-emerald-700' : 'text-slate-950'}`}>{value}</p></div>;
 
-const WhatsAppCard = ({ localWhatsApp }: { localWhatsApp: LocalWhatsAppState }) => {
-  const { t } = useOwnerTranslation();
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.whatsappTitle')}</h2><MessageCircle className="h-5 w-5 text-emerald-700" /></div><div className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm leading-5 text-emerald-950">{localWhatsApp.status === 'ready' ? t('dashboard.cockpit.approved.whatsappReadyBody') : t('dashboard.cockpit.approved.whatsappSetupBody')}</div><Button asChild variant="link" className="mt-2 h-auto px-0 text-[#2457D6]"><a href={`#${WHATSAPP_ANCHOR_ID}`}>{t('dashboard.cockpit.whatsapp.connect')}<ChevronRight className="ml-1 h-4 w-4" /></a></Button></CardContent></Card>;
-};
+/*
+ * Aqui vivia o cartão "Resumo no WhatsApp" da coluna lateral, removido em
+ * 31/08/2026 por decisão de Marcelo. Ele era um atalho para a configuração que
+ * agora tem destino próprio no menu (`/whatsapp`), e repetia na lateral aquilo
+ * que o menu passou a dizer melhor. Ver "Painel que cabe no celular" no
+ * contrato de produto.
+ */
 
 const DailyPractice = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
@@ -408,15 +392,15 @@ const DailyPractice = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) =>
     : reading.kind === 'strength'
       ? { title: t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions }), body: t('dashboard.advisorPilot.strengthAction', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`) }), action: t('dashboard.advisorPilot.reviewEvidence'), target: QUEUE_ANCHOR_ID }
     : unresolved ? { title: t('dashboard.cockpit.approved.practiceUnansweredTitle', { count: unresolved }), body: t('dashboard.cockpit.approved.practiceUnansweredBody'), action: t('dashboard.cockpit.approved.practiceUnansweredAction'), target: QUEUE_ANCHOR_ID } : { title: t('dashboard.cockpit.approved.practicePhotoTitle'), body: t('dashboard.cockpit.approved.practicePhotoBody'), action: t('dashboard.cockpit.approved.practicePhotoAction'), target: QR_ANCHOR_ID };
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.practiceTitle')}</h2></div><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button asChild variant="link" className="mt-2 h-auto px-0 text-[#2457D6]"><a href={`#${practice.target}`}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></a></Button></CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.practiceTitle')}</h2><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button asChild variant="link" className="mt-2 h-auto px-0 text-[#2457D6]"><a href={`#${practice.target}`}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></a></Button></CardContent></Card>;
 };
 
-const ProfileCompleteness = ({ connected, demo = false }: { connected: boolean; demo?: boolean }) => {
-  const { t } = useOwnerTranslation();
-  const percentage = demo ? 68 : undefined;
-
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.profileTitle')}</h2><span className="text-sm text-slate-500">{percentage ? `${percentage}%` : '—'}</span></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2457D6]" style={{ width: `${percentage ?? 0}%` }} /></div>{demo && <p className="mt-3 text-sm leading-5 text-slate-600">{t('dashboard.cockpit.approved.profileMissingDemo')}</p>}{connected && !demo ? <p className="mt-3 text-sm leading-5 text-slate-600">{t('dashboard.cockpit.approved.profileConnected')}</p> : null}</CardContent></Card>;
-};
+/*
+ * Aqui vivia "O que falta no seu perfil do Google" (completude do perfil),
+ * removido em 31/08/2026 por decisão de Marcelo. Sem a ligação oficial ele
+ * nunca teve o que medir: em toda conta real desenhava um traço e uma barra a
+ * zero, e uma barra vazia não é um estado neutro, é uma acusação sem prova.
+ */
 
 const WeeklyChange = ({ weeks }: { weeks: Week[] }) => {
   const current = weeks.at(-1)?.ownerReplies || 0;
@@ -424,22 +408,16 @@ const WeeklyChange = ({ weeks }: { weeks: Week[] }) => {
   return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.weekTitle')}</h2><span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.weekWindow')}</span></div><div className="mt-4 flex items-center gap-3"><div className="h-8 w-20">{weeks.length > 0 && <ResponsiveContainer width="100%" height="100%"><LineChart data={weeks}><Line type="monotone" dataKey="ownerReplies" stroke="#2457D6" strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><p className="text-sm leading-5 text-slate-600">{weeks.length ? (current ? t('dashboard.cockpit.approved.weekReplies', { count: current }) : t('whatsappPilot.weeklyChangeEmpty')) : t('whatsappPilot.weeklyChangeEmpty')}</p></div></CardContent></Card>;
 };
 
-const ObservedResult = ({ snapshot, version }: { snapshot: ExperimentalApifySnapshot; version: number }) => {
-  const { t } = useOwnerTranslation();
-  // version intentionally refreshes local action state after the owner marks it.
-  void version;
-  const result = getAdvisorObservedResult(snapshot);
-  const copy = result === 'persisting'
-    ? t('dashboard.advisorPilot.resultPersisting')
-    : result === 'not-repeated'
-      ? t('dashboard.advisorPilot.resultNotRepeated')
-      : t('dashboard.advisorPilot.resultWaiting');
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.resultTitle')}</h2></div><p className="mt-3 text-sm leading-5 text-slate-600">{copy}</p></CardContent></Card>;
-};
+/*
+ * Aqui vivia "Deu resultado?" (resultado observado), removido em 31/08/2026 por
+ * decisão de Marcelo. Ele só tinha o que dizer depois de o dono marcar uma ação
+ * E de chegar uma leitura seguinte, o que nunca aconteceu numa conta real; até
+ * lá ocupava um cartão inteiro para dizer que ainda não sabe.
+ */
 
 const QrCard = ({ funnel }: { funnel: { qrOpens: number; googleClicks: number } | null }) => {
   const { t } = useOwnerTranslation();
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center justify-between gap-3"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.approved.qrTitle')}</h2><QrCode className="h-5 w-5 text-[#2457D6]" /></div><dl className="mt-5 space-y-3"><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrOpened')}</dt><dd className="font-semibold text-slate-950">{funnel?.qrOpens ?? '—'}</dd></div><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrClicked')}</dt><dd className="font-semibold text-slate-950">{funnel?.googleClicks ?? '—'}</dd></div></dl></CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.approved.qrTitle')}</h2><dl className="mt-5 space-y-3"><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrOpened')}</dt><dd className="font-semibold text-slate-950">{funnel?.qrOpens ?? '—'}</dd></div><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrClicked')}</dt><dd className="font-semibold text-slate-950">{funnel?.googleClicks ?? '—'}</dd></div></dl></CardContent></Card>;
 };
 
 const TopicsCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {

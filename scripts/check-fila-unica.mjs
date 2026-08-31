@@ -101,9 +101,101 @@ for (const [origem, hook] of [
   exigir(`a fila lê a origem "${origem}" por ${hook}`, new RegExp(`${hook}\\(`).test(fila));
 }
 
+// Em 31/08/2026 a lista passou a desenhar `filaVisivel`, a mesma fila com o
+// filtro do cartão de origens aplicado. A asserção acompanha o nome, e continua
+// a medir a mesma coisa: uma lista só. Duas listas aqui seriam duas caixas de
+// entrada, que é exatamente o que o cartão de origens NÃO pode virar.
 exigir(
   'a fila é desenhada uma vez só, e não uma lista por origem',
-  (fila.match(/fila\.map\(/g) || []).length === 1,
+  (fila.match(/filaVisivel\.map\(/g) || []).length === 1
+  && (fila.match(/fila\.map\(/g) || []).length === 0,
+);
+
+// ---------------------------------------------------------------------------
+// 1b. O cartão de origens: uma fila, dois atalhos (decisão de 31/08/2026)
+// ---------------------------------------------------------------------------
+//
+// "deveria ter 2 caixas de entrada", disse Marcelo em 31/08, um dia depois de
+// pedir "um lugar só para responder". As duas frases conciliam-se num filtro:
+// ele quer saber quanto tem de cada lado, não quer duas caixas. Cada asserção
+// abaixo prende uma metade dessa conciliação.
+
+exigir(
+  'o cartão de origens existe acima da fila',
+  fila.includes('<CartaoDeOrigens fila={fila} filtro={filtroDeOrigem} aoFiltrar={setFiltroDeOrigem} />')
+  && fila.indexOf('<CartaoDeOrigens') < fila.indexOf('filaVisivel.map('),
+);
+
+exigir(
+  'o cartão de origens tem exatamente as duas linhas que o dono pediu',
+  /grupo: 'privado', rotulo: t\('reviews\.queue\.originsPrivate'\)/.test(fila)
+  && /grupo: 'google', rotulo: t\('reviews\.queue\.originsGoogle'\)/.test(fila),
+);
+
+// O padrão é a lista inteira. Nascer filtrado transformaria o cartão numa aba
+// com outro nome, que é o que o contrato proíbe desde 30/08/2026.
+const filtroInicial = fila.match(/useState<GrupoDeOrigem \| null>\(([^)]*)\)/);
+exigir('o filtro de origem deixou de ser um estado desta tela.', filtroInicial !== null);
+if (filtroInicial) {
+  exigir(
+    'a fila abre filtrada por uma origem, em vez de abrir inteira: o cartão de origens virou aba com outro nome',
+    filtroInicial[1].trim() === 'null',
+  );
+}
+
+// As duas contagens nascem da MESMA fila somada que a lista desenha. Lê-las de
+// outra fonte (dos hooks, por exemplo) devolveria dois números que podem
+// discordar da lista, que é o defeito que a fila somada existe para não ter.
+const corpoDoCartao = fila.match(/const CartaoDeOrigens = \(\{[\s\S]*?\n\};/);
+exigir('o cartão de origens deixou de existir como componente próprio.', corpoDoCartao !== null);
+if (corpoDoCartao) {
+  exigir(
+    'as contagens do cartão de origens deixaram de nascer da própria fila somada',
+    /fila\.filter\(\(item\) => grupoDaOrigem\(item\.origem\) === grupo\)\.length/.test(corpoDoCartao[0]),
+  );
+  // `useOwnerTranslation` é só tradução e não lê dado nenhum; qualquer outro
+  // hook aqui seria uma segunda fonte para as contagens.
+  exigir(
+    'o cartão de origens passou a ler um hook próprio, e as duas contagens podem discordar da lista',
+    !/use[A-Z]/.test(corpoDoCartao[0].replace(/useOwnerTranslation/g, '')),
+  );
+}
+
+// Filtrar não reordena. A ordem inteira continua a sair de
+// `montarFilaDeRespostas`; o filtro é aplicado DEPOIS dela, sobre a lista já
+// ordenada. Filtrar antes de ordenar daria o mesmo resultado hoje e deixaria a
+// porta aberta para uma segunda regra de recência amanhã.
+const calculoDoVisivel = fila.match(/const filaVisivel = useMemo\(\s*\(\) => \(([\s\S]*?)\),\s*\[/);
+exigir('filaVisivel deixou de ser calculada.', calculoDoVisivel !== null);
+if (calculoDoVisivel) {
+  exigir(
+    'o filtro de origem deixou de ser aplicado sobre a fila já ordenada',
+    /filtroDeOrigem \? fila\.filter\(/.test(calculoDoVisivel[1]) && /: fila/.test(calculoDoVisivel[1]),
+  );
+}
+
+// Vazio por filtro e vazio de verdade não são a mesma coisa. Dizer "nada
+// esperando resposta" a quem acabou de filtrar afirma sobre a fila inteira o
+// que só vale para um lado dela.
+exigir(
+  'a fila distingue o vazio por filtro do vazio de verdade',
+  /filtroDeOrigem \?[\s\S]{0,400}reviews\.queue\.emptyFiltered/.test(fila),
+);
+
+// A frase que explicava que o Google não devolve as respostas já publicadas
+// saiu em 31/08/2026. Ela pedia ao dono que guardasse na cabeça uma limitação
+// de API para poder usar um botão que já se explica sozinho. A asserção que a
+// exigia não existia; esta impede que ela volte, e mede nos três catálogos
+// porque uma chave apagada de um só volta pelos outros.
+for (const idioma of ['pt-BR', 'pt-PT', 'en']) {
+  exigir(
+    `o texto sobre o Google não informar quais avaliações já foram respondidas voltou a ${idioma}.json`,
+    !/publicUnknownState/.test(ler(`src/i18n/owner/locales/${idioma}.json`)),
+  );
+}
+exigir(
+  'a frase sobre o estado desconhecido das respostas do Google voltou à fila',
+  !fila.includes('publicUnknownState'),
 );
 
 exigir(

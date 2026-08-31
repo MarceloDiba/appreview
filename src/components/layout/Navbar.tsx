@@ -69,6 +69,7 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
                 <>
                   <Link to="/dashboard" className={deskLink('/dashboard', isActive('/dashboard'))}>{t('nav.dashboard')}</Link>
                   <Link to="/reviews" className={deskLink('/reviews', isActive('/reviews'))}>{t('nav.reviews')}</Link>
+                  <Link to="/whatsapp" className={deskLink('/whatsapp', isActive('/whatsapp'))}>{t('nav.whatsapp')}</Link>
                   <Link to="/qrcodes" className={deskLink('/qrcodes', isActive('/qrcodes'))}>{t('nav.qrcodes')}</Link>
                   <Link to="/settings" className={deskLink('/settings', isActive('/settings'))}>{t('nav.settings')}</Link>
                 </>
@@ -144,6 +145,7 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
               <>
                 <Link to="/dashboard" className={mobLink('/dashboard', isActive('/dashboard'))} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.dashboard')}</Link>
                 <Link to="/reviews" className={mobLink('/reviews', isActive('/reviews'))} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.reviews')}</Link>
+                <Link to="/whatsapp" className={mobLink('/whatsapp', isActive('/whatsapp'))} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.whatsapp')}</Link>
                 <Link to="/qrcodes" className={mobLink('/qrcodes', isActive('/qrcodes'))} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.qrcodes')}</Link>
                 <Link to="/settings" className={mobLink('/settings', isActive('/settings'))} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.settings')}</Link>
                 <Link to="/profile" className={mobLink('/profile', isActive('/profile'))} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.account')}</Link>

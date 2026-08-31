@@ -630,7 +630,10 @@ export async function runExperimentalApifyCollection({
   monthlyRunLimit: number;
   now: Date;
 }): Promise<CollectionOutcome> {
-  const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1_000).toISOString();
+  // Uma constante só: a janela que bloqueia e a hora que a mensagem promete
+  // vêm do mesmo número, senão a tela diria uma hora e a trava usaria outra.
+  const DAY_MS = 24 * 60 * 60 * 1_000;
+  const dayAgo = new Date(now.getTime() - DAY_MS).toISOString();
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 
   // Reivindica primeiro qualquer linha 'started' órfã deste negócio (por
@@ -650,14 +653,31 @@ export async function runExperimentalApifyCollection({
     // 'started' bloqueia igual a 'succeeded': um crash entre a cobrança e a
     // gravação do resultado não pode virar uma segunda cobrança. Só uma linha
     // órfã reivindicada acima (agora 'failed') deixa de bloquear.
-    admin.from('experimental_apify_runs').select('id').eq('user_id', userId).eq('google_review_url', googleReviewUrl).in('status', ['succeeded', 'started']).gte('requested_at', dayAgo).limit(1).maybeSingle(),
+    admin.from('experimental_apify_runs').select('id, requested_at').eq('user_id', userId).eq('google_review_url', googleReviewUrl).in('status', ['succeeded', 'started']).gte('requested_at', dayAgo).order('requested_at', { ascending: false }).limit(1).maybeSingle(),
     admin.from('experimental_apify_runs').select('id', { count: 'exact', head: true }).eq('user_id', userId).gte('requested_at', monthStart),
   ]);
   if (recentError || monthlyError) {
     return { ok: false, code: 'APIFY_EXPERIMENTAL_LIMIT_CHECK_FAILED', status: 500, message: 'Não foi possível aplicar os limites da coleta experimental.' };
   }
   if (recentRun) {
-    return { ok: false, code: 'APIFY_EXPERIMENTAL_COOLDOWN', status: 429, message: 'Este negócio já teve uma coleta experimental nas últimas 24 horas.' };
+    // A mensagem diz a hora exata de propósito. Em 31/08/2026 Marcelo clicou em
+    // buscar, a trava recusou, e ele só percebeu que nada tinha acontecido
+    // porque a fila continuou vazia: a frase antiga não dizia quando tentar de
+    // novo e desaparecia sozinha. Uma recusa que não diz o que fazer a seguir é
+    // quase indistinguível de uma busca que não achou nada.
+    const quando = (recentRun as { requested_at?: string }).requested_at;
+    const liberaEm = quando ? new Date(new Date(quando).getTime() + DAY_MS) : null;
+    const hora = liberaEm
+      ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(liberaEm)
+      : null;
+    return {
+      ok: false,
+      code: 'APIFY_EXPERIMENTAL_COOLDOWN',
+      status: 429,
+      message: hora
+        ? `Não busquei nada agora: já busquei as avaliações deste negócio nas últimas 24 horas. Pode buscar de novo a partir de ${hora}. O que está no painel continua valendo.`
+        : 'Não busquei nada agora: já busquei as avaliações deste negócio nas últimas 24 horas. O que está no painel continua valendo.',
+    };
   }
   if ((monthlyCount || 0) >= monthlyRunLimit) {
     return { ok: false, code: 'APIFY_EXPERIMENTAL_MONTHLY_LIMIT', status: 429, message: 'O limite mensal de coletas experimentais foi alcançado.' };

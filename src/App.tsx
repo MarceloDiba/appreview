@@ -22,6 +22,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
 const Reviews = lazy(() => import("./pages/Reviews"));
+const WhatsApp = lazy(() => import("./pages/WhatsApp"));
 const QRCodes = lazy(() => import("./pages/QRCodes"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -66,6 +67,17 @@ const App = () => (
               <Route path="/reviews" element={
                 <ProtectedRoute>
                   <Reviews />
+                </ProtectedRoute>
+              } />
+              {/*
+                O WhatsApp virou destino do menu principal em 31/08/2026, por
+                decisão de Marcelo. A configuração vivia ao fim do painel e
+                aparecia em todas as telas do dono; ver "Painel que cabe no
+                celular" em docs/contrato-produto-binno.md.
+              */}
+              <Route path="/whatsapp" element={
+                <ProtectedRoute>
+                  <WhatsApp />
                 </ProtectedRoute>
               } />
               <Route path="/qrcodes" element={
