@@ -10,9 +10,11 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface GoogleReviewsProps {
   userId: string;
+  /** `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão. */
+  businessCountry: string | null;
 }
 
-const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId }) => {
+const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId, businessCountry }) => {
   const { t } = useOwnerTranslation();
   const {
     loading,
@@ -56,6 +58,7 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId }) => {
             reviews={reviews}
             formatDate={formatDate}
             businessName={placeInfo?.place_name}
+            businessCountry={businessCountry}
           />
         </div>
       </CardContent>

@@ -31,6 +31,19 @@ export const useReputationAdvisor = (userId?: string) => {
       setLoading(true);
       setError(null);
 
+      // A variante do português da resposta sugerida segue o país do NEGÓCIO
+      // (`profiles.business_country`), nunca o idioma detectado no texto do
+      // cliente: quem publica é o dono, na própria página. Sem perfil ou sem
+      // país preenchido fica `null`, que é dizer "não se sabe" e cair no
+      // português de Portugal, em vez de arriscar um brasileirismo indevido.
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('business_country')
+        .eq('id', userId)
+        .maybeSingle();
+      if (!active) return;
+      const businessCountry: string | null = profile?.business_country || null;
+
       // When the owner connected Business Profile, this is the source of
       // truth: it has every imported review and the owner's existing replies.
       // The public Places cache remains a useful fallback, but it can never
@@ -74,6 +87,7 @@ export const useReputationAdvisor = (userId?: string) => {
             text: selected.comment || '',
             customerName: selected.reviewer_name || 'Cliente',
             businessName: connectedLocation.title,
+            businessCountry,
           })[0];
           setReview({
             authorName: selected.reviewer_name || 'Cliente',
@@ -139,6 +153,7 @@ export const useReputationAdvisor = (userId?: string) => {
         text: selected.text,
         customerName: selected.author_name,
         businessName: place.place_name,
+        businessCountry,
       })[0];
 
       setReview({

@@ -193,7 +193,7 @@ const Settings = () => {
               <GoogleBusinessConnection />
               <ExperimentalApifySnapshot googleReviewUrl={googleReviewUrl} />
               {isOfficialGoogleConnectionAvailable && <GoogleBusinessLocationPicker />}
-              {isOfficialGoogleConnectionAvailable && <GoogleReviews userId={userId} />}
+              {isOfficialGoogleConnectionAvailable && <GoogleReviews userId={userId} businessCountry={businessInfo.country || null} />}
             </TabsContent>
           </Tabs>
         </div>

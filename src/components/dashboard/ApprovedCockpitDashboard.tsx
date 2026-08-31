@@ -185,19 +185,30 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
     ? { status: 'unavailable', session: null, detail: null, refresh: async () => {} }
     : liveWhatsApp;
   const [onboardingPhone, setOnboardingPhone] = useState('');
+  // `profiles.business_country` decide a variante do português da resposta
+  // sugerida (pt-BR vs. pt-PT), pela mesma regra do cartão impresso em
+  // `src/lib/businessLocale.ts`. Fica em `null` enquanto o perfil não
+  // responde, e continua `null` na demonstração pública, onde não há dono
+  // nem país para ler: `null` é a afirmação de que não se sabe, e o texto
+  // cai no português de Portugal, que é o padrão histórico.
+  const [businessCountry, setBusinessCountry] = useState<string | null>(null);
   const [advisorActionVersion, setAdvisorActionVersion] = useState(0);
   useEffect(() => {
     if (!userId) return;
     let active = true;
-    const loadPhone = async () => {
+    const loadProfile = async () => {
       try {
-        const { data } = await supabase.from('profiles').select('phone').eq('id', userId).maybeSingle();
-        if (active) setOnboardingPhone(data?.phone || '');
+        const { data } = await supabase.from('profiles').select('phone, business_country').eq('id', userId).maybeSingle();
+        if (!active) return;
+        setOnboardingPhone(data?.phone || '');
+        setBusinessCountry(data?.business_country || null);
       } catch {
-        if (active) setOnboardingPhone('');
+        if (!active) return;
+        setOnboardingPhone('');
+        setBusinessCountry(null);
       }
     };
-    void loadPhone();
+    void loadProfile();
     return () => { active = false; };
   }, [userId]);
   const observed = (snapshot.sample.observedReviews?.items || []).map(normalizeObserved);
@@ -224,7 +235,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <section className="min-w-0 space-y-5">
         {!demo && <PendingCommentsBanner userId={userId} />}
-        <div id={QUEUE_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} /></div>
+        <div id={QUEUE_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} /></div>
         <div id={VOLUME_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><VolumeCard weeks={history} /></div>
         <div id={RATINGS_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><RatingTrends weeks={history} snapshot={snapshot} /></div>
         <div id={QR_ANCHOR_ID} className="grid scroll-mt-16 gap-5 md:grid-cols-2 lg:scroll-mt-4"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
@@ -281,14 +292,14 @@ const TodayPlan = ({ snapshot, onMarked }: { snapshot: ExperimentalApifySnapshot
   return <Card className="border-violet-200 bg-violet-50/40 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#6D43C0]" /><h2 className="font-semibold text-slate-950">{t('dashboard.advisorPilot.planTitle')}</h2></div><p className="mt-4 text-sm font-medium leading-5 text-slate-900">{body}</p>{reading.kind === 'alert' ? <Button onClick={mark} className="mt-4 rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><CheckCircle2 className="mr-2 h-4 w-4" />{t('dashboard.advisorPilot.markDone')}</Button> : <Button asChild variant="outline" className="mt-4"><a href={`#${QUEUE_ANCHOR_ID}`}>{t('dashboard.advisorPilot.reviewEvidence')}</a></Button>}</CardContent></Card>;
 };
 
-const ResponseQueue = ({ reviews, snapshot, demo = false }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean }) => {
+const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean; businessCountry: string | null }) => {
   const { t, i18n } = useOwnerTranslation();
   const [selectedId, setSelectedId] = useState<string | null>(reviews[0]?.id || null);
   const [editing, setEditing] = useState(false);
   const [actions, setActions] = useState<Record<string, ActionState>>(readActions);
   const selected = reviews.find((review) => review.id === selectedId) || reviews[0];
   const index = selected ? reviews.findIndex((review) => review.id === selected.id) : 0;
-  const baseSuggestion = selected ? buildReplySuggestions({ rating: selected.rating, text: selected.comment, customerName: selected.reviewerName, businessName: snapshot.business.name, channel: 'public' })[0]?.body || '' : '';
+  const baseSuggestion = selected ? buildReplySuggestions({ rating: selected.rating, text: selected.comment, customerName: selected.reviewerName, businessName: snapshot.business.name, businessCountry, channel: 'public' })[0]?.body || '' : '';
   const suggestion = demo
     ? baseSuggestion.replace(/\.\s*—\s*/g, '. ').replace(/\s*—\s*/g, ', ')
     : baseSuggestion;

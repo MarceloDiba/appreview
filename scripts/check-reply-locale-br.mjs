@@ -1,4 +1,7 @@
-import { resolve } from 'node:path';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 // `src/lib/replySuggestions.ts` respondia sempre em português de Portugal
@@ -30,6 +33,50 @@ import { pathToFileURL } from 'node:url';
 
 const modulePath = resolve(process.cwd(), 'src/lib/replySuggestions.ts');
 const { buildReplySuggestions } = await import(pathToFileURL(modulePath).href);
+
+// --- 0. Esquecer o país tem de ser erro de compilação. ---
+//
+// Até 30/08/2026 `businessCountry` era opcional em `ReplySuggestionInput`, e
+// quatro das sete chamadas do projeto não o passavam. Esquecer não tinha
+// sintoma nenhum em código: a função devolvia português de Portugal e seguia.
+// O sintoma aparecia no fim, na tela de um dono brasileiro.
+//
+// As asserções de comportamento deste arquivo NÃO conseguem provar isso: elas
+// importam o módulo com `--experimental-strip-types`, que apaga os tipos, e
+// por isso uma chamada sem o campo continua a executar e a devolver português
+// de Portugal, exatamente como antes. A única prova possível é compilar.
+//
+// Duas amostras minúsculas, uma sem o campo e uma com ele, compiladas pelo
+// mesmo `tsc` do `npm run verify`. A primeira TEM de falhar nomeando
+// `businessCountry`; a segunda TEM de passar. A segunda existe para a
+// primeira significar alguma coisa: sem ela, um erro de sintaxe qualquer na
+// amostra deixaria este guarda verde afirmando o que não verificou.
+const compilarAmostra = (nome, corpo) => {
+  const pasta = mkdtempSync(join(tmpdir(), 'binno-guarda-pais-'));
+  const arquivo = join(pasta, `${nome}.ts`);
+  const moduloRelativo = JSON.stringify(modulePath.replace(/\.ts$/, ''));
+  writeFileSync(arquivo, corpo.replace('@MODULO@', moduloRelativo));
+  const saida = spawnSync(
+    process.execPath,
+    [resolve(process.cwd(), 'node_modules/typescript/bin/tsc'),
+      '--noEmit', '--skipLibCheck', '--target', 'ES2020',
+      '--module', 'ESNext', '--moduleResolution', 'bundler', arquivo],
+    { encoding: 'utf8' },
+  );
+  rmSync(pasta, { recursive: true, force: true });
+  return { ok: saida.status === 0, texto: `${saida.stdout || ''}${saida.stderr || ''}` };
+};
+
+const semPais = compilarAmostra('sem-pais', `
+import { buildReplySuggestions } from @MODULO@;
+buildReplySuggestions({ rating: 1, text: 'x', channel: 'public' });
+`);
+
+const comPais = compilarAmostra('com-pais', `
+import { buildReplySuggestions } from @MODULO@;
+buildReplySuggestions({ rating: 1, text: 'x', channel: 'public', businessCountry: 'BR' });
+buildReplySuggestions({ rating: 1, text: 'x', channel: 'public', businessCountry: null });
+`);
 
 // Texto sem nenhuma palavra-chave de tema, para cair no fallback GENERIC.
 const genericText = 'Fiquei muito decepcionado com a visita, não recomendo.';
@@ -69,8 +116,13 @@ const esWithPt = build({ text: spanishText, businessCountry: 'PT' })[0];
 const enWithBr = build({ text: englishText, businessCountry: 'BR' })[0];
 const enWithPt = build({ text: englishText, businessCountry: 'PT' })[0];
 
-// --- 4. País ausente, vazio ou desconhecido: cai no português de hoje. ---
-const noCountry = build({ text: genericText })[0];
+// --- 4. País nulo, vazio ou desconhecido: cai no português de hoje. ---
+//
+// "País ausente" saiu daqui em 30/08/2026 porque deixou de ser uma chamada
+// possível: omitir o campo é erro de compilação, provado no bloco 0. O que
+// resta é quem não sabe o país e escreve `null` de propósito, e esse caso
+// continua a cair no português de Portugal, como sempre caiu.
+const nullCountry = build({ text: genericText, businessCountry: null })[0];
 const emptyCountry = build({ text: genericText, businessCountry: '' })[0];
 const unknownCountry = build({ text: genericText, businessCountry: 'FR' })[0];
 
@@ -94,8 +146,14 @@ const requirements = [
   ['EN: mesmo corpo com negócio brasileiro ou português', enWithBr?.body === enWithPt?.body],
   ['EN: título continua em inglês, intocado', enWithBr?.title === 'Short and direct'],
 
-  // 4. País ausente, vazio ou desconhecido cai no português de hoje.
-  ['Sem país informado: cai no texto de Portugal de hoje', noCountry?.body === ptGenericExpectedBody],
+  // 0. Esquecer o país é erro de compilação, e escrevê-lo compila.
+  ['omitir businessCountry na chamada é erro de compilação, e o erro nomeia o campo',
+    !semPais.ok && semPais.texto.includes('businessCountry')],
+  ['a amostra que passa o país compila limpa (senão a asserção acima não provaria nada)',
+    comPais.ok],
+
+  // 4. País nulo, vazio ou desconhecido cai no português de hoje.
+  ['País nulo escrito de propósito: cai no texto de Portugal de hoje', nullCountry?.body === ptGenericExpectedBody],
   ['País vazio: cai no texto de Portugal de hoje', emptyCountry?.body === ptGenericExpectedBody],
   ['País desconhecido (nem BR nem PT): cai no texto de Portugal de hoje', unknownCountry?.body === ptGenericExpectedBody],
 ];

@@ -82,7 +82,11 @@ export const useGoogleReviews = (userId: string) => {
     }
   };
 
-  const fetchGoogleReviews = useCallback(async (placeId?: string) => {
+  // Devolve se a leitura correu bem. Sem isto, quem chama não tem como
+  // distinguir uma atualização que falhou de uma que funcionou e não trouxe
+  // nada: as duas deixavam a tela exatamente igual, e o dono clicava, nada
+  // mudava, e ele não tinha como saber que quebrou.
+  const fetchGoogleReviews = useCallback(async (placeId?: string): Promise<boolean> => {
     setRefreshing(true);
     setError(null);
     
@@ -104,6 +108,7 @@ export const useGoogleReviews = (userId: string) => {
       if (data?.place_info) {
         setPlaceInfo(data.place_info);
         setReviews(data.reviews || []);
+        return true;
       } else {
         throw new Error('No data returned from Google Places API');
       }
@@ -113,6 +118,7 @@ export const useGoogleReviews = (userId: string) => {
       console.error('Error fetching Google reviews:', errorMessage);
       setError(errorMessage);
       toast.error(t('reviews.google.loadToast'));
+      return false;
     } finally {
       setRefreshing(false);
     }
@@ -157,14 +163,15 @@ export const useGoogleReviews = (userId: string) => {
     }
   }, [userId, fetchGoogleReviews, normalizeGoogleReviewsError, t]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (): Promise<boolean> => {
     if (!placeInfo?.place_id) {
       toast.error(t('reviews.google.noPlaceId'));
-      return;
+      return false;
     }
-    
-    await fetchGoogleReviews(placeInfo.place_id);
-    toast.success(t('reviews.refreshedToast'));
+
+    const ok = await fetchGoogleReviews(placeInfo.place_id);
+    if (ok) toast.success(t('reviews.refreshedToast'));
+    return ok;
   };
 
   useEffect(() => {

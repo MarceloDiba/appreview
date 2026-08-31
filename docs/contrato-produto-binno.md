@@ -144,6 +144,106 @@ ordem descrita acima, byte a byte. A exceção não desloca, esconde ou
 substitui a Fila de respostas nem qualquer outro módulo desta lista; ela some
 sozinha quando deixa de haver algo com prazo.
 
+### Uma fila só para responder (decisão de 30/08/2026)
+
+**Aprovado por Marcelo em 30/08/2026**, na mesma noite da tela única e depois
+do segundo uso real. Nas palavras dele: "um lugar só para responder, com as
+origens somadas em vez de separadas por aba. O dono não quer escolher entre
+'privado' e 'Google': quer a próxima avaliação que precisa de resposta."
+
+A página `/reviews` tinha três origens em superfícies separadas: o comentário
+privado do QR (`CasesList`), a fila oficial do Perfil da Empresa
+(`GoogleBusinessReviewQueue`) e a leitura pública do Google (`GoogleReviews`).
+Duas delas dependem de uma ligação que nenhuma conta real tem hoje, então a
+página abria com um convite para conectar e uma lista vazia por cima da única
+coisa que funciona, que é o comentário privado. É o mesmo defeito que tirou o
+seletor de abas do painel, uma tela adiante: uma superfície vazia ensina ao
+dono que o produto tem menos do que tem.
+
+**A mudança:** `src/pages/Reviews.tsx` deixa de ter `Tabs` e passa a renderizar
+uma única `FilaDeRespostas`
+(`src/components/dashboard/reviews/FilaDeRespostas.tsx`), que soma as três
+origens numa lista só, do mais recente para o mais antigo, com a origem escrita
+em cada item. A origem aparece porque decide para onde vai a resposta: o
+comentário privado responde-se por mensagem directa a quem deixou contacto, a
+avaliação do Google responde-se em público, na página do negócio. Ela não
+aparece como aba porque o dono não escolhe origem, escolhe o próximo.
+
+Regras que essa fila não pode quebrar, e que têm guarda própria em
+`scripts/check-fila-unica.mjs`:
+
+- Sem seletor de abas e sem escolha de origem antes de responder. As três
+  superfícies separadas deixam de existir nesta página.
+- A ordem inteira vem de `orderPendingCasesByRecency`
+  (`src/lib/internalCasePriority.ts`), a mesma função que o bloco "Comentários
+  que pedem atenção" da Visão geral usa. `src/lib/filaDeRespostas.ts` converte
+  as três origens e devolve o resultado dela; não existe uma segunda ordenação,
+  e as duas telas não podem discordar sobre qual é o próximo.
+- Um item sem nota nunca desenha a escala de cinco estrelas, seja qual for a
+  origem. Cinco estrelas apagadas é exatamente o que uma nota 1 desenha.
+- A leitura pública do Google não devolve as respostas que o dono já publicou.
+  Esses itens ficam na fila com o estado desconhecido dito uma vez, num único
+  estado objetivo no módulo, e nunca com um estado inventado item a item.
+- **Todo item tem de poder sair da fila.** Como o Binno não publica resposta
+  nenhuma e a leitura pública não devolve as respostas publicadas, a avaliação
+  pública só sai quando o próprio dono marca que já respondeu lá
+  (`google_public_reviews_answered`, migração de 30/08/2026). O rótulo é na
+  primeira pessoa dele, "Já respondi no Google", e nunca pode sugerir que o
+  Binno respondeu ou publicou algo. Sem esse caminho, um dono com link do
+  Google veria "N esperando resposta" para sempre, o estado vazio nunca
+  apareceria, e um número que nunca desce ensina o dono a ignorar o número.
+- **A mesma avaliação aparece uma vez só.** Com a ligação oficial ligada, a
+  mesma avaliação chega pelas duas portas do Google com identificadores de
+  espaços de nomes diferentes. A identidade é reconstruída por autor, nota e
+  dia (`chaveDaAvaliacaoDoGoogle`), e a versão oficial é a que fica, por ser a
+  única que sabe se já houve resposta.
+- **A atribuição ao Google acompanha o conteúdo deles.** A fila mostra nome de
+  avaliador e texto de avaliação, e os termos do Google exigem a atribuição
+  onde esse conteúdo aparece. Ela fica acima da lista, junto do conteúdo, e o
+  aviso de relevância acompanha quando há item vindo da leitura pública, que é
+  a porta que devolve as avaliações escolhidas por relevância e não todas.
+- **Uma atualização que falha não pode parecer uma que funcionou.** O botão
+  Atualizar lê o resultado de cada fonte; quando alguma falha, a tela diz que
+  nada foi atualizado, que a lista continua válida e o que fazer a seguir.
+  Enquanto a sincronização oficial não termina, a contagem é de uma parte do
+  perfil e a tela diz isso.
+- Os itens já tratados continuam visíveis, abaixo da fila, como histórico:
+  comentário privado resolvido e avaliação pública que o dono marcou. Fila e
+  histórico não se misturam.
+
+**O que ficou pelo caminho, de propósito:** a escolha de localização e o título
+da localização ligada (`selectLocation`, `locationTitle`) morreram com o cartão
+oficial separado e não têm lugar numa fila somada. O convite para ligar o
+Perfil da Empresa saiu por decisão anterior, a de 30/08/2026 sobre quem entrega
+hoje: ele vive nas Configurações, e um estado vazio não se escreve na voz de
+quem espera pelo Google. Os rótulos do botão de sincronizar saíram porque o
+Atualizar da fila faz esse trabalho.
+
+**O que não mudou, e por quê:** a Fila de respostas do painel (item 1 da ordem
+aprovada acima) continua exatamente onde está, com as avaliações do Google que
+a coleta própria traz. Ela e a fila de `/reviews` são duas superfícies do mesmo
+conceito, e somar as duas mexeria na primeira dobra aprovada e na exceção dos
+comentários que pedem atenção. Fica registrado como decisão pendente do dono,
+não como mudança feita por conta própria. O bloco "Comentários que pedem
+atenção" continua a levar a `/reviews`, agora à âncora da fila
+(`#fila-de-respostas`) em vez de `#casos-internos`.
+
+### Botões que cabem no cartão, no celular (correção de 30/08/2026)
+
+Na Avaliações, no telemóvel do dono, "Atualizar", "Abrir o Google para
+responder" e "Marcar como resolvido" saíam para fora do cartão. A causa é a
+mesma nos três: uma linha de ação que continuava a ser linha no celular, com
+botões que não podem encolher nem quebrar, porque `whitespace-nowrap` vem do
+próprio componente `Button`. Um botão nessas condições força a largura mínima
+da linha inteira, e a linha passa da caixa. `flex-wrap` não resolve sozinho: a
+quebra acontece entre botões, e um botão mais largo do que a caixa transborda
+na mesma.
+
+A regra, com guarda em `scripts/check-fila-unica.mjs`: nas telas de resposta,
+nenhuma linha de ação é uma linha abaixo de `sm`, e todo botão de ação ocupa a
+largura do cartão no celular (`w-full sm:w-auto`). No ecrã grande tudo volta a
+ser a linha de sempre.
+
 O painel não pode regredir para uma primeira dobra composta apenas por nota,
 total de avaliações e gráficos genéricos do Google. Fila, resposta sugerida,
 forças, fragilidades e próximo passo são o centro do produto.
@@ -287,6 +387,23 @@ respostas aparecendo uma única vez (a antiga aba Avaliações não pode voltar 
 duplicá-la), a fila e a configuração do WhatsApp com âncora própria e única
 na página, os cartões que antes trocavam de aba linkando para essas âncoras
 em vez de chamar um estado que não existe mais, e a configuração do WhatsApp
-sempre renderizada, nunca atrás de uma condição de aba. O teste não substitui
+sempre renderizada, nunca atrás de uma condição de aba. A fila do painel
+passou a receber `businessCountry`, e as asserções que casavam a tag inteira
+passaram a exigir também essa prop: continuam a contar ocorrências e a exigir
+`queue`, `snapshot` e `demo`, e ganharam a garantia de que o país do negócio
+chega à resposta sugerida.
+
+`npm run verify` executa também `npm run check:fila-unica`, que protege a fila
+só de `/reviews`: sem abas na página, uma fila só, as três origens somadas pelo
+módulo compartilhado, a origem escrita em cada item, a atribuição ao Google
+presa à presença de conteúdo do Google, a falha de atualização visível ao dono,
+o aviso de sincronização incompleta, o estado de avaliação sem texto, o perfil
+do avaliador, e nenhuma linha de ação que seja linha no celular. Esta última é
+medida por linha, e não por arquivo: a versão anterior perguntava se o arquivo
+tinha alguma linha que empilha, e dois destes arquivos têm duas, então reverter
+uma delas passava. `npm run check:shared-case-ordering` passou a provar
+a ordem sobre a fila somada, e `npm run check:reply-locale-br` passou a compilar
+duas amostras para provar que esquecer o país do negócio é erro de compilação.
+O teste não substitui
 revisão de produto: qualquer mudança visual ou de fluxo ainda deve ser
 comparada com este documento antes de ser aceita.

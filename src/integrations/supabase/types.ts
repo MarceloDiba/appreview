@@ -295,6 +295,24 @@ export type Database = {
         }
         Relationships: []
       }
+      google_public_reviews_answered: {
+        Row: {
+          answered_at: string
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          answered_at?: string
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       internal_feedback: {
         Row: {
           created_at: string | null

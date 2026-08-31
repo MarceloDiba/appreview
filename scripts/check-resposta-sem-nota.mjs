@@ -140,7 +140,15 @@ if (gravar) {
 
 const { lerNotaDoCaso } = await import(pathToFileURL(COMENTARIO).href);
 
-const listaDeCasos = readFileSync(resolve(raiz, 'src/components/dashboard/cases/CasesList.tsx'), 'utf8');
+// A lista de casos de `/reviews` virou a fila única de respostas em
+// 30/08/2026 (`docs/contrato-produto-binno.md`, "Uma fila só para responder"):
+// o comentário privado passou a aparecer somado às avaliações do Google, numa
+// tela só. A regra protegida aqui não mudou nem um pouco, e é a mesma de
+// sempre: um item sem nota não pode desenhar a escala de cinco estrelas
+// apagadas, porque é isso que uma nota 1 desenha. Só mudou o arquivo onde ela
+// vive, e é ele que este guarda passa a ler. Fixar o arquivo antigo deixaria o
+// guarda verde num arquivo apagado, ou vermelho por uma mudança aprovada.
+const filaDeRespostas = readFileSync(resolve(raiz, 'src/components/dashboard/reviews/FilaDeRespostas.tsx'), 'utf8');
 const componenteResposta = readFileSync(
   resolve(raiz, 'src/components/dashboard/ReplySuggestions.tsx'),
   'utf8'
@@ -251,17 +259,64 @@ exigir('lerNotaDoCaso: 3 é nota 3', lerNotaDoCaso(3).tipo === 'nota' && lerNota
 exigir('lerNotaDoCaso: 1 é nota 1', lerNotaDoCaso(1).tipo === 'nota' && lerNotaDoCaso(1).valor === 1);
 
 exigir(
-  'CasesList decide as estrelas por lerNotaDoCaso',
-  /lerNotaDoCaso\s*\(/.test(listaDeCasos)
+  'a fila de respostas decide as estrelas por lerNotaDoCaso',
+  /lerNotaDoCaso\s*\(/.test(filaDeRespostas)
 );
 exigir(
-  'CasesList não compara mais estrela com a nota crua (null acende zero estrelas)',
-  !/star\s*<=\s*item\.rating/.test(listaDeCasos)
+  'a fila de respostas não compara estrela com a nota crua (null acenderia zero estrelas)',
+  !/<=\s*(item\.rating|valor\b|item\.nota)/.test(filaDeRespostas)
 );
 exigir(
-  'CasesList mostra um rótulo de ausência de nota, em vez de uma escala vazia',
-  /reviews\.cases\.noRating/.test(listaDeCasos)
+  'a fila de respostas mostra um rótulo de ausência de nota, em vez de uma escala vazia',
+  /reviews\.cases\.noRating/.test(filaDeRespostas)
 );
+// A versão anterior desta asserção comparava duas posições no arquivo inteiro
+// (`indexOf('reviews.cases.noRating') < indexOf('fill-yellow-400')`) e não
+// conseguia falhar pela regra que dizia proteger: trocar
+// `if (nota.tipo === 'sem-nota')` por `if (false)` fazia uma nota nula
+// desenhar cinco estrelas cinzentas, e as duas posições continuavam na mesma
+// ordem, com as 157 asserções verdes. Foi substituída.
+//
+// Agora a leitura é feita dentro do corpo do componente `Nota`, que é quem
+// decide, e exige as três coisas que fazem a regra valer: o portão existe, o
+// portão está antes de qualquer `<Star`, e a estrela acesa é comparada com
+// `nota.valor`, que só existe depois de `lerNotaDoCaso` confirmar que há nota.
+// A mutação `if (false)` fica vermelha na primeira das três.
+const corpoDoComponente = (fonte, nome) => {
+  const inicio = fonte.indexOf(`const ${nome} = `);
+  if (inicio === -1) return null;
+  let i = fonte.indexOf('=', inicio) + 1;
+  let chaves = 0;
+  let parenteses = 0;
+  const partida = i;
+  for (; i < fonte.length; i += 1) {
+    const c = fonte[i];
+    if (c === '{') chaves += 1;
+    else if (c === '}') chaves -= 1;
+    else if (c === '(') parenteses += 1;
+    else if (c === ')') parenteses -= 1;
+    else if (c === ';' && chaves === 0 && parenteses === 0) break;
+  }
+  return fonte.slice(partida, i);
+};
+
+const corpoDaNota = corpoDoComponente(filaDeRespostas, 'Nota');
+exigir('o componente Nota da fila continua a existir', corpoDaNota !== null);
+if (corpoDaNota) {
+  exigir(
+    'Nota tem o portão de ausência de nota, e não desenha antes de perguntar',
+    corpoDaNota.includes("if (nota.tipo === 'sem-nota')")
+  );
+  exigir(
+    'em Nota o portão de ausência de nota vem antes de qualquer <Star>',
+    corpoDaNota.indexOf("if (nota.tipo === 'sem-nota')") !== -1
+      && corpoDaNota.indexOf("if (nota.tipo === 'sem-nota')") < corpoDaNota.indexOf('<Star')
+  );
+  exigir(
+    'em Nota a estrela acesa é comparada com nota.valor, que só existe depois do portão',
+    /<=\s*nota\.valor/.test(corpoDaNota)
+  );
+}
 exigir(
   'ReplySuggestions aceita caso sem nota no seu tipo',
   /rating:\s*number\s*\|\s*null/.test(componenteResposta)

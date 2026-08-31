@@ -38,9 +38,18 @@ const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
     );
   };
 
+  /*
+    Isto era `flex flex-row items-center justify-between`, sem quebra e sem
+    `min-w-0`. Os dois lados ficavam presos na mesma linha, e o lado direito
+    não podia encolher: `whitespace-nowrap` vem do próprio Button, e "Ver no
+    Google" mais "Atualizar" somam mais largura do que sobra num telemóvel
+    depois do padding da página e do cartão. O resultado era o botão a sair
+    para fora do cartão. No celular a linha passa a ser coluna; a partir de
+    `sm` volta a ser exatamente a linha de sempre.
+  */
   return (
-    <div className="flex flex-row items-center justify-between">
-      <div>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
         <CardTitle>{t('reviews.google.title')}</CardTitle>
         <CardDescription>
           {placeInfo && (
@@ -54,11 +63,12 @@ const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
           )}
         </CardDescription>
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         {placeInfo?.place_id && (
           <Button
             variant="outline"
             size="sm"
+            className="w-full sm:w-auto"
             onClick={() => window.open(createGoogleMapsUrl(placeInfo.place_id), '_blank')}
           >
             <ExternalLink className="h-4 w-4 mr-2" />
@@ -68,6 +78,7 @@ const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
         <Button
           variant="outline"
           size="sm"
+          className="w-full sm:w-auto"
           onClick={onRefresh}
           disabled={refreshing}
         >
