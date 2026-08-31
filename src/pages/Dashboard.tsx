@@ -70,10 +70,12 @@ const Dashboard = () => {
 
   const setup = useSetupStatus(userId || undefined);
   const outcome = useGoogleOutcome(userId || undefined);
-  // O agregado da coleta vive no banco desde 30/08/2026. Ele e o que faz o
-  // painel encher em qualquer aparelho do dono, e não só naquele que pediu a
-  // coleta. A fila de respostas continua vindo do navegador: nome, texto e URL
-  // de avaliação nunca foram gravados (contrato, linhas 39 a 41).
+  // O agregado da coleta vive no banco desde 30/08/2026, e a fila de respostas
+  // desde 31/08. Juntos, sao o que faz o painel encher em qualquer aparelho do
+  // dono, e não só naquele que pediu a coleta. A fila passou a ser gravada
+  // porque uma coleta feita pelo servidor nao tem navegador: ver a secção do
+  // contrato de produto sobre o que a coleta guarda, e
+  // `scripts/check-fila-no-banco.mjs` para os limites que a protegem.
   const persisted = useReputationSnapshot(userId || undefined);
   const filaDoBanco = useFilaDeRespostas(userId || undefined);
   const persistedSnapshot = useMemo(

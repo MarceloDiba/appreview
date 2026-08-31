@@ -495,7 +495,11 @@ const persistirFilaDeRespostas = async ({
         review_url: (item.reviewUrl as string | undefined) ?? null,
         response_observed: Boolean(item.responseObserved),
         collected_at: now.toISOString(),
-        expires_at: fila.retentionEndsAt,
+        // `expires_at` NAO vai aqui de proposito. A coluna tem valor padrao e
+        // so e escrita na primeira gravacao daquela avaliacao. Reenviando-a, o
+        // upsert reestamparia o prazo a cada coleta e uma avaliacao que
+        // continuasse na amostra nunca venceria: com coleta diaria os 14 dias
+        // viravam promessa que nada aplica.
       })),
       { onConflict: 'user_id,review_id' },
     );

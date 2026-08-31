@@ -10,9 +10,10 @@ import type { ExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot'
  * e são o que o painel lê.
  *
  * O que NÃO está aqui é tão importante quanto o que está: nome do avaliador,
- * texto da avaliação e URL pública da avaliação nunca foram gravados, então a
- * fila de respostas continua vindo do navegador autenticado, com a retenção de
- * 14 dias que o contrato de produto define nas linhas 39 a 41.
+ * texto da avaliação e URL pública da avaliação passaram a ser gravados em
+ * 31/08/2026, em tabela própria e com prazo próprio, porque uma coleta feita
+ * pelo servidor não tem navegador para os guardar. A fila vem do banco quando
+ * existir lá, e do navegador só enquanto não existir.
  */
 export type PersistedReputationSnapshotRow = {
   captured_at: string;

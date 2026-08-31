@@ -83,11 +83,11 @@ const Privacy = () => (
           Google do estabelecimento, através da API do Google Places, para as mostrar no painel.
         </li>
         <li>
-          <strong>Leitura experimental de avaliações públicas:</strong> durante o piloto assistido,
-          podemos mostrar ao titular do perfil o nome público, o texto, a nota, a data e a ligação
-          pública de uma avaliação do Google. Estes dados não são guardados na nossa base de dados:
-          ficam apenas no navegador autenticado do titular por até 14 dias, para que possa preparar
-          e publicar a própria resposta no Google.
+          <strong>Leitura de avaliações públicas do Google:</strong> mostramos ao titular do perfil
+          o nome público, o texto, a nota, a data e a ligação pública de uma avaliação do Google,
+          para que possa preparar e publicar a própria resposta no Google. Estes dados são guardados
+          na nossa base de dados por até 14 dias a contar da primeira vez que os lemos, e só o
+          titular daquele perfil os pode consultar. São avaliações que já estão públicas no Google.
         </li>
       </ul>
       <p>
@@ -170,9 +170,10 @@ const Privacy = () => (
           <strong>Registos de facturação:</strong> o prazo exigido por lei.
         </li>
         <li>
-          <strong>Leitura experimental de avaliações públicas:</strong> nome público, texto e ligação
-          da avaliação ficam apenas no navegador autenticado por até 14 dias. O registo técnico no
-          servidor conserva somente data, estado e métricas agregadas, sem identificar avaliadores.
+          <strong>Leitura de avaliações públicas do Google:</strong> nome público, texto e ligação
+          da avaliação ficam até 14 dias a contar da primeira leitura, e são apagados a seguir. O
+          prazo conta uma vez só: uma avaliação que voltemos a ler não recomeça a contagem. As
+          métricas agregadas, que não identificam avaliadores, ficam sem esse prazo.
         </li>
       </ul>
     </Seccao>

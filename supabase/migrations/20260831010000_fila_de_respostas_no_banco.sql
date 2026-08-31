@@ -39,7 +39,14 @@ create table if not exists public.google_reviews_awaiting_reply (
   response_observed boolean not null default false,
   collected_at timestamptz not null default now(),
   -- Obrigatorio de proposito: sem prazo, a retencao vira promessa verbal.
-  expires_at timestamptz not null,
+  --
+  -- O prazo nasce aqui, na primeira gravacao daquela avaliacao, e a coleta NAO
+  -- o reenvia depois. Se ele fosse reescrito a cada coleta, uma avaliacao que
+  -- continuasse entre as mais recentes seria reestampada todo dia e nunca
+  -- venceria: com coleta diaria os 14 dias viravam ficcao, e o contrato, esta
+  -- migracao e a politica de privacidade passariam a prometer um prazo que
+  -- nada aplicava.
+  expires_at timestamptz not null default (now() + interval '14 days'),
   primary key (user_id, review_id)
 );
 

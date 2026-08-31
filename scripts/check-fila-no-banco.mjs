@@ -28,7 +28,8 @@ const semComentarios = (fonte) => fonte
 const ler = (caminho) => semComentarios(readFileSync(caminho, 'utf8'));
 
 const falhas = [];
-const exigir = (rotulo, condicao) => { if (!condicao) falhas.push(rotulo); };
+let verificadas = 0;
+const exigir = (rotulo, condicao) => { verificadas += 1; if (!condicao) falhas.push(rotulo); };
 
 const nucleo = ler(NUCLEO);
 const chamador = ler(CHAMADOR);
@@ -90,6 +91,27 @@ exigir(
   'a limpeza compara contra o instante da coleta, e nao contra uma data fixa',
   !/\.lt\('expires_at',\s*'/.test(corpoDaGravacao),
 );
+// Sem o dono preso, a limpeza apagaria a fila vencida de todo mundo e a
+// gravacao poderia escrever na conta de outro. Nenhuma das duas falhava com o
+// guarda anterior.
+exigir(
+  'a limpeza apaga so as linhas daquele dono',
+  /\.delete\(\)[\s\S]{0,120}\.eq\('user_id', userId\)/.test(corpoDaGravacao),
+);
+exigir(
+  'a gravacao prende cada linha ao dono da coleta',
+  /user_id: userId,/.test(corpoDaGravacao),
+);
+// O prazo nao pode ser reenviado: reescreve-lo a cada coleta faria os 14 dias
+// nunca chegarem para uma avaliacao que continue na amostra.
+exigir(
+  'a gravacao nao reenvia o prazo, senao ele nunca vence',
+  !/expires_at:/.test(corpoDaGravacao),
+);
+exigir(
+  'o prazo nasce de um valor padrao na tabela',
+  /expires_at timestamptz not null default \(now\(\) \+ interval '14 days'\)/.test(migracao),
+);
 exigir(
   'a leitura do painel ignora o que ja venceu',
   /\.gt\('expires_at'/.test(leitor),
@@ -112,9 +134,17 @@ exigir(
   'a politica de leitura prende cada linha ao seu dono',
   /for select[\s\S]{0,120}using \(auth\.uid\(\) = user_id\)/.test(migracao),
 );
+// `for (insert|update|delete)` em minusculas deixava passar tres formas de
+// abrir escrita ao navegador: uma politica `for all`, a mesma palavra em
+// maiusculas, e um `grant insert` sem politica nenhuma. Qualquer uma delas
+// deixaria um cliente autenticado gravar texto de avaliacao com o guarda verde.
 exigir(
   'nao existe politica que deixe o navegador escrever na fila: quem grava e a coleta',
-  !/for (insert|update|delete)/.test(migracao),
+  !/for\s+(insert|update|delete|all)\b/i.test(migracao),
+);
+exigir(
+  'a fila nao concede ao navegador nada alem de leitura',
+  !/grant\s+[^;]*\b(insert|update|delete|all)\b[^;]*google_reviews_awaiting_reply/i.test(migracao),
 );
 
 // 6. O banco tem precedencia. Se o navegador voltar a ganhar, uma coleta do
@@ -123,10 +153,15 @@ const escolhaDaFila = composicao.match(/const observedReviews = ([^;]+);/);
 exigir('a composicao ainda escolhe a fila', escolhaDaFila !== null);
 if (escolhaDaFila) {
   const expressao = escolhaDaFila[1];
+  // Prender so a ordem das duas palavras deixa passar
+  // `(filaPersistida && false ? filaPersistida : null) || browserSnapshot...`,
+  // que mantem a ordem e faz o banco nunca ganhar. A forma exata e mais
+  // estreita, e uma mudanca deliberada aqui obriga a mexer nesta linha e a
+  // pensar de novo.
   exigir(
     'a fila do banco vem antes da do navegador na escolha',
-    expressao.indexOf('filaPersistida') !== -1
-      && expressao.indexOf('filaPersistida') < expressao.indexOf('browserSnapshot'),
+    expressao.replace(/\s+/g, ' ').trim()
+      === "(filaPersistida?.items.length ? filaPersistida : null) || browserSnapshot?.sample.observedReviews",
   );
 }
 exigir(
@@ -140,9 +175,17 @@ exigir(
   'o contrato registou que a fila passou a viver no banco, com a data e a razao',
   /31\/08\/2026/.test(contrato) && /google_reviews_awaiting_reply/.test(contrato),
 );
+// `/14 dias/` sozinho ficava verde por causa de linhas antigas do documento,
+// mesmo apagando a secao inteira. Prende-se agora a frase da secao nova.
 exigir(
   'o contrato mantem os 14 dias e diz que Portugal exige rever a decisao',
-  /14 dias/.test(contrato) && /Portugal/.test(contrato),
+  /os mesmos 14 dias, aplicados na limpeza/.test(contrato) && /Portugal trata dado pessoal/.test(contrato),
+);
+// A politica de privacidade e o que o usuario le. Enquanto ela disser que estes
+// dados ficam so no navegador, o produto esta a afirmar o contrario do que faz.
+exigir(
+  'a politica de privacidade deixou de dizer que a avaliacao fica so no navegador',
+  !/apenas no navegador autenticado/.test(readFileSync('src/pages/Privacy.tsx', 'utf8')),
 );
 
 if (falhas.length) {
@@ -150,4 +193,4 @@ if (falhas.length) {
   for (const falha of falhas) console.error(' - %s', falha);
   process.exit(1);
 }
-console.log('Fila no banco: 16 protecoes verdes.');
+console.log(`Fila no banco: ${verificadas} protecoes verdes.`);
