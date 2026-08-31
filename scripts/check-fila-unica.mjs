@@ -31,6 +31,7 @@ const MODULO = 'src/lib/filaDeRespostas.ts';
 const BLOCO = 'src/components/dashboard/PendingCommentsBanner.tsx';
 const SUGESTOES = 'src/components/dashboard/ReplySuggestions.tsx';
 const CABECALHO = 'src/components/dashboard/reviews/ReviewsHeader.tsx';
+const LEITURA_PUBLICA = 'src/hooks/useGoogleReviews.ts';
 const CONTRATO = 'docs/contrato-produto-binno.md';
 
 const pagina = semComentarios(ler(PAGINA));
@@ -39,6 +40,7 @@ const modulo = semComentarios(ler(MODULO));
 const bloco = semComentarios(ler(BLOCO));
 const sugestoes = semComentarios(ler(SUGESTOES));
 const cabecalho = semComentarios(ler(CABECALHO));
+const leituraPublica = semComentarios(ler(LEITURA_PUBLICA));
 const contrato = ler(CONTRATO);
 
 const falhas = [];
@@ -70,15 +72,23 @@ for (const separada of ['GoogleReviews', 'GoogleBusinessReviewQueue', 'CasesList
   );
 }
 
-// A soma tem de ser das TRÊS origens. Conferir só o nome da função deixaria
-// passar uma fila que perdeu uma origem pelo caminho.
-const chamadaDaSoma = fila.match(/montarFilaDeRespostas\(\{[\s\S]*?\}\)/);
-exigir('a fila chama montarFilaDeRespostas', chamadaDaSoma !== null);
-if (chamadaDaSoma) {
-  for (const [origem, fonte] of [['privados', 'privados.cases'], ['oficiais', 'oficiais.reviews'], ['publicas', 'publicas.reviews']]) {
+// A soma tem de ser das TRÊS origens, mais a marcação do dono sobre o que ele
+// já respondeu no Google. Conferir só o nome da função deixaria passar uma fila
+// que perdeu uma origem pelo caminho.
+const fontesDaFila = fila.match(/const fontes = useMemo\(\s*\(\) => \(\{([\s\S]*?)\}\)/);
+exigir('a fila monta as fontes num lugar só', fontesDaFila !== null);
+exigir('a fila e o histórico leem as MESMAS fontes, e não duas listas que podem divergir',
+  fila.includes('montarFilaDeRespostas(fontes)') && fila.includes('itensJaTratados(fontes)'));
+if (fontesDaFila) {
+  for (const [origem, fonte] of [
+    ['privados', 'privados.cases'],
+    ['oficiais', 'oficiais.reviews'],
+    ['publicas', 'publicas.reviews'],
+    ['respondidasNoGoogle', 'respondidas.answered'],
+  ]) {
     exigir(
       `a fila soma a origem "${origem}" (${fonte})`,
-      chamadaDaSoma[0].includes(`${origem}: ${fonte}`),
+      fontesDaFila[1].includes(`${origem}: ${fonte}`),
     );
   }
 }
@@ -120,6 +130,62 @@ exigir(
   !modulo.includes('.sort(') && !fila.includes('.sort('),
 );
 
+// A atribuição ao Google não é enfeite: os termos deles exigem-na onde quer
+// que o conteúdo de avaliação seja mostrado, e esta fila mostra nome do
+// avaliador e texto. Ela desapareceu quando as três superfícies viraram uma, e
+// é o tipo de coisa que ninguém repara em falta. Tem de estar presa à presença
+// de item do Google, não solta no arquivo.
+exigir(
+  'a fila mostra a atribuição ao Google quando há item vindo do Google',
+  /temItemDoGoogle &&[\s\S]{0,500}reviews\.google\.attribution/.test(fila),
+);
+exigir(
+  'a fila mostra o aviso de relevância quando há item da leitura pública, que é a porta que escolhe por relevância',
+  /temItemPublico[\s\S]{0,300}reviews\.google\.relevanceNotice/.test(fila),
+);
+
+// Uma atualização que falha tem de parecer diferente de uma que funcionou e
+// não trouxe nada. As três linhas seguintes prendem a cadeia inteira: a
+// leitura pública devolve se correu bem, a fila lê esse resultado, e a fila
+// desenha o aviso. Sem qualquer uma delas o dono clica, a tela fica igual, e
+// ele não tem como saber que quebrou.
+exigir(
+  `${LEITURA_PUBLICA}: handleRefresh diz a quem chama se a leitura correu bem`,
+  /const handleRefresh = async \(\): Promise<boolean>/.test(leituraPublica)
+  && /return ok;/.test(leituraPublica),
+);
+exigir(
+  'a fila trata a falha da atualização em vez de a ignorar',
+  /!\(await oficiais\.syncAll\(\)\)/.test(fila)
+  && /!\(await publicas\.handleRefresh\(\)\)/.test(fila)
+  && /setFalhaAoAtualizar\(falhou\)/.test(fila),
+);
+exigir(
+  'a fila mostra ao dono que a atualização falhou, e o que fazer',
+  /\(falhaAoAtualizar \|\| oficiais\.error\) &&[\s\S]{0,400}reviews\.queue\.refreshError/.test(fila),
+);
+
+// A sincronização oficial pagina o perfil. Enquanto não termina, a contagem é
+// de uma parte, e mostrá-la como total é dado incompleto passado por completo.
+exigir(
+  'a fila avisa quando a sincronização oficial ainda não terminou',
+  /!oficiais\.syncComplete &&[\s\S]{0,300}reviews\.google\.official\.incomplete/.test(fila),
+);
+
+// Uma avaliação do Google pode ser só a nota. Sem o estado próprio, o cartão
+// fica com um buraco e o dono não sabe se o texto não existe ou não carregou.
+exigir(
+  'um item sem texto escrito diz isso, em vez de deixar um buraco no cartão',
+  /reviews\.google\.official\.noComment/.test(fila),
+);
+
+// O perfil de quem avaliou existia na lista antiga e voltou com a fila. Só
+// quando a fonte o devolve: nunca se inventa um link.
+exigir(
+  'o autor vira link para o perfil dele somente quando a fonte devolve o link',
+  /item\.autorUrl \?/.test(fila),
+);
+
 exigir(
   `${CONTRATO} registra a decisão da fila só, com a razão`,
   /Uma fila só para responder \(decisão de 30\/08\/2026\)/.test(contrato)
@@ -147,11 +213,51 @@ for (const [caminho, fonte] of TELAS_DE_RESPOSTA) {
     `${caminho}: nenhuma linha de ação é linha no celular (todo flex-row tem prefixo de breakpoint)`,
     !/(?<![:\w-])flex-row/.test(fonte),
   );
-  exigir(
-    `${caminho}: existe pelo menos uma linha que empilha no celular e vira linha a partir de sm`,
-    /flex-col[^"]*sm:flex-row/.test(fonte),
-  );
 }
+
+// A asserção anterior a esta era "existe pelo menos uma linha que empilha", por
+// arquivo. Não conseguia falhar pela regra que dizia proteger: dois destes
+// arquivos têm duas linhas que empilham, então reverter UMA delas para uma
+// linha sem quebra deixava a outra a satisfazer o guarda. Foi substituída pela
+// leitura por linha, abaixo: cada botão é procurado pela sua própria chave de
+// tradução, e o que se mede é a `<div>` que o CONTÉM.
+//
+// A `<div>` que contém um elemento: percorre o arquivo até ao índice
+// empilhando cada `<div ...>` aberta e desempilhando em `</div>`, saltando
+// strings para não confundir um `>` dentro de um atributo com o fim da tag. O
+// topo da pilha no índice é o contentor.
+const divEnvolvente = (fonte, indice) => {
+  const pilha = [];
+  let i = 0;
+  while (i < indice && i < fonte.length) {
+    if (fonte.startsWith('</div>', i)) { pilha.pop(); i += 6; continue; }
+    if (fonte.startsWith('<div', i)) {
+      let j = i + 4;
+      let aspas = null;
+      while (j < fonte.length) {
+        const c = fonte[j];
+        if (aspas) { if (c === aspas) aspas = null; }
+        else if (c === '"' || c === "'" || c === '`') aspas = c;
+        else if (c === '>') break;
+        j += 1;
+      }
+      const tag = fonte.slice(i, j + 1);
+      if (!tag.endsWith('/>')) pilha.push(tag);
+      i = j + 1;
+      continue;
+    }
+    i += 1;
+  }
+  return pilha.length ? pilha[pilha.length - 1] : null;
+};
+
+const classesDa = (tag) => (tag && tag.match(/className="([^"]*)"/)) ? tag.match(/className="([^"]*)"/)[1] : '';
+
+// Uma caixa é linha no telemóvel quando é `flex` sem `flex-col`. É nessa caixa
+// que um botão que não encolhe nem quebra empurra a largura mínima para além
+// do cartão. Uma caixa que não é flex (um bloco simples) não tem o problema.
+const ehLinhaNoCelular = (classes) =>
+  /(^|\s)flex(\s|$)/.test(classes) && !/(^|\s)flex-col(\s|$)/.test(classes);
 
 // O elemento `<Button ...>` que desenha um rótulo: do `<Button` mais próximo
 // para trás até a chave de tradução. Prender o botão pela própria chave que
@@ -168,6 +274,7 @@ const botaoDoRotulo = (fonte, chave) => {
 const BOTOES_LONGOS = [
   [FILA, fila, "t('reviews.refresh')", 'Atualizar, no topo da fila'],
   [FILA, fila, "t('reviews.cases.markResolved')", 'Marcar como resolvido'],
+  [FILA, fila, "t('reviews.queue.markAnswered')", 'Já respondi no Google'],
   [FILA, fila, "t('reviews.google.sourceReview')", 'Ver avaliação no Google Maps'],
   [FILA, fila, "t('reviews.google.official.publish')", 'Publicar resposta no Google'],
   [SUGESTOES, sugestoes, "t('reply.copy')", 'Copiar'],
@@ -184,6 +291,12 @@ for (const [caminho, fonte, chave, nome] of BOTOES_LONGOS) {
     exigir(
       `${caminho}: o botão "${nome}" ocupa a largura do cartão no celular (w-full sm:w-auto)`,
       botao.includes('w-full') && botao.includes('sm:w-auto'),
+    );
+    const indiceDoBotao = fonte.lastIndexOf('<Button', fonte.indexOf(chave));
+    const classesDaLinha = classesDa(divEnvolvente(fonte, indiceDoBotao));
+    exigir(
+      `${caminho}: a linha que contém o botão "${nome}" empilha no celular, em vez de ser uma linha`,
+      !ehLinhaNoCelular(classesDaLinha),
     );
   }
 }

@@ -33,8 +33,22 @@ const estilos = read('src/index.css');
 // receba `queue`, `snapshot` e `demo` (trocar `queue` por outra coisa continua
 // a quebrar), continuam a contar ocorrências (a antiga aba "Avaliações" não
 // pode voltar a duplicar a fila) e ganham a exigência de o país do negócio
-// chegar à fila. É mais apertado do que antes, não menos.
+// chegar à fila.
+//
+// A primeira versão do guarda do país casava só a declaração do `useState` e a
+// string do `select`, e não conseguia falhar pela regra que dizia proteger:
+// trocar `setBusinessCountry(data?.business_country || null)` por
+// `setBusinessCountry(null)` dava português de Portugal a um dono brasileiro
+// com todos os guardas verdes. Agora a cadeia inteira é exigida, elo a elo: a
+// leitura no `select`, a ATRIBUIÇÃO do valor lido ao estado, a passagem à fila
+// pela prop e o uso na chamada que monta a resposta. Quebrar qualquer elo fica
+// vermelho. Só assim a frase "mais apertado do que antes" é verdadeira.
 const FILA_DO_PAINEL = /<ResponseQueue reviews=\{queue\} snapshot=\{snapshot\} demo=\{demo\} businessCountry=\{businessCountry\} \/>/g;
+// Uma atribuição comentada satisfaria uma busca por texto sem existir.
+const semComentarios = (fonte) => fonte
+  .replace(/\/\*[\s\S]*?\*\//g, ' ')
+  .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
+const dashboardCodigo = semComentarios(dashboard);
 const filaDoPainel = (fonte) => (fonte.match(FILA_DO_PAINEL) || []);
 const posicaoDaFila = (fonte) => {
   const encontrada = filaDoPainel(fonte)[0];
@@ -61,7 +75,9 @@ const requirements = [
   // e é por isso que a contagem é exata e o único permitido é nomeado.
   ['o único <nav> do painel é o índice do celular aprovado', (dashboard.match(/<nav/g) || []).length === 1 && /const MobileIndex[\s\S]{0,400}<nav/.test(dashboard)],
   ['fila de respostas aparece uma única vez: a antiga aba "Avaliações" não duplica a seção', filaDoPainel(dashboard).length === 1],
-  ['a fila do painel recebe o país do negócio, para a resposta sugerida sair na variante certa do português', /const \[businessCountry, setBusinessCountry\] = useState<string \| null>/.test(dashboard) && /select\('phone, business_country'\)/.test(dashboard)],
+  ['o painel lê profiles.business_country do dono', /select\('phone, business_country'\)/.test(dashboardCodigo)],
+  ['o painel ATRIBUI ao estado o país que leu, em vez de um valor fixo', /setBusinessCountry\(data\?\.business_country \|\| null\)/.test(dashboardCodigo)],
+  ['a fila do painel usa o país do negócio na chamada que monta a resposta sugerida', /buildReplySuggestions\(\{[^}]*businessCountry[^}]*\}\)/.test(dashboardCodigo)],
   ['fila de respostas, QR/temas e configuração do WhatsApp têm âncora própria e única na página', (dashboard.match(/id=\{QUEUE_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{QR_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{WHATSAPP_ANCHOR_ID\}/g) || []).length === 1],
   ['Plano de hoje e Resumo no WhatsApp linkam para a âncora certa em vez de trocar de aba', (dashboard.match(/href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/g) || []).length >= 1 && (dashboard.match(/href=\{`#\$\{WHATSAPP_ANCHOR_ID\}`\}/g) || []).length === 1],
   // A faixa-resumo do celular acrescentou um segundo link para a fila, por isso

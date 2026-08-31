@@ -58,7 +58,7 @@ const semComentarios = (fonte) => fonte
   .replace(/\/\*[\s\S]*?\*\//g, ' ')
   .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
 const filaCodigo = semComentarios(filaModulo);
-const { montarFilaDeRespostas, comentariosJaTratados } = await import(
+const { montarFilaDeRespostas, itensJaTratados, chaveDaAvaliacaoDoGoogle } = await import(
   pathToFileURL(resolve(root, 'src/lib/filaDeRespostas.ts')).href
 );
 
@@ -71,13 +71,25 @@ const privadoTratado = { id: 'p2', customer_name: 'Bia', customer_email: null, f
 const oficialSemResposta = { id: 'o1', reviewer_name: 'Carlos', rating: 3, comment: 'ok', review_updated_at: '2026-08-29T20:00:00.000Z', reply_text: null };
 const oficialRespondida = { id: 'o2', reviewer_name: 'Duda', rating: 5, comment: 'otimo', review_updated_at: '2026-08-30T22:00:00.000Z', reply_text: 'obrigado' };
 const publicaSemEstado = { review_id: 'g1', author_name: 'Eva', rating: 4, text: 'bom', time: '2026-08-28T20:00:00.000Z', google_maps_uri: 'https://maps.google.com/x' };
+// A MESMA avaliação de Carlos, vista pela porta pública: outro identificador,
+// mesmo autor, mesma nota, mesmo dia. Com a ligação oficial ligada ela chegava
+// pelas duas portas e aparecia duas vezes na fila.
+const publicaDuplicadaDoOficial = { review_id: 'g2', author_name: 'Carlos', rating: 3, text: 'ok', time: '2026-08-29T20:30:00.000Z', google_maps_uri: 'https://maps.google.com/y' };
 
-const filaSomada = montarFilaDeRespostas({
+const fontes = {
   privados: [privadoDeHoje, privadoTratado],
   oficiais: [oficialSemResposta, oficialRespondida],
-  publicas: [publicaSemEstado],
-});
-const tratados = comentariosJaTratados([privadoDeHoje, privadoTratado]);
+  publicas: [publicaSemEstado, publicaDuplicadaDoOficial],
+};
+
+const filaSomada = montarFilaDeRespostas(fontes);
+const tratados = itensJaTratados(fontes);
+
+// O dono marcou que já respondeu a Eva no Google. Sem esta marcação, um item
+// da leitura pública ficava na fila para sempre: nenhum caminho o tirava de
+// lá, e "N esperando resposta" nunca descia.
+const filaComEvaRespondida = montarFilaDeRespostas({ ...fontes, respondidasNoGoogle: ['g1'] });
+const tratadosComEvaRespondida = itensJaTratados({ ...fontes, respondidasNoGoogle: ['g1'] });
 
 const requirements = [
   ['mais recente sem contato (X) vence mais antigo com contato (Y): contato não reordena', xyOrder[0]?.id === 'X' && xyOrder[1]?.id === 'Y'],
@@ -105,8 +117,42 @@ const requirements = [
   ['a avaliação lida publicamente fica na fila com estado desconhecido, não com estado inventado',
     filaSomada.find((item) => item.origem === 'google-publico')?.is_addressed === null],
   ['cada item da fila diz de onde veio', filaSomada.every((item) => ['comentario-privado', 'google-oficial', 'google-publico'].includes(item.origem))],
-  ['os já tratados são só comentários privados tratados, e saem da mesma ordem partilhada',
-    tratados.length === 1 && tratados[0]?.idNaFonte === 'p2' && tratados[0]?.is_addressed === true],
+  // O histórico recebe tudo o que já foi tratado, de qualquer origem: o
+  // comentário privado resolvido e a avaliação oficial que já tem resposta
+  // publicada no Google. Sai na mesma ordem partilhada, mais recente primeiro
+  // (o2 às 22:00 vem antes de p2 às 21:00), e nunca traz nada pendente.
+  ['o histórico traz o que já foi tratado, de qualquer origem, na mesma ordem partilhada',
+    tratados.map((item) => item.idNaFonte).join(' | ') === 'o2 | p2'
+    && tratados.every((item) => item.is_addressed === true)],
+
+  // Duplicação entre as duas portas do Google.
+  ['a mesma avaliação vista pelas duas portas do Google aparece uma vez só',
+    filaSomada.filter((item) => item.autor === 'Carlos').length === 1],
+  ['quem fica é a versão oficial, que é a única que sabe se já foi respondida',
+    filaSomada.find((item) => item.autor === 'Carlos')?.origem === 'google-oficial'],
+  ['a chave de identidade é autor, nota e dia, e não o identificador de uma das APIs',
+    chaveDaAvaliacaoDoGoogle('Carlos', 3, '2026-08-29T20:00:00.000Z')
+      === chaveDaAvaliacaoDoGoogle('carlos', 3, '2026-08-29T23:59:00.000Z')
+    && chaveDaAvaliacaoDoGoogle('Carlos', 3, '2026-08-29T20:00:00.000Z')
+      !== chaveDaAvaliacaoDoGoogle('Carlos', 4, '2026-08-29T20:00:00.000Z')],
+  ['uma avaliação pública que não corresponde a nenhuma oficial continua na fila',
+    filaSomada.some((item) => item.idNaFonte === 'g1')],
+
+  // O dono marca que respondeu no Google, e o item sai da fila.
+  ['a avaliação pública que o dono marcou como respondida sai da fila',
+    !filaComEvaRespondida.some((item) => item.idNaFonte === 'g1')],
+  ['e passa a aparecer no histórico, como o comentário privado tratado',
+    tratadosComEvaRespondida.some((item) => item.idNaFonte === 'g1' && item.is_addressed === true)],
+  ['sem a marcação do dono, a avaliação pública fica na fila com estado desconhecido',
+    filaSomada.find((item) => item.idNaFonte === 'g1')?.is_addressed === null],
+  ['a fila do dono pode esvaziar: com tudo tratado e tudo marcado, não sobra item nenhum',
+    montarFilaDeRespostas({ privados: [privadoTratado], oficiais: [oficialRespondida], publicas: [publicaSemEstado], respondidasNoGoogle: ['g1'] }).length === 0],
+
+  // O perfil de quem avaliou volta com a fila, e só quando a fonte o devolve.
+  ['o item da leitura pública carrega o perfil do avaliador quando a fonte o devolve',
+    montarFilaDeRespostas({ publicas: [{ ...publicaSemEstado, author_uri: 'https://maps.google.com/perfil' }] })[0]?.autorUrl === 'https://maps.google.com/perfil'],
+  ['sem perfil devolvido pela fonte, o item não inventa um link',
+    filaSomada.find((item) => item.idNaFonte === 'g1')?.autorUrl === null],
 ];
 
 const failed = requirements.filter(([, ok]) => !ok).map(([label]) => label);

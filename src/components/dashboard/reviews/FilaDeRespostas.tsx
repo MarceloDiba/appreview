@@ -8,8 +8,9 @@ import ReplySuggestions from '@/components/dashboard/ReplySuggestions';
 import { useInternalFeedback } from '@/hooks/useInternalFeedback';
 import { useGoogleBusinessReviewQueue } from '@/hooks/useGoogleBusinessReviewQueue';
 import { useGoogleReviews } from '@/hooks/useGoogleReviews';
+import { useGooglePublicReviewsAnswered } from '@/hooks/useGooglePublicReviewsAnswered';
 import { lerNotaDoCaso } from '@/lib/comentarioInterno';
-import { comentariosJaTratados, montarFilaDeRespostas, type ItemDaFila, type OrigemDaResposta } from '@/lib/filaDeRespostas';
+import { itensJaTratados, montarFilaDeRespostas, type ItemDaFila, type OrigemDaResposta } from '@/lib/filaDeRespostas';
 import { buildReplySuggestions } from '@/lib/replySuggestions';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
@@ -126,6 +127,8 @@ const ItemDaFilaCard = ({
   resolverCaso,
   publicar,
   publicando,
+  marcandoId,
+  marcarRespondida,
 }: {
   item: ItemDaFila;
   businessName: string | null;
@@ -134,6 +137,8 @@ const ItemDaFilaCard = ({
   resolverCaso: (id: string, tratado: boolean) => void;
   publicar: (id: string, texto: string) => Promise<boolean>;
   publicando: boolean;
+  marcandoId: string | null;
+  marcarRespondida: (reviewId: string, respondida: boolean) => void;
 }) => {
   const { t, i18n } = useOwnerTranslation();
   const tratado = item.is_addressed === true;
@@ -146,9 +151,26 @@ const ItemDaFilaCard = ({
       <CardContent className="p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-2">
           <Origem origem={item.origem} />
-          <span className="min-w-0 break-words font-medium text-slate-900">
-            {item.autor?.trim() || t('reviews.cases.anonCustomer')}
-          </span>
+          {/*
+            O perfil de quem avaliou existia na lista antiga do Google e voltou
+            com a fila: para o dono, saber se quem reclamou avaliou uma vez na
+            vida ou tem histórico muda o peso da reclamação. Só aparece quando
+            a fonte devolve o link; nunca se inventa um.
+          */}
+          {item.autorUrl ? (
+            <a
+              className="min-w-0 break-words font-medium text-slate-900 hover:underline"
+              href={item.autorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {item.autor?.trim() || t('reviews.cases.anonCustomer')}
+            </a>
+          ) : (
+            <span className="min-w-0 break-words font-medium text-slate-900">
+              {item.autor?.trim() || t('reviews.cases.anonCustomer')}
+            </span>
+          )}
           {data && <span className="text-sm text-gray-500">{data}</span>}
         </div>
 
@@ -156,7 +178,16 @@ const ItemDaFilaCard = ({
           <Nota valor={item.nota} />
         </div>
 
-        {item.texto?.trim() && <p className="mt-3 break-words text-sm leading-6 text-gray-700">{item.texto}</p>}
+        {/*
+          Uma avaliação do Google pode ser só a nota, sem uma palavra escrita.
+          Sem este estado o cartão ficava com um buraco entre a nota e os
+          botões, e o dono não sabia se o texto não existia ou não carregou.
+        */}
+        {item.texto?.trim() ? (
+          <p className="mt-3 break-words text-sm leading-6 text-gray-700">{item.texto}</p>
+        ) : (
+          <p className="mt-3 text-sm italic leading-6 text-gray-500">{t('reviews.google.official.noComment')}</p>
+        )}
 
         {item.customer_email && (
           <p className="mt-2 break-words text-xs text-gray-500">
@@ -198,8 +229,25 @@ const ItemDaFilaCard = ({
           Cada botão é `w-full sm:w-auto` pela mesma razão: largura do cartão
           no celular, largura do texto no ecrã grande.
         */}
-        {(item.origem === 'comentario-privado' || item.link) && (
+        {(item.origem !== 'google-oficial' || item.link) && (
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            {/*
+              A marcação é do dono, não do Binno: o Binno nunca publica uma
+              resposta no Google. O rótulo é na primeira pessoa dele por isso,
+              e é o que tira a avaliação pública da fila. Sem ela, o item ficava
+              lá para sempre e a contagem nunca descia.
+            */}
+            {item.origem === 'google-publico' && (
+              <Button
+                size="sm"
+                className="w-full sm:w-auto"
+                variant={tratado ? 'outline' : 'default'}
+                disabled={marcandoId === item.idNaFonte}
+                onClick={() => marcarRespondida(item.idNaFonte, !tratado)}
+              >
+                {tratado ? t('reviews.queue.markNotAnswered') : t('reviews.queue.markAnswered')}
+              </Button>
+            )}
             {item.origem === 'comentario-privado' && (
               <Button
                 size="sm"
@@ -257,27 +305,36 @@ const FilaDeRespostas = ({
     import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined,
   );
   const publicas = useGoogleReviews(userId);
+  const respondidas = useGooglePublicReviewsAnswered(userId);
+  const [falhaAoAtualizar, setFalhaAoAtualizar] = useState(false);
 
-  const fila = useMemo(
-    () => montarFilaDeRespostas({
+  const fontes = useMemo(
+    () => ({
       privados: privados.cases,
       oficiais: oficiais.reviews,
       publicas: publicas.reviews,
+      respondidasNoGoogle: respondidas.answered,
     }),
-    [privados.cases, oficiais.reviews, publicas.reviews],
+    [privados.cases, oficiais.reviews, publicas.reviews, respondidas.answered],
   );
-  const tratados = useMemo(() => comentariosJaTratados(privados.cases), [privados.cases]);
+  const fila = useMemo(() => montarFilaDeRespostas(fontes), [fontes]);
+  const tratados = useMemo(() => itensJaTratados(fontes), [fontes]);
 
-  const temPublicaSemEstado = fila.some((item) => item.origem === 'google-publico');
+  const temItemDoGoogle = [...fila, ...tratados].some((item) => item.origem !== 'comentario-privado');
+  const temItemPublico = [...fila, ...tratados].some((item) => item.origem === 'google-publico');
   const carregando = privados.loading || oficiais.loading || publicas.loading;
 
   const atualizar = async () => {
+    setFalhaAoAtualizar(false);
+    let falhou = false;
     await privados.refresh();
     // Só se pede ao Google o que o Google pode dar: sincronizar sem ligação
     // oficial, ou reler o perfil público sem Place ID, devolveria um erro que
     // o dono não causou e não pode resolver a partir daqui.
-    if (oficiais.connectionStatus === 'connected') await oficiais.syncAll();
-    if (publicas.placeInfo?.place_id) await publicas.handleRefresh();
+    if (oficiais.connectionStatus === 'connected' && !(await oficiais.syncAll())) falhou = true;
+    if (publicas.placeInfo?.place_id && !(await publicas.handleRefresh())) falhou = true;
+    await respondidas.refresh();
+    setFalhaAoAtualizar(falhou);
   };
 
   const ocupado = privados.loading || oficiais.syncing || publicas.refreshing;
@@ -314,14 +371,54 @@ const FilaDeRespostas = ({
         ainda esperam. Dizer isto uma vez é mais honesto do que marcar cada
         item com um estado inventado.
       */}
-      {temPublicaSemEstado && (
+      {temItemPublico && (
         <p className="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-xs leading-5 text-slate-600">
           {t('reviews.queue.publicUnknownState')}
         </p>
       )}
 
+      {/*
+        A sincronização oficial pagina o perfil inteiro. Enquanto não termina,
+        a contagem acima é de uma parte do perfil, e apresentá-la como o total
+        seria dado incompleto passado por completo.
+      */}
+      {oficiais.connectionStatus === 'connected' && !oficiais.syncComplete && (
+        <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-5 text-amber-900">
+          {t('reviews.google.official.incomplete')}
+        </p>
+      )}
+
+      {/*
+        Uma atualização que falha tem de parecer diferente de uma que funcionou
+        e não trouxe nada. Sem isto o dono clica, a tela fica igual, e ele não
+        tem como saber que quebrou. A frase diz o que fazer, não o que houve.
+      */}
+      {(falhaAoAtualizar || oficiais.error) && (
+        <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm leading-5 text-red-800">
+          {t('reviews.queue.refreshError')}
+        </p>
+      )}
+
       {privados.error && (
         <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{privados.error}</p>
+      )}
+
+      {/*
+        Atribuição ao Google. Isto não é enfeite: os termos do Google exigem a
+        atribuição onde quer que o conteúdo de avaliação deles seja mostrado, e
+        esta fila mostra nome do avaliador e texto da avaliação. Vinha na lista
+        antiga e desapareceu quando as três superfícies viraram uma; volta
+        acima da lista, junto do conteúdo, e não num rodapé seis cartões
+        abaixo. O aviso de relevância acompanha só quando há item da leitura
+        pública, porque é essa porta que devolve as avaliações escolhidas por
+        relevância, e não todas.
+      */}
+      {temItemDoGoogle && (
+        <p className="mt-3 text-xs leading-5 text-gray-500">
+          {temItemPublico
+            ? `${t('reviews.google.relevanceNotice')} · ${t('reviews.google.attribution')}`
+            : t('reviews.google.attribution')}
+        </p>
       )}
 
       <div className="mt-4 space-y-4">
@@ -348,6 +445,8 @@ const FilaDeRespostas = ({
             resolverCaso={privados.resolveCase}
             publicar={oficiais.publishReply}
             publicando={oficiais.publishing}
+            marcandoId={respondidas.markingId}
+            marcarRespondida={(reviewId, respondida) => void respondidas.mark(reviewId, respondida)}
           />
         ))}
       </div>
@@ -368,6 +467,8 @@ const FilaDeRespostas = ({
                 resolverCaso={privados.resolveCase}
                 publicar={oficiais.publishReply}
                 publicando={oficiais.publishing}
+                marcandoId={respondidas.markingId}
+                marcarRespondida={(reviewId, respondida) => void respondidas.mark(reviewId, respondida)}
               />
             ))}
           </div>

@@ -1025,7 +1025,12 @@
       "emptyBody": "Quando alguém deixar um comentário no QR da mesa ou uma avaliação no seu perfil do Google, ela aparece aqui, com a resposta sugerida pronta a ajustar. Deixe o QR à vista na mesa e no balcão: é ele que traz o primeiro.",
       "originPrivate": "Comentário privado",
       "originGoogle": "Google",
-      "publicUnknownState": "Nas avaliações que o Binno lê do seu perfil público, o Google não diz quais já respondeu. Ficam na lista até as conferir.",
+      "publicUnknownState": "Nas avaliações que o Binno lê do seu perfil público, o Google não diz quais já respondeu. Depois de responder lá, marque aqui para as tirar da lista.",
+      "markAnswered": "Já respondi no Google",
+      "markNotAnswered": "Ainda não respondi",
+      "answeredToast": "Marcada como respondida por si no Google.",
+      "unansweredToast": "De volta para a fila.",
+      "refreshError": "Não foi possível falar com o Google agora, e nada foi atualizado. O que está na lista continua a valer. Tente de novo daqui a alguns minutos; se continuar, confirme o link do Google em Definições.",
       "handledTitle": "Já tratados"
     },
     "loading": "A carregar...",
