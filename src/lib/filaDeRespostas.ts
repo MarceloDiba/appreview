@@ -34,6 +34,36 @@ import { orderPendingCasesByRecency, type PrioritizableCase } from './internalCa
  */
 export type OrigemDaResposta = 'comentario-privado' | 'google-oficial' | 'google-publico';
 
+/**
+ * O identificador de uma avaliação no produto inteiro: a origem, dois pontos, o
+ * id dentro da fonte.
+ *
+ * POR QUE ISTO É UMA FUNÇÃO, E NÃO UM MOLDE ESCRITO EM CADA SÍTIO
+ *
+ * Este id deixou de ser só a chave de uma lista em React quando o rascunho do
+ * modelo passou a ser guardado por avaliação (31/08/2026): ele é a chave por
+ * que se paga, e por que se decide se uma avaliação já foi lida.
+ *
+ * Escrito à mão em cada chamador, ele divergiu de imediato. A fila somada e a
+ * leitura pública usavam `google-oficial:`/`google-publico:`; a fila do painel
+ * passava o `review.id` cru, das MESMAS linhas de
+ * `useGoogleBusinessReviewQueue`. Uma avaliação, duas chaves: paga duas vezes,
+ * e a `temperature` de 0.4 devolvia dois textos diferentes, para o mesmo
+ * cliente, em duas telas do mesmo produto. Achado na auditoria de 31/08/2026.
+ *
+ * Uma função, um espaço de identificadores. `scripts/check-rascunho-que-le.mjs`
+ * exige que ninguém volte a montar este id à mão.
+ */
+/**
+ * As origens da fila, mais o piloto Apify, que alimenta a fila do painel sem
+ * aparecer nesta lista somada. Ele tem espaço próprio porque as chaves dele são
+ * de outra fonte: dar-lhe o prefixo `google-publico` poria duas avaliações
+ * diferentes na mesma gaveta se um dia os números coincidissem.
+ */
+export type FonteDeAvaliacao = OrigemDaResposta | 'piloto-apify';
+
+export const idDaFila = (fonte: FonteDeAvaliacao, idNaFonte: string): string => `${fonte}:${idNaFonte}`;
+
 export interface ItemDaFila extends PrioritizableCase {
   origem: OrigemDaResposta;
   /**
@@ -96,7 +126,7 @@ export interface AvaliacaoPublicaDaFila {
 }
 
 const doComentarioPrivado = (caso: ComentarioPrivadoDaFila): ItemDaFila => ({
-  id: `comentario-privado:${caso.id}`,
+  id: idDaFila('comentario-privado', caso.id),
   idNaFonte: caso.id,
   origem: 'comentario-privado',
   customer_email: caso.customer_email,
@@ -110,7 +140,7 @@ const doComentarioPrivado = (caso: ComentarioPrivadoDaFila): ItemDaFila => ({
 });
 
 const daAvaliacaoOficial = (avaliacao: AvaliacaoOficialDaFila): ItemDaFila => ({
-  id: `google-oficial:${avaliacao.id}`,
+  id: idDaFila('google-oficial', avaliacao.id),
   idNaFonte: avaliacao.id,
   origem: 'google-oficial',
   // Quem avalia no Google não deixa contacto: não há mensagem directa a
@@ -128,7 +158,7 @@ const daAvaliacaoOficial = (avaliacao: AvaliacaoOficialDaFila): ItemDaFila => ({
 });
 
 const daAvaliacaoPublica = (avaliacao: AvaliacaoPublicaDaFila, respondida: boolean): ItemDaFila => ({
-  id: `google-publico:${avaliacao.review_id}`,
+  id: idDaFila('google-publico', avaliacao.review_id),
   idNaFonte: avaliacao.review_id,
   origem: 'google-publico',
   customer_email: null,

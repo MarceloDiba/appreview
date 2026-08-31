@@ -1129,6 +1129,11 @@
     "cardHint": "The table card opens in a print window, where you can print it or save it as a PDF. It is the format ready for the table, with the review request and the signature."
   },
   "reply": {
+    "modelTitle": "Reply to this review",
+    "modelHint": "Written from what the customer wrote, in their language.",
+    "draftFromReview": "Written from this review",
+    "draftReading": "Reading the review",
+    "draftStandard": "Standard text",
     "cta": "Suggest a reply",
     "title": "Reply suggestions",
     "close": "Close",

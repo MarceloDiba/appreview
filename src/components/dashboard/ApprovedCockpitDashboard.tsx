@@ -10,10 +10,19 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import { useGoogleBusinessReviewQueue } from '@/hooks/useGoogleBusinessReviewQueue';
 import { useReviewFunnelMetrics, type ReviewFunnelMetrics } from '@/hooks/useReviewFunnelMetrics';
 import { buildReplySuggestions } from '@/lib/replySuggestions';
+import {
+  pedirRascunho,
+  rascunhoGuardado,
+  rascunhoNaTela,
+  type ResultadoDoModelo,
+} from '@/lib/rascunhoDoModelo';
+import { pedirRascunhoAoBinno } from '@/lib/sugerirResposta';
+import OrigemDoRascunho from '@/components/dashboard/OrigemDoRascunho';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdvisorReading } from '@/lib/advisorReading';
 import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
 import { sampleWasTruncated } from '@/lib/reputationSnapshotReading';
+import { idDaFila } from '@/lib/filaDeRespostas';
 
 type QueueReview = {
   id: string;
@@ -24,12 +33,40 @@ type QueueReview = {
   reviewUrl?: string;
   responseObserved: boolean;
 };
-type ActionState = { draft: string; copied?: boolean };
+/**
+ * O que a fila guarda sobre uma avaliaçao, no navegador do dono.
+ *
+ * `draft` e OPCIONAL de propósito, e a diferença é a regra 3 inteira.
+ *
+ * Até 31/08/2026 ele era obrigatório, e `copyReply` gravava `{ ...currentAction,
+ * copied: true }`: carregar em "Copiar e abrir avaliação" persistia o texto que
+ * estivesse no ecrã, que antes da resposta do modelo é o TEXTO PADRÃO. A partir
+ * daí a avaliação parecia escrita pelo dono para sempre, o pedido ao modelo
+ * deixava de sair, e ela nunca mais podia ser lida. Toda avaliação com que ele
+ * ensaiou nascia morta. Achado na auditoria de 31/08/2026.
+ *
+ * Copiar não é escrever. `draft` só é preenchido pela caixa de texto; copiar
+ * escreve apenas `copied`. Assim `draft !== undefined` volta a significar
+ * exactamente uma coisa: ele escreveu isto.
+ */
+type ActionState = { draft?: string; copied?: boolean };
 type Rating = '1' | '2' | '3' | '4' | '5';
 type Week = { start: string; reviewCount: number; ratingBreakdown: Record<Rating, number>; ownerReplies: number };
 
 const ratings: Rating[] = ['5', '4', '3', '2', '1'];
-const actionStorageKey = 'binno.approved-cockpit-actions';
+/**
+ * A chave subiu para `.v2` em 31/08/2026, com a correcçao acima.
+ *
+ * O formato antigo gravava "o que estava no ecrã quando ele carregou em
+ * copiar", e nada distingue lá dentro um texto que ele escreveu de um texto
+ * padrão que ele apenas copiou. Ler essas entradas como autoria manteria mortas
+ * exactamente as avaliações que o defeito matou.
+ *
+ * A chave antiga NÃO é apagada: nada se destrói, e ela continua legível para
+ * quem quiser inspeccioná-la. O custo desta decisão é, no pior caso, um
+ * rascunho que se volta a gerar numa avaliação ainda por responder.
+ */
+const actionStorageKey = 'binno.approved-cockpit-actions.v2';
 const integer = new Intl.NumberFormat();
 const decimal = new Intl.NumberFormat(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 // Âncoras que substituem as antigas abas. Os cartões que antes trocavam de
@@ -63,7 +100,13 @@ const formatAge = (value: string | null, locale: string) => value
   ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(value))
   : '—';
 
-const normalizeObserved = (review: ExperimentalObservedReview): QueueReview => review;
+/**
+ * O piloto Apify entra no MESMO espaço de identificadores da fila somada, com
+ * a fonte dele. Antes disto ele passava o id cru, e a fila do painel e a fila
+ * de `/reviews` guardavam a mesma avaliação em duas chaves.
+ */
+const normalizeObserved = (review: ExperimentalObservedReview): QueueReview =>
+  ({ ...review, id: idDaFila('piloto-apify', review.id) });
 
 /**
  * Contrato de produto, linha 30: amostra nunca pode aparecer como dado
@@ -189,7 +232,11 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
   // mudou: antes era "este aparelho não tem", agora é "ainda não houve busca".
   const temFila = official.syncComplete || snapshot.sample.observedReviews !== undefined;
   const queue: QueueReview[] = official.syncComplete
-    ? official.reviews.map((review) => ({ id: review.id, rating: review.rating, comment: review.comment || '', publishedAt: review.review_updated_at, reviewerName: review.reviewer_name || undefined, responseObserved: Boolean(review.reply_text) }))
+    // `idDaFila` e nao um molde escrito aqui: estas sao as MESMAS linhas de
+    // `useGoogleBusinessReviewQueue` que a fila de `/reviews` mostra, e enquanto
+    // esta tela passava o `review.id` cru a mesma avaliacao era paga duas vezes
+    // e rendia dois textos diferentes nas duas telas. Ver `idDaFila`.
+    ? official.reviews.map((review) => ({ id: idDaFila('google-oficial', review.id), rating: review.rating, comment: review.comment || '', publishedAt: review.review_updated_at, reviewerName: review.reviewer_name || undefined, responseObserved: Boolean(review.reply_text) }))
     : observed;
   const history = useMemo(() => snapshot.sample.insights?.history?.weeks || [], [snapshot.sample.insights?.history?.weeks]);
 
@@ -311,7 +358,64 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
   const suggestion = demo
     ? baseSuggestion.replace(/\.\s*—\s*/g, '. ').replace(/\s*—\s*/g, ', ')
     : baseSuggestion;
-  const currentAction = selected ? actions[selected.id] || { draft: suggestion } : { draft: '' };
+  // O rascunho que lê a avaliação, por avaliação, guardado na sessão. Ver
+  // `src/lib/rascunhoDoModelo.ts` para as quatro regras e o porquê de cada uma.
+  const [doModelo, setDoModelo] = useState<Record<string, ResultadoDoModelo>>({});
+
+  // Uma chamada por avaliação, quando o dono a seleciona. Nunca por tecla nem
+  // por quadro: a única dependência que muda por seleção é `selected?.id`, e o
+  // cache do módulo cuida das voltas, inclusive depois desta fila remontar.
+  //
+  // `actions` fica FORA das dependências de propósito. Ele muda a cada letra
+  // que o dono escreve, e reagir a isso transformaria uma chamada por avaliação
+  // numa por tecla, que é o oposto da regra 4. O valor lido aqui é o do momento
+  // da seleção, que é o único momento em que esta decisão se toma.
+  useEffect(() => {
+    if (demo || !selected) return;
+    // Sem texto não há o que ler, e a função devolveria `SEM_COMENTARIO`. O
+    // template já responde a uma avaliação que é só nota.
+    if (selected.comment.trim().length < 3) return;
+    // Regra 3, aplicada antes de gastar: com rascunho ESCRITO pelo dono nesta
+    // avaliação, a resposta do modelo não teria como entrar na tela.
+    //
+    // A pergunta é por `?.draft`, e não pela existência da entrada. Perguntar
+    // pela entrada punha ter copiado ao nível de ter escrito, e uma avaliação
+    // que ele copiou uma vez nunca mais era lida. Ver `ActionState`.
+    if (actions[selected.id]?.draft !== undefined) return;
+
+    const guardado = rascunhoGuardado(selected.id);
+    if (guardado) {
+      setDoModelo((atual) => ({ ...atual, [selected.id]: guardado }));
+      return;
+    }
+
+    let vivo = true;
+    setDoModelo((atual) => ({ ...atual, [selected.id]: { origem: 'pedindo' } }));
+    void pedirRascunho(
+      selected.id,
+      { comment: selected.comment, rating: selected.rating, businessName: snapshot.business.name },
+      pedirRascunhoAoBinno,
+    ).then((resultado) => {
+      if (vivo) setDoModelo((atual) => ({ ...atual, [selected.id]: resultado }));
+    });
+    return () => { vivo = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.id, demo]);
+
+  // Quem decide o que está na caixa é `rascunhoNaTela`, e não este componente:
+  // a ordem das três perguntas É a regra 3, e ela vive num lugar que se prova
+  // sem React. O template entra como último argumento, que é o mesmo que dizer
+  // que ele é o chão: enquanto o modelo não responde, e se ele nunca responder,
+  // é ele que está na tela.
+  const naTela = rascunhoNaTela(
+    selected ? actions[selected.id]?.draft : undefined,
+    selected ? doModelo[selected.id] : undefined,
+    suggestion,
+  );
+  // O que esta guardado desta avaliaçao, que nao e o mesmo que o que esta na
+  // tela: na tela pode estar o texto padrao ou o do modelo, e nenhum dos dois e
+  // autoria dele.
+  const guardado = selected ? actions[selected.id] : undefined;
   const save = (next: ActionState) => {
     if (!selected) return;
     setActions((current) => {
@@ -327,8 +431,11 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
     }
   };
   const copyReply = async () => {
-    try { await navigator.clipboard.writeText(currentAction.draft); } catch { /* Keep the editable draft available. */ }
-    save({ ...currentAction, copied: true });
+    try { await navigator.clipboard.writeText(naTela.texto); } catch { /* Keep the editable draft available. */ }
+    // Copiar marca que ele copiou, e mais nada. Gravar aqui o texto que estava
+    // no ecra transformaria o texto padrao em autoria dele, e a avaliaçao nunca
+    // mais poderia ser lida pelo modelo. Ver o cabeçalho de `ActionState`.
+    save({ ...(guardado || {}), copied: true });
   };
   // Sem oficial sincronizado e sem recolha local do piloto, a fila fica
   // genuinamente vazia hoje em toda conta real: a ligação oficial ao Google
@@ -353,7 +460,15 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
     <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2><span className="text-sm text-slate-500">{t('dashboard.cockpit.approved.queuePosition', { current: index + 1, total: reviews.length })}</span></div>
     <div className="p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex flex-wrap items-center gap-2"><p className="font-semibold text-slate-950">{selected.reviewerName || t('dashboard.cockpit.layout.anonymousReviewer')}</p><Stars rating={selected.rating} medium /></div><p className="mt-1 text-xs text-slate-500">{formatAge(selected.publishedAt, i18n.language)}</p></div><div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => select(index - 1)} disabled={index === 0}><ChevronLeft className="mr-1 h-4 w-4" />{t('dashboard.cockpit.approved.previous')}</Button><Button variant="outline" size="sm" onClick={() => select(index + 1)} disabled={index >= reviews.length - 1}>{t('dashboard.cockpit.approved.next')}<ChevronRight className="ml-1 h-4 w-4" /></Button></div></div>
       <blockquote className="mt-5 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">“{selected.comment}”</blockquote>
-      <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4"><span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-[#2457D6]">{t('dashboard.cockpit.layout.replyTitle')}</span>{editing ? <Textarea value={currentAction.draft} onChange={(event) => save({ draft: event.target.value })} className="mt-3 min-h-28 resize-y text-sm leading-6" /> : <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-700">{currentAction.draft}</p>}<div className="mt-4 flex flex-wrap gap-2">{selected.reviewUrl ? <Button asChild className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><a href={selected.reviewUrl} target="_blank" rel="noreferrer" onClick={() => void copyReply()}><Copy className="mr-2 h-4 w-4" />{t('dashboard.cockpit.assisted.copyAndOpenReview')}<ExternalLink className="ml-2 h-4 w-4" /></a></Button> : <Button onClick={() => void copyReply()} className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><Copy className="mr-2 h-4 w-4" />{currentAction.copied ? t('dashboard.advisor.copiedButton') : t('dashboard.cockpit.assisted.copy')}</Button>}<Button variant="outline" onClick={() => setEditing((value) => !value)}>{editing ? t('dashboard.cockpit.approved.doneEditing') : t('dashboard.cockpit.approved.edit')}</Button><Button variant="outline" onClick={() => select(Math.min(index + 1, reviews.length - 1))}>{t('dashboard.cockpit.approved.skip')}</Button></div></div>
+      <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4"><div className="flex flex-wrap items-center gap-2"><span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-[#2457D6]">{t('dashboard.cockpit.layout.replyTitle')}</span>{/*
+              A etiqueta existe para o DONO saber se esta a ler o modelo ou o
+              texto padrao. Na demonstraçao publica (`binno.pro` e `/demo`) nao
+              ha dono nem modelo: e uma ilustraçao do produto a funcionar, e o
+              efeito acima nem chega a pedir nada. Estampar "Texto padrao" ali
+              explicava ao possivel cliente o nosso plano B, no lugar onde ele
+              devia estar a ver o produto.
+            */}
+            {!demo && <OrigemDoRascunho origem={naTela.origem} />}</div>{editing ? <Textarea value={naTela.texto} onChange={(event) => save({ ...(guardado || {}), draft: event.target.value })} className="mt-3 min-h-28 resize-y text-sm leading-6" /> : <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-700">{naTela.texto}</p>}<div className="mt-4 flex flex-wrap gap-2">{selected.reviewUrl ? <Button asChild className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><a href={selected.reviewUrl} target="_blank" rel="noreferrer" onClick={() => void copyReply()}><Copy className="mr-2 h-4 w-4" />{t('dashboard.cockpit.assisted.copyAndOpenReview')}<ExternalLink className="ml-2 h-4 w-4" /></a></Button> : <Button onClick={() => void copyReply()} className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><Copy className="mr-2 h-4 w-4" />{guardado?.copied ? t('dashboard.advisor.copiedButton') : t('dashboard.cockpit.assisted.copy')}</Button>}<Button variant="outline" onClick={() => setEditing((value) => !value)}>{editing ? t('dashboard.cockpit.approved.doneEditing') : t('dashboard.cockpit.approved.edit')}</Button><Button variant="outline" onClick={() => select(Math.min(index + 1, reviews.length - 1))}>{t('dashboard.cockpit.approved.skip')}</Button></div></div>
       <div className="mt-4 flex flex-wrap gap-2">{reviews.slice(0, 8).map((review) => <button key={review.id} type="button" onClick={() => { setSelectedId(review.id); setEditing(false); }} className={`rounded-xl border px-3 py-2 text-left text-xs ${review.id === selected.id ? 'border-[#2457D6] bg-blue-50 text-[#2457D6]' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}><span className="block max-w-32 truncate font-semibold">{review.reviewerName || t('dashboard.cockpit.layout.anonymousReviewer')}</span><Stars rating={review.rating} /></button>)}</div>
     </div>
   </CardContent></Card>;

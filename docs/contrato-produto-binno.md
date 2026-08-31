@@ -599,6 +599,67 @@ encolhe é a ausência de leitura, não o resultado baixo.
   pode insinuar que levará ao comentário correto.
 - Editar, pular e avançar fazem parte da fila. Marcação local não é confirmação
   de publicação no Google.
+- **O rascunho passou a ler a avaliação (decisão de 31/08/2026).** Marcelo, no
+  mesmo dia: "a sugestão de resposta dentro do app não reconhece o idioma que
+  foi escrito automaticamente e não entende o contexto do que foi dito e gera
+  apenas uma resposta padrão". A fila pede o rascunho à função
+  `sugerir-resposta`, que lê o texto do cliente. `src/lib/replySuggestions.ts`
+  **não saiu**: passou de fonte do rascunho a chão do rascunho. Cinco regras,
+  todas presas por `scripts/check-rascunho-que-le.mjs`:
+  1. O texto padrão está na caixa no primeiro quadro. Nunca há caixa vazia nem
+     roda a girar onde antes havia rascunho.
+  2. Qualquer falha fica com o texto padrão: rede, 4xx, 5xx, rascunho recusado
+     pela própria função, resposta vazia ou demora. Um modelo quebrado não pode
+     quebrar a fila.
+  3. O que o dono escreveu ganha de tudo. Uma resposta atrasada do modelo não
+     entra por cima do texto dele, nem por cima de uma caixa que ele apagou.
+  4. Uma chamada por avaliação, na sessão, guardada por id da avaliação. Uma
+     avaliação a que ele volta não é paga de novo, e uma que falhou não é
+     repetida a cada volta.
+  5. A caixa diz de onde veio o que está nela, em três palavras e sem jargão.
+- O Binno continua a não publicar nada em nome do dono. O que sai da função é um
+  rascunho que ele lê, edita e cola, exatamente como o texto padrão sempre foi.
+- **As duas telas dizem a mesma coisa.** A fila do painel e a fila de `/reviews`
+  rascunham resposta para a mesma avaliação, e uma política só decide o que está
+  na caixa nas duas (`src/lib/rascunhoDoModelo.ts`). Uma cópia local dessa
+  decisão, em qualquer arquivo, é erro de guarda: duas cópias voltariam a poder
+  discordar sobre a mesma pessoa, que é a classe de defeito que a fila somada e
+  a ordem única já existem para não ter.
+- **Em `/reviews`, o rascunho do modelo é um cartão a mais, nunca uma variante
+  reescrita.** Aquele painel mostra várias variantes do molde, cada uma com o
+  seu título e a sua dica ("Curta e directa", "A escolha segura quando ainda não
+  sabe o que correu mal"). Pôr o texto do modelo debaixo desses rótulos seria uma
+  etiqueta a mentir sobre o que está na caixa. O cartão do modelo entra à frente,
+  com nome próprio, e as variantes ficam intactas por baixo.
+- **A recusa da função cobre português, espanhol e inglês.** A função manda o
+  modelo responder no idioma do cliente, então uma lista de bloqueio só em
+  português deixava passar um *discount*, um *refund*, um *descuento* ou uma
+  *devolución*: uma dívida que o dono nunca autorizou, na língua que a defesa não
+  lia. Uma quarta língua de cliente entra na lista antes de entrar no resto. A
+  lista é um bloqueio, não uma garantia: ela não entende o texto, e a última
+  defesa continua a ser o dono ler antes de enviar, que é por que o Binno não
+  publica.
+- **Copiar não é escrever.** O rascunho guardado por avaliação só existe quando
+  o dono escreveu na caixa. Enquanto copiar gravava o que estava no ecrã, um
+  toque em "Copiar e abrir avaliação" transformava o texto padrão em autoria
+  dele, e a avaliação nunca mais podia ser lida pelo modelo, em nenhuma sessão.
+- **Uma avaliação, um identificador.** `idDaFila` monta a chave de toda
+  avaliação, em todas as telas. Com duas chaves para a mesma avaliação ela era
+  paga duas vezes e rendia dois textos diferentes, para o mesmo cliente, em duas
+  telas do mesmo produto.
+- **A demonstração pública mostra o produto, não o plano B.** A etiqueta de
+  origem é para o dono. Em `binno.pro` e `/demo` não há dono nem modelo, e
+  estampar "Texto padrão" ali explicava o nosso plano B a quem devia estar a ver
+  o produto a funcionar.
+- **O comentário privado não passa pelo modelo.** `channel === 'private'` é uma
+  mensagem directa a quem deixou contacto no QR, não uma resposta publicada. A
+  função `sugerir-resposta` está escrita e implantada para o público: pede "a
+  resposta que o dono publicaria", manda assinar com o nome do negócio e recusa
+  qualquer promessa de reparação. Essa recusa é certa em público e errada em
+  privado, onde oferecer resolver é exactamente o que o dono quer dizer, e onde o
+  molde já tem uma variante inteira para isso (`com-reparacao`). O comentário
+  privado fica com as variantes privadas do molde. Um rascunho lido para o canal
+  privado exige outro pedido ao modelo e outra implantação da função.
 
 ### Leitura de reputação e recomendações
 

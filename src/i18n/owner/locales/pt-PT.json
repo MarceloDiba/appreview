@@ -1129,6 +1129,11 @@
     "cardHint": "O cartão de mesa abre numa janela de impressão, onde pode imprimir ou guardar em PDF. É o formato pronto para pôr na mesa, com o pedido de avaliação e a assinatura."
   },
   "reply": {
+    "modelTitle": "Resposta a esta avaliação",
+    "modelHint": "Escrita a partir do que o cliente escreveu, no idioma dele.",
+    "draftFromReview": "Escrito a partir desta avaliação",
+    "draftReading": "A ler a avaliação",
+    "draftStandard": "Texto padrão",
     "cta": "Sugerir resposta",
     "title": "Sugestões de resposta",
     "close": "Fechar",
