@@ -15,6 +15,15 @@ export type WhatsAppDelivery = {
 export type WhatsAppDeliveryState = {
   preferences: PilotNotificationPreferences | null;
   deliveries: WhatsAppDelivery[];
+  /**
+   * O último teste do dono, consultado pelo próprio `kind` no servidor.
+   *
+   * Não sai de `deliveries`: aquela lista tem dez linhas de qualquer tipo, e
+   * dez avisos mais recentes escondiam o teste de um dono com a ligação a
+   * funcionar. Ver o comentário da ação `get` em
+   * `supabase/functions/whatsapp-notifications/index.ts`.
+   */
+  lastTest: WhatsAppDelivery | null;
 };
 
 type WirePreferences = {
@@ -73,8 +82,12 @@ const invoke = async <T>(body: Record<string, unknown>) => {
 };
 
 export const getWhatsAppDeliveryState = async (): Promise<WhatsAppDeliveryState> => {
-  const data = await invoke<{ preferences?: WirePreferences | null; deliveries?: WireDelivery[] }>({ action: 'get' });
-  return { preferences: toPreferences(data.preferences), deliveries: (data.deliveries || []).map(toDelivery) };
+  const data = await invoke<{ preferences?: WirePreferences | null; deliveries?: WireDelivery[]; last_test?: WireDelivery | null }>({ action: 'get' });
+  return {
+    preferences: toPreferences(data.preferences),
+    deliveries: (data.deliveries || []).map(toDelivery),
+    lastTest: data.last_test ? toDelivery(data.last_test) : null,
+  };
 };
 
 export const saveWhatsAppDeliveryPreferences = async (preferences: PilotNotificationPreferences) => {

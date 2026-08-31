@@ -722,7 +722,6 @@
         "summaryWaiting": "A summary will only be offered after sufficient data, consent and a configured channel.",
         "notConnected": "Not connected",
         "scheduled": "Local schedule ready",
-        "connect": "Configure WhatsApp",
         "manage": "Manage delivery",
         "workspaceTitle": "Owner WhatsApp",
         "workspaceBody": "Choose when the summary should arrive. Actual delivery starts only after provider, consent, and verified number.",
@@ -739,28 +738,16 @@
         "localDisclaimer": "This schedule is only a local preview. No message was sent or will be sent without the provider connection and your consent.",
         "historyTitle": "Sent messages",
         "historyEmpty": "No message was sent by this dashboard in this session.",
-        "status": {
-          "checking": "Checking local channel",
-          "ready": "Local channel connected",
-          "not-connected": "Local channel not linked",
-          "unavailable": "Temporary channel unavailable"
-        },
         "localCardReady": "The temporary channel is ready for one confirmed manual send.",
         "openTest": "Open delivery test",
-        "localTitle": "Local delivery test",
-        "localBody": "Validate manual sending from the dashboard without enabling scheduling, automation, or a published integration.",
         "refresh": "Refresh status",
         "readyBody": "The local session is linked. The send below still requires a number and explicit confirmation.",
-        "unavailableBody": "Start local OpenWA and the development proxy to test this channel.",
         "recipient": "Test number",
         "recipientHint": "Use international format, for example +351 911 056 526. Binno does not save this number.",
-        "message": "Message",
         "defaultMessage": "Binno: manual test sent from the local dashboard. No automation was enabled.",
         "confirmation": "I confirm this is a single manual send to the number entered.",
-        "sendTest": "Send test message",
         "sending": "Sending…",
         "sendError": "The test message could not be sent.",
-        "sent": "Test message sent at {{time}} to {{recipient}}.",
         "historyLive": "One manual send was recorded in this local session."
       },
       "approved": {
@@ -808,7 +795,6 @@
       }
     },
     "advisorPilot": {
-      "radarTitle": "Binno Radar: what your reviews say today",
       "alertTitle": "Attention for today",
       "alertBody": "{{low}} one- and two-star reviews came in above the usual, and {{topic}} was the subject named in {{mentions}} comments.",
       "experimental": "Experimental reading",
@@ -1181,17 +1167,12 @@
     "notificationRecipientHint": "Enter the business owner's number. Future summaries and alerts will go there.",
     "onboardingPhoneHint": "Filled in during onboarding. Edit it only if notifications should go to another owner.",
     "testRecipient": "The preview goes to",
-    "testRecipientHint": "This is the same number as your notifications, in the block above. Change it there. This test is never sent to a customer.",
+    "testRecipientHint": "It is the same number as the notifications, in the block below. To change it, change it there. This test is never sent to a customer.",
     "testRecipientMissing": "Enter the number in the notifications block above.",
     "weeklyChangeEmpty": "No change has been confirmed this week.",
     "save": "Save preferences",
     "preferencesSaved": "Preferences saved. Binno will use these choices for the delivery queue.",
     "backendUnavailable": "The delivery channel is not available yet. Try again after the server is configured.",
-    "deliveryTitle": "WhatsApp delivery",
-    "deliveryBody": "Binno records the send and follows the status reported by the connected channel.",
-    "deliveryReady": "Delivery channel prepared",
-    "deliveryReadyBody": "Messages are placed in the Binno queue. The status changes when the channel confirms the send.",
-    "testQueued": "Message queued for {{recipient}}. Delivery usually takes a few seconds; the panel updates on its own once WhatsApp confirms.",
     "delivery": {
       "queued": "Message queued for {{recipient}}.",
       "sending": "Message is being sent to {{recipient}}.",
@@ -1207,7 +1188,9 @@
     "testeRefazer": "Run the test again",
     "ligacaoAtiva": "Your WhatsApp connection is active.",
     "testeACaminho": "The test went out and there is no confirmation yet that it arrived. Tap refresh in a moment.",
-    "testeFalhou": "The test did not reach your WhatsApp. Check the number above and send it again."
+    "testeFalhou": "The test did not reach your WhatsApp. Check the number above and send it again.",
+    "testeExpirado": "The last test that arrived is no longer recent enough to prove the connection is still up. Run the test again.",
+    "testeVoltar": "Go back without testing"
   },
   "localWhatsApp": {
     "proxyUnavailable": "The local OpenWA proxy is unavailable. Start the preview with BINNO_ENABLE_OPENWA_PROXY=true and configure the local key.",

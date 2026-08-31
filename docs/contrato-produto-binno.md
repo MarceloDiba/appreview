@@ -140,17 +140,28 @@ seção própria porque já era, byte a byte, a mesma Fila de respostas do item
 completa do WhatsApp (item 6) passa de aba para a última seção da página, e
 fica sempre renderizada ali, nunca atrás de uma condição de aba.
 
-**A ordem segue uma regra:** o que tem prazo vem primeiro (o comentário
-privado da exceção abaixo, depois a fila), o que é leitura vem no meio
-(volume, notas, QR, temas e a coluna lateral fixada acima), e o que é
-configuração vem por último (WhatsApp). Um comentário privado com nota baixa
-expira porque o cliente pode sair do restaurante; uma avaliação pública pode
-esperar um dia; a configuração do WhatsApp não expira nunca.
+**Superado em 31/08/2026, autorizado por Marcelo.** Os três parágrafos a
+seguir descreviam a configuração do WhatsApp como a última seção desta página,
+com âncora `#configuracao-whatsapp`, e nomeavam o cartão **Resumo no WhatsApp**
+da coluna lateral. Nada disso existe desde 31/08: a configuração virou destino
+próprio (`/whatsapp`) e o cartão saiu. Ficam aqui reescritos em vez de
+apagados, porque a decisão de 30/08 que este bloco registra continua de pé e é
+ela que explica por que a de 31/08 não é um recuo.
 
-Os cartões que antes trocavam de aba (**Plano de hoje**, **Boas práticas** e
-**Resumo no WhatsApp**, todos na coluna lateral) agora levam a uma âncora na
-própria página (`#fila-de-respostas` e `#configuracao-whatsapp`) por link
-nativo, não por clique de estado. Nenhum deles fica sem destino.
+**A ordem segue uma regra:** o que tem prazo vem primeiro (o comentário
+privado da exceção abaixo, depois a fila) e o que é leitura vem depois (volume,
+notas, QR, temas e a coluna lateral fixada acima). Um comentário privado com
+nota baixa expira porque o cliente pode sair do restaurante; uma avaliação
+pública pode esperar um dia. A configuração do WhatsApp não expira nunca, e era
+por isso que vinha por último; desde 31/08/2026 ela nem sequer está nesta
+página, que é a forma mais forte da mesma regra.
+
+Os cartões que antes trocavam de aba (**Plano de hoje** e **Boas práticas**,
+ambos na coluna lateral) agora levam a uma âncora na própria página
+(`#fila-de-respostas`) por link nativo, não por clique de estado. Nenhum deles
+fica sem destino. O terceiro era o **Resumo no WhatsApp**, que apontava para
+`#configuracao-whatsapp`; os dois saíram juntos em 31/08/2026, o cartão e a
+âncora, e a asserção que os protegia foi apagada em vez de reapontada.
 
 ### Exceção aprovada em 30/08/2026: comentários que pedem atenção
 
@@ -372,12 +383,22 @@ que a ligação está ativa e um botão para refazer o teste.
 Aqui há um limite honesto, e ele é regra, não detalhe de implementação. O
 Binno não tem como perguntar ao WhatsApp se está ligado. O que ele sabe é o
 estado da última mensagem de teste em `whatsapp_outbox`: `queued` e `sending`
-dizem que a mensagem está na fila, `accepted` diz que o retransmissor a
-entregou ao WhatsApp, `delivered` e `read` dizem que ela chegou, `failed` diz
-que falhou. A sessão local do piloto (`useLocalWhatsApp`) só existe em
+dizem que a mensagem está na fila; `accepted` diz que a chamada HTTP do
+retransmissor ao OpenWA devolveu 2xx com um id de mensagem; `delivered` e
+`read` vêm do webhook `message.ack` e dizem que ela chegou; `failed` diz que
+falhou. A sessão local do piloto (`useLocalWhatsApp`) só existe em
 desenvolvimento e nunca serve de prova em produção; e o backend responder ao
 pedido de preferências prova que o backend está de pé, não que exista uma
 ligação de WhatsApp.
+
+**Correção de 31/08/2026, na auditoria desta mesma mudança.** A frase acima
+dizia que `accepted` significa "o retransmissor entregou ao WhatsApp". Não
+significa: significa que o OpenWA respondeu 2xx, e uma sessão despareada que
+ainda responda 200 nesse endpoint seria lida como ligação ativa. Ele continua
+a contar como prova, e é uma decisão: `delivered` e `read` dependem do webhook
+estar registado no servidor, e sem `accepted` uma instalação sem webhook nunca
+conseguiria confirmar um teste que funcionou. O risco residual é coberto pela
+janela de prova, abaixo.
 
 Então: **a tela só diz "ligação ativa" quando a última mensagem de teste
 chegou ao estado `accepted`, `delivered` ou `read`.** Em `queued` ou `sending`
@@ -385,6 +406,34 @@ ela diz que a mensagem saiu e que ainda não há confirmação. Em `failed` ela 
 que falhou e oferece repetir. Sem teste nenhum, ela oferece o teste. Nunca
 afirma uma ligação que não foi confirmada, que é a mesma regra da secção 2
 sobre não apresentar inferência como facto.
+
+**E só enquanto essa prova for recente: sete dias** (`JANELA_DE_PROVA_EM_DIAS`,
+decidido em 31/08/2026 na auditoria). "Funcionou uma vez" não é "está de pé
+agora": a sessão do OpenWA despareia, e sem janela um `delivered` de há seis
+semanas fazia a tela dizer "ligação ativa" para sempre. Sete dias porque é a
+cadência do próprio produto, o resumo é semanal: passada uma semana sem
+nenhuma confirmação, o Binno não tem observação dessa semana para sustentar a
+afirmação. Passado o prazo, a tela diz que o teste já não é recente o bastante
+e oferece outro.
+
+**Uma regra só, sem atalho ao lado.** A primeira versão desta tela tinha um
+`aceiteLocal ? 'ativa' : ...` antes da função: em `npm run dev`, um OpenWA
+local a responder 2xx punha "ligação ativa" na tela sem linha nenhuma na
+outbox. Uma regra honesta com um atalho ao lado é o atalho, não a regra. O
+estado da tela vem da função e de mais nada.
+
+**E o teste tem de poder ser refeito.** Depois do primeiro teste bem sucedido,
+"Refazer o teste" limpava variáveis e recarregava; a linha antiga continuava
+lá, o estado voltava a "ativa" e o mesmo painel redesenhava-se. O formulário
+ficava inalcançável para sempre, e o guarda exigia esse beco. O botão tem de
+devolver o formulário e permitir um teste novo, e quem entra nele com a ligação
+ativa tem de conseguir voltar sem testar.
+
+**O último teste é consultado como último teste.** A tela pescava-o de uma
+lista de dez entregas de qualquer tipo; dez avisos mais recentes empurravam-no
+para fora e um dono com a ligação a funcionar lia "nunca testou". Era um
+defeito que piorava quanto mais o produto entregasse. A consulta é filtrada por
+`kind = 'test'` no servidor.
 
 O painel não pode regredir para uma primeira dobra composta apenas por nota,
 total de avaliações e gráficos genéricos do Google. Fila, resposta sugerida,

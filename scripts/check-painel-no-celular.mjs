@@ -38,7 +38,8 @@ const corpoDaDeclaracao = (fonte, nome) => {
 };
 
 const falhas = [];
-const exigir = (condicao, mensagem) => { if (!condicao) falhas.push(mensagem); };
+let verificadas = 0;
+const exigir = (condicao, mensagem) => { verificadas += 1; if (!condicao) falhas.push(mensagem); };
 
 const painel = semComentarios(readFileSync(PAINEL, 'utf8'));
 const contrato = readFileSync(CONTRATO, 'utf8');
@@ -115,4 +116,4 @@ if (falhas.length) {
   for (const falha of falhas) console.error(' - %s', falha);
   process.exit(1);
 }
-console.log('Painel no celular: %d proteções verdes.', 8);
+console.log('Painel no celular: %d proteções verdes.', verificadas);

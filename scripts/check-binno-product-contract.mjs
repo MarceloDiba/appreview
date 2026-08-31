@@ -25,9 +25,16 @@ const estilos = read('src/index.css');
 // O WhatsApp saiu do painel em 31/08/2026 e virou destino do menu principal.
 // Provar que ele "saiu" exige provar para onde foi: sem isto, apagar a tela
 // inteira deixaria o guarda verde.
+// Comentários podem conter qualquer coisa, inclusive o texto exato que estas
+// asserções proíbem: os comentários desta tela explicam o atalho antigo citando
+// `'ativa'`. Sem os remover, o guarda ficaria vermelho com o código certo.
+const semComentariosDeArquivo = (fonte) => fonte
+  .replace(/\/\*[\s\S]*?\*\//g, ' ')
+  .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
 const rotas = read('src/App.tsx');
 const menu = read('src/components/layout/Navbar.tsx');
 const telaDoWhatsApp = read('src/pages/WhatsApp.tsx');
+const telaDoWhatsAppWorkspace = semComentariosDeArquivo(read('src/components/dashboard/WhatsAppNotificationWorkspace.tsx'));
 const catalogos = ['pt-BR', 'pt-PT', 'en'].map((idioma) => read(`src/i18n/owner/locales/${idioma}.json`));
 
 // O corpo de `const Nome = ...` até o `;` que fecha a declaração, contando
@@ -221,7 +228,20 @@ const requirements = [
   // estado vem de `lerEstadoDaLigacao`, e `scripts/check-whatsapp-ligacao.mjs`
   // executa esse módulo estado a estado. Aqui garante-se só que a tela o usa em
   // vez de inventar um booleano próprio.
-  ['a tela do WhatsApp lê o estado da ligação do módulo que sabe o que prova entrega', read('src/components/dashboard/WhatsAppNotificationWorkspace.tsx').includes("import { lerEstadoDaLigacao } from '@/lib/whatsappConnection';")],
+  // Esta linha conferia o `import`. Apagar todo o USO e manter o import
+  // deixava-a verde, que é a mesma falha de fundo do guarda vizinho: medir a
+  // presença de um nome em vez do valor que chega à tela. Passa a medir o
+  // valor: a expressão inteira tem de ser a chamada ao módulo, e esse valor tem
+  // de ser o que decide qual painel se desenha.
+  ['a tela do WhatsApp deriva o estado da ligação do módulo, e sem atalho ao lado', /const estadoDaLigacao = lerEstadoDaLigacao\([^;]*\);/.test(telaDoWhatsAppWorkspace)],
+  ['o estado da ligação é o que decide o que a tela do WhatsApp desenha', /const mostrandoFormulario = [^;]*estadoDaLigacao[^;]*;/.test(telaDoWhatsAppWorkspace) && /\{mostrandoFormulario \?/.test(telaDoWhatsAppWorkspace)],
+  // "ligação ativa" não pode nascer em lado nenhum a não ser de uma comparação
+  // com o que o módulo devolveu. Um `? 'ativa' :` ou um `= 'ativa'` aqui é um
+  // segundo decisor, e foi exatamente assim que o atalho `aceiteLocal` entrou.
+  // Só comparação. Uma atribuição (`= 'ativa'`) ou um ramo de ternário
+  // (`? 'ativa' :`) seria um segundo decisor, e foi exatamente assim que o
+  // atalho `aceiteLocal` entrou nesta tela.
+  ['nenhum atalho na tela do WhatsApp produz "ativa" por conta própria', [...telaDoWhatsAppWorkspace.matchAll(/(.{4})'ativa'/g)].every(([, antes]) => antes === '=== ' || antes === '!== ')],
 
   // O contrato fixa violeta #6D43C0 como assinatura e azul #2457D6 para acoes,
   // e ate 30/08/2026 nada verificava isso. O token --primary tinha derivado
