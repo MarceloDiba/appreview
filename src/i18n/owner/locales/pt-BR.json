@@ -774,6 +774,7 @@
         "ratingsAttention": "atenção",
         "ratingsShift": "As 5 estrelas mudaram de {{fiveBefore}}% para {{fiveNow}}% e as notas 1 e 2 mudaram de {{lowBefore}}% para {{lowNow}}% nas últimas 4 semanas.",
         "reputationTitle": "Reputação no Google",
+        "topicsEmpty": "Ainda não há texto suficiente nas avaliações para agrupar temas.",
         "reputationFreshness": "da última busca",
         "reviewsTotal": "avaliações no total",
         "practiceTitle": "Boas práticas",
