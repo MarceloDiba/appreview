@@ -1168,7 +1168,7 @@
     "onboardingPhoneHint": "Filled in during onboarding. Edit it only if notifications should go to another owner.",
     "testRecipient": "The preview goes to",
     "testRecipientHint": "It is the same number as the notifications, in the block below. To change it, change it there. This test is never sent to a customer.",
-    "testRecipientMissing": "Enter the number in the notifications block above.",
+    "testRecipientMissing": "Enter the number in the notifications block below.",
     "weeklyChangeEmpty": "No change has been confirmed this week.",
     "save": "Save preferences",
     "preferencesSaved": "Preferences saved. Binno will use these choices for the delivery queue.",

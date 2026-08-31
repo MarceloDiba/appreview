@@ -1168,7 +1168,7 @@
     "onboardingPhoneHint": "Preenchido no onboarding. Edite aqui apenas se os avisos precisarem ir para outro responsável.",
     "testRecipient": "A prévia vai para",
     "testRecipientHint": "É o mesmo número das notificações, no bloco abaixo. Para trocar, altere lá. Este teste nunca é enviado a um cliente.",
-    "testRecipientMissing": "Informe o número no bloco de notificações, acima.",
+    "testRecipientMissing": "Informe o número no bloco de notificações, abaixo.",
     "weeklyChangeEmpty": "Nenhuma mudança confirmada nesta semana.",
     "save": "Salvar preferências",
     "preferencesSaved": "Preferências salvas. O Binno usará estas escolhas para a fila de envio.",

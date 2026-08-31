@@ -125,6 +125,17 @@ if (atribuicao) {
     'o estado da ligação deixou de ser exatamente o que o módulo devolve: há um atalho ao lado da regra honesta, e é o atalho que decide o que a tela afirma',
     /^lerEstadoDaLigacao\([^;]*\)$/.test(atribuicao[1].trim()),
   );
+  // A forma da chamada nao basta. `lerEstadoDaLigacao(aceiteLocal ? {status:
+  // 'accepted', updatedAt: agora} : ultimoTeste)` satisfaz a regra acima e
+  // reintroduz o atalho inteiro, so que dentro do parenteses: o modulo passa a
+  // julgar um registo forjado em vez do ultimo teste que o servidor devolveu.
+  // Por isso o argumento tambem e preso: ele tem de ser o registo vindo do
+  // servidor, sem ramo e sem objeto construido ali.
+  const argumento = atribuicao[1].trim().replace(/^lerEstadoDaLigacao\(/, '').replace(/\)$/, '').trim();
+  exigir(
+    'o argumento deixou de ser o ultimo teste vindo do servidor: um registo forjado ali dentro faz o modulo honesto julgar uma prova inventada',
+    /^[A-Za-z_$][\w$]*$/.test(argumento),
+  );
 }
 
 // E o valor tem de ser o que a tela DESENHA. Sem isto, apagar todo o uso e
