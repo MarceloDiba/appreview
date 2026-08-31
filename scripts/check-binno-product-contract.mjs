@@ -158,7 +158,22 @@ const requirements = [
   // para `/whatsapp` e passou a ler o telefone lá. O país do negócio ficou.
   ['o painel lê profiles.business_country do dono', /select\('business_country'\)/.test(dashboardCodigo)],
   ['o painel ATRIBUI ao estado o país que leu, em vez de um valor fixo', /setBusinessCountry\(data\?\.business_country \|\| null\)/.test(dashboardCodigo)],
-  ['a fila do painel usa o país do negócio na chamada que monta a resposta sugerida', /buildReplySuggestions\(\{[^}]*businessCountry[^}]*\}\)/.test(dashboardCodigo)],
+  // Em 31/08/2026 a fila do painel passou a pedir o rascunho a
+  // `supabase/functions/sugerir-resposta`, que lê o que o cliente escreveu.
+  // `buildReplySuggestions` deixou de ser a FONTE do rascunho e passou a ser o
+  // CHÃO dele: é o que está na caixa no primeiro quadro e o que fica quando o
+  // modelo não responde.
+  //
+  // Esta asserção não foi enfraquecida por causa disso, foi reapontada. A regra
+  // que ela protegia continua inteira, porque o texto do template continua a ser
+  // publicável em nome do dono, e um dono brasileiro continua a não poder
+  // receber "casa de banho". O que ela ganhou foi a segunda metade, sem a qual
+  // ficaria verde com um template calculado e nunca desenhado: o resultado tem
+  // de chegar à caixa, e chega como o último argumento de `rascunhoNaTela`, que
+  // é a posição do chão. Quem prova a precedência inteira, com o módulo a
+  // correr, é `scripts/check-rascunho-que-le.mjs`.
+  ['a fila do painel usa o país do negócio na chamada que monta o texto padrão da resposta', /buildReplySuggestions\(\{[^}]*businessCountry[^}]*\}\)/.test(dashboardCodigo)],
+  ['o texto padrão da fila do painel continua alcançável: ele chega à caixa do dono como o chão do rascunho do modelo', /rascunhoNaTela\([\s\S]{0,300}?\n\s*suggestion,\n\s*\);/.test(dashboardCodigo) && /draft: naTela\.texto/.test(dashboardCodigo)],
   // A âncora do WhatsApp saiu desta linha em vez de ser reapontada: ela deixou
   // de existir com a tela, e uma asserção sobre um id que ninguém desenha fica
   // verde sem proteger nada.

@@ -599,6 +599,26 @@ encolhe é a ausência de leitura, não o resultado baixo.
   pode insinuar que levará ao comentário correto.
 - Editar, pular e avançar fazem parte da fila. Marcação local não é confirmação
   de publicação no Google.
+- **O rascunho passou a ler a avaliação (decisão de 31/08/2026).** Marcelo, no
+  mesmo dia: "a sugestão de resposta dentro do app não reconhece o idioma que
+  foi escrito automaticamente e não entende o contexto do que foi dito e gera
+  apenas uma resposta padrão". A fila pede o rascunho à função
+  `sugerir-resposta`, que lê o texto do cliente. `src/lib/replySuggestions.ts`
+  **não saiu**: passou de fonte do rascunho a chão do rascunho. Cinco regras,
+  todas presas por `scripts/check-rascunho-que-le.mjs`:
+  1. O texto padrão está na caixa no primeiro quadro. Nunca há caixa vazia nem
+     roda a girar onde antes havia rascunho.
+  2. Qualquer falha fica com o texto padrão: rede, 4xx, 5xx, rascunho recusado
+     pela própria função, resposta vazia ou demora. Um modelo quebrado não pode
+     quebrar a fila.
+  3. O que o dono escreveu ganha de tudo. Uma resposta atrasada do modelo não
+     entra por cima do texto dele, nem por cima de uma caixa que ele apagou.
+  4. Uma chamada por avaliação, na sessão, guardada por id da avaliação. Uma
+     avaliação a que ele volta não é paga de novo, e uma que falhou não é
+     repetida a cada volta.
+  5. A caixa diz de onde veio o que está nela, em três palavras e sem jargão.
+- O Binno continua a não publicar nada em nome do dono. O que sai da função é um
+  rascunho que ele lê, edita e cola, exatamente como o texto padrão sempre foi.
 
 ### Leitura de reputação e recomendações
 

@@ -10,6 +10,14 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import { useGoogleBusinessReviewQueue } from '@/hooks/useGoogleBusinessReviewQueue';
 import { useReviewFunnelMetrics, type ReviewFunnelMetrics } from '@/hooks/useReviewFunnelMetrics';
 import { buildReplySuggestions } from '@/lib/replySuggestions';
+import {
+  pedirRascunho,
+  rascunhoGuardado,
+  rascunhoNaTela,
+  type OrigemNaTela,
+  type ResultadoDoModelo,
+} from '@/lib/rascunhoDoModelo';
+import { pedirRascunhoAoBinno } from '@/lib/sugerirResposta';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdvisorReading } from '@/lib/advisorReading';
 import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
@@ -300,6 +308,28 @@ const RadarNow = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
  * sem nenhum chamador.
  */
 
+/**
+ * Regra 5: o dono tem de saber se está a ler o modelo ou o texto padrão.
+ *
+ * Três palavras ao lado do título, sem jargão: ninguém precisa de saber o que é
+ * um modelo de linguagem para decidir se confia no parágrafo que tem à frente.
+ * O que ele precisa de saber é se aquilo foi escrito a partir da avaliação dele
+ * ou montado a partir de um molde.
+ *
+ * Com rascunho do próprio dono não há etiqueta nenhuma. Depois de ele escrever,
+ * o texto é dele, e qualquer uma das três frases abaixo seria mentira sobre a
+ * origem do que está na caixa.
+ */
+const OrigemDoRascunho = ({ origem }: { origem: OrigemNaTela }) => {
+  const { t } = useOwnerTranslation();
+  if (origem === 'dono') return null;
+  return <span className="text-xs text-slate-500">{origem === 'modelo'
+    ? t('dashboard.cockpit.approved.draftFromReview')
+    : origem === 'pedindo'
+      ? t('dashboard.cockpit.approved.draftReading')
+      : t('dashboard.cockpit.approved.draftStandard')}</span>;
+};
+
 const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean; businessCountry: string | null }) => {
   const { t, i18n } = useOwnerTranslation();
   const [selectedId, setSelectedId] = useState<string | null>(reviews[0]?.id || null);
@@ -311,7 +341,59 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
   const suggestion = demo
     ? baseSuggestion.replace(/\.\s*—\s*/g, '. ').replace(/\s*—\s*/g, ', ')
     : baseSuggestion;
-  const currentAction = selected ? actions[selected.id] || { draft: suggestion } : { draft: '' };
+  // O rascunho que lê a avaliação, por avaliação, guardado na sessão. Ver
+  // `src/lib/rascunhoDoModelo.ts` para as quatro regras e o porquê de cada uma.
+  const [doModelo, setDoModelo] = useState<Record<string, ResultadoDoModelo>>({});
+
+  // Uma chamada por avaliação, quando o dono a seleciona. Nunca por tecla nem
+  // por quadro: a única dependência que muda por seleção é `selected?.id`, e o
+  // cache do módulo cuida das voltas, inclusive depois desta fila remontar.
+  //
+  // `actions` fica FORA das dependências de propósito. Ele muda a cada letra
+  // que o dono escreve, e reagir a isso transformaria uma chamada por avaliação
+  // numa por tecla, que é o oposto da regra 4. O valor lido aqui é o do momento
+  // da seleção, que é o único momento em que esta decisão se toma.
+  useEffect(() => {
+    if (demo || !selected) return;
+    // Sem texto não há o que ler, e a função devolveria `SEM_COMENTARIO`. O
+    // template já responde a uma avaliação que é só nota.
+    if (selected.comment.trim().length < 3) return;
+    // Regra 3, aplicada antes de gastar: com rascunho do dono nesta avaliação,
+    // a resposta do modelo não teria como entrar na tela de qualquer forma.
+    if (actions[selected.id] !== undefined) return;
+
+    const guardado = rascunhoGuardado(selected.id);
+    if (guardado) {
+      setDoModelo((atual) => ({ ...atual, [selected.id]: guardado }));
+      return;
+    }
+
+    let vivo = true;
+    setDoModelo((atual) => ({ ...atual, [selected.id]: { origem: 'pedindo' } }));
+    void pedirRascunho(
+      selected.id,
+      { comment: selected.comment, rating: selected.rating, businessName: snapshot.business.name },
+      pedirRascunhoAoBinno,
+    ).then((resultado) => {
+      if (vivo) setDoModelo((atual) => ({ ...atual, [selected.id]: resultado }));
+    });
+    return () => { vivo = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.id, demo]);
+
+  // Quem decide o que está na caixa é `rascunhoNaTela`, e não este componente:
+  // a ordem das três perguntas É a regra 3, e ela vive num lugar que se prova
+  // sem React. O template entra como último argumento, que é o mesmo que dizer
+  // que ele é o chão: enquanto o modelo não responde, e se ele nunca responder,
+  // é ele que está na tela.
+  const naTela = rascunhoNaTela(
+    selected ? actions[selected.id]?.draft : undefined,
+    selected ? doModelo[selected.id] : undefined,
+    suggestion,
+  );
+  const currentAction: ActionState = selected
+    ? { ...(actions[selected.id] || {}), draft: naTela.texto }
+    : { draft: '' };
   const save = (next: ActionState) => {
     if (!selected) return;
     setActions((current) => {
@@ -353,7 +435,7 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
     <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2><span className="text-sm text-slate-500">{t('dashboard.cockpit.approved.queuePosition', { current: index + 1, total: reviews.length })}</span></div>
     <div className="p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex flex-wrap items-center gap-2"><p className="font-semibold text-slate-950">{selected.reviewerName || t('dashboard.cockpit.layout.anonymousReviewer')}</p><Stars rating={selected.rating} medium /></div><p className="mt-1 text-xs text-slate-500">{formatAge(selected.publishedAt, i18n.language)}</p></div><div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => select(index - 1)} disabled={index === 0}><ChevronLeft className="mr-1 h-4 w-4" />{t('dashboard.cockpit.approved.previous')}</Button><Button variant="outline" size="sm" onClick={() => select(index + 1)} disabled={index >= reviews.length - 1}>{t('dashboard.cockpit.approved.next')}<ChevronRight className="ml-1 h-4 w-4" /></Button></div></div>
       <blockquote className="mt-5 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">“{selected.comment}”</blockquote>
-      <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4"><span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-[#2457D6]">{t('dashboard.cockpit.layout.replyTitle')}</span>{editing ? <Textarea value={currentAction.draft} onChange={(event) => save({ draft: event.target.value })} className="mt-3 min-h-28 resize-y text-sm leading-6" /> : <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-700">{currentAction.draft}</p>}<div className="mt-4 flex flex-wrap gap-2">{selected.reviewUrl ? <Button asChild className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><a href={selected.reviewUrl} target="_blank" rel="noreferrer" onClick={() => void copyReply()}><Copy className="mr-2 h-4 w-4" />{t('dashboard.cockpit.assisted.copyAndOpenReview')}<ExternalLink className="ml-2 h-4 w-4" /></a></Button> : <Button onClick={() => void copyReply()} className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><Copy className="mr-2 h-4 w-4" />{currentAction.copied ? t('dashboard.advisor.copiedButton') : t('dashboard.cockpit.assisted.copy')}</Button>}<Button variant="outline" onClick={() => setEditing((value) => !value)}>{editing ? t('dashboard.cockpit.approved.doneEditing') : t('dashboard.cockpit.approved.edit')}</Button><Button variant="outline" onClick={() => select(Math.min(index + 1, reviews.length - 1))}>{t('dashboard.cockpit.approved.skip')}</Button></div></div>
+      <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4"><div className="flex flex-wrap items-center gap-2"><span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-[#2457D6]">{t('dashboard.cockpit.layout.replyTitle')}</span><OrigemDoRascunho origem={naTela.origem} /></div>{editing ? <Textarea value={currentAction.draft} onChange={(event) => save({ draft: event.target.value })} className="mt-3 min-h-28 resize-y text-sm leading-6" /> : <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-700">{currentAction.draft}</p>}<div className="mt-4 flex flex-wrap gap-2">{selected.reviewUrl ? <Button asChild className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><a href={selected.reviewUrl} target="_blank" rel="noreferrer" onClick={() => void copyReply()}><Copy className="mr-2 h-4 w-4" />{t('dashboard.cockpit.assisted.copyAndOpenReview')}<ExternalLink className="ml-2 h-4 w-4" /></a></Button> : <Button onClick={() => void copyReply()} className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><Copy className="mr-2 h-4 w-4" />{currentAction.copied ? t('dashboard.advisor.copiedButton') : t('dashboard.cockpit.assisted.copy')}</Button>}<Button variant="outline" onClick={() => setEditing((value) => !value)}>{editing ? t('dashboard.cockpit.approved.doneEditing') : t('dashboard.cockpit.approved.edit')}</Button><Button variant="outline" onClick={() => select(Math.min(index + 1, reviews.length - 1))}>{t('dashboard.cockpit.approved.skip')}</Button></div></div>
       <div className="mt-4 flex flex-wrap gap-2">{reviews.slice(0, 8).map((review) => <button key={review.id} type="button" onClick={() => { setSelectedId(review.id); setEditing(false); }} className={`rounded-xl border px-3 py-2 text-left text-xs ${review.id === selected.id ? 'border-[#2457D6] bg-blue-50 text-[#2457D6]' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}><span className="block max-w-32 truncate font-semibold">{review.reviewerName || t('dashboard.cockpit.layout.anonymousReviewer')}</span><Stars rating={review.rating} /></button>)}</div>
     </div>
   </CardContent></Card>;
