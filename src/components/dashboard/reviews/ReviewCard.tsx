@@ -85,7 +85,14 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessNam
         </a>
       )}
 
+      {/*
+        O mesmo espaço de identificadores da fila somada
+        (`src/lib/filaDeRespostas.ts`, `google-publico:${review_id}`), e não um
+        id cru. A mesma avaliação vista aqui e vista na fila de `/reviews` é a
+        mesma avaliação: partilhando a chave, ela é lida uma vez e não duas.
+      */}
       <ReplySuggestions
+        reviewId={`google-publico:${review.review_id}`}
         channel="public"
         rating={review.rating}
         text={review.text}

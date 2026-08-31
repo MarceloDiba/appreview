@@ -22,10 +22,22 @@
 // estruturais existem so para provar que a tela usa mesmo essa politica em vez
 // de tomar uma segunda decisao por conta propria.
 //
+// AS DUAS TELAS
+//
+// A fila do painel (`ApprovedCockpitDashboard`) e a fila de `/reviews`
+// (`ReplySuggestions`, dentro de `FilaDeRespostas`) rascunham resposta para a
+// mesma avaliaçao. Uma politica so decide o que esta na caixa nas duas, e a
+// secçao "As duas telas dizem a MESMA coisa" prende isso: uma copia local de
+// `rascunhoNaTela` ou da etiqueta, em qualquer arquivo de `src/`, fica
+// vermelha, mesmo num arquivo que ainda nao existe.
+//
+// O que difere em `/reviews` esta na sua propria secçao: o painel de la mostra
+// varias variantes do molde, e o comentario privado nao passa pelo modelo.
+//
 // AS MUTAÇOES QUE PROVARAM CADA VERMELHO
 //
-// Trinta e nove, uma por caminho de codigo, todas confirmadas vermelhas PELA
-// asserçao que nomeiam e todas revertidas depois. Onde uma asserçao e gerada em
+// Cinquenta e cinco, uma por caminho de codigo, todas confirmadas vermelhas
+// PELA asserçao que nomeiam e todas revertidas depois. Onde uma asserçao e gerada em
 // laço (as seis falhas da regra 2, as tres chaves nos tres catalogos), foi
 // provado um membro por caminho, que e provar o gerador.
 //
@@ -47,6 +59,15 @@
 //            template da ultima posiçao; apagar a chamada ao template; passar
 //            outro transporte; apontar o transporte a outra funçao; apagar cada
 //            recusa da funçao e o codigo `RASCUNHO_RECUSADO`.
+//   o par    apontar CADA UMA das duas telas para uma copia local de
+//            `rascunhoNaTela`; apagar o import da politica; apagar o import da
+//            etiqueta; escrever uma etiqueta local; chamar a funçao por fora da
+//            porta partilhada.
+//   /reviews por o texto do modelo debaixo do titulo de uma variante do molde;
+//            dar o resultado do modelo as variantes; por o idioma na chave do
+//            cartao do modelo; mandar o comentario privado ao modelo; apagar o
+//            portao do `open`, o do texto curto, o `reviewId` obrigatorio, o id
+//            que a fila passa e o prefixo do id da leitura publica.
 //
 // Duas asserçoes NAO passaram nesta prova na primeira tentativa e foram
 // substituidas, nao removidas: `/pedirRascunhoAoBinno/.test(painel)` ficava
@@ -57,8 +78,8 @@
 //
 // `scripts/snapshots/` nao entra aqui: nao ha copy nova a congelar.
 
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const raiz = process.cwd();
@@ -75,12 +96,29 @@ const semComentarios = (fonte) => fonte
 const POLITICA = 'src/lib/rascunhoDoModelo.ts';
 const TRANSPORTE = 'src/lib/sugerirResposta.ts';
 const PAINEL = 'src/components/dashboard/ApprovedCockpitDashboard.tsx';
+const SUGESTOES = 'src/components/dashboard/ReplySuggestions.tsx';
+const FILA = 'src/components/dashboard/reviews/FilaDeRespostas.tsx';
+const CARTAO_PUBLICO = 'src/components/dashboard/reviews/ReviewCard.tsx';
+const ETIQUETA = 'src/components/dashboard/OrigemDoRascunho.tsx';
 const TEMPLATE = 'src/lib/replySuggestions.ts';
 const FUNCAO = 'supabase/functions/sugerir-resposta/index.ts';
 
 const painel = semComentarios(ler(PAINEL));
+const sugestoes = semComentarios(ler(SUGESTOES));
+const fila = semComentarios(ler(FILA));
+const cartaoPublico = semComentarios(ler(CARTAO_PUBLICO));
+const etiqueta = semComentarios(ler(ETIQUETA));
 const transporte = semComentarios(ler(TRANSPORTE));
 const funcao = ler(FUNCAO);
+
+/**
+ * As telas que rascunham resposta. Sao as que tem de concordar sobre a mesma
+ * avaliacao, e por isso sao medidas em conjunto e nunca uma a uma.
+ */
+const SUPERFICIES = [
+  ['a fila do painel', PAINEL, painel],
+  ['a fila de /reviews', SUGESTOES, sugestoes],
+];
 
 const {
   rascunhoNaTela,
@@ -331,32 +369,176 @@ for (const [nome, comportamento] of [
     new Set(origens.map(([, o]) => o)).size === 4,
   );
 
-  // A etiqueta existe na tela, e diz as tres coisas nos tres idiomas. Sem a
-  // metade dos catalogos, apagar as frases deixaria a etiqueta a desenhar a
-  // propria chave.
-  exigir(
-    'regra 5: o painel desenha a etiqueta de origem ao lado do titulo da resposta',
-    /<OrigemDoRascunho origem=\{naTela\.origem\} \/>/.test(painel),
-  );
+  // A etiqueta existe nas DUAS telas, sai de um arquivo so, e diz as tres
+  // coisas nos tres idiomas. Sem a metade dos catalogos, apagar as frases
+  // deixaria a etiqueta a desenhar a propria chave.
   exigir(
     'regra 5: a etiqueta desaparece quando o texto passa a ser do dono, em vez de mentir sobre a origem',
-    /if \(origem === 'dono'\) return null;/.test(painel),
+    /if \(origem === 'dono'\) return null;/.test(etiqueta),
   );
+  for (const [nome, , fonte] of SUPERFICIES) {
+    exigir(
+      `regra 5: ${nome} desenha a etiqueta de origem, e a origem vem de rascunhoNaTela`,
+      /<OrigemDoRascunho origem=\{naTela\.origem\} \/>/.test(fonte),
+    );
+  }
   for (const chave of ['draftFromReview', 'draftReading', 'draftStandard']) {
     exigir(
-      `regra 5: o painel usa a chave dashboard.cockpit.approved.${chave}`,
-      painel.includes(`t('dashboard.cockpit.approved.${chave}')`),
+      `regra 5: a etiqueta partilhada usa a chave reply.${chave}`,
+      etiqueta.includes(`t('reply.${chave}')`),
     );
     for (const idioma of ['pt-BR', 'pt-PT', 'en']) {
       const catalogo = JSON.parse(ler(`src/i18n/owner/locales/${idioma}.json`));
-      const valor = catalogo?.dashboard?.cockpit?.approved?.[chave];
+      const valor = catalogo?.reply?.[chave];
       exigir(
-        `regra 5: ${idioma}.json tem texto para ${chave}`,
+        `regra 5: ${idioma}.json tem texto para reply.${chave}`,
         typeof valor === 'string' && valor.trim().length > 0,
       );
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// As duas telas dizem a MESMA coisa sobre a MESMA avaliacao
+// ---------------------------------------------------------------------------
+//
+// A fila do painel e a fila de `/reviews` rascunham resposta para a mesma
+// avaliacao. Enquanto cada uma tivesse a sua decisao sobre qual texto esta na
+// caixa, elas podiam divergir sem que ninguem reparasse: o dono lia uma coisa
+// no painel e outra em `/reviews`, sobre a mesma pessoa. Duas politicas a
+// decidir a mesma coisa e a classe de defeito que este projeto ja pagou varias
+// vezes, e aqui seria pior, porque as duas copias ficariam a discordar.
+//
+// A regra: existe UMA politica, e as duas telas usam-na.
+
+for (const [nome, , fonte] of SUPERFICIES) {
+  exigir(
+    `${nome} decide o texto pela politica partilhada (${POLITICA}), e nao por uma copia propria`,
+    new RegExp(`import \\{[\\s\\S]*?rascunhoNaTela[\\s\\S]*?\\} from '@/lib/rascunhoDoModelo'`).test(fonte)
+    && /rascunhoNaTela\(/.test(fonte),
+  );
+  exigir(
+    `${nome} pede o rascunho pela mesma porta partilhada, e nao por uma chamada propria`,
+    /pedirRascunho\(/.test(fonte) && !/functions\.invoke\(/.test(fonte),
+  );
+  // A etiqueta tambem e uma so. Duas telas com frases proprias voltariam a
+  // poder dizer coisas diferentes sobre a mesma avaliacao, que e o mesmo
+  // defeito noutro lugar.
+  exigir(
+    `${nome} usa a etiqueta de origem partilhada, e nao uma frase propria`,
+    new RegExp(`from '@/components/dashboard/OrigemDoRascunho'`).test(fonte),
+  );
+}
+
+// E a rede de seguranca que apanha uma tela que ainda nem existe: as duas
+// pecas partilhadas tem de estar definidas UMA vez em todo o `src/`. Uma copia
+// local em qualquer arquivo, com ou sem import, fica vermelha aqui.
+const arquivosDeSrc = [];
+const varrer = (pasta) => {
+  for (const entrada of readdirSync(pasta, { withFileTypes: true })) {
+    const caminho = join(pasta, entrada.name);
+    if (entrada.isDirectory()) varrer(caminho);
+    else if (/\.(ts|tsx)$/.test(entrada.name)) arquivosDeSrc.push(caminho);
+  }
+};
+varrer(resolve(raiz, 'src'));
+
+const quemDefine = (nome) => arquivosDeSrc.filter((caminho) =>
+  new RegExp(`(const|function)\\s+${nome}\\b\\s*[=(:]`).test(semComentarios(readFileSync(caminho, 'utf8'))));
+
+for (const [nome, esperado] of [['rascunhoNaTela', POLITICA], ['OrigemDoRascunho', ETIQUETA]]) {
+  const definem = quemDefine(nome);
+  exigir(
+    `${nome} e definido uma unica vez em src/ (uma copia local faria as telas divergirem)`,
+    definem.length === 1 && definem[0].endsWith(esperado.split('/').pop()),
+  );
+  if (definem.length !== 1) {
+    console.error(`  ${nome} definido em: ${definem.map((c) => c.replace(`${raiz}/`, '')).join(', ')}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// A fila de /reviews: o que e diferente la, e por que
+// ---------------------------------------------------------------------------
+//
+// Aquele painel mostra VARIAS variantes do molde, e nao um rascunho so. Duas
+// decisoes de 31/08/2026, ambas presas aqui.
+
+// 1. O rascunho do modelo entra como um cartao A MAIS, a frente das variantes.
+//    Reescrever o corpo de uma variante deixaria o titulo e a dica dela a
+//    descrever um texto que o molde nao produziu: "Curta e directa" por cima de
+//    um paragrafo que pode nao ser nem curto nem directo.
+exigir(
+  '/reviews: o cartao do modelo e ADICIONAL, e as variantes do molde entram inteiras a seguir',
+  /\.\.\.suggestions\.map\(\(suggestion\) => \(\{/.test(sugestoes)
+  && /title: suggestion\.title,/.test(sugestoes)
+  && /hint: suggestion\.hint,/.test(sugestoes)
+  && /padrao: suggestion\.body,/.test(sugestoes),
+);
+// A metade que faz a regra valer: nenhuma variante do molde recebe o texto do
+// modelo. Exatamente um cartao carrega o resultado do modelo, e e o dele.
+exigir(
+  '/reviews: nenhuma variante do molde recebe o rascunho do modelo',
+  /doModelo: undefined as ResultadoDoModelo \| undefined,/.test(sugestoes),
+);
+exigir(
+  '/reviews: exatamente um cartao carrega o resultado do modelo',
+  (sugestoes.match(/^\s*doModelo,$/gm) || []).length === 1,
+);
+
+// 2. A gaveta onde a edicao do dono e guardada NAO leva o idioma no cartao do
+//    modelo. Se a chave mudasse quando o modelo chega, o texto que o dono ja
+//    tinha escrito ficaria noutra gaveta e a caixa encher-se-ia sozinha, que e
+//    a regra 3 quebrada pelo relogio em vez de pela precedencia.
+const chaveDoModelo = sugestoes.match(/chave: `([^`]*)`,/);
+exigir('/reviews: o cartao do modelo deixou de ter chave propria.', chaveDoModelo !== null);
+if (chaveDoModelo) {
+  exigir(
+    '/reviews: a chave do cartao do modelo nao depende do selector de idioma',
+    chaveDoModelo[1] === 'modelo:${reviewId}',
+  );
+}
+
+// 3. O comentario privado NAO e pedido ao modelo. A funcao esta escrita e
+//    implantada para o publico: manda assinar com o nome do negocio e RECUSA
+//    promessa de reparacao, que em privado e a coisa certa a dizer e tem uma
+//    variante inteira do molde (`com-reparacao`).
+exigir(
+  '/reviews: o comentario privado nao e mandado a uma funcao afinada para o publico',
+  /if \(channel !== 'public'\) return;/.test(sugestoes),
+);
+
+// 4. Uma chamada por avaliacao, e so quando o dono ABRE o painel. Pedir no
+//    desenho de cada cartao pagaria pela fila inteira sempre que a pagina abre.
+exigir(
+  '/reviews: o rascunho e pedido ao abrir o painel, e nao no desenho de cada cartao da fila',
+  /useEffect\(\(\) => \{\s*if \(!open\) return;/.test(sugestoes),
+);
+exigir(
+  '/reviews: uma avaliacao sem texto escrito nao gasta chamada',
+  /if \(comentario\.length < 3\) return;/.test(sugestoes),
+);
+
+// 5. O id da avaliacao chega de fora, e e obrigatorio. Enquanto `businessCountry`
+//    era opcional, quatro das sete chamadas do projeto esqueciam-no e o
+//    sintoma so aparecia na tela do dono. Um `reviewId` esquecido faria duas
+//    avaliacoes partilharem o mesmo rascunho, que e pior: o dono leria a
+//    resposta de outra pessoa. Esquecer passa a ser erro de compilacao.
+exigir(
+  '/reviews: reviewId e obrigatorio no tipo, e nao um campo que se pode esquecer',
+  /\n  reviewId: string;/.test(sugestoes),
+);
+exigir(
+  '/reviews: a fila somada passa o id do item, que ja leva o prefixo da origem',
+  /reviewId=\{item\.id\}/.test(fila),
+);
+// A leitura publica do Google (Definicoes) mostra as MESMAS avaliacoes que a
+// fila. Partilhando o espaco de identificadores, a mesma avaliacao e lida uma
+// vez, e nao uma vez por tela.
+exigir(
+  'a leitura publica usa o mesmo espaco de identificadores da fila somada',
+  /reviewId=\{`google-publico:\$\{review\.review_id\}`\}/.test(cartaoPublico),
+);
 
 // ---------------------------------------------------------------------------
 // A tela usa mesmo esta politica, em vez de decidir por conta propria

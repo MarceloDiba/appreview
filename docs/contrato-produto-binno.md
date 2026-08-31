@@ -619,6 +619,27 @@ encolhe é a ausência de leitura, não o resultado baixo.
   5. A caixa diz de onde veio o que está nela, em três palavras e sem jargão.
 - O Binno continua a não publicar nada em nome do dono. O que sai da função é um
   rascunho que ele lê, edita e cola, exatamente como o texto padrão sempre foi.
+- **As duas telas dizem a mesma coisa.** A fila do painel e a fila de `/reviews`
+  rascunham resposta para a mesma avaliação, e uma política só decide o que está
+  na caixa nas duas (`src/lib/rascunhoDoModelo.ts`). Uma cópia local dessa
+  decisão, em qualquer arquivo, é erro de guarda: duas cópias voltariam a poder
+  discordar sobre a mesma pessoa, que é a classe de defeito que a fila somada e
+  a ordem única já existem para não ter.
+- **Em `/reviews`, o rascunho do modelo é um cartão a mais, nunca uma variante
+  reescrita.** Aquele painel mostra várias variantes do molde, cada uma com o
+  seu título e a sua dica ("Curta e directa", "A escolha segura quando ainda não
+  sabe o que correu mal"). Pôr o texto do modelo debaixo desses rótulos seria uma
+  etiqueta a mentir sobre o que está na caixa. O cartão do modelo entra à frente,
+  com nome próprio, e as variantes ficam intactas por baixo.
+- **O comentário privado não passa pelo modelo.** `channel === 'private'` é uma
+  mensagem directa a quem deixou contacto no QR, não uma resposta publicada. A
+  função `sugerir-resposta` está escrita e implantada para o público: pede "a
+  resposta que o dono publicaria", manda assinar com o nome do negócio e recusa
+  qualquer promessa de reparação. Essa recusa é certa em público e errada em
+  privado, onde oferecer resolver é exactamente o que o dono quer dizer, e onde o
+  molde já tem uma variante inteira para isso (`com-reparacao`). O comentário
+  privado fica com as variantes privadas do molde. Um rascunho lido para o canal
+  privado exige outro pedido ao modelo e outra implantação da função.
 
 ### Leitura de reputação e recomendações
 

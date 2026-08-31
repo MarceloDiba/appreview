@@ -256,6 +256,7 @@ const ItemDaFilaCard = ({
         )}
 
         <ReplySuggestions
+          reviewId={item.id}
           channel={item.origem === 'comentario-privado' ? 'private' : 'public'}
           rating={item.nota}
           text={item.texto}

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -10,9 +10,25 @@ import {
   type ReplyChannel,
   type ReplyLocale,
 } from '@/lib/replySuggestions';
+import {
+  pedirRascunho,
+  rascunhoGuardado,
+  rascunhoNaTela,
+  type ResultadoDoModelo,
+} from '@/lib/rascunhoDoModelo';
+import { pedirRascunhoAoBinno } from '@/lib/sugerirResposta';
+import OrigemDoRascunho from '@/components/dashboard/OrigemDoRascunho';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 interface ReplySuggestionsProps {
+  /**
+   * O id do item na fila somada (`ItemDaFila.id`, com o prefixo da origem).
+   * É por ele que o rascunho do modelo é guardado na sessão, para que uma
+   * avaliação a que o dono volta não seja paga duas vezes. O prefixo importa:
+   * sem ele, um caso privado e uma avaliação do Google com o mesmo número
+   * partilhariam o mesmo rascunho.
+   */
+  reviewId: string;
   /** `null` para o caso interno em que o cliente escreveu sem avaliar. */
   rating: number | null;
   text?: string | null;
@@ -40,8 +56,36 @@ const LOCALES: ReplyLocale[] = ['pt', 'es', 'en'];
  * E não publicamos nada em nome de ninguém. Responder no Google exige o perfil
  * de empresa do próprio dono; o botão leva-o lá, o texto vai na área de
  * transferência.
+ *
+ * O RASCUNHO QUE LÊ A AVALIAÇÃO (31/08/2026)
+ *
+ * O painel de variantes continua inteiro. O que mudou é que, numa avaliação
+ * PÚBLICA, o painel pede também um rascunho a `sugerir-resposta`, que lê o que
+ * o cliente escreveu, e o põe como um cartão A MAIS, à frente das variantes.
+ * Nenhuma variante é reescrita: o título e a dica de cada uma descrevem o texto
+ * que o molde produz ("Curta e directa", "A escolha segura quando ainda não
+ * sabe o que correu mal"), e pôr o texto do modelo debaixo desses rótulos seria
+ * uma etiqueta a mentir sobre o que está na caixa.
+ *
+ * POR QUE O COMENTÁRIO PRIVADO NÃO PASSA POR AQUI
+ *
+ * `channel === 'private'` é uma mensagem directa a quem deixou contacto no QR,
+ * e não uma resposta publicada. A função `sugerir-resposta` está escrita e
+ * implantada para o público, e as regras dela dizem-no: pede "a resposta que o
+ * dono do negócio publicaria", manda terminar com o nome do negócio numa linha
+ * própria (uma assinatura pública) e RECUSA qualquer promessa de reparação.
+ * Essa última regra existe porque em público uma oferta de dinheiro ou refeição
+ * atrai reclamação por interesse; em privado, ela é exactamente a coisa certa a
+ * dizer, e o molde tem uma variante inteira para isso (`com-reparacao`).
+ *
+ * Mandar o texto privado por uma função afinada para o público entregaria ao
+ * dono um recado assinado como se fosse um comunicado, e proibido de oferecer o
+ * que ele quer oferecer. O comentário privado fica com as variantes privadas do
+ * molde, escritas para essa conversa. Um rascunho lido para o canal privado
+ * pede outro pedido ao modelo, e outra implantação da função.
  */
 const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
+  reviewId,
   rating,
   text,
   customerName,
@@ -55,6 +99,42 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
   const [locale, setLocale] = useState<ReplyLocale>(() => detectReplyLocale(text));
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [doModelo, setDoModelo] = useState<ResultadoDoModelo | undefined>(undefined);
+
+  // Uma chamada por avaliação, e só quando o dono ABRE o painel.
+  //
+  // Abrir o painel é o "seleccionar" desta tela. A fila de `/reviews` é uma
+  // lista, não uma selecção: pedir no desenho de cada cartão seria pagar pela
+  // fila inteira sempre que a página abre, para responder a uma avaliação. O
+  // cache do módulo cuida das voltas, e fechar e reabrir não paga de novo.
+  //
+  // Ao contrário da fila do painel, aqui não se pergunta antes se o dono já
+  // escreveu: as edições dele são por variante e por idioma, e ter mexido numa
+  // variante não quer dizer que ele não queira ler a resposta que leu a
+  // avaliação. Cada cartão continua protegido um a um por `rascunhoNaTela`.
+  useEffect(() => {
+    if (!open) return;
+    // O comentário privado não passa por aqui. Ver o cabeçalho do componente.
+    if (channel !== 'public') return;
+    const comentario = (text || '').trim();
+    // Sem texto não há o que ler, e a função devolveria `SEM_COMENTARIO`.
+    if (comentario.length < 3) return;
+
+    const guardado = rascunhoGuardado(reviewId);
+    if (guardado) {
+      setDoModelo(guardado);
+      return;
+    }
+
+    let vivo = true;
+    setDoModelo({ origem: 'pedindo' });
+    void pedirRascunho(
+      reviewId,
+      { comment: comentario, rating, businessName: businessName ?? null },
+      pedirRascunhoAoBinno,
+    ).then((resultado) => { if (vivo) setDoModelo(resultado); });
+    return () => { vivo = false; };
+  }, [open, channel, reviewId, text, rating, businessName]);
 
   const suggestions = useMemo(
     () =>
@@ -70,7 +150,42 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
     [rating, text, customerName, businessName, businessCountry, channel, locale]
   );
 
-  const bodyOf = (id: string, fallback: string) => drafts[`${locale}:${id}`] ?? fallback;
+  /**
+   * Os cartões do painel: o do modelo à frente, quando existe, e as variantes
+   * do molde a seguir, intactas.
+   *
+   * `chave` é onde a edição do dono é guardada. A do modelo NÃO leva o idioma:
+   * o modelo responde na língua em que o cliente escreveu, e o selector de
+   * idioma acima manda nas variantes do molde, não nele. Fixar a chave também
+   * é o que impede a regra 3 de ser quebrada pelo relógio: se a chave mudasse
+   * quando o modelo chega, o texto que o dono já tinha escrito ficaria noutra
+   * gaveta e a caixa voltaria a encher-se sozinha.
+   *
+   * `padrao` do cartão do modelo é o corpo da primeira variante, e não uma
+   * string vazia: é o chão dele. Assim, mesmo que este cartão viesse a ser
+   * desenhado sem resposta do modelo, ele mostraria texto útil em vez de uma
+   * caixa em branco.
+   */
+  const cartoes = [
+    ...(doModelo?.origem === 'modelo'
+      ? [{
+          id: 'do-modelo',
+          chave: `modelo:${reviewId}`,
+          title: t('reply.modelTitle'),
+          hint: t('reply.modelHint'),
+          padrao: suggestions[0]?.body || '',
+          doModelo,
+        }]
+      : []),
+    ...suggestions.map((suggestion) => ({
+      id: suggestion.id,
+      chave: `${locale}:${suggestion.id}`,
+      title: suggestion.title,
+      hint: suggestion.hint,
+      padrao: suggestion.body,
+      doModelo: undefined as ResultadoDoModelo | undefined,
+    })),
+  ];
 
   const handleCopy = async (id: string, body: string) => {
     try {
@@ -111,9 +226,16 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
   return (
     <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+        <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
           <MessageSquareQuote size={16} aria-hidden="true" />
           {t('reply.title')}
+          {/*
+            Enquanto o pedido está em curso não há cartão do modelo a que
+            prender a etiqueta, e é o painel inteiro que está à espera. Depois
+            de resolver, quem diz de onde veio o texto é cada cartão, porque a
+            resposta é diferente de cartão para cartão.
+          */}
+          {doModelo?.origem === 'pedindo' && <OrigemDoRascunho origem="pedindo" />}
         </div>
         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setOpen(false)}>
           {t('reply.close')}
@@ -140,22 +262,29 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
       </div>
 
       <div className="mt-4 space-y-4">
-        {suggestions.map((suggestion) => {
-          const body = bodyOf(suggestion.id, suggestion.body);
-          const isCopied = copiedId === suggestion.id;
+        {cartoes.map((cartao) => {
+          // Quem decide o que está nesta caixa é a mesma `rascunhoNaTela` da
+          // fila do painel, cartão a cartão: o que o dono escreveu ganha do
+          // modelo, e o modelo ganha do molde. Duas telas, uma regra só.
+          const naTela = rascunhoNaTela(drafts[cartao.chave], cartao.doModelo, cartao.padrao);
+          const body = naTela.texto;
+          const isCopied = copiedId === cartao.id;
           return (
-            <div key={suggestion.id} className="rounded-lg border border-gray-200 bg-white p-3">
-              <p className="text-sm font-medium text-gray-900">{suggestion.title}</p>
-              <p className="mt-0.5 text-xs text-gray-500">{suggestion.hint}</p>
+            <div key={cartao.id} className="rounded-lg border border-gray-200 bg-white p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-medium text-gray-900">{cartao.title}</p>
+                <OrigemDoRascunho origem={naTela.origem} />
+              </div>
+              <p className="mt-0.5 text-xs text-gray-500">{cartao.hint}</p>
 
               <Textarea
                 value={body}
                 onChange={(e) =>
-                  setDrafts((prev) => ({ ...prev, [`${locale}:${suggestion.id}`]: e.target.value }))
+                  setDrafts((prev) => ({ ...prev, [cartao.chave]: e.target.value }))
                 }
                 rows={Math.min(12, body.split('\n').length + 2)}
                 className="mt-3 resize-y text-sm"
-                aria-label={t('reply.textareaLabel', { title: suggestion.title })}
+                aria-label={t('reply.textareaLabel', { title: cartao.title })}
               />
 
               {/*
@@ -168,7 +297,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
                 empilha; a partir de `sm` volta a ser a linha de sempre.
               */}
               <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                <Button size="sm" variant="outline" className="w-full sm:w-auto" onClick={() => handleCopy(suggestion.id, body)}>
+                <Button size="sm" variant="outline" className="w-full sm:w-auto" onClick={() => handleCopy(cartao.id, body)}>
                   {isCopied ? (
                     <Check size={14} className="mr-2" aria-hidden="true" />
                   ) : (

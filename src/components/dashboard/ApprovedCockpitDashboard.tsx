@@ -14,10 +14,10 @@ import {
   pedirRascunho,
   rascunhoGuardado,
   rascunhoNaTela,
-  type OrigemNaTela,
   type ResultadoDoModelo,
 } from '@/lib/rascunhoDoModelo';
 import { pedirRascunhoAoBinno } from '@/lib/sugerirResposta';
+import OrigemDoRascunho from '@/components/dashboard/OrigemDoRascunho';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdvisorReading } from '@/lib/advisorReading';
 import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
@@ -307,28 +307,6 @@ const RadarNow = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
  * desativado e mais nada. `src/lib/advisorPilot.ts` saiu junto, porque ficou
  * sem nenhum chamador.
  */
-
-/**
- * Regra 5: o dono tem de saber se está a ler o modelo ou o texto padrão.
- *
- * Três palavras ao lado do título, sem jargão: ninguém precisa de saber o que é
- * um modelo de linguagem para decidir se confia no parágrafo que tem à frente.
- * O que ele precisa de saber é se aquilo foi escrito a partir da avaliação dele
- * ou montado a partir de um molde.
- *
- * Com rascunho do próprio dono não há etiqueta nenhuma. Depois de ele escrever,
- * o texto é dele, e qualquer uma das três frases abaixo seria mentira sobre a
- * origem do que está na caixa.
- */
-const OrigemDoRascunho = ({ origem }: { origem: OrigemNaTela }) => {
-  const { t } = useOwnerTranslation();
-  if (origem === 'dono') return null;
-  return <span className="text-xs text-slate-500">{origem === 'modelo'
-    ? t('dashboard.cockpit.approved.draftFromReview')
-    : origem === 'pedindo'
-      ? t('dashboard.cockpit.approved.draftReading')
-      : t('dashboard.cockpit.approved.draftStandard')}</span>;
-};
 
 const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean; businessCountry: string | null }) => {
   const { t, i18n } = useOwnerTranslation();

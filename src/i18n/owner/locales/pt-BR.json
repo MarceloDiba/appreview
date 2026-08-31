@@ -761,9 +761,6 @@
         "queuePosition": "{{current}} de {{total}}",
         "previous": "Anterior",
         "next": "Próxima",
-        "draftFromReview": "Escrito a partir desta avaliação",
-        "draftReading": "Lendo a avaliação",
-        "draftStandard": "Texto padrão",
         "doneEditing": "Concluir",
         "edit": "Editar",
         "skip": "Pular",
@@ -1132,6 +1129,11 @@
     "cardHint": "O cartão de mesa abre numa janela de impressão, onde dá para imprimir ou salvar em PDF. É o formato pronto para pôr na mesa, com o pedido de avaliação e a assinatura."
   },
   "reply": {
+    "modelTitle": "Resposta a esta avaliação",
+    "modelHint": "Escrita a partir do que o cliente escreveu, no idioma dele.",
+    "draftFromReview": "Escrito a partir desta avaliação",
+    "draftReading": "Lendo a avaliação",
+    "draftStandard": "Texto padrão",
     "cta": "Sugerir resposta",
     "title": "Sugestões de resposta",
     "close": "Fechar",
