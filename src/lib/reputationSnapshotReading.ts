@@ -237,17 +237,26 @@ export const composeCockpitSnapshot = ({
   browserSnapshot,
   persistedSnapshot,
   fallbackSnapshot,
+  filaPersistida = null,
   now = Date.now(),
 }: {
   browserSnapshot: ExperimentalApifySnapshot | null;
   persistedSnapshot: ExperimentalApifySnapshot | null;
   fallbackSnapshot: ExperimentalApifySnapshot | null;
+  filaPersistida?: ExperimentalApifySnapshot['sample']['observedReviews'] | null;
   now?: number;
 }): ExperimentalApifySnapshot | null => {
   const aggregates = freshestAggregates(browserSnapshot, persistedSnapshot, now) || fallbackSnapshot;
   if (!aggregates) return null;
 
-  const observedReviews = browserSnapshot?.sample.observedReviews;
+  // O banco tem precedência, porque é a única fila que uma coleta feita pelo
+  // servidor consegue produzir e a única que atravessa aparelhos. O navegador
+  // continua servindo o instante entre o clique de coletar e a leitura do
+  // banco, e as contas antigas que ainda têm a lista guardada localmente e
+  // ainda não coletaram de novo. Não são duas fontes que discordam: a do banco
+  // ganha sempre que existir.
+  const observedReviews = (filaPersistida?.items.length ? filaPersistida : null)
+    || browserSnapshot?.sample.observedReviews;
   const owner = weeklyHistoryOwner(aggregates, browserSnapshot);
   const history = owner && !sampleWasTruncated(owner) ? owner.sample.insights?.history : undefined;
 

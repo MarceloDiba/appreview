@@ -134,6 +134,70 @@ export const nestedPublicString = (item: Record<string, unknown>, keys: string[]
   return null;
 };
 
+/**
+ * A fila de respostas: uma linha por avaliacao que o dono pode responder.
+ *
+ * Isto vivia em `sync-experimental-apify/index.ts`, ou seja, no chamador
+ * manual. O drenador automatico chama este nucleo e nunca passava por la, entao
+ * uma coleta feita pelo servidor produzia numeros e nenhuma fila. Vivendo aqui,
+ * os dois caminhos produzem a mesma lista e nao podem divergir.
+ */
+export const RETENCAO_DA_FILA_MS = 14 * 24 * 60 * 60 * 1_000;
+
+const observedReviewId = (review: Record<string, unknown>, index: number) => {
+  const material = [
+    typeof review.stars === 'number' ? review.stars : 0,
+    stringFrom(review, ['publishedAtDate', 'reviewDate', 'reviewDateTime', 'date']) || '',
+    stringFrom(review, ['text', 'reviewText', 'reviewContent', 'comment']) || '',
+    index,
+  ].join('|');
+  let hash = 2_166_136_261;
+  for (let position = 0; position < material.length; position += 1) {
+    hash ^= material.charCodeAt(position);
+    hash = Math.imul(hash, 16_777_619);
+  }
+  return `apify-${(hash >>> 0).toString(36)}`;
+};
+
+// O Compass devolve o nome publico de quem avaliou como `name`. E seguro aqui
+// porque esta funcao le um registo de avaliacao; o nome do negocio vem
+// separado, como `title`.
+const publicReviewerName = (review: Record<string, unknown>) =>
+  stringFrom(review, ['reviewerName', 'authorName', 'reviewerDisplayName', 'name'])
+  || nestedPublicString(review, ['reviewer', 'author', 'user']);
+
+// `url` pode identificar o lugar em vez desta avaliacao. So aceitar campos
+// documentados como permalink evita que o botao abra o perfil do negocio
+// dizendo que abre a avaliacao escolhida.
+const publicReviewUrl = (review: Record<string, unknown>) => {
+  const candidate = stringFrom(review, ['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']);
+  return candidate && parseGoogleUrl(candidate) ? candidate : undefined;
+};
+
+export const montarFilaDeRespostas = (reviews: Array<Record<string, unknown>>, now: Date) => {
+  const items = reviews.flatMap((review, index) => {
+    const comment = stringFrom(review, ['text', 'reviewText', 'reviewContent', 'comment']);
+    const rating = typeof review.stars === 'number' ? review.stars : 0;
+    if (!comment || rating < 1 || rating > 5 || !Number.isInteger(rating)) return [];
+
+    const publishedAt = stringFrom(review, ['publishedAtDate', 'reviewDate', 'reviewDateTime', 'date']);
+    return [{
+      id: observedReviewId(review, index),
+      rating,
+      comment,
+      publishedAt: publishedAt ? new Date(publishedAt).toISOString() : null,
+      reviewerName: publicReviewerName(review) || undefined,
+      reviewUrl: publicReviewUrl(review),
+      responseObserved: Boolean(stringFrom(review, ['responseFromOwnerText', 'ownerReplyText', 'responseText'])),
+    }];
+  });
+
+  return {
+    retentionEndsAt: new Date(now.getTime() + RETENCAO_DA_FILA_MS).toISOString(),
+    items,
+  };
+};
+
 const dateFrom = (item: Record<string, unknown>, keys: string[]) => {
   const value = stringFrom(item, keys);
   if (!value) return null;
@@ -389,6 +453,58 @@ export const APIFY_SNAPSHOT_SOURCE = 'apify-experimental';
  * já cobrou e a auditoria já está marcada como bem-sucedida; transformar isso
  * numa coleta falhada faria o chamador tentar de novo e gastar de novo.
  */
+/**
+ * Grava a fila de respostas do dono.
+ *
+ * O padrao de falha e o mesmo do agregado, e pela mesma razao: a essa altura o
+ * Apify ja cobrou. Uma falha aqui e registrada e nunca propagada.
+ *
+ * Cada gravacao apaga primeiro o que venceu deste dono. A retencao de 14 dias
+ * so vale se algo a fizer valer; deixar a linha morta no banco e confiar no
+ * filtro da leitura transformaria o prazo em promessa verbal.
+ */
+const persistirFilaDeRespostas = async ({
+  admin,
+  userId,
+  fila,
+  now,
+}: {
+  admin: ReturnType<typeof createClient>;
+  userId: string;
+  fila: { retentionEndsAt: string; items: Array<Record<string, unknown>> };
+  now: Date;
+}) => {
+  try {
+    const { error: erroDaLimpeza } = await admin
+      .from('google_reviews_awaiting_reply')
+      .delete()
+      .eq('user_id', userId)
+      .lt('expires_at', now.toISOString());
+    if (erroDaLimpeza) console.error('Nao consegui apagar a fila vencida:', erroDaLimpeza);
+
+    if (!fila.items.length) return;
+
+    const { error } = await admin.from('google_reviews_awaiting_reply').upsert(
+      fila.items.map((item) => ({
+        user_id: userId,
+        review_id: item.id as string,
+        rating: item.rating as number,
+        comment: item.comment as string,
+        published_at: (item.publishedAt as string | null) ?? null,
+        reviewer_name: (item.reviewerName as string | undefined) ?? null,
+        review_url: (item.reviewUrl as string | undefined) ?? null,
+        response_observed: Boolean(item.responseObserved),
+        collected_at: now.toISOString(),
+        expires_at: fila.retentionEndsAt,
+      })),
+      { onConflict: 'user_id,review_id' },
+    );
+    if (error) console.error('Nao consegui gravar a fila de respostas:', error);
+  } catch (erro) {
+    console.error('Nao consegui gravar a fila de respostas:', erro);
+  }
+};
+
 const persistAggregateSnapshot = async ({
   admin,
   userId,
@@ -638,6 +754,7 @@ export async function runExperimentalApifyCollection({
       result_summary: aggregateSnapshot,
     }).eq('id', audit.id);
     await persistAggregateSnapshot({ admin, userId, aggregateSnapshot });
+    await persistirFilaDeRespostas({ admin, userId, fila: montarFilaDeRespostas(reviews, now), now });
     await enqueueAdvisorAlert({
       admin,
       userId,

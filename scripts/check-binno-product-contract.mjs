@@ -7,6 +7,13 @@ const dashboard = read('src/components/dashboard/ApprovedCockpitDashboard.tsx');
 const pendingCommentsBanner = read('src/components/dashboard/PendingCommentsBanner.tsx');
 const dashboardPage = read('src/pages/Dashboard.tsx');
 const collector = read('supabase/functions/sync-experimental-apify/index.ts');
+// Em 31/08/2026 a montagem da fila saiu do chamador manual para o núcleo
+// partilhado, porque vivendo no chamador ela nunca corria na coleta feita pelo
+// servidor: o drenador automático chama o núcleo e o dono ficava sem fila. As
+// duas regras abaixo passam a ser lidas onde o código passou a morar, e são
+// medidas nos dois arquivos somados para que mover de novo não as apague.
+const nucleoDaColeta = read('supabase/functions/_shared/experimentalApifyCollection.ts');
+const coletaInteira = collector + '\n' + nucleoDaColeta;
 // A janela de 24h e o teto mensal viraram núcleo partilhado em 30/08/2026
 // (decisão de coleta automática no cadastro), para que a coleta automática do
 // cadastro não possa, por construção, reimplementar ou contornar o que a
@@ -109,8 +116,8 @@ const requirements = [
   // dela quando ele nao existir.
   ['bloco de comentários pendentes some por completo sem caso sem tratar', pendingCommentsBanner.includes('if (pendingOrdered.length === 0) return null;')],
   ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner userId={userId} />') && filaDoPainel(dashboard).length > 0 && dashboard.indexOf('<PendingCommentsBanner userId={userId} />') < posicaoDaFila(dashboard)],
-  ['coleta pede nome público', collector.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
-  ['coleta aceita somente campos específicos de permalink', collector.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !collector.includes("'reviewUri', 'url'")],
+  ['coleta pede nome público', coletaInteira.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
+  ['coleta aceita somente campos específicos de permalink', coletaInteira.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !coletaInteira.includes("'reviewUri', 'url'")],
   ['coleta temporária continua sem agenda e com limite explícito', collectorCore.includes("maxReviews: 50") && collectorCore.includes("APIFY_EXPERIMENTAL_COOLDOWN")],
   // O contrato fixa violeta #6D43C0 como assinatura e azul #2457D6 para acoes,
   // e ate 30/08/2026 nada verificava isso. O token --primary tinha derivado

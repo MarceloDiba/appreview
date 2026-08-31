@@ -36,9 +36,29 @@ histórico de repositório e documentos legados até uma migração intencional.
 - O QR público recebe somente os campos mínimos para apresentar o negócio e os
   destinos de avaliação. Perfil completo, telefone, assinatura e demais links
   do dono nunca podem ficar disponíveis por leitura anônima direta.
-- Nome, texto e URL pública de uma avaliação obtidos no piloto Apify ficam só
-  no navegador autenticado, por até 14 dias. Não entram em cache agregado,
-  briefing, WhatsApp, banco de auditoria ou perfil do avaliador.
+- Nome, texto e URL pública de uma avaliação obtidos no piloto Apify ficam por
+  até 14 dias e não entram em cache agregado, briefing, WhatsApp, banco de
+  auditoria ou perfil do avaliador.
+
+  **Mudança de 31/08/2026, autorizada por Marcelo.** Até esta data eles ficavam
+  só no navegador autenticado. A regra nasceu de cautela nossa, não de exigência
+  externa, e cobrava um preço que só apareceu quando a coleta passou a rodar
+  sozinha: uma coleta feita pelo servidor não tem navegador, então entregava
+  números e nenhuma fila. Um cliente pagando pela coleta diária acordaria com os
+  gráficos atualizados e a lista de avaliações a responder vazia, que é
+  exactamente o que ele comprou.
+
+  A razão para autorizar: estas avaliações já são públicas no Google, qualquer
+  pessoa as lê no Maps, então guardá-las não expõe nada que já não esteja
+  exposto.
+
+  Passam a viver em `google_reviews_awaiting_reply`, com quatro limites que
+  `scripts/check-fila-no-banco.mjs` protege: só as avaliações do próprio dono;
+  os mesmos 14 dias, aplicados na limpeza e na leitura; leitura apenas do dono,
+  sem política que deixe o navegador escrever; e **Brasil primeiro**, porque
+  Portugal trata dado pessoal com regime mais exigente mesmo quando ele é
+  público, e vender lá exige rever esta decisão em vez de herdar a resposta
+  brasileira.
 
 ## 3. Arquitetura aprovada do painel
 

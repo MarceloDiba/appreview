@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import { ExperimentalApifySnapshot, loadExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
 import { useReputationSnapshot } from '@/hooks/useReputationSnapshot';
+import { useFilaDeRespostas } from '@/hooks/useFilaDeRespostas';
 import { buildSnapshotFromPersistedRow, composeCockpitSnapshot } from '@/lib/reputationSnapshotReading';
 
 const emptyBreakdown = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 } as const;
@@ -74,6 +75,7 @@ const Dashboard = () => {
   // coleta. A fila de respostas continua vindo do navegador: nome, texto e URL
   // de avaliação nunca foram gravados (contrato, linhas 39 a 41).
   const persisted = useReputationSnapshot(userId || undefined);
+  const filaDoBanco = useFilaDeRespostas(userId || undefined);
   const persistedSnapshot = useMemo(
     () => buildSnapshotFromPersistedRow(persisted.row, { businessName: businessName || t('dashboard.workspace.fallbackName') }),
     [businessName, persisted.row, t],
@@ -112,8 +114,9 @@ const Dashboard = () => {
       browserSnapshot: experimentalSnapshot,
       persistedSnapshot,
       fallbackSnapshot: approvedFallbackSnapshot,
+      filaPersistida: filaDoBanco.fila,
     }),
-    [approvedFallbackSnapshot, experimentalSnapshot, persistedSnapshot],
+    [approvedFallbackSnapshot, experimentalSnapshot, persistedSnapshot, filaDoBanco.fila],
   );
 
   return (

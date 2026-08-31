@@ -313,6 +313,45 @@ export type Database = {
         }
         Relationships: []
       }
+      google_reviews_awaiting_reply: {
+        Row: {
+          collected_at: string
+          comment: string
+          expires_at: string
+          published_at: string | null
+          rating: number
+          response_observed: boolean
+          review_id: string
+          review_url: string | null
+          reviewer_name: string | null
+          user_id: string
+        }
+        Insert: {
+          collected_at?: string
+          comment: string
+          expires_at: string
+          published_at?: string | null
+          rating: number
+          response_observed?: boolean
+          review_id: string
+          review_url?: string | null
+          reviewer_name?: string | null
+          user_id: string
+        }
+        Update: {
+          collected_at?: string
+          comment?: string
+          expires_at?: string
+          published_at?: string | null
+          rating?: number
+          response_observed?: boolean
+          review_id?: string
+          review_url?: string | null
+          reviewer_name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       internal_feedback: {
         Row: {
           created_at: string | null
