@@ -98,8 +98,26 @@ export type UltimoTesteDeWhatsApp = {
 export const lerEstadoDaLigacao = (
   ultimoTeste: UltimoTesteDeWhatsApp,
   agora: Date = new Date(),
+  // Terceiro de propósito. Pô-la em segundo faria `agora` cair aqui em toda
+  // chamada existente, e o valor errado seria lido em silêncio.
+  ultimaFalha: UltimoTesteDeWhatsApp = null,
 ): EstadoDaLigacao => {
   const status = ultimoTeste?.status;
+
+  // Uma falha mais recente que o ultimo teste derruba a afirmacao de ligacao.
+  //
+  // Em 31/08/2026 o numero do piloto foi bloqueado pelo WhatsApp. O ultimo
+  // teste tinha sido entregue no dia anterior, dentro da janela de prova, e a
+  // tela continuava a dizer "ligacao ativa" enquanto um aviso de elogio falhava
+  // com OpenWA 409. Um teste que passou ontem nao prova nada sobre uma
+  // mensagem que nao chegou hoje: a evidencia mais recente manda.
+  const quandoFalhou = ultimaFalha?.updatedAt ? new Date(ultimaFalha.updatedAt) : null;
+  if (quandoFalhou && !Number.isNaN(quandoFalhou.getTime())) {
+    const quandoTestou = ultimoTeste?.updatedAt ? new Date(ultimoTeste.updatedAt) : null;
+    const testeLegivel = quandoTestou && !Number.isNaN(quandoTestou.getTime());
+    if (!testeLegivel || quandoFalhou.getTime() > quandoTestou.getTime()) return 'falhou';
+  }
+
   if (!status) return 'sem-teste';
   if ((ESTADOS_DE_FALHA as readonly string[]).includes(status)) return 'falhou';
   if (!(ESTADOS_QUE_PROVAM_ENTREGA as readonly string[]).includes(status)) return 'a-caminho';

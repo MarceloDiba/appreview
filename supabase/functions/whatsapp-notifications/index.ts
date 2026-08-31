@@ -80,12 +80,18 @@ serve(async (request) => {
      * dizer que ele nunca tinha testado. Quanto mais o produto entrega, mais
      * depressa isso acontece: era um defeito que piorava com o uso.
      */
-    const [{ data: preferences }, { data: deliveries }, { data: lastTest }] = await Promise.all([
+    const [{ data: preferences }, { data: deliveries }, { data: lastTest }, { data: ultimaFalha }] = await Promise.all([
       admin.from('whatsapp_notification_preferences').select('*').eq('user_id', user.id).maybeSingle(),
       admin.from('whatsapp_outbox').select(COLUNAS_DA_ENTREGA).eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
       admin.from('whatsapp_outbox').select(COLUNAS_DA_ENTREGA).eq('user_id', user.id).eq('kind', 'test').order('created_at', { ascending: false }).limit(1).maybeSingle(),
+      // A ultima falha, de qualquer especie. Em 31/08/2026 o numero do piloto
+      // foi bloqueado: o ultimo teste tinha sido entregue no dia anterior e a
+      // tela continuava a dizer "ligacao ativa" enquanto um aviso falhava com
+      // OpenWA 409. Um teste de ontem nao prova nada sobre uma mensagem que
+      // nao chegou hoje, e a falha pode ser de qualquer tipo de mensagem.
+      admin.from('whatsapp_outbox').select(COLUNAS_DA_ENTREGA).eq('user_id', user.id).eq('status', 'failed').order('created_at', { ascending: false }).limit(1).maybeSingle(),
     ]);
-    return json({ preferences, deliveries: deliveries || [], last_test: lastTest || null });
+    return json({ preferences, deliveries: deliveries || [], last_test: lastTest || null, last_failure: ultimaFalha || null });
   }
 
   if (body.action === 'save-preferences') {

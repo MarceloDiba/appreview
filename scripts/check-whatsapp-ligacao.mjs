@@ -111,6 +111,33 @@ const clienteDaEntrega = ler('src/lib/whatsappDelivery.ts');
 
 // A versão anterior desta asserção pedia que a linha CONTIVESSE uma chamada ao
 // módulo: `/const estadoDaLigacao = [^;]*lerEstadoDaLigacao\(/`. Ela ficava
+// A evidencia mais recente manda. Um teste entregue ontem nao prova nada sobre
+// uma mensagem que nao chegou hoje: em 31/08/2026 o numero do piloto foi
+// bloqueado e a tela continuou a dizer "ligacao ativa" porque so olhava o
+// ultimo teste. Estas quatro executam o modulo, nao leem o codigo.
+{
+  const agora = new Date('2026-08-31T14:00:00Z');
+  const testeOntem = { status: 'delivered', updatedAt: '2026-08-30T16:20:00Z' };
+  const falhaHoje = { status: 'failed', updatedAt: '2026-08-31T13:50:00Z' };
+  const falhaAnteontem = { status: 'failed', updatedAt: '2026-08-29T10:00:00Z' };
+  exigir(
+    'uma falha mais recente que o ultimo teste deixou de derrubar a afirmacao de ligacao ativa',
+    lerEstadoDaLigacao(testeOntem, agora, falhaHoje) === 'falhou',
+  );
+  exigir(
+    'uma falha ANTERIOR ao ultimo teste passou a derrubar a ligacao, e nao devia: o teste veio depois e e a evidencia mais recente',
+    lerEstadoDaLigacao(testeOntem, agora, falhaAnteontem) === 'ativa',
+  );
+  exigir(
+    'sem falha nenhuma o teste recente deixou de valer',
+    lerEstadoDaLigacao(testeOntem, agora) === 'ativa',
+  );
+  exigir(
+    'uma falha sem teste nenhum deixou de ser lida como falha',
+    lerEstadoDaLigacao(null, agora, falhaHoje) === 'falhou',
+  );
+}
+
 // verde com `const estadoDaLigacao = true ? 'ativa' : lerEstadoDaLigacao(...)`,
 // e a versão que ela aprovou tinha exatamente essa forma, com `aceiteLocal` no
 // lugar do `true`. Conferir a presença de um nome não é conferir o valor que
@@ -131,10 +158,20 @@ if (atribuicao) {
   // julgar um registo forjado em vez do ultimo teste que o servidor devolveu.
   // Por isso o argumento tambem e preso: ele tem de ser o registo vindo do
   // servidor, sem ramo e sem objeto construido ali.
-  const argumento = atribuicao[1].trim().replace(/^lerEstadoDaLigacao\(/, '').replace(/\)$/, '').trim();
+  // Cada argumento tem de ser uma variavel nua ou `new Date()`. Um objeto
+  // construido ali dentro, ou um ternario, faz o modulo honesto julgar uma
+  // prova inventada, com a chamada a parecer certa por fora. Passou a haver
+  // tres argumentos em 31/08/2026, quando a ultima falha entrou na regra.
+  const argumentos = atribuicao[1].trim()
+    .replace(/^lerEstadoDaLigacao\(/, '').replace(/\)$/, '')
+    .split(',').map((a) => a.trim()).filter(Boolean);
   exigir(
-    'o argumento deixou de ser o ultimo teste vindo do servidor: um registo forjado ali dentro faz o modulo honesto julgar uma prova inventada',
-    /^[A-Za-z_$][\w$]*$/.test(argumento),
+    'a chamada do estado da ligacao ficou sem argumento nenhum',
+    argumentos.length > 0,
+  );
+  exigir(
+    'algum argumento deixou de ser o registo vindo do servidor: um valor forjado ali dentro faz o modulo honesto julgar uma prova inventada',
+    argumentos.every((a) => /^[A-Za-z_$][\w$]*$/.test(a) || a === 'new Date()'),
   );
 }
 
