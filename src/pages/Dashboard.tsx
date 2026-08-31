@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import { ExperimentalApifySnapshot, loadExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot';
 import { useReputationSnapshot } from '@/hooks/useReputationSnapshot';
+import { useFilaDeRespostas } from '@/hooks/useFilaDeRespostas';
 import { buildSnapshotFromPersistedRow, composeCockpitSnapshot } from '@/lib/reputationSnapshotReading';
 
 const emptyBreakdown = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 } as const;
@@ -69,11 +70,14 @@ const Dashboard = () => {
 
   const setup = useSetupStatus(userId || undefined);
   const outcome = useGoogleOutcome(userId || undefined);
-  // O agregado da coleta vive no banco desde 30/08/2026. Ele e o que faz o
-  // painel encher em qualquer aparelho do dono, e não só naquele que pediu a
-  // coleta. A fila de respostas continua vindo do navegador: nome, texto e URL
-  // de avaliação nunca foram gravados (contrato, linhas 39 a 41).
+  // O agregado da coleta vive no banco desde 30/08/2026, e a fila de respostas
+  // desde 31/08. Juntos, sao o que faz o painel encher em qualquer aparelho do
+  // dono, e não só naquele que pediu a coleta. A fila passou a ser gravada
+  // porque uma coleta feita pelo servidor nao tem navegador: ver a secção do
+  // contrato de produto sobre o que a coleta guarda, e
+  // `scripts/check-fila-no-banco.mjs` para os limites que a protegem.
   const persisted = useReputationSnapshot(userId || undefined);
+  const filaDoBanco = useFilaDeRespostas(userId || undefined);
   const persistedSnapshot = useMemo(
     () => buildSnapshotFromPersistedRow(persisted.row, { businessName: businessName || t('dashboard.workspace.fallbackName') }),
     [businessName, persisted.row, t],
@@ -112,8 +116,9 @@ const Dashboard = () => {
       browserSnapshot: experimentalSnapshot,
       persistedSnapshot,
       fallbackSnapshot: approvedFallbackSnapshot,
+      filaPersistida: filaDoBanco.fila,
     }),
-    [approvedFallbackSnapshot, experimentalSnapshot, persistedSnapshot],
+    [approvedFallbackSnapshot, experimentalSnapshot, persistedSnapshot, filaDoBanco.fila],
   );
 
   return (

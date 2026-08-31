@@ -10,9 +10,10 @@ import type { ExperimentalApifySnapshot } from '@/lib/experimentalApifySnapshot'
  * e são o que o painel lê.
  *
  * O que NÃO está aqui é tão importante quanto o que está: nome do avaliador,
- * texto da avaliação e URL pública da avaliação nunca foram gravados, então a
- * fila de respostas continua vindo do navegador autenticado, com a retenção de
- * 14 dias que o contrato de produto define nas linhas 39 a 41.
+ * texto da avaliação e URL pública da avaliação passaram a ser gravados em
+ * 31/08/2026, em tabela própria e com prazo próprio, porque uma coleta feita
+ * pelo servidor não tem navegador para os guardar. A fila vem do banco quando
+ * existir lá, e do navegador só enquanto não existir.
  */
 export type PersistedReputationSnapshotRow = {
   captured_at: string;
@@ -237,17 +238,26 @@ export const composeCockpitSnapshot = ({
   browserSnapshot,
   persistedSnapshot,
   fallbackSnapshot,
+  filaPersistida = null,
   now = Date.now(),
 }: {
   browserSnapshot: ExperimentalApifySnapshot | null;
   persistedSnapshot: ExperimentalApifySnapshot | null;
   fallbackSnapshot: ExperimentalApifySnapshot | null;
+  filaPersistida?: ExperimentalApifySnapshot['sample']['observedReviews'] | null;
   now?: number;
 }): ExperimentalApifySnapshot | null => {
   const aggregates = freshestAggregates(browserSnapshot, persistedSnapshot, now) || fallbackSnapshot;
   if (!aggregates) return null;
 
-  const observedReviews = browserSnapshot?.sample.observedReviews;
+  // O banco tem precedência, porque é a única fila que uma coleta feita pelo
+  // servidor consegue produzir e a única que atravessa aparelhos. O navegador
+  // continua servindo o instante entre o clique de coletar e a leitura do
+  // banco, e as contas antigas que ainda têm a lista guardada localmente e
+  // ainda não coletaram de novo. Não são duas fontes que discordam: a do banco
+  // ganha sempre que existir.
+  const observedReviews = (filaPersistida?.items.length ? filaPersistida : null)
+    || browserSnapshot?.sample.observedReviews;
   const owner = weeklyHistoryOwner(aggregates, browserSnapshot);
   const history = owner && !sampleWasTruncated(owner) ? owner.sample.insights?.history : undefined;
 

@@ -331,8 +331,29 @@ const requisitos = [
     return [rotulo, instrucoes.length > 0 && instrucoes.every(({ sql }) => !IDENTIFICAVEL.test(sql))];
   })(),
 
-  ['o núcleo que grava no banco não conhece a fila do navegador: sem nome público, sem permalink, sem lista de avaliações observadas',
-    !/observedReviews|reviewerName|reviewUrl|authorName|reviewLink/.test(nucleoDeColeta)],
+  // Esta assercao dizia que o nucleo nao podia conhecer nome, permalink nem a
+  // lista de avaliacoes. Em 31/08/2026 Marcelo autorizou guardar a fila no
+  // banco, porque uma coleta feita pelo servidor nao tem navegador e entregava
+  // numeros sem lista a um cliente que paga. A regra nao foi afrouxada: mudou
+  // de fronteira. O que continua proibido, e e o que importa, e um campo
+  // identificavel entrar na tabela de AGREGADOS, que existe para medir e nunca
+  // para identificar. A fila tem tabela propria, com prazo e leitura so do
+  // dono, protegida por `scripts/check-fila-no-banco.mjs`.
+  (() => {
+    const rotulo = 'a gravação do agregado não escreve nenhum campo identificável, mesmo agora que o núcleo conhece a fila';
+    const corpo = expressaoAtribuida(nucleoDeColeta, 'persistAggregateSnapshot');
+    if (!corpo) return [rotulo, false];
+    return [rotulo, !/reviewer_name|review_url|reviewerName|reviewUrl|observedReviews|comment/.test(corpo)];
+  })(),
+
+  (() => {
+    const rotulo = 'a fila só é gravada na tabela própria dela, nunca na de agregados';
+    const corpo = expressaoAtribuida(nucleoDeColeta, 'persistirFilaDeRespostas');
+    if (!corpo) return [rotulo, false];
+    return [rotulo,
+      /google_reviews_awaiting_reply/.test(corpo)
+      && !/google_business_reputation_snapshots/.test(corpo)];
+  })(),
 
   (() => {
     const rotulo = 'falha ao gravar o agregado e REGISTRADA (as duas formas de falha) e nunca propagada: a coleta já paga não vira coleta falhada';
@@ -407,13 +428,21 @@ const requisitos = [
   // ------------------------------------------------------------------
 
   (() => {
-    const rotulo = 'a fila de respostas vem SEMPRE do navegador e entra no retorno da composição, sem depender de qual agregado venceu';
+    const rotulo = 'a fila de respostas entra no retorno da composição sem depender de qual agregado venceu, e sai do banco antes do navegador';
     // O defeito que isto guarda: escolher um retrato inteiro fazia a fila
     // sumir da tela quando a linha do banco vencia, que e justamente o caso da
-    // coleta diária paga.
+    // coleta diária paga. Essa parte da regra nao mudou.
+    //
+    // O que mudou em 31/08/2026: a fila deixou de vir SO do navegador e passou
+    // a vir do banco quando existir la, porque uma coleta feita pelo servidor
+    // nao tem navegador. As duas nao discordam: a do banco ganha sempre que
+    // houver. Ver `scripts/check-fila-no-banco.mjs`.
     if (!corpoDaComposicao) return [rotulo, false];
     const atribuicao = expressaoAtribuida(corpoDaComposicao, 'observedReviews');
-    const vemDoNavegador = atribuicao === 'browserSnapshot?.sample.observedReviews';
+    const vemDoNavegador = Boolean(atribuicao)
+      && atribuicao.includes('filaPersistida')
+      && atribuicao.includes('browserSnapshot?.sample.observedReviews')
+      && atribuicao.indexOf('filaPersistida') < atribuicao.indexOf('browserSnapshot');
     const naoDependeDoVencedor = Boolean(atribuicao) && !atribuicao.includes('aggregates');
     const entraNoRetorno = /\n\s*observedReviews,\n/.test(corpoDaComposicao);
     // Dois `return` e só: o `null` sem agregado nenhum e o objeto composto.

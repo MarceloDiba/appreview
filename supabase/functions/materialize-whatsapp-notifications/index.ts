@@ -29,10 +29,26 @@ const messageFromSummary = (summary: Record<string, unknown>) => {
   const name = typeof business?.name === 'string' ? business.name : 'seu negócio';
   const rating = typeof business?.googleRating === 'number' ? business.googleRating.toFixed(1).replace('.', ',') : null;
   const total = typeof business?.googleReviewCount === 'number' ? business.googleReviewCount : null;
-  const lines = ['Binno', `Resumo de reputação de ${name}.`];
-  if (rating !== null && total !== null) lines.push(`Nota atual: ${rating} com ${total} avaliações.`);
-  if (typeof opportunity?.phrase === 'string' && typeof opportunity?.mentions === 'number') lines.push(`Oportunidade observada: “${opportunity.phrase}” apareceu em ${opportunity.mentions} elogios recentes.`);
-  lines.push('Abra o painel para ver a leitura e decidir a próxima ação.');
+  // O negrito do WhatsApp e *assim*, com um asterisco de cada lado.
+  //
+  // A mensagem NAO diz "resumo da semana" nem cita periodo nenhum, e isso e de
+  // proposito. O que ela envia e o estado no instante do envio: nota atual e
+  // total acumulado, nao uma comparacao de janela. Marcelo perguntou em
+  // 31/08/2026 qual era o periodo desta analise, e a resposta honesta era que
+  // nao havia: a palavra "Resumo" prometia o que a mensagem nao entregava.
+  // Quando houver dois retratos no banco para comparar, aqui e o lugar de
+  // dizer o que mudou, e ai a palavra passa a ser verdadeira.
+  const lines = [`Binno, o seu assessor de presença no Google`, '', `*${name}*`, ''];
+  if (rating !== null && total !== null) {
+    lines.push(`*Nota atual: ${rating}* ⭐`);
+    lines.push(`${total} ${total === 1 ? 'avaliação' : 'avaliações'} no total, hoje.`);
+  }
+  if (typeof opportunity?.phrase === 'string' && typeof opportunity?.mentions === 'number') {
+    lines.push('');
+    lines.push(`Os seus clientes repetem *"${opportunity.phrase}"*: apareceu em ${opportunity.mentions} elogios.`);
+  }
+  lines.push('');
+  lines.push('Abra o painel para ver o que mudou e decidir a próxima ação.');
   return lines.join('\n');
 };
 

@@ -3,11 +3,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import {
   corsHeaders,
   json,
-  nestedPublicString,
+  montarFilaDeRespostas,
   parseGoogleUrl,
   resolveMonthlyRunLimit,
   runExperimentalApifyCollection,
-  stringFrom,
 } from '../_shared/experimentalApifyCollection.ts';
 
 /**
@@ -27,60 +26,6 @@ import {
  * worker. The short-lived browser response may include a public display name
  * and direct public review URL so the owner can respond to the right review.
  */
-const observedReviewId = (review: Record<string, unknown>, index: number) => {
-  const material = [
-    typeof review.stars === 'number' ? review.stars : 0,
-    stringFrom(review, ['publishedAtDate', 'reviewDate', 'reviewDateTime', 'date']) || '',
-    stringFrom(review, ['text', 'reviewText', 'reviewContent', 'comment']) || '',
-    index,
-  ].join('|');
-  let hash = 2_166_136_261;
-  for (let position = 0; position < material.length; position += 1) {
-    hash ^= material.charCodeAt(position);
-    hash = Math.imul(hash, 16_777_619);
-  }
-  return `apify-${(hash >>> 0).toString(36)}`;
-};
-
-const publicReviewerName = (review: Record<string, unknown>) =>
-  // Compass returns the reviewer's public display name as `name`. It is safe
-  // here because this function is scoped to that review record; the place
-  // itself is exposed separately as `title`.
-  stringFrom(review, ['reviewerName', 'authorName', 'reviewerDisplayName', 'name'])
-  || nestedPublicString(review, ['reviewer', 'author', 'user']);
-
-const publicReviewUrl = (review: Record<string, unknown>) => {
-  // `url` can identify the place rather than this individual review. Only
-  // accept fields documented as a review permalink so the action never opens
-  // the business profile while claiming to open the selected review.
-  const candidate = stringFrom(review, ['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']);
-  return candidate && parseGoogleUrl(candidate) ? candidate : undefined;
-};
-
-const observedReviewsForBrowser = (reviews: Array<Record<string, unknown>>, now: Date) => {
-  const items = reviews.flatMap((review, index) => {
-    const comment = stringFrom(review, ['text', 'reviewText', 'reviewContent', 'comment']);
-    const rating = typeof review.stars === 'number' ? review.stars : 0;
-    if (!comment || rating < 1 || rating > 5 || !Number.isInteger(rating)) return [];
-
-    const publishedAt = stringFrom(review, ['publishedAtDate', 'reviewDate', 'reviewDateTime', 'date']);
-    return [{
-      id: observedReviewId(review, index),
-      rating,
-      comment,
-      publishedAt: publishedAt ? new Date(publishedAt).toISOString() : null,
-      reviewerName: publicReviewerName(review) || undefined,
-      reviewUrl: publicReviewUrl(review),
-      responseObserved: Boolean(stringFrom(review, ['responseFromOwnerText', 'ownerReplyText', 'responseText'])),
-    }];
-  });
-
-  return {
-    retentionEndsAt: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1_000).toISOString(),
-    items,
-  };
-};
-
 serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
@@ -119,7 +64,7 @@ serve(async (request) => {
     sample: {
       ...outcome.aggregateSnapshot.sample,
       ...(Object.keys(outcome.advisor).length ? { advisor: outcome.advisor } : {}),
-      observedReviews: observedReviewsForBrowser(outcome.reviews, now),
+      observedReviews: montarFilaDeRespostas(outcome.reviews, now),
     },
   };
   return json({ snapshot: browserSnapshot });
