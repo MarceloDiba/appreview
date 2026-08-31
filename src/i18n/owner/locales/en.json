@@ -458,7 +458,6 @@
         "pendingCommentsCount_one": "{{count}} private comment still without a reply",
         "pendingCommentsCount_other": "{{count}} private comments still without a reply",
         "pendingCommentsQuote": "\"{{quote}}\"",
-        "pendingCommentsDistinction": "A private comment is for you to reach the person. Public Google reviews are in the queue below.",
         "pendingCommentsHasContact": "Contact left for a callback",
         "pendingCommentsAction": "View and resolve",
         "queueTitle": "Reply queue",
@@ -752,8 +751,8 @@
       },
       "approved": {
         "starsLabel": "{{rating}} out of 5 stars",
+        "queueEmptyHint": "Fetch your reviews to build the queue.",
         "reviewsShort": "reviews",
-        "queueOtherDevice": "The reply queue stays on the device where you fetched the reviews. The numbers above are the same on any device.",
         "waitingReplies_one": "review is waiting for a reply",
         "waitingReplies_other": "reviews are waiting for a reply",
         "nextInQueue": ". Next up, {{name}}",

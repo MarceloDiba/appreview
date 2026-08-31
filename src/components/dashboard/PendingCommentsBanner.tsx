@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { MailWarning } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useInternalFeedback } from '@/hooks/useInternalFeedback';
@@ -49,10 +48,12 @@ const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
   return (
     <Card className="border-red-200 bg-red-50/70 shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
       <CardContent className="p-5">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-700">
-            <MailWarning className="h-5 w-5" aria-hidden="true" />
-          </span>
+        {/*
+          O ícone saiu em 31/08/2026. O círculo de 36px mais o intervalo comiam
+          48px dos 390 de um telemóvel, e era isso que partia o título em duas
+          linhas. Ele também não dizia nada: o cartão inteiro já é vermelho.
+        */}
+        <div>
           <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-slate-950">
               {t('dashboard.cockpit.layout.pendingCommentsTitle')}
@@ -61,16 +62,12 @@ const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
               {t('dashboard.cockpit.layout.pendingCommentsCount', { count: pendingOrdered.length })}
             </p>
             {/*
-              O produto tem duas filas e nunca explicou a diferença a ninguém.
-              Esta pede um telefonema, a de baixo pede um texto público no
-              Google. Marcelo procurou o comentário privado na fila de
-              respostas em 30/08/2026, no primeiro uso real, porque nada dizia
-              que eram coisas separadas. Separação sem explicação é a mesma
-              coisa que armadilha.
+              Aqui havia um parágrafo explicando a diferença entre esta fila e a
+              de baixo. Marcelo mandou tirá-lo em 31/08/2026, depois de o ler no
+              telemóvel: numa tela pequena ele empurra o comentário de verdade
+              para fora da primeira dobra, e o que o dono precisa de ver é o
+              comentário, não a explicação da arquitetura do produto.
             */}
-            <p className="mt-1 text-xs leading-5 text-slate-600">
-              {t('dashboard.cockpit.layout.pendingCommentsDistinction')}
-            </p>
             <div className="mt-3 rounded-lg bg-white/70 p-3 text-sm leading-5 text-slate-700">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-medium text-slate-900">
