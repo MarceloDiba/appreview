@@ -791,23 +791,23 @@
         "weekReplies_other": "Você respondeu {{count}} avaliações nos últimos 7 dias.",
         "qrTitle": "Do QR ao Google",
         "qrOpened": "QR aberto",
-        "qrClicked": "Clicou no Google"
+        "qrClicked": "Clicou no Google",
+        "volumeEmpty": "Aqui aparece quantas avaliações você recebe por semana, depois da segunda busca.",
+        "distributionEmpty": "Aqui aparece cada nota separada, depois que o Binno buscar as suas avaliações.",
+        "qrEmpty": "Aqui aparecem as aberturas do QR e os cliques para o Google, assim que o seu QR estiver na mesa.",
+        "reputationBreakdownEmpty": "A distribuição por nota aparece depois da primeira busca de avaliações.",
+        "reputationMetricsEmpty": "O tempo de resposta e as avaliações do mês aparecem quando a busca trouxer as datas."
       }
     },
     "advisorPilot": {
       "alertTitle": "Atenção para hoje",
       "alertBody": "{{low}} avaliações de 1 ou 2 estrelas apareceram acima do normal, e {{topic}} foi o assunto citado em {{mentions}} comentários.",
       "experimental": "Leitura experimental",
-      "planTitle": "Plano de hoje",
-      "planBody": "Olhe hoje para {{topic}}. Escolha uma coisa para mudar, faça, e marque aqui quando estiver feito.",
-      "markDone": "Marcar como feito",
-      "marked": "Feito. Da próxima vez que você buscar as avaliações, o Binno conta aqui se o assunto voltou a aparecer.",
       "opportunityTitle": "O que está ajudando",
       "opportunityBody": "“{{phrase}}” apareceu em {{mentions}} elogios recentes.",
       "opportunityAction": "Use isso a seu favor: coloque esse ponto forte no seu perfil do Google, no cardápio e nas suas redes.",
       "strengthBody": "{{topic}} apareceu como elogio em {{mentions}} das avaliações que o Binno buscou.",
       "strengthAction": "Escolha um exemplo real de {{topic}} e mostre isso no seu perfil do Google, numa foto nova ou na descrição do negócio.",
-      "monitorAction": "Aproveite o dia calmo para responder quem ainda está esperando na fila. Responder é o que mais ajuda a sua nota.",
       "reviewEvidence": "Ver avaliações",
       "whatsappSent": "Alerta enviado ao WhatsApp do gestor.",
       "whatsappSkipped": "As avaliações foram buscadas; o aviso não saiu porque falta o consentimento, o número ou o canal do WhatsApp.",
@@ -824,8 +824,7 @@
       "radarLineAlert": "Atenção: {{topic}} apareceu em {{mentions}} comentários, com {{low}} avaliações de 1 ou 2 estrelas.",
       "radarLineOpportunity": "O que está ajudando: “{{phrase}}” apareceu em {{mentions}} elogios recentes.",
       "radarLineStrength": "O que está ajudando: {{topic}} apareceu como elogio em {{mentions}} avaliações.",
-      "radarLineMonitor": "Nada precisa de você agora. O Binno avisa aqui quando algo se repetir.",
-      "markedDone": "Marcado como feito"
+      "radarLineMonitor": "Nada precisa de você agora. O Binno avisa aqui quando algo se repetir."
     },
     "setupBanner": {
       "title": "Falta terminar a configuração",

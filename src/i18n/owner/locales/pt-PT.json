@@ -791,23 +791,23 @@
         "weekReplies_other": "Respondeu a {{count}} avaliações nos últimos 7 dias.",
         "qrTitle": "Do QR ao Google",
         "qrOpened": "QR aberto",
-        "qrClicked": "Carregou para o Google"
+        "qrClicked": "Carregou para o Google",
+        "volumeEmpty": "Aqui aparece quantas avaliações recebe por semana, depois da segunda procura.",
+        "distributionEmpty": "Aqui aparece cada nota separada, depois de o Binno procurar as suas avaliações.",
+        "qrEmpty": "Aqui aparecem as aberturas do QR e os cliques para o Google, assim que o seu QR estiver na mesa.",
+        "reputationBreakdownEmpty": "A distribuição por nota aparece depois da primeira procura de avaliações.",
+        "reputationMetricsEmpty": "O tempo de resposta e as avaliações do mês aparecem quando a procura trouxer as datas."
       }
     },
     "advisorPilot": {
       "alertTitle": "Atenção para hoje",
       "alertBody": "{{low}} avaliações de 1 ou 2 estrelas apareceram acima do normal, e {{topic}} foi o assunto referido em {{mentions}} comentários.",
       "experimental": "Leitura experimental",
-      "planTitle": "Plano de hoje",
-      "planBody": "Olhe hoje para {{topic}}. Escolha uma coisa para mudar, faça-a, e marque aqui quando estiver feita.",
-      "markDone": "Marcar como feito",
-      "marked": "Feito. Da próxima vez que procurar as avaliações, o Binno diz-lhe aqui se o assunto voltou a aparecer.",
       "opportunityTitle": "O que está a ajudar",
       "opportunityBody": "“{{phrase}}” apareceu em {{mentions}} elogios recentes.",
       "opportunityAction": "Use isto a seu favor: ponha este ponto forte no seu perfil do Google, na ementa e nas suas redes.",
       "strengthBody": "{{topic}} apareceu como elogio em {{mentions}} das avaliações que o Binno recolheu.",
       "strengthAction": "Escolha um exemplo real de {{topic}} e mostre isso no seu perfil do Google, numa fotografia nova ou na descrição do negócio.",
-      "monitorAction": "Aproveite o dia calmo para responder a quem ainda espera na fila. Responder é o que mais ajuda a sua classificação.",
       "reviewEvidence": "Ver avaliações",
       "whatsappSent": "Alerta enviado para o WhatsApp do gestor.",
       "whatsappSkipped": "As avaliações foram recolhidas; o aviso não saiu porque falta o consentimento, o número ou o canal do WhatsApp.",
@@ -824,8 +824,7 @@
       "radarLineAlert": "Atenção: {{topic}} apareceu em {{mentions}} comentários, com {{low}} avaliações de 1 ou 2 estrelas.",
       "radarLineOpportunity": "O que está a ajudar: “{{phrase}}” apareceu em {{mentions}} elogios recentes.",
       "radarLineStrength": "O que está a ajudar: {{topic}} apareceu como elogio em {{mentions}} avaliações.",
-      "radarLineMonitor": "Nada precisa de si agora. O Binno avisa aqui quando algo se repetir.",
-      "markedDone": "Marcado como feito"
+      "radarLineMonitor": "Nada precisa de si agora. O Binno avisa aqui quando algo se repetir."
     },
     "setupBanner": {
       "title": "Falta terminar a configuração",

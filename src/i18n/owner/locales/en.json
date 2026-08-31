@@ -791,23 +791,23 @@
         "weekReplies_other": "You replied to {{count}} reviews in the last 7 days.",
         "qrTitle": "From QR to Google",
         "qrOpened": "QR opened",
-        "qrClicked": "Clicked through to Google"
+        "qrClicked": "Clicked through to Google",
+        "volumeEmpty": "How many reviews you get each week appears here after the second fetch.",
+        "distributionEmpty": "Each rating on its own line appears here once Binno fetches your reviews.",
+        "qrEmpty": "QR opens and clicks through to Google appear here as soon as your QR is on the table.",
+        "reputationBreakdownEmpty": "The rating breakdown appears after the first review fetch.",
+        "reputationMetricsEmpty": "Reply time and reviews this month appear when the fetch brings the dates."
       }
     },
     "advisorPilot": {
       "alertTitle": "Attention for today",
       "alertBody": "{{low}} one- and two-star reviews came in above the usual, and {{topic}} was the subject named in {{mentions}} comments.",
       "experimental": "Experimental reading",
-      "planTitle": "Today's plan",
-      "planBody": "Look at {{topic}} today. Pick one thing to change, do it, and mark it here when it is done.",
-      "markDone": "Mark as done",
-      "marked": "Done. Next time you fetch your reviews, Binno will tell you here whether the subject came back.",
       "opportunityTitle": "What is helping",
       "opportunityBody": "“{{phrase}}” appeared in {{mentions}} recent positive mentions.",
       "opportunityAction": "Put that strength to work: show it on your Google profile, on the menu, and in your posts.",
       "strengthBody": "{{topic}} came up as praise in {{mentions}} of the reviews Binno fetched.",
       "strengthAction": "Pick a real example of {{topic}} and show it on your Google profile, in a new photo or in the business description.",
-      "monitorAction": "Use the quiet day to reply to whoever is still waiting in the queue. Replying is what helps your rating most.",
       "reviewEvidence": "View reviews",
       "whatsappSent": "Alert sent to the owner's WhatsApp.",
       "whatsappSkipped": "The reviews were fetched; the alert did not go out because consent, the number, or the WhatsApp channel is missing.",
@@ -824,8 +824,7 @@
       "radarLineAlert": "Heads up: {{topic}} came up in {{mentions}} comments, with {{low}} one or two star reviews.",
       "radarLineOpportunity": "What is helping: “{{phrase}}” came up in {{mentions}} recent compliments.",
       "radarLineStrength": "What is helping: {{topic}} came up as praise in {{mentions}} reviews.",
-      "radarLineMonitor": "Nothing needs you right now. Binno flags it here when something repeats.",
-      "markedDone": "Marked as done"
+      "radarLineMonitor": "Nothing needs you right now. Binno flags it here when something repeats."
     },
     "setupBanner": {
       "title": "Finish the setup",
