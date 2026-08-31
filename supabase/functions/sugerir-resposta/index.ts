@@ -75,8 +75,14 @@ const PROIBIDO: Array<{ padrao: RegExp; motivo: string }> = [
   { padrao: new RegExp(`[${TRAVESSAO}${MEIO_RISCO}]`), motivo: 'travessao' },
   // O dono nao autorizou reparacao nenhuma. Prometer em nome dele cria uma
   // divida que ele nao sabe que tem. Uma vez por idioma que o produto atende.
-  { padrao: /\b(reembols|devolu[cç]|desconto|cortesia|brinde|gr[aá]tis|compensa[cç]|por (nossa|minha) conta|sem custo|sem qualquer custo|oferta da casa|vale de)/i, motivo: 'promessa de reparacao (pt)' },
-  { padrao: /\b(descuento|reembols|devoluci|cortes[ií]a|obsequio|gratis|compensaci|sin (coste|cargo|costo)|invita la casa|vale de)/i, motivo: 'promessa de reparacao (es)' },
+  //
+  // As formas VERBAIS entram junto das nominais. A auditoria de 31/08/2026
+  // mostrou que "Vamos devolver o valor" e "Vamos compensar o transtorno"
+  // passavam inteiras: `devolu[cç]` apanha "devolucao" e nao "devolver",
+  // `compensa[cç]` apanha "compensacao" e nao "compensar". E "devolver o
+  // valor" e a forma mais natural de prometer reembolso em portugues.
+  { padrao: /\b(reembols|devolv|devolu[cç]|ressarc|desconto|cortesia|brinde|gr[aá]tis|compensa|por (nossa|minha) conta|sem custo|sem qualquer custo|oferta da casa|vale de)/i, motivo: 'promessa de reparacao (pt)' },
+  { padrao: /\b(descuento|reembols|devolver|devolvere|devoluci|cortes[ií]a|obsequio|gratis|compensa|resarci|sin (coste|cargo|costo)|invita la casa|vale de)/i, motivo: 'promessa de reparacao (es)' },
   { padrao: /\b(refund|discount|voucher|coupon|rebate|reimburs|compensat|complimentary|on the house|free of charge|for free|at no (cost|charge)|free (meal|drink|dessert|night|stay|room)|gift (card|voucher))/i, motivo: 'promessa de reparacao (en)' },
   // Dizer que e um assistente quebra a voz do negocio, em qualquer lingua.
   { padrao: /\b(intelig[eê]ncia artificial|assistente virtual|sou uma? (IA|intelig)|inteligencia artificial|asistente virtual|artificial intelligence|virtual assistant|language model|an? AI\b)/i, motivo: 'revela automacao' },

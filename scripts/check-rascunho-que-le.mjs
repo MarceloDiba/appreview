@@ -849,6 +849,17 @@ exigir(
   /RASCUNHO_RECUSADO/.test(semComentarios(funcao)),
 );
 
+// A assercao acima conferia so que o codigo de erro existia no arquivo. Apagar
+// o laco inteiro que aplica a lista deixava as 114 verdes, com a correcao
+// principal da rodada completamente desguardada: as expressoes eram provadas a
+// correr, mas nada provava que elas eram aplicadas ao que o modelo devolveu.
+// Achado pela auditoria de 31/08/2026. Rodar a regra nao prova que a regra esta
+// ligada.
+exigir(
+  'a funçao deixou de PERCORRER a lista de proibicoes sobre o rascunho do modelo',
+  /for \(const \{ padrao, motivo \} of PROIBIDO\)[\s\S]{0,200}padrao\.test\(rascunho\)/.test(semComentarios(funcao)),
+);
+
 // Lido COM comentarios de proposito: o que se exige aqui e a advertencia, e ela
 // e um comentario. Quem ler a lista a seguir tem de ler primeiro que ela e uma
 // lista de bloqueio, e nao uma garantia: um rascunho que prometa reparaçao por
