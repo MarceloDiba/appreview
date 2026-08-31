@@ -458,7 +458,6 @@
         "pendingCommentsCount_one": "{{count}} comentário privado ainda sem resposta",
         "pendingCommentsCount_other": "{{count}} comentários privados ainda sem resposta",
         "pendingCommentsQuote": "\"{{quote}}\"",
-        "pendingCommentsDistinction": "Comentário privado é para falar com a pessoa. As avaliações públicas do Google ficam na fila abaixo.",
         "pendingCommentsHasContact": "Contacto deixado para retorno",
         "pendingCommentsAction": "Ver e resolver",
         "queueTitle": "Fila de respostas",
@@ -752,8 +751,8 @@
       },
       "approved": {
         "starsLabel": "{{rating}} de 5 estrelas",
+        "queueEmptyHint": "Procure as suas avaliações para montar a fila.",
         "reviewsShort": "avaliações",
-        "queueOtherDevice": "A fila de respostas fica no aparelho onde procurou as avaliações. Os números acima valem em qualquer aparelho.",
         "waitingReplies_one": "avaliação espera resposta",
         "waitingReplies_other": "avaliações esperam resposta",
         "nextInQueue": ". A seguir, {{name}}",

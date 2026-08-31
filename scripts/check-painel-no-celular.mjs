@@ -71,17 +71,17 @@ exigir(!/MobileIndex|MOBILE_SECTIONS/.test(painel),
 // distinguir as duas, senão um segundo aparelho mostra "nenhuma esperando"
 // sem ter como saber, que é afirmar o que não se sabe.
 const corpoResumo = corpoDaDeclaracao(painel, 'MobileSummary') || '';
-exigir(/!\s*queueOnThisDevice/.test(corpoResumo),
-  'A faixa-resumo parou de tratar o caso de a fila não existir neste aparelho, e passaria a mostrar zero como se fosse "nada a responder".');
+exigir(/!\s*temFila/.test(corpoResumo),
+  'A faixa-resumo parou de distinguir fila ausente de fila vazia, e passaria a mostrar zero como se fosse "nada a responder".');
 
 // 5. E a distinção precisa nascer da ausência do retrato, não do seu tamanho.
 // `observedReviews.length` seria zero tanto para fila vazia quanto para fila
 // ausente, e as duas voltariam a ser indistinguíveis.
-const calculo = painel.match(/const queueOnThisDevice = [^;]+;/);
-exigir(calculo !== null, 'queueOnThisDevice deixou de ser calculado.');
+const calculo = painel.match(/const temFila = [^;]+;/);
+exigir(calculo !== null, 'temFila deixou de ser calculado.');
 if (calculo) {
   exigir(/observedReviews\s*!==\s*undefined/.test(calculo[0]),
-    'queueOnThisDevice deixou de distinguir fila ausente de fila vazia: sem checar a ausência do retrato, zero avaliações e nenhum retrato viram o mesmo estado.');
+    'temFila deixou de distinguir fila ausente de fila vazia: sem checar a ausência do retrato, zero avaliações e nenhum retrato viram o mesmo estado.');
 }
 
 // 6. A linha de "Cada nota separada" estourava a largura do cartão no celular

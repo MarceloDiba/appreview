@@ -111,7 +111,7 @@ const SampleSourceNote = ({ snapshot }: { snapshot: ExperimentalApifySnapshot })
  * (linhas 39 a 41). Num segundo aparelho ela não existe, e a faixa diz isso em
  * vez de mostrar zero, que seria afirmar "nada a responder" sem saber.
  */
-const MobileSummary = ({ snapshot, queue, queueOnThisDevice }: { snapshot: ExperimentalApifySnapshot; queue: QueueReview[]; queueOnThisDevice: boolean }) => {
+const MobileSummary = ({ snapshot, queue, temFila }: { snapshot: ExperimentalApifySnapshot; queue: QueueReview[]; temFila: boolean }) => {
   const { t } = useOwnerTranslation();
   const waiting = queue.filter((review) => !review.responseObserved).length;
   const next = queue.find((review) => !review.responseObserved);
@@ -122,8 +122,15 @@ const MobileSummary = ({ snapshot, queue, queueOnThisDevice }: { snapshot: Exper
         <Stars rating={Math.round(snapshot.business.googleRating)} />
         <span className="text-sm text-slate-600">{integer.format(snapshot.business.googleReviewCount)} {t('dashboard.cockpit.approved.reviewsShort')}</span>
       </div>
-      {!queueOnThisDevice ? (
-        <p className="mt-2 text-sm leading-5 text-slate-600">{t('dashboard.cockpit.approved.queueOtherDevice')}</p>
+      {/*
+        Aqui dizia que a fila ficava no aparelho onde a busca foi feita. Isso
+        deixou de ser verdade em 31/08/2026, quando a fila passou a viver no
+        banco, e a frase sobreviveu à mudança dizendo o contrário do que o
+        produto faz. Sem fila nenhuma o que falta não é um aviso sobre
+        aparelhos: é dizer o que fazer para ter uma.
+      */}
+      {!temFila ? (
+        <p className="mt-2 text-sm leading-5 text-slate-600">{t('dashboard.cockpit.approved.queueEmptyHint')}</p>
       ) : waiting ? (
         <p className="mt-2 text-sm leading-5 text-slate-900">
           <strong className="font-semibold">{waiting}</strong> {t('dashboard.cockpit.approved.waitingReplies', { count: waiting })}
@@ -132,7 +139,7 @@ const MobileSummary = ({ snapshot, queue, queueOnThisDevice }: { snapshot: Exper
       ) : (
         <p className="mt-2 text-sm leading-5 text-slate-600">{t('dashboard.cockpit.approved.noneWaiting')}</p>
       )}
-      {queueOnThisDevice && waiting ? (
+      {temFila && waiting ? (
         <a href={`#${QUEUE_ANCHOR_ID}`} className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-[#2457D6] hover:underline">
           {t('dashboard.cockpit.approved.goToQueue')}<ChevronRight className="ml-1 h-4 w-4" />
         </a>
@@ -176,7 +183,9 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
   // Fila ausente e fila vazia não são a mesma coisa. Sem o retrato do
   // navegador e sem a conexão oficial, este aparelho não tem como saber o que
   // está por responder, e a faixa do celular precisa dizer isso.
-  const queueOnThisDevice = official.syncComplete || snapshot.sample.observedReviews !== undefined;
+  // Fila ausente e fila vazia continuam sendo coisas diferentes, mas o motivo
+  // mudou: antes era "este aparelho não tem", agora é "ainda não houve busca".
+  const temFila = official.syncComplete || snapshot.sample.observedReviews !== undefined;
   const queue: QueueReview[] = official.syncComplete
     ? official.reviews.map((review) => ({ id: review.id, rating: review.rating, comment: review.comment || '', publishedAt: review.review_updated_at, reviewerName: review.reviewer_name || undefined, responseObserved: Boolean(review.reply_text) }))
     : observed;
@@ -196,7 +205,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
   // forte da mesma regra. Saíram também o índice do celular, o cartão "Resumo
   // no WhatsApp", a completude do perfil e o "Deu resultado?".
   return <div className="space-y-5">
-    <MobileSummary snapshot={snapshot} queue={queue} queueOnThisDevice={queueOnThisDevice} />
+    <MobileSummary snapshot={snapshot} queue={queue} temFila={temFila} />
     <RadarNow snapshot={snapshot} />
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <section className="min-w-0 space-y-5">
