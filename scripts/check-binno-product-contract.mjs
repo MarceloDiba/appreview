@@ -22,6 +22,44 @@ const coletaInteira = collector + '\n' + nucleoDaColeta;
 const collectorCore = read('supabase/functions/_shared/experimentalApifyCollection.ts');
 const advisorReading = read('src/lib/advisorReading.ts');
 const estilos = read('src/index.css');
+// O WhatsApp saiu do painel em 31/08/2026 e virou destino do menu principal.
+// Provar que ele "saiu" exige provar para onde foi: sem isto, apagar a tela
+// inteira deixaria o guarda verde.
+const rotas = read('src/App.tsx');
+const menu = read('src/components/layout/Navbar.tsx');
+const telaDoWhatsApp = read('src/pages/WhatsApp.tsx');
+const catalogos = ['pt-BR', 'pt-PT', 'en'].map((idioma) => read(`src/i18n/owner/locales/${idioma}.json`));
+
+// O corpo de `const Nome = ...` até o `;` que fecha a declaração, contando
+// chaves e parênteses. Sem isto, "o Radar não desenha ícone fora do alerta"
+// seria medido no arquivo inteiro, onde há outros ícones legítimos.
+const corpoDaDeclaracao = (fonte, nome) => {
+  const inicio = fonte.indexOf(`const ${nome} =`);
+  if (inicio === -1) return null;
+  let i = fonte.indexOf('=', inicio) + 1;
+  let chaves = 0;
+  let parenteses = 0;
+  const partida = i;
+  for (; i < fonte.length; i += 1) {
+    const c = fonte[i];
+    if (c === '{') chaves += 1;
+    else if (c === '}') chaves -= 1;
+    else if (c === '(') parenteses += 1;
+    else if (c === ')') parenteses -= 1;
+    else if (c === ';' && chaves === 0 && parenteses === 0) break;
+  }
+  return fonte.slice(partida, i);
+};
+
+// Os quatro blocos de texto que Marcelo mandou sair em 31/08/2026. Guardá-los
+// pelo texto, e nos três catálogos, é a única forma de a decisão sobreviver:
+// uma chave apagada de um catálogo só volta pelo outro.
+const TEXTOS_REMOVIDOS_EM_31_08 = [
+  'O que o WhatsApp faz hoje',
+  'Lembretes sobre horários, fotos e informações do perfil quando a conexão oficial estiver ativa.',
+  'Escolha o que quer receber no seu WhatsApp. Neste piloto',
+  'o Google não informa quais você já respondeu',
+];
 
 // indexOf(A) < indexOf(B) sozinho e cego a A ter sido apagado inteiro: sem A,
 // indexOf devolve -1, e -1 e sempre menor que a posicao real de B, entao o
@@ -56,6 +94,7 @@ const semComentarios = (fonte) => fonte
   .replace(/\/\*[\s\S]*?\*\//g, ' ')
   .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
 const dashboardCodigo = semComentarios(dashboard);
+const corpoDoRadar = corpoDaDeclaracao(dashboardCodigo, 'RadarNow') || '';
 const filaDoPainel = (fonte) => (fonte.match(FILA_DO_PAINEL) || []);
 const posicaoDaFila = (fonte) => {
   const encontrada = filaDoPainel(fonte)[0];
@@ -65,7 +104,15 @@ const posicaoDaFila = (fonte) => {
 const requirements = [
   ['painel mantém a fila antes das métricas', filaDoPainel(dashboard).length > 0 && dashboard.includes('<VolumeCard weeks={history} />') && posicaoDaFila(dashboard) < dashboard.indexOf('<VolumeCard weeks={history} />')],
   ['painel mantém volume, notas, QR e temas', ['<VolumeCard weeks={history} />', '<RatingTrends weeks={history} snapshot={snapshot} />', '<QrCard funnel={funnel.data} />', '<TopicsCard snapshot={snapshot} />'].every((token) => dashboard.includes(token))],
-  ['coluna lateral mantém reputação, WhatsApp, boas práticas, completude e semana', ['<ReputationCard snapshot={snapshot} />', '<WhatsAppCard localWhatsApp={whatsApp}', '<DailyPractice snapshot={snapshot}', '<ProfileCompleteness connected={official.syncComplete} />', '<WeeklyChange weeks={history} />'].every((token) => dashboard.includes(token))],
+  // Em 31/08/2026 Marcelo tirou da coluna lateral o "Resumo no WhatsApp" (era
+  // atalho para uma tela que ganhou destino próprio) e a "Completude do
+  // perfil" (sem a ligação oficial nunca teve o que medir), e tirou da página o
+  // "Deu resultado?" (só falava depois de uma leitura seguinte que nunca chegou
+  // em conta real). A asserção deixou de os exigir; se parasse aí, os três
+  // voltavam sozinhos na próxima refatoração, porque nada os proibiria. Por
+  // isso ela tem duas metades: o que fica, e o que não pode voltar.
+  ['coluna lateral mantém reputação, boas práticas e semana', ['<ReputationCard snapshot={snapshot} />', '<DailyPractice snapshot={snapshot}', '<WeeklyChange weeks={history} />'].every((token) => dashboard.includes(token))],
+  ['os três cartões removidos em 31/08/2026 não voltam ao painel', !['<WhatsAppCard', '<ProfileCompleteness', '<ObservedResult'].some((token) => dashboardCodigo.includes(token))],
   // Decisão de 30/08/2026: a navegação em três abas (Visão geral, Avaliações,
   // WhatsApp) virou uma tela única. A aba Avaliações não sobrevive como seção
   // porque já era, byte a byte, a mesma <ResponseQueue> da Visão geral; a aba
@@ -76,17 +123,29 @@ const requirements = [
   // antes trocavam de aba (Plano de hoje, Boas práticas, Resumo no WhatsApp)
   // linkam para essas âncoras em vez de chamar um estado que deixou de existir.
   ['painel vira uma tela única: sem estado de aba e sem seletor', !dashboard.includes('CockpitTab') && !dashboard.includes('setTab(')],
-  // O <nav> era proibido por significar seletor de abas. Em 30/08/2026 o
-  // contrato passou a permitir exatamente um: o índice do celular, que é
-  // atalho e não navegação. A proibição continua valendo para qualquer outro,
-  // e é por isso que a contagem é exata e o único permitido é nomeado.
-  ['o único <nav> do painel é o índice do celular aprovado', (dashboard.match(/<nav/g) || []).length === 1 && /const MobileIndex[\s\S]{0,400}<nav/.test(dashboard)],
+  // O <nav> era proibido por significar seletor de abas. Em 30/08/2026 abriu-se
+  // uma exceção de um: o índice do celular, que era atalho e não navegação. Em
+  // 31/08/2026 o índice saiu (aparecia cortado no telemóvel do dono, e o menu
+  // principal já faz o trabalho), então a exceção não tem mais nada para
+  // cobrir e a proibição volta a ser total.
+  ['o painel não tem <nav> nenhum: nem seletor de abas, nem índice do celular', (dashboard.match(/<nav/g) || []).length === 0],
   ['fila de respostas aparece uma única vez: a antiga aba "Avaliações" não duplica a seção', filaDoPainel(dashboard).length === 1],
-  ['o painel lê profiles.business_country do dono', /select\('phone, business_country'\)/.test(dashboardCodigo)],
+  // O `phone` saiu deste `select` com a configuração do WhatsApp, que se mudou
+  // para `/whatsapp` e passou a ler o telefone lá. O país do negócio ficou.
+  ['o painel lê profiles.business_country do dono', /select\('business_country'\)/.test(dashboardCodigo)],
   ['o painel ATRIBUI ao estado o país que leu, em vez de um valor fixo', /setBusinessCountry\(data\?\.business_country \|\| null\)/.test(dashboardCodigo)],
   ['a fila do painel usa o país do negócio na chamada que monta a resposta sugerida', /buildReplySuggestions\(\{[^}]*businessCountry[^}]*\}\)/.test(dashboardCodigo)],
-  ['fila de respostas, QR/temas e configuração do WhatsApp têm âncora própria e única na página', (dashboard.match(/id=\{QUEUE_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{QR_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{WHATSAPP_ANCHOR_ID\}/g) || []).length === 1],
-  ['Plano de hoje e Resumo no WhatsApp linkam para a âncora certa em vez de trocar de aba', (dashboard.match(/href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/g) || []).length >= 1 && (dashboard.match(/href=\{`#\$\{WHATSAPP_ANCHOR_ID\}`\}/g) || []).length === 1],
+  // A âncora do WhatsApp saiu desta linha em vez de ser reapontada: ela deixou
+  // de existir com a tela, e uma asserção sobre um id que ninguém desenha fica
+  // verde sem proteger nada.
+  ['fila de respostas e QR/temas têm âncora própria e única na página', (dashboard.match(/id=\{QUEUE_ANCHOR_ID\}/g) || []).length === 1 && (dashboard.match(/id=\{QR_ANCHOR_ID\}/g) || []).length === 1],
+  // A versão anterior desta linha contava ocorrências no arquivo inteiro e
+  // pedia "pelo menos uma". Com três componentes a linkar para a mesma âncora,
+  // quebrar a de um deles deixava a asserção verde: ela não conseguia falhar
+  // pela regra que dizia proteger. Passa a medir DENTRO do corpo de cada
+  // componente que promete esse destino.
+  ['Plano de hoje linka para a âncora da fila em vez de trocar de aba', /href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/.test(corpoDaDeclaracao(dashboardCodigo, 'TodayPlan') || '')],
+  ['a faixa-resumo do celular linka para a âncora da fila', /href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/.test(corpoDaDeclaracao(dashboardCodigo, 'MobileSummary') || '')],
   // A faixa-resumo do celular acrescentou um segundo link para a fila, por isso
   // a contagem acima deixou de ser exata. O que a contagem media de verdade era
   // "ninguém troca de aba": isso agora é medido diretamente, e todo link de
@@ -98,12 +157,25 @@ const requirements = [
   // o alvo por variante: as tres que falam de avaliacao ou fila apontam para
   // a fila, a que fala de foto/QR aponta para o QR.
   ['Boas práticas linka para a âncora que o próprio texto do CTA promete (fila ou QR)', dashboard.includes('href={`#${practice.target}`}') && (dashboard.match(/target: QUEUE_ANCHOR_ID/g) || []).length === 3 && dashboard.includes('target: QR_ANCHOR_ID')],
-  ['configuração completa do WhatsApp não fica atrás de aba: sempre renderizada na página', dashboard.includes('<WhatsAppNotificationWorkspace localWhatsApp={whatsApp} onboardingPhone={onboardingPhone}') && !dashboard.includes("tab === 'whatsapp'")],
-  ['Radar, Plano de hoje e Resultado observado são adicionais aos módulos aprovados', ['<RadarNow snapshot={snapshot} />', '<TodayPlan snapshot={snapshot}', '<ObservedResult snapshot={snapshot}'].every((token) => dashboard.includes(token))],
+  // Decisão de 31/08/2026: o WhatsApp deixa de aparecer em todas as telas e
+  // vira destino do menu principal. As três linhas abaixo medem a mudança
+  // inteira, e não só metade dela: sai do painel, existe como rota protegida, e
+  // o menu leva até lá nas DUAS versões. Sem a terceira, apagar o link do menu
+  // do celular (que é onde o dono usa o produto) passava.
+  ['a configuração do WhatsApp saiu do painel', !dashboardCodigo.includes('WhatsAppNotificationWorkspace') && !dashboard.includes("tab === 'whatsapp'")],
+  ['o WhatsApp é uma rota própria e protegida por autenticação', /<Route path="\/whatsapp" element=\{\s*<ProtectedRoute>\s*<WhatsApp \/>/.test(rotas)],
+  ['o menu principal leva ao WhatsApp no ecrã grande e no celular', (menu.match(/to="\/whatsapp"/g) || []).length === 2],
+  // O Resultado observado saiu desta linha em 31/08/2026 e virou proibição, na
+  // asserção dos três cartões removidos, acima.
+  ['Radar e Plano de hoje são adicionais aos módulos aprovados', ['<RadarNow snapshot={snapshot} />', '<TodayPlan snapshot={snapshot}'].every((token) => dashboard.includes(token))],
   ['Radar e Plano permanecem visíveis sem alerta severo', dashboard.includes('const reading = getAdvisorReading(snapshot);') && !dashboard.includes('if (!alert && !opportunity) return null;')],
   ['assessor só usa força positiva agregada ou critérios de alerta existentes', advisorReading.includes("topic.sentiment === 'positive' && topic.count >= 3") && advisorReading.includes("if (alert)") && advisorReading.includes("return { kind: 'monitor' }")],
   ['dashboard autenticado não retorna ao layout legado quando falta snapshot', dashboardPage.includes('approvedFallbackSnapshot') && !['GoogleOutcomeCard', 'ReputationRadarCard', 'ReputationAdvisorCard', 'ProfileHealthCard'].some((token) => dashboardPage.includes(token))],
-  ['telefone do onboarding é reutilizado no WhatsApp', dashboard.includes('onboardingPhone={onboardingPhone}')],
+  // A secção 4 do contrato continua a mandar que o telefone do onboarding seja
+  // o destinatário inicial. A leitura mudou-se do painel para a tela do
+  // WhatsApp junto com ela, então a asserção mudou de arquivo, não de exigência:
+  // ela pede a cadeia inteira, do `select` à prop.
+  ['telefone do onboarding é reutilizado no WhatsApp', /select\('business_name, phone'\)/.test(telaDoWhatsApp) && /setOnboardingPhone\(profile\?\.phone \|\| ''\)/.test(telaDoWhatsApp) && telaDoWhatsApp.includes('onboardingPhone={onboardingPhone}')],
   ['fila oferece copiar e abrir somente com permalink individual', dashboard.includes("selected.reviewUrl ? <Button asChild") && dashboard.includes("copyAndOpenReview")],
   ['fila não inventa nome quando a fonte não o devolve', dashboard.includes("t('dashboard.cockpit.layout.anonymousReviewer')")],
   // O comentario privado com nota baixa expira: o cliente ainda esta no
@@ -119,6 +191,38 @@ const requirements = [
   ['coleta pede nome público', coletaInteira.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
   ['coleta aceita somente campos específicos de permalink', coletaInteira.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !coletaInteira.includes("'reviewUri', 'url'")],
   ['coleta temporária continua sem agenda e com limite explícito', collectorCore.includes("maxReviews: 50") && collectorCore.includes("APIFY_EXPERIMENTAL_COOLDOWN")],
+  // --------------------------------------------------------------------
+  // Decisões de 31/08/2026 que não tinham guarda nenhum antes.
+  // --------------------------------------------------------------------
+
+  // O Radar abria a página e enchia a primeira dobra sem dizer nada
+  // accionável. Passa a caber numa linha. Medir "é uma linha" pelo que ele
+  // NÃO desenha é o que torna a asserção falsificável: devolver um <Card>
+  // com título e corpo, como era, fica vermelho.
+  ['o Radar cabe numa linha: não volta a ser um cartão com título e corpo', corpoDoRadar !== '' && !corpoDoRadar.includes('<Card')],
+  ['o Radar tem uma linha por estado, e nenhuma a mais', (corpoDoRadar.match(/dashboard\.advisorPilot\.radarLine/g) || []).length === 4],
+  // O ícone do Radar só existe no alerta, onde carrega a severidade que o
+  // texto sozinho não carrega. Fora dele era enfeite a comer largura.
+  ['o Radar só desenha ícone quando há alerta, e um só', /urgent \? <AlertTriangle/.test(corpoDoRadar) && (corpoDoRadar.match(/<[A-Z][A-Za-z]*/g) || []).join(' ') === '<AlertTriangle'],
+
+  // Os ícones decorativos nos títulos de cartão comiam largura de um texto já
+  // apertado no celular. Ficam só os que carregam informação que o texto não
+  // carrega: severidade (AlertTriangle), estado (Info, CheckCircle2) e a
+  // estrela da nota. Medir pelo import é o mais apertado que dá: um ícone
+  // usado sem import não compila.
+  ['nenhum ícone decorativo volta aos títulos de cartão do painel', !['Sparkles', 'QrCode', 'Lightbulb', 'MessageCircle'].some((icone) => new RegExp(`\\b${icone}\\b`).test(dashboard))],
+
+  // Os quatro blocos de texto removidos, nos três catálogos. Uma chave apagada
+  // de um catálogo só volta pelo outro, e o check:i18n-owner não repara em
+  // texto: ele confere chaves, não frases.
+  ['os textos removidos em 31/08/2026 não voltam a nenhum dos três catálogos', !TEXTOS_REMOVIDOS_EM_31_08.some((texto) => catalogos.some((catalogo) => catalogo.includes(texto)))],
+
+  // A tela do WhatsApp não pode afirmar uma ligação que não foi confirmada. O
+  // estado vem de `lerEstadoDaLigacao`, e `scripts/check-whatsapp-ligacao.mjs`
+  // executa esse módulo estado a estado. Aqui garante-se só que a tela o usa em
+  // vez de inventar um booleano próprio.
+  ['a tela do WhatsApp lê o estado da ligação do módulo que sabe o que prova entrega', read('src/components/dashboard/WhatsAppNotificationWorkspace.tsx').includes("import { lerEstadoDaLigacao } from '@/lib/whatsappConnection';")],
+
   // O contrato fixa violeta #6D43C0 como assinatura e azul #2457D6 para acoes,
   // e ate 30/08/2026 nada verificava isso. O token --primary tinha derivado
   // para #6C45BA, que e o violeta que slider, switch, badge e barra de

@@ -54,7 +54,8 @@
     "logout": "Sair",
     "login": "Entrar",
     "signup": "Começar",
-    "profile": "perfil"
+    "profile": "perfil",
+    "whatsapp": "WhatsApp"
   },
   "auth": {
     "loginSubtitle": "Entre na sua conta",
@@ -738,8 +739,6 @@
         "localDisclaimer": "Esta programação é apenas uma prévia local. Nenhuma mensagem foi enviada nem será enviada sem a ligação do fornecedor e o seu consentimento.",
         "historyTitle": "Mensagens enviadas",
         "historyEmpty": "Nenhuma mensagem foi enviada por este painel nesta sessão.",
-        "connectionTitle": "O que o WhatsApp faz hoje",
-        "connectionBody": "Escolhe o que quer receber e envia uma mensagem de teste na hora, a partir deste aparelho, para ver como ela chega. O envio sozinho à hora marcada ainda não está ligado: por agora, cada mensagem sai quando carrega no botão.",
         "status": {
           "checking": "A verificar canal local",
           "ready": "Canal local ligado",
@@ -766,13 +765,6 @@
       },
       "approved": {
         "starsLabel": "{{rating}} de 5 estrelas",
-        "mobileIndexLabel": "Ir para uma secção",
-        "sectionRadar": "Radar",
-        "sectionQueue": "Fila",
-        "sectionVolume": "Volume",
-        "sectionRatings": "Estrelas",
-        "sectionQr": "QR e temas",
-        "sectionWhatsapp": "WhatsApp",
         "reviewsShort": "avaliações",
         "queueOtherDevice": "A fila de respostas fica no aparelho onde procurou as avaliações. Os números acima valem em qualquer aparelho.",
         "waitingReplies_one": "avaliação espera resposta",
@@ -798,9 +790,6 @@
         "reputationTitle": "Reputação no Google",
         "reputationFreshness": "da última procura",
         "reviewsTotal": "avaliações no total",
-        "whatsappTitle": "Resumo no WhatsApp",
-        "whatsappReadyBody": "O seu WhatsApp está ligado. Já pode enviar um resumo de teste e ver como ele chega.",
-        "whatsappSetupBody": "Diga o que quer receber no seu WhatsApp: o resumo da semana e o aviso quando alguém deixa uma avaliação má. Demora um minuto.",
         "practiceTitle": "Boas práticas",
         "practiceUnansweredTitle_one": "{{count}} avaliação ainda espera a sua resposta",
         "practiceUnansweredTitle_other": "{{count}} avaliações ainda esperam a sua resposta",
@@ -809,9 +798,6 @@
         "practicePhotoTitle": "Tire uma fotografia nova do seu negócio",
         "practicePhotoBody": "Mostre no Google o que o cliente encontra hoje, não o que encontrava no ano passado.",
         "practicePhotoAction": "Ver QR Codes",
-        "profileTitle": "O que falta no seu perfil do Google",
-        "profileMissingDemo": "Falta preencher: horário de funcionamento, duas fotografias e a descrição do negócio.",
-        "profileConnected": "O Perfil de Empresa está ligado. O Binno mostra aqui o que ainda falta preencher no Google.",
         "weekTitle": "O que mudou na semana",
         "weekWindow": "7 dias",
         "weekReplies_one": "Respondeu a {{count}} avaliação nos últimos 7 dias.",
@@ -835,18 +821,11 @@
       "opportunityAction": "Use isto a seu favor: ponha este ponto forte no seu perfil do Google, na ementa e nas suas redes.",
       "strengthBody": "{{topic}} apareceu como elogio em {{mentions}} das avaliações que o Binno recolheu.",
       "strengthAction": "Escolha um exemplo real de {{topic}} e mostre isso no seu perfil do Google, numa fotografia nova ou na descrição do negócio.",
-      "monitorTitle": "Nada precisa de si agora",
-      "monitorBody": "O Binno viu todas as avaliações que já recolheu e não encontrou nenhum problema a repetir-se. Não precisa de fazer nada por causa deste quadro hoje. Quando o mesmo assunto aparecer em várias avaliações más, ou as classificações baixas subirem, o aviso nasce aqui. O Binno prefere dizer-lhe que está tudo bem a inventar-lhe um problema.",
       "monitorAction": "Aproveite o dia calmo para responder a quem ainda espera na fila. Responder é o que mais ajuda a sua classificação.",
       "reviewEvidence": "Ver avaliações",
-      "resultTitle": "Deu resultado?",
-      "resultWaiting": "Quando marcar uma ação como feita no Plano de hoje e depois voltar a procurar as avaliações, o Binno compara as duas e diz-lhe aqui se o problema deixou de aparecer.",
-      "resultNotRepeated": "Boa notícia: o problema que tratou não voltou a aparecer nas avaliações novas. Ainda é cedo para garantir, mas o caminho está certo.",
-      "resultPersisting": "O mesmo problema voltou a aparecer nas avaliações novas. Vale a pena insistir na mudança que começou.",
       "whatsappSent": "Alerta enviado para o WhatsApp do gestor.",
       "whatsappSkipped": "As avaliações foram recolhidas; o aviso não saiu porque falta o consentimento, o número ou o canal do WhatsApp.",
       "whatsappFailed": "As avaliações foram recolhidas, mas o aviso não conseguiu sair pelo WhatsApp.",
-      "notificationsBody": "Escolha o que quer receber no seu WhatsApp. Neste piloto, um aviso só sai depois de procurar as avaliações em Definições.",
       "notificationsConsent": "Autorizo o Binno a enviar estes avisos para este número depois de eu procurar as avaliações. Nada sai sozinho nem em segundo plano.",
       "preferencesSaved": "Preferências locais guardadas para o próximo teste manual.",
       "messageAlertTitle": "Binno: aviso das avaliações de hoje",
@@ -855,7 +834,12 @@
       "messageAlertAction": "O que fazer: olhe para essa parte do seu negócio hoje e abra o painel para ver as avaliações que deram origem ao aviso.",
       "messageWeeklyTitle": "Resumo do Binno",
       "messageWeeklySnapshot": "{{business}} está com nota {{rating}} e {{total}} avaliações no Google.",
-      "messageWeeklyOpportunity": "{{business}}: “{{phrase}}” apareceu em {{mentions}} elogios recentes."
+      "messageWeeklyOpportunity": "{{business}}: “{{phrase}}” apareceu em {{mentions}} elogios recentes.",
+      "radarLineAlert": "Atenção: {{topic}} apareceu em {{mentions}} comentários, com {{low}} avaliações de 1 ou 2 estrelas.",
+      "radarLineOpportunity": "O que está a ajudar: “{{phrase}}” apareceu em {{mentions}} elogios recentes.",
+      "radarLineStrength": "O que está a ajudar: {{topic}} apareceu como elogio em {{mentions}} avaliações.",
+      "radarLineMonitor": "Nada precisa de si agora. O Binno avisa aqui quando algo se repetir.",
+      "markedDone": "Marcado como feito"
     },
     "setupBanner": {
       "title": "Falta terminar a configuração",
@@ -1025,13 +1009,16 @@
       "emptyBody": "Quando alguém deixar um comentário no QR da mesa ou uma avaliação no seu perfil do Google, ela aparece aqui, com a resposta sugerida pronta a ajustar. Deixe o QR à vista na mesa e no balcão: é ele que traz o primeiro.",
       "originPrivate": "Comentário privado",
       "originGoogle": "Google",
-      "publicUnknownState": "Nas avaliações que o Binno lê do seu perfil público, o Google não diz quais já respondeu. Depois de responder lá, marque aqui para as tirar da lista.",
       "markAnswered": "Já respondi no Google",
       "markNotAnswered": "Ainda não respondi",
       "answeredToast": "Marcada como respondida por si no Google.",
       "unansweredToast": "De volta para a fila.",
       "refreshError": "Não foi possível falar com o Google agora, e nada foi atualizado. O que está na lista continua a valer. Tente de novo daqui a alguns minutos; se continuar, confirme o link do Google em Definições.",
-      "handledTitle": "Já tratados"
+      "handledTitle": "Já tratados",
+      "originsPrivate": "Mensagens privadas",
+      "originsGoogle": "Comentários no Google",
+      "originsAll": "Ver todas",
+      "emptyFiltered": "Nada desta origem à espera de resposta agora."
     },
     "loading": "A carregar...",
     "google": {
@@ -1188,8 +1175,6 @@
     "repliesBody": "Aviso quando uma avaliação observada ainda não mostra resposta.",
     "reputationTitle": "Alertas do Radar",
     "reputationBody": "Queda relevante, classificações baixas fora do padrão e causa recorrente quando a evidência for suficiente.",
-    "profileTitle": "Perfil do Google",
-    "profileBody": "Lembretes sobre horários, fotos e informações do perfil quando a ligação oficial estiver ativa.",
     "feedbackTitle": "Comentário privado com classificação baixa",
     "feedbackBody": "Aviso imediato quando alguém deixa um comentário com classificação 3 ou menos.",
     "notificationRecipient": "WhatsApp do gestor que receberá os avisos",
@@ -1216,7 +1201,13 @@
       "failed": "Não foi possível entregar a última mensagem.",
       "skipped": "A última mensagem não foi enviada.",
       "cancelled": "A última mensagem foi cancelada."
-    }
+    },
+    "testeTitulo": "Teste o seu WhatsApp com o Binno e depois guarde o nosso número.",
+    "testeBotao": "Enviar o teste agora",
+    "testeRefazer": "Refazer o teste",
+    "ligacaoAtiva": "A ligação com o seu WhatsApp está ativa.",
+    "testeACaminho": "O teste saiu e ainda não há confirmação de que chegou. Toque em atualizar daqui a pouco.",
+    "testeFalhou": "O teste não chegou ao seu WhatsApp. Confirme o número acima e envie de novo."
   },
   "localWhatsApp": {
     "proxyUnavailable": "O proxy local do OpenWA não está disponível. Inicie a prévia com BINNO_ENABLE_OPENWA_PROXY=true e configure a chave local.",

@@ -54,7 +54,8 @@
     "logout": "Log out",
     "login": "Log in",
     "signup": "Get started",
-    "profile": "profile"
+    "profile": "profile",
+    "whatsapp": "WhatsApp"
   },
   "auth": {
     "loginSubtitle": "Sign in to your account",
@@ -738,8 +739,6 @@
         "localDisclaimer": "This schedule is only a local preview. No message was sent or will be sent without the provider connection and your consent.",
         "historyTitle": "Sent messages",
         "historyEmpty": "No message was sent by this dashboard in this session.",
-        "connectionTitle": "What WhatsApp does today",
-        "connectionBody": "You choose what you want to receive and send a test message right now, from this device, to see how it arrives. Sending on its own at a set time is not switched on yet: for now, each message goes out when you click.",
         "status": {
           "checking": "Checking local channel",
           "ready": "Local channel connected",
@@ -766,13 +765,6 @@
       },
       "approved": {
         "starsLabel": "{{rating}} out of 5 stars",
-        "mobileIndexLabel": "Jump to a section",
-        "sectionRadar": "Radar",
-        "sectionQueue": "Queue",
-        "sectionVolume": "Volume",
-        "sectionRatings": "Ratings",
-        "sectionQr": "QR and topics",
-        "sectionWhatsapp": "WhatsApp",
         "reviewsShort": "reviews",
         "queueOtherDevice": "The reply queue stays on the device where you fetched the reviews. The numbers above are the same on any device.",
         "waitingReplies_one": "review is waiting for a reply",
@@ -798,9 +790,6 @@
         "reputationTitle": "Google reputation",
         "reputationFreshness": "from the latest fetch",
         "reviewsTotal": "reviews in total",
-        "whatsappTitle": "WhatsApp summary",
-        "whatsappReadyBody": "Your WhatsApp is connected. You can send yourself a test summary and see how it arrives.",
-        "whatsappSetupBody": "Tell Binno what you want on your WhatsApp: the weekly summary, and an alert when someone leaves a bad review. It takes a minute.",
         "practiceTitle": "Good practice",
         "practiceUnansweredTitle_one": "{{count}} review is still waiting for your reply",
         "practiceUnansweredTitle_other": "{{count}} reviews are still waiting for your reply",
@@ -809,9 +798,6 @@
         "practicePhotoTitle": "Take a fresh photo of your business",
         "practicePhotoBody": "Show on Google what a customer finds today, not what they found last year.",
         "practicePhotoAction": "View QR codes",
-        "profileTitle": "What is missing from your Google profile",
-        "profileMissingDemo": "Still missing: opening hours, two photos, and the business description.",
-        "profileConnected": "The Business Profile is connected. Binno shows here what is still missing on Google.",
         "weekTitle": "What changed this week",
         "weekWindow": "7 days",
         "weekReplies_one": "You replied to {{count}} review in the last 7 days.",
@@ -835,18 +821,11 @@
       "opportunityAction": "Put that strength to work: show it on your Google profile, on the menu, and in your posts.",
       "strengthBody": "{{topic}} came up as praise in {{mentions}} of the reviews Binno fetched.",
       "strengthAction": "Pick a real example of {{topic}} and show it on your Google profile, in a new photo or in the business description.",
-      "monitorTitle": "Nothing needs you right now",
-      "monitorBody": "Binno went through every review it has fetched and found no problem repeating itself. Nothing here needs you today. The moment the same subject shows up across several bad reviews, or low ratings start climbing, the warning appears right here. Binno would rather tell you all is well than invent a problem for you to solve.",
       "monitorAction": "Use the quiet day to reply to whoever is still waiting in the queue. Replying is what helps your rating most.",
       "reviewEvidence": "View reviews",
-      "resultTitle": "Did it work?",
-      "resultWaiting": "Once you mark an action as done in Today’s plan and fetch your reviews again, Binno compares the two and tells you here whether the problem stopped showing up.",
-      "resultNotRepeated": "Good news: the problem you worked on did not come back in the new reviews. Too early to call it settled, but you are on the right track.",
-      "resultPersisting": "The same problem showed up again in the new reviews. Worth sticking with the change you started.",
       "whatsappSent": "Alert sent to the owner's WhatsApp.",
       "whatsappSkipped": "The reviews were fetched; the alert did not go out because consent, the number, or the WhatsApp channel is missing.",
       "whatsappFailed": "The reviews were fetched, but the alert could not go out through WhatsApp.",
-      "notificationsBody": "Choose what you want on your WhatsApp. In this pilot, an alert only goes out after you fetch the reviews in Settings.",
       "notificationsConsent": "I allow Binno to send these alerts to this number after I fetch the reviews. Nothing goes out on its own or in the background.",
       "preferencesSaved": "Local preferences saved for the next manual test.",
       "messageAlertTitle": "Binno: today’s review alert",
@@ -855,7 +834,12 @@
       "messageAlertAction": "What to do: look at that part of the business today, and open the panel to see the reviews behind the alert.",
       "messageWeeklyTitle": "Binno summary",
       "messageWeeklySnapshot": "{{business}} has a {{rating}} rating and {{total}} Google reviews.",
-      "messageWeeklyOpportunity": "{{business}}: “{{phrase}}” appeared in {{mentions}} recent positive mentions."
+      "messageWeeklyOpportunity": "{{business}}: “{{phrase}}” appeared in {{mentions}} recent positive mentions.",
+      "radarLineAlert": "Heads up: {{topic}} came up in {{mentions}} comments, with {{low}} one or two star reviews.",
+      "radarLineOpportunity": "What is helping: “{{phrase}}” came up in {{mentions}} recent compliments.",
+      "radarLineStrength": "What is helping: {{topic}} came up as praise in {{mentions}} reviews.",
+      "radarLineMonitor": "Nothing needs you right now. Binno flags it here when something repeats.",
+      "markedDone": "Marked as done"
     },
     "setupBanner": {
       "title": "Finish the setup",
@@ -1025,13 +1009,16 @@
       "emptyBody": "When someone leaves a comment on the table QR code or a review on your Google profile, it shows up here with a suggested reply ready for you to adjust. Keep the QR code in sight on the table and at the counter: that is what brings the first one.",
       "originPrivate": "Private comment",
       "originGoogle": "Google",
-      "publicUnknownState": "For reviews Binno reads from your public profile, Google does not say which ones you already answered. After you answer there, mark it here to take it off the list.",
       "markAnswered": "I answered this on Google",
       "markNotAnswered": "Not answered yet",
       "answeredToast": "Marked as answered by you on Google.",
       "unansweredToast": "Back in the queue.",
       "refreshError": "Google could not be reached right now, and nothing was updated. What is on the list still stands. Try again in a few minutes; if it keeps failing, check your Google link in Settings.",
-      "handledTitle": "Already handled"
+      "handledTitle": "Already handled",
+      "originsPrivate": "Private messages",
+      "originsGoogle": "Google comments",
+      "originsAll": "Show all",
+      "emptyFiltered": "Nothing from this source is waiting for a reply right now."
     },
     "loading": "Loading...",
     "google": {
@@ -1188,8 +1175,6 @@
     "repliesBody": "An alert when an observed review does not show a reply yet.",
     "reputationTitle": "Radar alerts",
     "reputationBody": "Relevant drops, low ratings outside the pattern, and repeated causes when evidence is sufficient.",
-    "profileTitle": "Google Business Profile",
-    "profileBody": "Reminders about hours, photos, and profile information after the official connection is active.",
     "feedbackTitle": "Private low-rating comment",
     "feedbackBody": "Immediate alert when someone leaves a comment with a rating of 3 or lower.",
     "notificationRecipient": "Owner's WhatsApp for notifications",
@@ -1216,7 +1201,13 @@
       "failed": "The latest message could not be delivered.",
       "skipped": "The latest message was not sent.",
       "cancelled": "The latest message was cancelled."
-    }
+    },
+    "testeTitulo": "Test your WhatsApp with Binno, then save our number.",
+    "testeBotao": "Send the test now",
+    "testeRefazer": "Run the test again",
+    "ligacaoAtiva": "Your WhatsApp connection is active.",
+    "testeACaminho": "The test went out and there is no confirmation yet that it arrived. Tap refresh in a moment.",
+    "testeFalhou": "The test did not reach your WhatsApp. Check the number above and send it again."
   },
   "localWhatsApp": {
     "proxyUnavailable": "The local OpenWA proxy is unavailable. Start the preview with BINNO_ENABLE_OPENWA_PROXY=true and configure the local key.",

@@ -62,6 +62,66 @@ const CHAVES_DA_ORIGEM: Record<OrigemDaResposta, string> = {
   'google-publico': 'reviews.queue.originGoogle',
 };
 
+/**
+ * As duas caixas de entrada que o dono pediu, sem virarem duas caixas.
+ *
+ * Em 31/08/2026, depois de rever o painel no telemóvel: "deveria ter 2 caixas
+ * de entrada". Na véspera tinha pedido o contrário: "um lugar só para
+ * responder, com as origens somadas em vez de separadas por aba". As duas
+ * frases conciliam-se porque ele não pediu duas caixas, pediu saber quanto tem
+ * de cada lado antes de rolar a lista. As origens pedem coisas diferentes dele,
+ * uma mensagem directa e um texto público, e a soma escondia essa conta.
+ *
+ * Uma fila, dois atalhos: o padrão é a lista inteira, e isto é um filtro que se
+ * põe e se tira na mesma tela. Não é aba, não reordena nada, e as contagens
+ * nascem da mesma fila somada que a lista desenha logo abaixo: uma segunda
+ * contagem, lida de outra fonte, voltaria a poder discordar da lista, que é o
+ * defeito que a fila somada existe para não ter.
+ */
+export type GrupoDeOrigem = 'privado' | 'google';
+
+export const grupoDaOrigem = (origem: OrigemDaResposta): GrupoDeOrigem =>
+  origem === 'comentario-privado' ? 'privado' : 'google';
+
+const CartaoDeOrigens = ({
+  fila,
+  filtro,
+  aoFiltrar,
+}: {
+  fila: ItemDaFila[];
+  filtro: GrupoDeOrigem | null;
+  aoFiltrar: (grupo: GrupoDeOrigem | null) => void;
+}) => {
+  const { t } = useOwnerTranslation();
+  const linhas: Array<{ grupo: GrupoDeOrigem; rotulo: string }> = [
+    { grupo: 'privado', rotulo: t('reviews.queue.originsPrivate') },
+    { grupo: 'google', rotulo: t('reviews.queue.originsGoogle') },
+  ];
+
+  return (
+    <Card className="mt-4">
+      <CardContent className="divide-y divide-slate-200 p-0">
+        {linhas.map(({ grupo, rotulo }) => {
+          const total = fila.filter((item) => grupoDaOrigem(item.origem) === grupo).length;
+          const ativo = filtro === grupo;
+          return (
+            <button
+              key={grupo}
+              type="button"
+              aria-pressed={ativo}
+              onClick={() => aoFiltrar(ativo ? null : grupo)}
+              className={`flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm ${ativo ? 'bg-blue-50 text-[#2457D6]' : 'text-slate-700 hover:bg-slate-50'}`}
+            >
+              <span className="min-w-0 break-words font-medium">{rotulo}</span>
+              <span className="shrink-0 font-semibold tabular-nums">{total}</span>
+            </button>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+};
+
 const Origem = ({ origem }: { origem: OrigemDaResposta }) => {
   const { t } = useOwnerTranslation();
   return (
@@ -307,6 +367,9 @@ const FilaDeRespostas = ({
   const publicas = useGoogleReviews(userId);
   const respondidas = useGooglePublicReviewsAnswered(userId);
   const [falhaAoAtualizar, setFalhaAoAtualizar] = useState(false);
+  // O padrão é sem filtro: a fila abre inteira, do mais recente para o mais
+  // antigo. O cartão de origens acima dela põe e tira este filtro.
+  const [filtroDeOrigem, setFiltroDeOrigem] = useState<GrupoDeOrigem | null>(null);
 
   const fontes = useMemo(
     () => ({
@@ -319,6 +382,14 @@ const FilaDeRespostas = ({
   );
   const fila = useMemo(() => montarFilaDeRespostas(fontes), [fontes]);
   const tratados = useMemo(() => itensJaTratados(fontes), [fontes]);
+  // Filtrar não reordena: a ordem inteira continua a sair de
+  // `montarFilaDeRespostas`, e o filtro é aplicado depois dela, sobre a lista
+  // já ordenada. Uma segunda ordenação aqui seria a quarta cópia da regra de
+  // recência neste projeto.
+  const filaVisivel = useMemo(
+    () => (filtroDeOrigem ? fila.filter((item) => grupoDaOrigem(item.origem) === filtroDeOrigem) : fila),
+    [fila, filtroDeOrigem],
+  );
 
   const temItemDoGoogle = [...fila, ...tratados].some((item) => item.origem !== 'comentario-privado');
   const temItemPublico = [...fila, ...tratados].some((item) => item.origem === 'google-publico');
@@ -350,7 +421,7 @@ const FilaDeRespostas = ({
         <div className="min-w-0">
           <h2 className="text-xl font-semibold text-slate-950">{t('reviews.queue.title')}</h2>
           <p className="mt-1 text-sm text-gray-600">
-            {carregando ? t('reviews.loading') : t('reviews.queue.pending', { count: fila.length })}
+            {carregando ? t('reviews.loading') : t('reviews.queue.pending', { count: filaVisivel.length })}
           </p>
         </div>
         <Button
@@ -365,17 +436,12 @@ const FilaDeRespostas = ({
       </div>
 
       {/*
-        Um único estado objetivo, no módulo afetado, como manda a regra de
-        apresentação do contrato: a leitura pública do Google não devolve as
-        respostas já publicadas, então sobre essas o Binno não sabe dizer se
-        ainda esperam. Dizer isto uma vez é mais honesto do que marcar cada
-        item com um estado inventado.
+        Aqui vivia a frase que explicava que a leitura pública do Google não
+        devolve as respostas já publicadas. Marcelo mandou-a sair em 31/08/2026:
+        ela pedia ao dono que guardasse na cabeça uma limitação de API para
+        poder usar um botão que já se explica sozinho ("Já respondi no Google").
+        O botão continua onde estava, e é ele que tira o item da fila.
       */}
-      {temItemPublico && (
-        <p className="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-xs leading-5 text-slate-600">
-          {t('reviews.queue.publicUnknownState')}
-        </p>
-      )}
 
       {/*
         A sincronização oficial pagina o perfil inteiro. Enquanto não termina,
@@ -421,21 +487,40 @@ const FilaDeRespostas = ({
         </p>
       )}
 
+      <CartaoDeOrigens fila={fila} filtro={filtroDeOrigem} aoFiltrar={setFiltroDeOrigem} />
+
       <div className="mt-4 space-y-4">
-        {carregando && fila.length === 0 && (
+        {carregando && filaVisivel.length === 0 && (
           <Card><CardContent className="py-8 text-center text-gray-500">{t('reviews.loading')}</CardContent></Card>
         )}
 
-        {!carregando && fila.length === 0 && (
+        {!carregando && filaVisivel.length === 0 && (
           <Card>
             <CardContent className="p-5">
-              <p className="font-semibold text-slate-950">{t('reviews.queue.emptyTitle')}</p>
-              <p className="mt-2 text-sm leading-6 text-gray-600">{t('reviews.queue.emptyBody')}</p>
+              {/*
+                Vazio por filtro e vazio de verdade são coisas diferentes. Dizer
+                "nada esperando resposta" a quem acabou de filtrar por uma
+                origem seria afirmar sobre a fila inteira o que só vale para um
+                lado dela.
+              */}
+              {filtroDeOrigem ? (
+                <>
+                  <p className="font-semibold text-slate-950">{t('reviews.queue.emptyFiltered')}</p>
+                  <Button variant="outline" className="mt-3 w-full sm:w-auto" onClick={() => setFiltroDeOrigem(null)}>
+                    {t('reviews.queue.originsAll')}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold text-slate-950">{t('reviews.queue.emptyTitle')}</p>
+                  <p className="mt-2 text-sm leading-6 text-gray-600">{t('reviews.queue.emptyBody')}</p>
+                </>
+              )}
             </CardContent>
           </Card>
         )}
 
-        {fila.map((item) => (
+        {filaVisivel.map((item) => (
           <ItemDaFilaCard
             key={item.id}
             item={item}
