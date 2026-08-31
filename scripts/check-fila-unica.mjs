@@ -144,6 +144,30 @@ exigir(
   /temItemPublico[\s\S]{0,300}reviews\.google\.relevanceNotice/.test(fila),
 );
 
+// As duas asserções acima prendem o desenho ao nome do booleano, e só isso.
+// Escrever `const temItemDoGoogle = [...].some(...) && false` deixa as duas
+// verdes enquanto a linha de atribuição nunca aparece, que é a falha exata que
+// a auditoria de 31/08 demonstrou. Uma linha exigida pelos termos do Google não
+// pode depender de um guarda que confere o nome da variável.
+//
+// Estas duas prendem o cálculo: cada booleano nasce de percorrer a lista real,
+// e nenhum aceita um literal que o force a um valor fixo.
+for (const nome of ['temItemDoGoogle', 'temItemPublico']) {
+  const calculo = fila.match(new RegExp(`const ${nome} = ([^;]+);`));
+  exigir(`${nome} deixou de ser calculado na fila.`, calculo !== null);
+  if (calculo) {
+    const expressao = calculo[1];
+    exigir(
+      `${nome} deixou de nascer de percorrer a fila e os já tratados, entao pode ficar preso num valor que nao corresponde ao que esta na tela.`,
+      /\.some\(/.test(expressao) && /fila/.test(expressao) && /tratados/.test(expressao),
+    );
+    exigir(
+      `${nome} passou a conter um literal booleano, que o prende a um valor fixo e faz a atribuição ao Google desaparecer com o guarda verde.`,
+      !/(^|[^A-Za-z.])(false|true)([^A-Za-z]|$)/.test(expressao),
+    );
+  }
+}
+
 // Uma atualização que falha tem de parecer diferente de uma que funcionou e
 // não trouxe nada. As três linhas seguintes prendem a cadeia inteira: a
 // leitura pública devolve se correu bem, a fila lê esse resultado, e a fila

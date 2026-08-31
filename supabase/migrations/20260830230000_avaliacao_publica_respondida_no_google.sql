@@ -36,6 +36,13 @@ create table if not exists public.google_public_reviews_answered (
 
 alter table public.google_public_reviews_answered enable row level security;
 
+-- O RLS ja nega por omissao a quem nao tem politica, entao o `anon` nao passa.
+-- As permissoes abaixo sao a segunda tranca, e existem para esta tabela ficar
+-- igual as irmas (ver `cached_reviews`): se um dia alguem acrescentar uma
+-- politica ampla sem pensar, a permissao ainda barra o anonimo.
+revoke all on table public.google_public_reviews_answered from anon, authenticated;
+grant select, insert, delete on table public.google_public_reviews_answered to authenticated;
+
 drop policy if exists "google_public_reviews_answered_owner_select" on public.google_public_reviews_answered;
 create policy "google_public_reviews_answered_owner_select"
 on public.google_public_reviews_answered for select
