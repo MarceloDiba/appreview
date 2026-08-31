@@ -48,6 +48,7 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, onboardingPhone }
   const [backendState, setBackendState] = useState<'checking' | 'ready' | 'local-fallback' | 'unavailable'>('checking');
   const [deliveries, setDeliveries] = useState<WhatsAppDelivery[]>([]);
   const [ultimoTeste, setUltimoTeste] = useState<WhatsAppDelivery | null>(null);
+  const [ultimaFalha, setUltimaFalha] = useState<WhatsAppDelivery | null>(null);
   const testRecipient = preferences.recipient;
   const directReady = localWhatsApp.status === 'ready' && localWhatsApp.session;
   const ready = backendState === 'ready' || Boolean(directReady);
@@ -55,7 +56,7 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, onboardingPhone }
   // O estado da ligação nasce do último teste registado, e de mais nada.
   // Nenhum atalho ao lado desta linha: ver o cabeçalho de
   // `src/lib/whatsappConnection.ts` para o que foi apagado daqui e por quê.
-  const estadoDaLigacao = lerEstadoDaLigacao(ultimoTeste);
+  const estadoDaLigacao = lerEstadoDaLigacao(ultimoTeste, new Date(), ultimaFalha);
   // O formulário reaparece quando o dono pede para refazer, e é isso que torna
   // o botão um caminho em vez de um enfeite.
   const mostrandoFormulario = refazendo || estadoDaLigacao !== 'ativa';
@@ -69,6 +70,7 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, onboardingPhone }
     const state = await getWhatsAppDeliveryState();
     setDeliveries(state.deliveries);
     setUltimoTeste(state.lastTest);
+    setUltimaFalha(state.lastFailure);
     if (state.preferences) setPreferences(state.preferences);
     setBackendState('ready');
     return state;

@@ -24,6 +24,7 @@ export type WhatsAppDeliveryState = {
    * `supabase/functions/whatsapp-notifications/index.ts`.
    */
   lastTest: WhatsAppDelivery | null;
+  lastFailure: WhatsAppDelivery | null;
 };
 
 type WirePreferences = {
@@ -82,11 +83,12 @@ const invoke = async <T>(body: Record<string, unknown>) => {
 };
 
 export const getWhatsAppDeliveryState = async (): Promise<WhatsAppDeliveryState> => {
-  const data = await invoke<{ preferences?: WirePreferences | null; deliveries?: WireDelivery[]; last_test?: WireDelivery | null }>({ action: 'get' });
+  const data = await invoke<{ preferences?: WirePreferences | null; deliveries?: WireDelivery[]; last_test?: WireDelivery | null; last_failure?: WireDelivery | null }>({ action: 'get' });
   return {
     preferences: toPreferences(data.preferences),
     deliveries: (data.deliveries || []).map(toDelivery),
     lastTest: data.last_test ? toDelivery(data.last_test) : null,
+    lastFailure: data.last_failure ? toDelivery(data.last_failure) : null,
   };
 };
 
