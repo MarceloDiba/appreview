@@ -778,13 +778,30 @@ exigir(
 //
 // Agora a lista e extraida do arquivo e CORRIDA contra rascunhos de verdade.
 
-const blocoProibido = funcao.match(/const PROIBIDO[^=]*= (\[[\s\S]*?\n\]);/);
-exigir('a lista de recusa da funçao continua a existir e a ser legivel', blocoProibido !== null);
+// Desde 01/09/2026 a funçao tem DOIS canais, e a lista de recusa deixou de ser
+// um array solto para ser um por canal. As sondas abaixo sao todas do canal
+// PUBLICO, que e o que esta secçao sempre guardou: a resposta que o dono
+// publica debaixo da avaliaçao, onde prometer reparaçao esta proibido.
+//
+// O canal privado inverte essa proibiçao de proposito (em privado, oferecer
+// resolver e a coisa certa) e ganha outra no lugar. Quem guarda a diferença
+// entre os dois e `scripts/check-canal-do-rascunho.mjs`, que corre as duas
+// listas lado a lado. Aqui exige-se apenas que a do publico continue inteira.
+const inicioDasRegras = funcao.indexOf('const TRAVESSAO =');
+const fimDasRegras = funcao.indexOf('// Escolhido em 31/08/2026');
+exigir(
+  'a lista de recusa da funçao continua a existir e a ser legivel',
+  inicioDasRegras >= 0 && fimDasRegras > inicioDasRegras,
+);
 
-if (blocoProibido) {
+if (inicioDasRegras >= 0 && fimDasRegras > inicioDasRegras) {
   const TRAVESSAO = String.fromCharCode(0x2014);
-  const MEIO_RISCO = String.fromCharCode(0x2013);
-  const PROIBIDO = new Function('TRAVESSAO', 'MEIO_RISCO', `return ${blocoProibido[1]}`)(TRAVESSAO, MEIO_RISCO);
+  const bloco = funcao
+    .slice(inicioDasRegras, fimDasRegras)
+    .replace(/^type .*$/gm, '')
+    .replace(/: Regra\[\]/g, '')
+    .replace(/: Record<Canal, Regra\[\]>/g, '');
+  const PROIBIDO = new Function(`${bloco}\nreturn PROIBIDO.public;`)();
   const recusa = (texto) => (PROIBIDO.find(({ padrao }) => padrao.test(texto)) || {}).motivo || null;
 
   // Uma promessa de reparaçao por idioma. Cada sonda foi escolhida para ser
@@ -857,7 +874,11 @@ exigir(
 // ligada.
 exigir(
   'a funçao deixou de PERCORRER a lista de proibicoes sobre o rascunho do modelo',
-  /for \(const \{ padrao, motivo \} of PROIBIDO\)[\s\S]{0,200}padrao\.test\(rascunho\)/.test(semComentarios(funcao)),
+  // `PROIBIDO[canal]` e nao `PROIBIDO`: desde 01/09/2026 a lista aplicada
+  // depende do canal. O que continua a ser exigido e o mesmo, e e o que a
+  // auditoria de 31/08 apanhou em falta: que ela seja PERCORRIDA sobre o
+  // rascunho, e nao apenas definida.
+  /for \(const \{ padrao, motivo \} of PROIBIDO\[canal\]\)[\s\S]{0,200}padrao\.test\(rascunho\)/.test(semComentarios(funcao)),
 );
 
 // Lido COM comentarios de proposito: o que se exige aqui e a advertencia, e ela
