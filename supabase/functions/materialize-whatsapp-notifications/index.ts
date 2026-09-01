@@ -38,17 +38,26 @@ const messageFromSummary = (summary: Record<string, unknown>) => {
   // nao havia: a palavra "Resumo" prometia o que a mensagem nao entregava.
   // Quando houver dois retratos no banco para comparar, aqui e o lugar de
   // dizer o que mudou, e ai a palavra passa a ser verdadeira.
-  const lines = [`Binno, o seu assessor de presença no Google`, '', `*${name}*`, ''];
+  // Os emojis sao MARCADORES e nao enfeite, e cada um abre uma parte que o
+  // dono pode querer sem ler a mensagem toda: o negocio, a nota, o que os
+  // clientes repetem, e o caminho para agir. Pedido por Marcelo em 01/09/2026,
+  // junto com o negrito e o link no fim.
+  //
+  // O asterisco sai da frase do cliente pela mesma razao da migracao
+  // `aviso_com_emoji_e_negrito`: um asterisco que nao e nosso emparelha com os
+  // nossos e poe negrito no sitio errado.
+  const semAsterisco = (texto: string) => texto.replace(/\*/g, '');
+  const lines = [`🏪 *${name}*`, ''];
   if (rating !== null && total !== null) {
-    lines.push(`*Nota atual: ${rating}* ⭐`);
+    lines.push(`⭐ *Nota atual: ${rating}*`);
     lines.push(`${total} ${total === 1 ? 'avaliação' : 'avaliações'} no total, hoje.`);
   }
   if (typeof opportunity?.phrase === 'string' && typeof opportunity?.mentions === 'number') {
     lines.push('');
-    lines.push(`Os seus clientes repetem *"${opportunity.phrase}"*: apareceu em ${opportunity.mentions} elogios.`);
+    lines.push(`💬 Os seus clientes repetem *"${semAsterisco(opportunity.phrase)}"*: apareceu em ${opportunity.mentions} elogios.`);
   }
   lines.push('');
-  lines.push('Abra o painel para ver o que mudou e decidir a próxima ação.');
+  lines.push('👉 https://binno.pro');
   return lines.join('\n');
 };
 
