@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
 /**
- * Rascunha a resposta a uma avaliacao, lendo o que a pessoa escreveu.
+ * Rascunha o texto a enviar a quem escreveu, lendo o que a pessoa escreveu.
  *
  * POR QUE ESTA FUNCAO EXISTE
  *
@@ -14,11 +14,38 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
  * o vocabulario inteiro. Responder ao que a pessoa disse exige ler o que a
  * pessoa disse.
  *
+ * OS DOIS CANAIS, E POR QUE AS REGRAS DELES SAO DIFERENTES (01/09/2026)
+ *
+ * `public` e uma resposta que o dono publica na pagina do Google, debaixo da
+ * avaliacao, para desconhecidos lerem. `private` e um recado directo a quem
+ * deixou contacto no formulario do QR, que mais ninguem le.
+ *
+ * A diferenca nao e de tom, e de risco, e ela inverte uma proibicao:
+ *
+ *   Em PUBLICO, prometer reembolso, desconto ou refeicao gratis ensina o
+ *   proximo leitor que uma avaliacao de uma estrela vale dinheiro. Por isso o
+ *   canal publico RECUSA qualquer promessa de reparacao.
+ *
+ *   Em PRIVADO, oferecer resolver e exactamente a coisa certa a dizer, e o
+ *   molde tem uma variante inteira para isso (`com-reparacao`). Recusa-la aqui
+ *   seria entregar ao dono um recado proibido de oferecer o que ele quer
+ *   oferecer. Por isso o canal privado PERMITE a reparacao.
+ *
+ * O que o privado ganha no lugar e a proibicao que o proprio molde ja escreve
+ * na dica da variante: "nunca em troca de apagar ou mudar uma avaliacao
+ * publica. Isso e proibido." Trocar reparacao por avaliacao viola as politicas
+ * do Google e pode custar a ficha do cliente. E a unica regra que existe so no
+ * privado, e a razao de o canal privado nao ser o canal publico com o texto
+ * amaciado.
+ *
+ * O canal chega no corpo do pedido e o PADRAO E `public`. Um chamador antigo,
+ * que nao saiba do campo, continua a receber exactamente o que recebia.
+ *
  * O QUE ELA NAO MUDA
  *
- * O Binno continua sem publicar. O que sai daqui e um rascunho que o dono le,
- * edita e envia em nome dele. A funcao nao decide se responde, nao escolhe a
- * avaliacao, nao toca na fila.
+ * O Binno continua sem publicar e sem enviar. O que sai daqui e um rascunho que
+ * o dono le, edita e envia em nome dele. A funcao nao decide se responde, nao
+ * escolhe a avaliacao, nao toca na fila.
  *
  * POR QUE AS REGRAS ESTAO EM CODIGO E NAO SO NO PEDIDO AO MODELO
  *
@@ -39,8 +66,11 @@ const json = (body: unknown, status = 200) =>
 const TRAVESSAO = String.fromCharCode(0x2014);
 const MEIO_RISCO = String.fromCharCode(0x2013);
 
+type Canal = 'public' | 'private';
+type Regra = { padrao: RegExp; motivo: string };
+
 /**
- * O que o rascunho nao pode conter, e por que cada um esta aqui.
+ * O que NENHUM rascunho pode conter, em canal nenhum.
  *
  * ISTO E UMA LISTA DE BLOQUEIO, NAO UMA GARANTIA
  *
@@ -50,7 +80,21 @@ const MEIO_RISCO = String.fromCharCode(0x2013);
  * que ela garante e o caso comum e barato, nao o caso adversarial.
  *
  * Por isso ela nao substitui a ultima defesa, que e o dono ler antes de enviar.
- * O Binno nao publica nada em nome dele exatamente por isso.
+ * O Binno nao publica nem envia nada em nome dele exactamente por isso.
+ */
+const SEMPRE_PROIBIDO: Regra[] = [
+  // Marcelo, em 30/08/2026: "usam travessao, nunca usaria isso, ja deixa claro
+  // que e IA". O tracinho longo e a marca mais reconhecivel de texto gerado.
+  { padrao: new RegExp(`[${TRAVESSAO}${MEIO_RISCO}]`), motivo: 'travessao' },
+  // Dizer que e um assistente quebra a voz do negocio, em qualquer lingua e em
+  // qualquer canal.
+  { padrao: /\b(intelig[eê]ncia artificial|assistente virtual|sou uma? (IA|intelig)|inteligencia artificial|asistente virtual|artificial intelligence|virtual assistant|language model|an? AI\b)/i, motivo: 'revela automacao' },
+];
+
+/**
+ * So no PUBLICO: o dono nao autorizou reparacao nenhuma, e prometer em nome
+ * dele cria uma divida que ele nao sabe que tem. Uma entrada por idioma que o
+ * produto atende.
  *
  * POR QUE HA TRES IDIOMAS, E NAO UM
  *
@@ -68,25 +112,56 @@ const MEIO_RISCO = String.fromCharCode(0x2013);
  *
  * As entradas ficam separadas por idioma, e nao somadas numa expressao so, para
  * que o guarda possa provar cada uma vermelha por si.
+ *
+ * As formas VERBAIS entram junto das nominais. A auditoria de 31/08/2026
+ * mostrou que "Vamos devolver o valor" e "Vamos compensar o transtorno"
+ * passavam inteiras: `devolu[cç]` apanha "devolucao" e nao "devolver",
+ * `compensa[cç]` apanha "compensacao" e nao "compensar". E "devolver o valor"
+ * e a forma mais natural de prometer reembolso em portugues.
  */
-const PROIBIDO: Array<{ padrao: RegExp; motivo: string }> = [
-  // Marcelo, em 30/08/2026: "usam travessao, nunca usaria isso, ja deixa claro
-  // que e IA". O tracinho longo e a marca mais reconhecivel de texto gerado.
-  { padrao: new RegExp(`[${TRAVESSAO}${MEIO_RISCO}]`), motivo: 'travessao' },
-  // O dono nao autorizou reparacao nenhuma. Prometer em nome dele cria uma
-  // divida que ele nao sabe que tem. Uma vez por idioma que o produto atende.
-  //
-  // As formas VERBAIS entram junto das nominais. A auditoria de 31/08/2026
-  // mostrou que "Vamos devolver o valor" e "Vamos compensar o transtorno"
-  // passavam inteiras: `devolu[cç]` apanha "devolucao" e nao "devolver",
-  // `compensa[cç]` apanha "compensacao" e nao "compensar". E "devolver o
-  // valor" e a forma mais natural de prometer reembolso em portugues.
+const REPARACAO: Regra[] = [
   { padrao: /\b(reembols|devolv|devolu[cç]|ressarc|desconto|cortesia|brinde|gr[aá]tis|compensa|por (nossa|minha) conta|sem custo|sem qualquer custo|oferta da casa|vale de)/i, motivo: 'promessa de reparacao (pt)' },
   { padrao: /\b(descuento|reembols|devolver|devolvere|devoluci|cortes[ií]a|obsequio|gratis|compensa|resarci|sin (coste|cargo|costo)|invita la casa|vale de)/i, motivo: 'promessa de reparacao (es)' },
   { padrao: /\b(refund|discount|voucher|coupon|rebate|reimburs|compensat|complimentary|on the house|free of charge|for free|at no (cost|charge)|free (meal|drink|dessert|night|stay|room)|gift (card|voucher))/i, motivo: 'promessa de reparacao (en)' },
-  // Dizer que e um assistente quebra a voz do negocio, em qualquer lingua.
-  { padrao: /\b(intelig[eê]ncia artificial|assistente virtual|sou uma? (IA|intelig)|inteligencia artificial|asistente virtual|artificial intelligence|virtual assistant|language model|an? AI\b)/i, motivo: 'revela automacao' },
 ];
+
+/**
+ * So no PRIVADO: nada pode ser oferecido em troca de apagar, mudar ou melhorar
+ * uma avaliacao publica.
+ *
+ * Esta e a regra que substitui a da reparacao quando o canal muda. Ela nao e
+ * uma preferencia de estilo: as politicas do Google proibem incentivar
+ * avaliacoes, e uma unica frase destas num recado que o cliente pode capturar
+ * chega para custar a ficha do negocio. A dica da variante `com-reparacao` do
+ * molde ja diz isto ao dono por escrito desde que existe; aqui passa a ser
+ * verificado no texto em vez de confiado ao modelo.
+ *
+ * A forma apanha as duas ordens da frase, porque as duas sao naturais: o verbo
+ * antes do substantivo ("apagar a sua avaliacao") e o substantivo antes do
+ * verbo ("a avaliacao, se quiser retirar"). A janela entre os dois e curta e
+ * nao atravessa pontuacao final, para que duas frases seguidas sem relacao
+ * ("Lamento a sua avaliacao. Vou melhorar o servico") nao contem como troca.
+ *
+ * Um falso positivo aqui custa o template, que ja esta na tela. Um falso
+ * negativo custa a ficha do cliente. A assimetria manda apertar.
+ */
+const TIRAR_PT = 'apag\\w*|remov\\w*|retir\\w*|mud\\w*|alter\\w*|melhor\\w*|aument\\w*|sub\\w*|rever|revej\\w*|atualiz\\w*|actualiz\\w*|corrig\\w*';
+const ALVO_PT = 'avalia[çc][ãa]o|avalia[çc][õo]es|coment[áa]rio p[úu]blico|nota p[úu]blica|estrela\\w*|review';
+const TIRAR_ES = 'borr\\w*|elimin\\w*|quit\\w*|retir\\w*|cambi\\w*|modific\\w*|mejor\\w*|sub\\w*|actualiz\\w*|corrig\\w*';
+const ALVO_ES = 'rese[ñn]a\\w*|valoraci[óo]n\\w*|comentario p[úu]blico|estrella\\w*|review';
+const TIRAR_EN = 'delet\\w*|remov\\w*|take down|chang\\w*|edit\\w*|updat\\w*|rais\\w*|improv\\w*|revis\\w*';
+const ALVO_EN = 'review\\w*|rating\\w*|star\\w*|public comment';
+
+const TROCA: Regra[] = [
+  { padrao: new RegExp(`(?:(?:${TIRAR_PT})[^.!?\\n]{0,40}(?:${ALVO_PT}))|(?:(?:${ALVO_PT})[^.!?\\n]{0,40}(?:${TIRAR_PT}))|em troca d`, 'i'), motivo: 'troca por avaliacao (pt)' },
+  { padrao: new RegExp(`(?:(?:${TIRAR_ES})[^.!?\\n]{0,40}(?:${ALVO_ES}))|(?:(?:${ALVO_ES})[^.!?\\n]{0,40}(?:${TIRAR_ES}))|a cambio d`, 'i'), motivo: 'troca por avaliacao (es)' },
+  { padrao: new RegExp(`(?:(?:${TIRAR_EN})[^.!?\\n]{0,40}(?:${ALVO_EN}))|(?:(?:${ALVO_EN})[^.!?\\n]{0,40}(?:${TIRAR_EN}))|in exchange for`, 'i'), motivo: 'troca por avaliacao (en)' },
+];
+
+const PROIBIDO: Record<Canal, Regra[]> = {
+  public: [...SEMPRE_PROIBIDO, ...REPARACAO],
+  private: [...SEMPRE_PROIBIDO, ...TROCA],
+};
 
 // Escolhido em 31/08/2026 comparando tres modelos com os comentarios reais da
 // Noa. O gpt-5-nano, o mais barato da tabela, devolveu VAZIO nas quatro provas:
@@ -98,9 +173,10 @@ const PROIBIDO: Array<{ padrao: RegExp; motivo: string }> = [
 const MODELO = Deno.env.get('OPENAI_MODEL') || 'gpt-4.1-nano';
 
 /**
- * O pedido e escrito em INGLES, e a resposta vem em JSON com o idioma declarado
- * antes do texto. As duas coisas foram descobertas a testar, em 01/09/2026,
- * depois de Marcelo ver uma resposta em portugues para uma avaliacao em ingles.
+ * Os pedidos sao escritos em INGLES, e a resposta vem em JSON com o idioma
+ * declarado antes do texto. As duas coisas foram descobertas a testar, em
+ * 01/09/2026, depois de Marcelo ver uma resposta em portugues para uma
+ * avaliacao em ingles.
  *
  * O pedido anterior estava escrito em portugues e mandava "responda no MESMO
  * idioma". O modelo respondia em portugues a tudo: a lingua do pedido vence a
@@ -114,7 +190,7 @@ const MODELO = Deno.env.get('OPENAI_MODEL') || 'gpt-4.1-nano';
  * a chave em portugues, ao responder em espanhol o modelo traduzia a propria
  * chave para `respuesta` e o texto chegava vazio.
  */
-const PEDIDO = (negocio: string, nota: number | null, comentario: string) => `You reply to customer reviews as the owner of "${negocio}".
+const PEDIDO_PUBLICO = (negocio: string, nota: number | null, comentario: string) => `You reply to customer reviews as the owner of "${negocio}".
 
 Rating given: ${nota === null ? 'none' : `${nota} out of 5`}
 The review, verbatim:
@@ -137,6 +213,52 @@ Rules for the reply, all mandatory:
 
 Answer with JSON only, no other text:
 {"language":"<the review\'s language, in English>","reply":"<the reply>"}`;
+
+/**
+ * O pedido privado. Tres coisas o separam do publico, e cada uma corresponde a
+ * uma diferenca real do canal:
+ *
+ *   E DIRECTO. Diz-se ao modelo, em texto, que isto nao e publicado em lado
+ *   nenhum: e um recado de uma pessoa para outra, como uma mensagem de
+ *   telemovel. Sem isso o modelo escreve um comunicado com destinatario.
+ *
+ *   PODE OFERECER. "You MAY offer to fix it" esta la de proposito, porque e a
+ *   coisa certa a dizer em privado e porque o molde ja oferece na variante
+ *   `com-reparacao`. E a instrucao que o canal publico proibe.
+ *
+ *   NAO NEGOCEIA A AVALIACAO. A frase que proibe trocar seja o que for por
+ *   apagar, mudar ou melhorar uma avaliacao publica. O pedido diz, e a lista
+ *   `TROCA` verifica depois, porque pedir nao e garantir.
+ *
+ * O nome de quem escreveu entra quando existe, para o recado abrir como o molde
+ * abre (`greeting`) em vez de comecar num "Ola" sem ninguem.
+ */
+const PEDIDO_PRIVADO = (negocio: string, nota: number | null, comentario: string, cliente: string | null) => `You draft a PRIVATE message from the owner of "${negocio}" to one customer who sent private feedback. It is not published anywhere and nobody else reads it. It is a direct message, like a phone message written down.
+
+${cliente ? `The customer's name: ${cliente}` : 'The customer left no name.'}
+Rating given: ${nota === null ? 'none' : `${nota} out of 5`}
+What the customer wrote, verbatim:
+"""
+${comentario}
+"""
+
+Step 1. Identify the language the customer wrote in.
+Step 2. Write the owner's private message ENTIRELY in that same language.
+
+Rules for the message, all mandatory:
+- Name the concrete thing the customer mentioned. A message that would fit anyone is wrong.
+- Speak as one person to another. Say "I", not "we", wherever the language allows it. No corporate words.
+- You MAY offer to fix it, to talk, to have them come back, or to make it right. This is private, so making it right is the point.
+- NEVER offer anything in exchange for deleting, changing, improving or updating a public review or rating. That is prohibited and would cost the business its listing. Do not mention public reviews at all.
+- Ask one concrete question that helps the owner understand what happened.
+- Never invent a fact about the business that is not in what the customer wrote.
+- Never say or imply you are an AI.
+- No em dash and no en dash.
+- Between 3 and 6 sentences.
+${cliente ? `- Open by greeting ${cliente} by name.` : ''}- End with "${negocio}" on its own line.
+
+Answer with JSON only, no other text:
+{"language":"<the customer's language, in English>","reply":"<the message>"}`;
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -161,11 +283,19 @@ Deno.serve(async (request) => {
   const comentario = typeof corpo.comment === 'string' ? corpo.comment.trim() : '';
   const negocio = typeof corpo.businessName === 'string' && corpo.businessName.trim() ? corpo.businessName.trim() : 'o negócio';
   const nota = typeof corpo.rating === 'number' && corpo.rating >= 1 && corpo.rating <= 5 ? corpo.rating : null;
+  const cliente = typeof corpo.customerName === 'string' && corpo.customerName.trim() ? corpo.customerName.trim().slice(0, 80) : null;
+  // Qualquer valor que nao seja exactamente 'private' cai no publico, que e o
+  // canal com as regras mais apertadas. Um chamador antigo, um campo com erro
+  // de escrita e um campo ausente levam todos ao mesmo lugar seguro.
+  const canal: Canal = corpo.channel === 'private' ? 'private' : 'public';
 
   if (comentario.length < 3) return json({ code: 'SEM_COMENTARIO', error: 'Sem texto para responder.' }, 422);
   // Um comentario absurdamente longo e quase sempre colagem ou ataque. Cortar
   // protege o custo e o tempo de resposta sem perder o assunto.
   const recorte = comentario.slice(0, 1500);
+  const pedido = canal === 'private'
+    ? PEDIDO_PRIVADO(negocio, nota, recorte, cliente)
+    : PEDIDO_PUBLICO(negocio, nota, recorte);
 
   try {
     const resposta = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -173,9 +303,11 @@ Deno.serve(async (request) => {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${chave}` },
       body: JSON.stringify({
         model: MODELO,
-        messages: [{ role: 'user', content: PEDIDO(negocio, nota, recorte) }],
+        messages: [{ role: 'user', content: pedido }],
         temperature: 0.3,
-        max_tokens: 400,
+        // O recado privado tem uma frase a mais e uma pergunta, e o corte por
+        // orcamento chegaria como JSON partido, ou seja, como template.
+        max_tokens: canal === 'private' ? 500 : 400,
         response_format: { type: 'json_object' },
       }),
     });
@@ -200,17 +332,21 @@ Deno.serve(async (request) => {
     }
     if (!rascunho) return json({ code: 'MODELO_VAZIO', error: 'O modelo devolveu vazio.' }, 502);
 
-    // A verificacao, que e a parte que garante em vez de pedir.
-    for (const { padrao, motivo } of PROIBIDO) {
+    // A verificacao, que e a parte que garante em vez de pedir. A lista muda
+    // com o canal: ver o cabecalho.
+    for (const { padrao, motivo } of PROIBIDO[canal]) {
       if (padrao.test(rascunho)) {
         return json({ code: 'RASCUNHO_RECUSADO', error: `O rascunho continha ${motivo}.` }, 422);
       }
     }
-    if (rascunho.length > 1200) {
-      return json({ code: 'RASCUNHO_RECUSADO', error: 'O rascunho ficou longo demais para uma resposta pública.' }, 422);
+    // O recado privado tem uma frase a mais que a resposta publica, e o molde
+    // privado ja e mais longo que o publico. O tecto acompanha.
+    const tecto = canal === 'private' ? 1600 : 1200;
+    if (rascunho.length > tecto) {
+      return json({ code: 'RASCUNHO_RECUSADO', error: 'O rascunho ficou longo demais.' }, 422);
     }
 
-    return json({ rascunho, idioma, modelo: MODELO });
+    return json({ rascunho, idioma, modelo: MODELO, canal });
   } catch (erro) {
     return json({ code: 'MODELO_INDISPONIVEL', error: String(erro).slice(0, 160) }, 502);
   }

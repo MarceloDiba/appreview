@@ -48,6 +48,8 @@
  *    página, e é um preço barato: o template está lá e ele responde na mesma.
  */
 
+import type { ReplyChannel } from '@/lib/replySuggestions';
+
 /** O que a fila sabe sobre o rascunho do modelo para uma avaliação. */
 export type ResultadoDoModelo =
   /** Pedido em curso. O template continua na tela enquanto isto dura. */
@@ -66,6 +68,29 @@ export interface EntradaDoRascunho {
   /** 1 a 5, ou `null` quando a avaliação não tem nota. */
   rating: number | null;
   businessName: string | null;
+  /**
+   * Qual dos dois textos se pede, e é uma diferença de regras, não de tom.
+   *
+   * `public` é a resposta que o dono publica debaixo da avaliação, para
+   * desconhecidos lerem, e nela a função RECUSA qualquer promessa de reparação:
+   * oferecer dinheiro em público ensina o próximo leitor que uma estrela vale
+   * dinheiro.
+   *
+   * `private` é o recado directo a quem deixou contacto no formulário do QR, que
+   * mais ninguém lê. Aí oferecer resolver é exactamente a coisa certa a dizer, e
+   * o molde já tem uma variante inteira para isso (`com-reparacao`). O que o
+   * privado ganha no lugar é a proibição de trocar seja o que for por apagar ou
+   * mudar uma avaliação pública, que viola as políticas do Google.
+   *
+   * Até 01/09/2026 o comentário privado não tinha rascunho do modelo nenhum, por
+   * não haver onde pôr esta diferença. Marcelo pediu-o nesse dia.
+   */
+  channel: ReplyChannel;
+  /**
+   * O nome de quem escreveu, quando existe. Só o recado privado o usa, para
+   * abrir como o molde privado abre em vez de começar num "Olá" sem ninguém.
+   */
+  customerName: string | null;
 }
 
 /** O transporte, injetado: aqui não se sabe que existe rede nem Supabase. */

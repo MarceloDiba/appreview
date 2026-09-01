@@ -43,6 +43,10 @@ const tieOrder = orderPendingCasesByRecency([caseF, caseE]);
 const withResolved = orderPendingCasesByRecency([caseResolved, caseX]);
 
 const banner = read('src/components/dashboard/PendingCommentsBanner.tsx');
+// O painel, desde 01/09/2026: e ele que le `internal_feedback` e aplica a
+// ordem partilhada antes de passar a lista ao bloco. Ver "Primeira dobra do
+// portatil" em docs/contrato-produto-binno.md.
+const painelDaVisaoGeral = read('src/components/dashboard/ApprovedCockpitDashboard.tsx');
 // A lista de casos (`CasesList.tsx`) virou a fila única aprovada em
 // 30/08/2026: as três abas de `/reviews` somaram-se numa fila só. O segundo
 // consumidor da ordem partilhada passou a ser `src/lib/filaDeRespostas.ts`, e
@@ -58,6 +62,10 @@ const semComentarios = (fonte) => fonte
   .replace(/\/\*[\s\S]*?\*\//g, ' ')
   .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
 const filaCodigo = semComentarios(filaModulo);
+// Pela mesma razao, o bloco da Visao geral tambem e lido sem prosa: o
+// cabecalho dele explica de onde vem a ordem e nomeia a funcao, e a mencao
+// no comentario deixava o guarda vermelho com o codigo certo.
+const bannerCodigo = semComentarios(banner);
 const { montarFilaDeRespostas, itensJaTratados, chaveDaAvaliacaoDoGoogle } = await import(
   pathToFileURL(resolve(root, 'src/lib/filaDeRespostas.ts')).href
 );
@@ -97,8 +105,20 @@ const requirements = [
   ['sem contato dos dois lados, o mais recente (D) vem antes do mais antigo (C)', cdOrder[0]?.id === 'D' && cdOrder[1]?.id === 'C'],
   ['empate de created_at desempata por id crescente (E antes de F)', tieOrder[0]?.id === 'E' && tieOrder[1]?.id === 'F'],
   ['caso já tratado nunca aparece na ordem de pendentes', withResolved.length === 1 && withResolved[0]?.id === 'X'],
-  ['o bloco da Visão geral importa a função compartilhada', banner.includes("from '@/lib/internalCasePriority'")],
-  ['o bloco da Visão geral chama a função compartilhada, não uma cópia local', banner.includes('orderPendingCasesByRecency(cases)')],
+  // REAPONTADAS EM 01/09/2026. A leitura de `internal_feedback` subiu do bloco
+  // para o painel nesse dia, para a faixa de Acao poder decidir a largura da
+  // fila ao lado do cartao. A REGRA e a mesma: a Visao geral ordena pela funcao
+  // partilhada, nunca por uma copia local. O que mudou foi QUEM chama, e as
+  // ancoras seguiram o chamador em vez de ficarem verdes num ficheiro onde a
+  // chamada ja nao existe.
+  //
+  // A terceira linha e nova e nasceu desta mudanca: com o bloco a receber a
+  // lista pronta, a maneira de a regra divergir passou a ser o bloco reordenar
+  // por cima do que recebeu. E o mesmo perigo que a fila somada ja tem coberto
+  // logo abaixo, na mesma forma.
+  ['a Visão geral importa a função compartilhada', painelDaVisaoGeral.includes("from '@/lib/internalCasePriority'")],
+  ['a Visão geral chama a função compartilhada, não uma cópia local', painelDaVisaoGeral.includes('orderPendingCasesByRecency(internos.cases)')],
+  ['o bloco da Visão geral não reordena por cima da lista que recebe', !bannerCodigo.includes('.sort(') && !bannerCodigo.includes('orderPendingCasesByRecency')],
   ['a fila única de /reviews importa a função compartilhada', filaModulo.includes("from './internalCasePriority.ts'")],
   ['a fila única de /reviews chama a função compartilhada, não uma cópia local', /orderPendingCasesByRecency<ItemDaFila>\(/.test(filaModulo)],
   // A fila somada é o lugar mais fácil do projeto para nascer uma segunda

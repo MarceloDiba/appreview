@@ -20,6 +20,8 @@ import { pedirRascunhoAoBinno } from '@/lib/sugerirResposta';
 import OrigemDoRascunho from '@/components/dashboard/OrigemDoRascunho';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdvisorReading } from '@/lib/advisorReading';
+import { useInternalFeedback } from '@/hooks/useInternalFeedback';
+import { orderPendingCasesByRecency } from '@/lib/internalCasePriority';
 import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
 import { sampleWasTruncated } from '@/lib/reputationSnapshotReading';
 import { idDaFila } from '@/lib/filaDeRespostas';
@@ -197,6 +199,20 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
   const official = useGoogleBusinessReviewQueue(import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined);
   const liveFunnel = useReviewFunnelMetrics(userId);
   const funnel = demoFunnel ? { ...liveFunnel, data: demoFunnel } : liveFunnel;
+  // Os comentários internos por tratar, lidos AQUI e não dentro do cartão que
+  // os desenha (mudança de 01/09/2026; ver o cabeçalho de
+  // `PendingCommentsBanner`). É uma leitura só, a mesma de sempre, e serve
+  // duas coisas ao mesmo tempo: o cartão, e a largura que a fila de respostas
+  // pode ocupar ao lado dele.
+  //
+  // Sem `userId` (demonstração pública) o hook nem chega a consultar o banco e
+  // devolve lista vazia, que é o mesmo que dizer "não há cartão".
+  const internos = useInternalFeedback(userId || '');
+  const comentariosInternos = useMemo(
+    () => orderPendingCasesByRecency(internos.cases),
+    [internos.cases],
+  );
+  const temComentariosInternos = comentariosInternos.length > 0;
   // `profiles.business_country` decide a variante do português da resposta
   // sugerida (pt-BR vs. pt-PT), pela mesma regra do cartão impresso em
   // `src/lib/businessLocale.ts`. Fica em `null` enquanto o perfil não
@@ -297,11 +313,45 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
   return <div className="space-y-8 lg:space-y-10">
     <MobileSummary snapshot={snapshot} queue={queue} temFila={temFila} />
 
-    {/* Ação: o que ele precisa de decidir ou fazer agora. */}
-    <section data-faixa="acao" className="space-y-4">
+    {/* Ação: o que ele precisa de decidir ou fazer agora.
+
+        A FAIXA DE AÇÃO PASSA A USAR A LARGURA (01/09/2026). Nas palavras de
+        Marcelo, no portátil dele: "poderia dividir a tela ao meio e apresentar
+        mais coisas na primeira dobra". Até aqui esta faixa era `space-y-4`, e
+        os dois cartões dela ocupavam a largura toda um debaixo do outro: a
+        1280 ele via "Comentários internos" e "Avaliações no Google", e mais
+        nada, na primeira dobra.
+
+        A repartição segue o que cada cartão precisa de ler, e não o tamanho
+        que ele calharia ter. A fila é onde o dono lê uma avaliação inteira e
+        um rascunho inteiro, e pede largura de texto; os comentários internos
+        são uma contagem, um nome, uma data e uma citação curta, e cabem numa
+        coluna estreita. Por isso a fila leva duas colunas e o cartão de
+        contagens a terceira, ao lado dela e não por cima.
+
+        A ORDEM NÃO MUDA, e é o que o contrato prende: os comentários internos
+        continuam primeiro no DOM, que é a ordem que o telemóvel lê, e a faixa
+        continua a ser a primeira das três. No telemóvel isto é uma coluna só,
+        exactamente como era.
+
+        SEM CARTÃO DE CONTAGENS A FILA VOLTA ÀS TRÊS COLUNAS. É a mesma regra
+        de "Faixas sem buraco": uma coluna sozinha a segurar a altura de uma
+        faixa é o buraco que aquela decisão foi tirar da tela, e reservar um
+        terço da largura para um cartão que não existe seria reintroduzi-lo
+        aqui. `temComentariosInternos` sai da MESMA lista que o cartão
+        desenha, por isso os dois nunca podem discordar. */}
+    <section data-faixa="acao" className="grid items-start gap-4 lg:grid-cols-3">
       {radarEmAcao && <RadarNow snapshot={snapshot} />}
-      {!demo && <PendingCommentsBanner userId={userId} />}
-      <div id={QUEUE_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} /></div>
+      <div className="grid min-w-0 items-start gap-4 lg:col-span-3 lg:grid-cols-3">
+        {/* `empty:hidden` nao e enfeite. Sem comentario por tratar o cartao
+            devolve `null`, e esta caixa fica sem filho nenhum: continua a ser
+            um item da grade, e o `gap-4` continua a contar com ela. Medido no
+            ecra, isso custava 16px de branco por cima da fila no telemovel,
+            em toda conta em dia. Escondida, ela deixa de ser item e o
+            intervalo desaparece com ela. */}
+        <div className="min-w-0 empty:hidden lg:col-start-3 lg:row-start-1"><PendingCommentsBanner casos={comentariosInternos} /></div>
+        <div id={QUEUE_ANCHOR_ID} className={`min-w-0 scroll-mt-16 lg:row-start-1 lg:scroll-mt-4 ${temComentariosInternos ? 'lg:col-span-2' : 'lg:col-span-3'}`}><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} /></div>
+      </div>
     </section>
 
     {/* Mudança: o que se mexeu desde a última vez. */}
@@ -537,14 +587,48 @@ const VolumeCard = ({ weeks }: { weeks: Week[] }) => {
 const share = (weeks: Week[], rating: Rating) => weeks.reduce((sum, week) => sum + week.ratingBreakdown[rating], 0) / Math.max(1, weeks.reduce((sum, week) => sum + week.reviewCount, 0));
 
 /**
+ * Quantas avaliações a leitura precisa de ter atrás dela para as cinco linhas
+ * deste cartão dizerem alguma coisa.
+ *
+ * VINTE, decidido em 01/09/2026 depois de o dono ver o cartão na conta dele.
+ * Ele tem 10 avaliações, todas da mesma nota, e o que estava na tela era
+ * 100% / 0% / 0% / 0% / 0% com cinco linhas rectas. Não era um erro de
+ * cálculo: era a aritmética a funcionar em cima de quase nada.
+ *
+ * A conta que fixa o número: uma percentagem repartida por cinco notas move-se
+ * em degraus de 100/N pontos. Com 10 avaliações o degrau é de 10 pontos, e o
+ * próprio cartão chama "atenção" a qualquer descida das 5 estrelas ou subida
+ * das notas 1 e 2. Abaixo de 20, portanto, o gráfico anuncia a CHEGADA de uma
+ * avaliação como se fosse uma mudança do negócio, que é a definição de ruído
+ * com ar de informação. A 20 o degrau desce para 5 pontos, e as duas janelas
+ * de quatro semanas que o cartão compara passam a ter conteúdo de sobra.
+ *
+ * O módulo continua PRESENTE, como o contrato exige: encolhe para a linha
+ * honesta dos outros cartões e diz porquê, com o número que ele tem hoje e o
+ * número a partir do qual o gráfico aparece.
+ */
+const MINIMO_DE_AVALIACOES = 20;
+
+/**
  * Sem histórico e sem distribuição na amostra, as cinco linhas deste cartão
  * desenhavam um traço no lugar da percentagem de hoje e outro no lugar da de
  * antes, cinco vezes, com cinco caixas de gráfico vazias: era o módulo mais
- * alto do painel a dizer que não sabia nada. Encolhe pela mesma regra dos
- * outros, e continua presente.
+ * alto do painel a dizer que não sabia nada.
  *
- * Com distribuição e sem histórico ele NÃO encolhe: a percentagem de cada nota
- * na amostra é evidência de verdade, e o "antes" é que fica em traço.
+ * Desde 01/09/2026 há um segundo motivo para encolher, e ele é diferente do
+ * primeiro: a leitura EXISTE mas é pequena demais para ser lida. Os dois
+ * motivos dão a mesma forma (a linha honesta) e frases diferentes, porque o
+ * que o dono faz a seguir é diferente: num caso falta o Binno procurar, no
+ * outro faltam avaliações e o que ele faz é pôr o QR na mesa.
+ *
+ * `avaliacoesLidas` é a base de que as percentagens saem, e não um total
+ * qualquer do perfil: é a amostra que o Binno buscou, a mesma que a nota de
+ * rodapé deste cartão já nomeia, e as semanas do histórico são um recorte
+ * dela. Sem amostra, cai nas avaliações das oito semanas que o cartão compara.
+ *
+ * Medir a amostra, e não a janela, é também o que faz o número na frase ser um
+ * número que o dono reconhece: ele sabe quantas avaliações tem, não quantas
+ * caíram dentro das últimas oito semanas.
  */
 const RatingTrends = ({ weeks, snapshot }: { weeks: Week[]; snapshot: ExperimentalApifySnapshot }) => {
   const { t } = useOwnerTranslation();
@@ -552,13 +636,18 @@ const RatingTrends = ({ weeks, snapshot }: { weeks: Week[]; snapshot: Experiment
   const current = weeks.slice(-4);
   const previous = weeks.slice(-8, -4);
   const hasDistribution = snapshot.sample.reviewCount > 0;
-  const semEvidencia = !hasHistory && !hasDistribution;
+  const semLeitura = !hasHistory && !hasDistribution;
+  const avaliacoesLidas = hasDistribution
+    ? snapshot.sample.reviewCount
+    : weeks.slice(-8).reduce((total, week) => total + week.reviewCount, 0);
+  const poucasAvaliacoes = !semLeitura && avaliacoesLidas < MINIMO_DE_AVALIACOES;
+  const semEvidencia = semLeitura || poucasAvaliacoes;
   const rows = ratings.map((rating) => ({ rating, current: hasHistory ? Math.round(share(current, rating) * 100) : hasDistribution ? Math.round((snapshot.sample.ratingBreakdown[rating] / snapshot.sample.reviewCount) * 100) : null, previous: hasHistory ? Math.round(share(previous, rating) * 100) : null, series: weeks.map((week) => ({ value: week.reviewCount ? Math.round((week.ratingBreakdown[rating] / week.reviewCount) * 100) : 0 })) }));
   const five = rows[0];
   const lowCurrent = rows.filter((row) => row.rating === '1' || row.rating === '2').reduce((sum, row) => sum + (row.current || 0), 0);
   const lowPrevious = rows.filter((row) => row.rating === '1' || row.rating === '2').reduce((sum, row) => sum + (row.previous || 0), 0);
   const needsAttention = hasHistory && five.current < (five.previous || 0) || hasHistory && lowCurrent > lowPrevious;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-4 sm:p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.distributionTitle')}</h2>{semEvidencia ? null : <span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.ratingsNoStacking')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.distributionEmpty')}</p> : <><div className="mt-5 divide-y divide-slate-200">{rows.map((row) => { const risk = hasHistory && row.current !== null && (row.rating === '5' ? row.current < (row.previous || 0) : Number(row.rating) <= 2 && row.current > (row.previous || 0)); return <div key={row.rating} className="grid grid-cols-[32px_minmax(0,1fr)_104px] items-center gap-2 py-3 sm:grid-cols-[52px_minmax(0,1fr)_208px] sm:gap-3"><span className="text-sm font-semibold text-slate-800">{row.rating}<Star className="ml-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" /></span><div className="h-8 min-w-16 sm:min-w-24">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={row.series}><Line type="monotone" dataKey="value" stroke={risk ? '#C2413A' : '#D4A72C'} strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><span className="text-right text-xs leading-5 text-slate-500"><strong className="text-slate-900">{row.current === null ? '—' : `${row.current}%`}</strong> {t('dashboard.cockpit.approved.ratingsBefore')} {row.previous === null ? '—' : `${row.previous}%`} {risk && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-red-700">{t('dashboard.cockpit.approved.ratingsAttention')}</span>}</span></div>; })}</div>{needsAttention && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p>{t('dashboard.cockpit.approved.ratingsShift', { fiveBefore: five.previous, fiveNow: five.current, lowBefore: lowPrevious, lowNow: lowCurrent })}</p></div>}<SampleSourceNote snapshot={snapshot} /></>}</CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-4 sm:p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.distributionTitle')}</h2>{semEvidencia ? null : <span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.ratingsNoStacking')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{semLeitura ? t('dashboard.cockpit.approved.distributionEmpty') : t('dashboard.cockpit.approved.distributionTooFew', { count: avaliacoesLidas, minimo: MINIMO_DE_AVALIACOES })}</p> : <><div className="mt-5 divide-y divide-slate-200">{rows.map((row) => { const risk = hasHistory && row.current !== null && (row.rating === '5' ? row.current < (row.previous || 0) : Number(row.rating) <= 2 && row.current > (row.previous || 0)); return <div key={row.rating} className="grid grid-cols-[32px_minmax(0,1fr)_104px] items-center gap-2 py-3 sm:grid-cols-[52px_minmax(0,1fr)_208px] sm:gap-3"><span className="text-sm font-semibold text-slate-800">{row.rating}<Star className="ml-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" /></span><div className="h-8 min-w-16 sm:min-w-24">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={row.series}><Line type="monotone" dataKey="value" stroke={risk ? '#C2413A' : '#D4A72C'} strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><span className="text-right text-xs leading-5 text-slate-500"><strong className="text-slate-900">{row.current === null ? '—' : `${row.current}%`}</strong> {t('dashboard.cockpit.approved.ratingsBefore')} {row.previous === null ? '—' : `${row.previous}%`} {risk && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-red-700">{t('dashboard.cockpit.approved.ratingsAttention')}</span>}</span></div>; })}</div>{needsAttention && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p>{t('dashboard.cockpit.approved.ratingsShift', { fiveBefore: five.previous, fiveNow: five.current, lowBefore: lowPrevious, lowNow: lowCurrent })}</p></div>}<SampleSourceNote snapshot={snapshot} /></>}</CardContent></Card>;
 };
 
 /**

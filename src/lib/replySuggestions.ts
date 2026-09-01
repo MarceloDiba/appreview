@@ -86,17 +86,95 @@ const stripAccents = (value: string): string =>
   value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 /**
- * Palavras curtas e muito frequentes, que só existem numa das três línguas.
- * Não é um detector de idioma a sério — é o suficiente para distinguir
- * português, espanhol e inglês num parágrafo de avaliação, que é o problema
- * real. Empate ou texto curto demais cai em português, a língua do piloto.
+ * Palavras muito frequentes, que só existem numa das três línguas.
+ *
+ * A LISTA CRESCEU EM 01/09/2026, E PORQUÊ.
+ *
+ * Até aqui cada lista era vocabulário de restaurante: "comida", "atendimento",
+ * "staff", "camarero". Isso acerta numa avaliação de mesa e falha em tudo o
+ * resto. O defeito foi visto na conta do dono, num comentário privado que diz
+ * "Horrible App, i can't even log in.": nenhuma das três listas continha uma
+ * única daquelas palavras, as três pontuações ficaram a zero, e a votação a
+ * zero devolvia português. O cliente escreveu em inglês e o painel abria o
+ * seletor em português.
+ *
+ * O que entra agora são palavras de classe fechada, que aparecem em qualquer
+ * assunto: pronomes, preposições, artigos, auxiliares. "in", "my", "can" e
+ * "even" identificam inglês numa queixa sobre uma aplicação tão bem como
+ * "food" identificava numa queixa sobre o jantar, e continuam a identificar
+ * quando o assunto for outro qualquer.
+ *
+ * A REGRA DE ENTRADA NÃO MUDOU: cada palavra tem de existir numa língua só,
+ * depois de tirados os acentos. Foi por isso que ficaram de fora palavras
+ * óbvias e tentadoras: "so" (que é o "só" português sem acento), "me", "no",
+ * "porque", "funciona", "entrar", "desde", "dos" e "horrible" (que é espanhol
+ * tal e qual). Uma palavra partilhada não desempata nada: pontua os dois lados
+ * e só faz barulho.
+ *
+ * E "comida" SAIU das duas listas, onde estava desde o início. Ela é a mesma
+ * palavra em português e em espanhol, e por isso dava um ponto a cada um dos
+ * dois de cada vez que aparecia. Nunca decidiu nada; o que fazia era diluir o
+ * peso das palavras que decidem. Foi encontrada ao escrever a asserção que
+ * mede esta regra na lista inteira, em `scripts/check-idioma-do-cliente.mjs`.
  */
 const LOCALE_MARKERS: Record<ReplyLocale, string[]> = {
-  pt: ['nao', 'muito', 'foi', 'estava', 'atendimento', 'comida', 'otimo', 'mas', 'demorou', 'aqui', 'para', 'lugar', 'sempre', 'gostei', 'voltar'],
-  es: ['pero', 'muy', 'estaba', 'comida', 'atencion', 'bueno', 'buena', 'nada', 'volver', 'todo', 'gusto', 'camarero', 'tambien', 'malo'],
-  en: ['the', 'was', 'and', 'very', 'food', 'service', 'good', 'great', 'but', 'they', 'were', 'staff', 'place', 'again', 'nice'],
+  pt: [
+    'nao', 'muito', 'foi', 'estava', 'atendimento', 'otimo', 'mas', 'demorou', 'aqui', 'para', 'lugar', 'sempre', 'gostei', 'voltar',
+    'uma', 'com', 'sem', 'das', 'pelo', 'pela', 'nem', 'entao', 'ainda', 'isso', 'ele', 'ela', 'voce', 'sao', 'tambem',
+    'minha', 'meu', 'quando', 'onde', 'muita', 'muitos', 'muitas', 'melhor', 'pior', 'horrivel', 'pessimo', 'obrigado',
+    'aplicacao', 'aplicativo', 'conta', 'ontem', 'hoje', 'agora', 'tenho', 'consegui', 'fazer',
+  ],
+  es: [
+    'pero', 'muy', 'estaba', 'atencion', 'bueno', 'buena', 'nada', 'volver', 'todo', 'gusto', 'camarero', 'tambien', 'malo',
+    'una', 'con', 'sin', 'los', 'las', 'del', 'ni', 'entonces', 'ahora', 'ellos', 'ella', 'mi', 'mucho', 'mucha', 'siempre',
+    'donde', 'cuando', 'mejor', 'peor', 'son', 'fue', 'estan', 'tengo', 'tiene', 'tienen', 'puedo', 'puede', 'pueden',
+    'hacer', 'aplicacion', 'cuenta', 'ayer', 'hoy',
+  ],
+  en: [
+    'the', 'was', 'and', 'very', 'food', 'service', 'good', 'great', 'but', 'they', 'were', 'staff', 'place', 'again', 'nice',
+    'i', 'in', 'is', 'it', 'my', 'you', 'we', 'can', 'cannot', 'even', 'log', 'not', 'this', 'that', 'have', 'with', 'to', 'of',
+    'at', 'on', 'all', 'get', 'got', 'here', 'there', 'never', 'always', 'worst', 'best', 'love', 'am', 'are', 'be', 'been',
+    'do', 'does', 'did', 'dont', 'didnt', 'isnt', 'wasnt', 'what', 'why', 'how', 'when', 'who', 'from', 'about', 'after',
+    'before', 'into', 'than', 'then', 'them', 'their', 'these', 'those', 'just', 'only', 'still', 'also', 'because',
+    'would', 'could', 'should', 'will', 'wont', 'account', 'crash', 'useless',
+  ],
 };
 
+/**
+ * Sinais de ortografia que uma língua tem e as outras duas não.
+ *
+ * `ã`, `õ` e `ç` aparecem em português e não no espanhol nem no inglês; `ñ`,
+ * `¿` e `¡` são espanhóis e de mais ninguém. O inglês não tem sinal positivo
+ * nenhum: identifica-se pelas palavras, que é o que a lista acima passou a
+ * garantir.
+ *
+ * Isto SÓ DESEMPATA, nunca pontua. Um "não" solto dentro de um parágrafo
+ * inglês não pode virar a leitura da frase inteira; o que ele pode é decidir
+ * um texto acentuado e curto em que nenhuma palavra da lista apareceu.
+ */
+const ORTHOGRAPHIC_SIGNALS: Partial<Record<ReplyLocale, RegExp>> = {
+  pt: /[ãõç]/i,
+  es: /[ñ¿¡]/i,
+};
+
+/**
+ * O idioma em que o cliente escreveu, para a resposta sair na língua dele.
+ *
+ * A ordem das decisões, e cada uma existe por um caso real:
+ *
+ * 1. Texto curto demais para decidir cai em português. Doze caracteres é o
+ *    chão histórico e continua: "Top!" não é evidência de língua nenhuma.
+ * 2. Votação pelas palavras acima. Ganha quem tiver mais, sozinho.
+ * 3. Empate, ou votação a zero, consulta a ortografia.
+ * 4. Sem nada disso, português, que é a língua do piloto e do dono.
+ *
+ * O passo 4 é o ÚLTIMO recurso, e não o primeiro. Até 01/09/2026 qualquer
+ * comentário sem vocabulário de restaurante caía nele, e era assim que
+ * "Horrible App, i can't even log in." abria o seletor em português.
+ *
+ * Quem escolhe no fim continua a ser o dono: o seletor ABRE no que isto
+ * devolve, e ele troca com um toque.
+ */
 export const detectReplyLocale = (text?: string | null): ReplyLocale => {
   if (!text || text.trim().length < 12) return 'pt';
 
@@ -113,8 +191,18 @@ export const detectReplyLocale = (text?: string | null): ReplyLocale => {
   const best = (Object.keys(scores) as ReplyLocale[]).reduce((a, b) =>
     scores[b] > scores[a] ? b : a
   );
+  const tied = (Object.keys(scores) as ReplyLocale[]).filter((locale) => scores[locale] === scores[best]);
+  if (scores[best] > 0 && tied.length === 1) return best;
 
-  return scores[best] === 0 ? 'pt' : best;
+  // A ortografia só é consultada entre quem ainda está empatado. Com a votação
+  // a zero, "empatados" são as três.
+  const candidates = scores[best] > 0 ? tied : (['pt', 'es', 'en'] as ReplyLocale[]);
+  for (const locale of candidates) {
+    const signal = ORTHOGRAPHIC_SIGNALS[locale];
+    if (signal && signal.test(text)) return locale;
+  }
+
+  return scores[best] > 0 ? best : 'pt';
 };
 
 interface Theme {

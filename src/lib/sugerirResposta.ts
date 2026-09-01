@@ -12,8 +12,9 @@ import type { EntradaDoRascunho } from '@/lib/rascunhoDoModelo';
  * O CONTRATO COM A FUNÇÃO
  *
  * Ela devolve `{ rascunho }` quando o modelo respondeu E o texto passou pelas
- * verificações dela (sem travessão, sem promessa de reparação, sem revelar
- * automação, dentro do tamanho). Em qualquer outro caso devolve um objeto com
+ * verificações dela, que dependem do canal: sem travessão e sem revelar
+ * automação nos dois, sem promessa de reparação no público, sem troca por
+ * avaliação no privado. Em qualquer outro caso devolve um objeto com
  * `code` e um estado HTTP fora do 2xx, que o cliente do Supabase entrega como
  * `error`.
  *
@@ -31,6 +32,13 @@ export const pedirRascunhoAoBinno = async (entrada: EntradaDoRascunho): Promise<
       comment: entrada.comment,
       rating: entrada.rating,
       businessName: entrada.businessName,
+      // O canal escolhe, do lado da função, qual pedido é feito ao modelo e
+      // qual lista de recusas é aplicada ao que ele devolver. Sem esta linha
+      // tudo o resto está certo e o painel continua a pedir sempre em público,
+      // que é o defeito mais silencioso possível: o recado privado chegaria
+      // proibido de oferecer o que o dono quer oferecer.
+      channel: entrada.channel,
+      customerName: entrada.customerName,
     },
   });
 

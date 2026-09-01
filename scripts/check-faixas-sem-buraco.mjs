@@ -136,7 +136,48 @@ if (contentor) {
 }
 
 // ---------------------------------------------------------------------------
-// 5. O contrato registra a decisão.
+// 5. A faixa de Ação usa a largura, e sem abrir buraco (01/09/2026).
+// ---------------------------------------------------------------------------
+//
+// Segunda decisão de 01/09/2026, autorizada por Marcelo: "poderia dividir a
+// tela ao meio e apresentar mais coisas na primeira dobra". Ver "Primeira
+// dobra do portátil" em docs/contrato-produto-binno.md.
+//
+// Até esse dia a faixa de Ação era a única das três que não era grade: era uma
+// pilha, e a 1280 os seus dois cartões ocupavam a largura toda um debaixo do
+// outro. Medido no ecrã: na primeira dobra do portátil cabiam "Comentários
+// internos" e "Avaliações no Google", e mais nada.
+//
+// As regras 1 a 4 acima já valem para ela, porque passou a ser grade e entra
+// nos mesmos laços. O que fica aqui é o que só esta faixa tem: a largura da
+// fila SEGUE a presença do cartão de contagens, em vez de ser fixa. Uma
+// largura fixa de duas colunas devolveria a esta faixa exactamente o defeito
+// que a decisão acima tirou das outras duas: um terço de fundo vazio ao lado
+// de um cartão alto, sempre que o dono não tiver comentário interno por
+// tratar, que é o estado normal de uma conta em dia.
+const classesDaFila = painel.match(/<div id=\{QUEUE_ANCHOR_ID\} className=\{`([^`]*)`\}/);
+exigir(classesDaFila !== null,
+  'A fila de respostas deixou de declarar a largura dela na faixa de Ação. Sem essa expressão a faixa volta a ser uma pilha de cartões à largura toda, e a primeira dobra do portátil volta a mostrar dois módulos onde cabem quatro.');
+if (classesDaFila) {
+  // As duas larguras E a condição que escolhe entre elas. Procurar só por
+  // `lg:col-span-2` deixaria passar uma largura fixa de duas colunas, que é
+  // precisamente o buraco.
+  exigir(/temComentariosInternos \? 'lg:col-span-2' : 'lg:col-span-3'/.test(classesDaFila[1]),
+    'A fila de respostas deixou de trocar de largura conforme existir ou não cartão de comentários internos. Fixa em duas colunas, ela deixa um terço de fundo vazio ao lado sempre que não há comentário por tratar; fixa em três, o cartão volta a empilhar-se por cima dela.');
+}
+
+// E a condição tem de nascer da MESMA lista que o cartão desenha. Duas
+// leituras do mesmo dado, uma para a largura e outra para o conteúdo, são o
+// defeito que `src/lib/internalCasePriority.ts` já regista ter custado a este
+// projeto uma vez: elas divergem em silêncio na primeira vez que alguém mexer
+// numa delas, e aqui a divergência é uma coluna vazia ou um cartão espremido.
+exigir(/const temComentariosInternos = comentariosInternos\.length > 0;/.test(painel),
+  'A largura da faixa de Ação deixou de sair da lista de comentários internos. Uma segunda leitura para decidir a largura pode discordar da que desenha o cartão, e o resultado na tela é uma coluna vazia ou um cartão sem espaço.');
+exigir(/<PendingCommentsBanner casos=\{comentariosInternos\} \/>/.test(painel),
+  'O cartão de comentários internos deixou de receber a mesma lista que decide a largura da fila ao lado dele.');
+
+// ---------------------------------------------------------------------------
+// 6. O contrato registra as decisões.
 // ---------------------------------------------------------------------------
 //
 // Uma regra viva no código e morta no documento é a contradição que este
@@ -145,6 +186,10 @@ exigir(/### Faixas sem buraco \(decisão de 01\/09\/2026\)/.test(contrato),
   `${CONTRATO} deixou de registrar a decisão de 01/09/2026 sobre o desenho das faixas.`);
 exigir(/mal estruturados e com espaços vazios/.test(contrato),
   `${CONTRATO} deixou de registrar as palavras de Marcelo que motivaram a mudança.`);
+exigir(/### Primeira dobra do portátil \(decisão de 01\/09\/2026\)/.test(contrato),
+  `${CONTRATO} deixou de registrar a decisão de 01/09/2026 sobre a faixa de Ação usar a largura.`);
+exigir(/dividir a tela ao meio e apresentar mais coisas na primeira dobra/.test(contrato),
+  `${CONTRATO} deixou de registrar as palavras de Marcelo que motivaram a primeira dobra do portátil.`);
 
 if (falhas.length) {
   console.error('Faixas sem buraco: %d proteção(ões) falharam.\n', falhas.length);

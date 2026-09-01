@@ -794,6 +794,8 @@
         "qrClicked": "Carregou para o Google",
         "volumeEmpty": "Aqui aparece quantas avaliações recebe por semana, depois da segunda procura.",
         "distributionEmpty": "Aqui aparece cada nota separada, depois de o Binno procurar as suas avaliações.",
+        "distributionTooFew_one": "Com 1 avaliação procurada, o gráfico ainda não tem o que separar. A partir de {{minimo}}, cada nota separada aparece aqui.",
+        "distributionTooFew_other": "Com {{count}} avaliações procuradas, uma única avaliação já muda muito o gráfico. A partir de {{minimo}}, cada nota separada aparece aqui.",
         "qrEmpty": "Aqui aparecem as aberturas do QR e os cliques para o Google, assim que o seu QR estiver na mesa.",
         "reputationBreakdownEmpty": "A distribuição por nota aparece depois da primeira procura de avaliações.",
         "reputationMetricsEmpty": "O tempo de resposta e as avaliações do mês aparecem quando a procura trouxer as datas."

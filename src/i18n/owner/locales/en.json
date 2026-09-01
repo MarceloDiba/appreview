@@ -794,6 +794,8 @@
         "qrClicked": "Clicked through to Google",
         "volumeEmpty": "How many reviews you get each week appears here after the second fetch.",
         "distributionEmpty": "Each rating on its own line appears here once Binno fetches your reviews.",
+        "distributionTooFew_one": "With 1 review fetched, there is nothing yet for the chart to separate. From {{minimo}} on, each rating on its own line appears here.",
+        "distributionTooFew_other": "With {{count}} reviews fetched, a single review already shifts the chart a lot. From {{minimo}} on, each rating on its own line appears here.",
         "qrEmpty": "QR opens and clicks through to Google appear here as soon as your QR is on the table.",
         "reputationBreakdownEmpty": "The rating breakdown appears after the first review fetch.",
         "reputationMetricsEmpty": "Reply time and reviews this month appear when the fetch brings the dates."

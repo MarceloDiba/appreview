@@ -590,7 +590,73 @@ Onde a evidência é parcial, o módulo não encolhe. "Cada nota separada" com
 distribuição e sem histórico mostra a percentagem de cada nota, que é evidência
 de verdade, e deixa o "antes" em traço. "Do QR ao Google" com zero aberturas
 mostra zero, porque zero é uma medida: o QR está na mesa e ninguém o leu. O que
-encolhe é a ausência de leitura, não o resultado baixo.
+encolhe é a ausência de leitura, não o resultado baixo. **Emendado em
+01/09/2026:** evidência parcial continua a abrir o módulo, mas evidência
+pequena de mais para ser lida passou a encolher, e a diferença entre as duas
+está na secção "Gráfico com amostra pequena" abaixo.
+
+### Primeira dobra do portátil (decisão de 01/09/2026)
+
+**Estado:** autorizada por Marcelo em 01/09/2026, nas palavras dele: "poderia
+dividir a tela ao meio e apresentar mais coisas na primeira dobra".
+
+Isto muda o DESENHO da faixa de Ação e não muda a ordem. Ação continua
+primeiro, os comentários internos continuam antes da fila de respostas na
+sequência do DOM, que é a que o telemóvel lê, e nenhum módulo saiu, fundiu-se
+com outro ou trocou de faixa.
+
+**O que estava errado, medido no ecrã.** A faixa de Ação era a única das três
+que não usava a largura: era uma pilha, e a 1280 os seus dois cartões ocupavam
+a largura toda um debaixo do outro. Na primeira dobra do portátil do dono
+cabiam "Comentários internos" e "Avaliações no Google", e mais nada, quando
+cabiam quatro módulos.
+
+**O que passa a valer.** A faixa é a mesma grade de três colunas das outras
+duas. A repartição segue o que cada cartão tem de deixar ler, e não o tamanho
+que calharia ter: a fila de respostas é onde o dono lê uma avaliação inteira e
+um rascunho inteiro, e leva duas colunas; os comentários internos são uma
+contagem, um nome, uma data e uma citação curta, e levam a terceira, ao lado
+da fila em vez de por cima dela. No telemóvel continua a ser uma coluna só.
+
+**Sem comentários internos, a fila volta às três colunas.** Reservar um terço
+da largura para um cartão que não está lá é o buraco que "Faixas sem buraco"
+foi tirar da tela, e ele não volta por esta porta. Para a faixa poder decidir
+isto, a leitura de `internal_feedback` subiu para o painel: é a MESMA leitura
+de antes, feita uma vez só, e a lista que decide a largura é a mesma que
+desenha o cartão. Nunca podem discordar porque são a mesma lista.
+
+O guarda é `npm run check:faixas-sem-buraco`.
+
+### Gráfico com amostra pequena (decisão de 01/09/2026)
+
+**Estado:** autorizada por Marcelo em 01/09/2026, depois de ver "Cada nota
+separada" na conta dele: 100% / 0% / 0% / 0% / 0% e cinco linhas rectas, com
+10 avaliações.
+
+**A regra:** um gráfico desenhado a partir de história de menos é ruído com ar
+de informação, e encolhe pela mesma regra dos módulos sem evidência.
+
+**O número é 20 avaliações**, e sai de uma conta e não de gosto. Uma
+percentagem repartida por cinco notas move-se em degraus de 100/N pontos: com
+10 avaliações o degrau é de 10 pontos, e este cartão chama "atenção" a
+qualquer descida das 5 estrelas ou subida das notas 1 e 2. Abaixo de 20, o
+cartão anuncia a CHEGADA de uma avaliação como se fosse uma mudança do
+negócio. A 20 o degrau desce para 5 pontos e as duas janelas de quatro semanas
+que ele compara passam a ter conteúdo.
+
+**A base contada é a amostra que o Binno buscou**, a mesma que a nota de rodapé
+do cartão já nomeia, e não um total qualquer do perfil. É também o número que o
+dono reconhece: ele sabe quantas avaliações tem, não quantas caíram dentro das
+últimas oito semanas.
+
+**O módulo continua presente**, como esta secção exige de todos: o título fica
+na tela, na faixa dele, e a linha honesta diz quantas avaliações há hoje e a
+partir de quantas o gráfico aparece. São duas frases diferentes para dois
+motivos diferentes de encolher, porque o que o dono faz a seguir é diferente:
+sem leitura nenhuma falta o Binno procurar; com leitura pequena faltam
+avaliações, e o que ele faz é pôr o QR na mesa.
+
+O guarda é `npm run check:ordem-por-decisao`.
 
 ### Camada de assessoria adicionada
 

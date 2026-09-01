@@ -90,8 +90,17 @@ if (marcadores.length === FAIXAS.length) {
 // o mandou. A faixa-resumo do celular fica de fora de propósito: ela é um bloco
 // aditivo que precede as faixas, aprovado em 30/08/2026, e tem guarda próprio em
 // `scripts/check-painel-no-celular.mjs`.
+//
+// REAPONTADO EM 01/09/2026: a âncora dos comentários internos era
+// `<PendingCommentsBanner userId={userId} />`. A leitura de `internal_feedback`
+// subiu para o painel nesse dia, para a faixa de Ação poder decidir a largura
+// da fila ao lado do cartão (ver "Primeira dobra do portátil" no contrato de
+// produto), e o componente passou a receber a lista já ordenada. A REGRA que
+// esta linha protege não mudou, e continua a ser a mesma para os nove módulos:
+// desenhado uma vez, na faixa que a decisão lhe deu. Mudou a construção que a
+// cumpre, e por isso a âncora foi reapontada em vez de apagada.
 const MODULOS = [
-  ['acao', '<PendingCommentsBanner userId={userId} />', 'Comentários internos'],
+  ['acao', '<PendingCommentsBanner casos={comentariosInternos} />', 'Comentários internos'],
   ['acao', '<ResponseQueue reviews={queue}', 'Avaliações no Google (fila de respostas)'],
   ['mudanca', '<VolumeCard weeks={history} />', 'Volume de avaliações'],
   ['mudanca', '<RatingTrends weeks={history} snapshot={snapshot} />', 'Cada nota separada'],
@@ -172,11 +181,18 @@ const ENCOLHEM = [
   {
     nome: 'Cada nota separada',
     componente: 'RatingTrends',
-    // Distribuição sem histórico é evidência de verdade: a percentagem de cada
-    // nota na amostra existe, e é o "antes" que fica em traço. Só encolhe quando
-    // faltam as duas.
-    calculo: 'const semEvidencia = !hasHistory && !hasDistribution;',
-    chave: 'dashboard.cockpit.approved.distributionEmpty',
+    // REAPONTADO EM 01/09/2026. O cálculo era
+    // `const semEvidencia = !hasHistory && !hasDistribution;`, e a linha era um
+    // `t()` só. Passaram a ser dois motivos de encolher, com duas frases: sem
+    // leitura nenhuma, e com leitura pequena de mais para ser lida (ver
+    // "Gráfico com amostra pequena" no contrato de produto). A regra protegida
+    // é a mesma das outras quatro linhas desta tabela, e é a construção que a
+    // cumpre que mudou; por isso a âncora foi reapontada e não apagada.
+    //
+    // `semEvidencia` continua a ser a porta única do ternário: as duas causas
+    // entram nela, e nenhuma delas pode desenhar o corpo pesado.
+    calculo: 'const semEvidencia = semLeitura || poucasAvaliacoes;',
+    linha: "{semEvidencia ? <p className=\"mt-2 text-sm text-slate-500\">{semLeitura ? t('dashboard.cockpit.approved.distributionEmpty') : t('dashboard.cockpit.approved.distributionTooFew', { count: avaliacoesLidas, minimo: MINIMO_DE_AVALIACOES })}</p> : ",
     pesado: 'divide-y divide-slate-200',
   },
   {
@@ -198,13 +214,13 @@ const ENCOLHEM = [
   },
 ];
 
-for (const { nome, componente, calculo, chave, pesado } of ENCOLHEM) {
+for (const { nome, componente, calculo, chave, linha, pesado } of ENCOLHEM) {
   const corpo = corpoDaDeclaracao(painel, componente) || '';
   exigir(corpo !== '', `${componente} sumiu de ${PAINEL}.`);
   if (corpo === '') continue;
   exigir(corpo.includes(calculo),
     `"${nome}" deixou de calcular o vazio a partir da ausência de evidência (esperado: ${calculo}). Um vazio fixo faz o cartão encolher sempre ou nunca, e nos dois casos ele deixa de dizer a verdade.`);
-  const ternario = `{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('${chave}')}</p> : `;
+  const ternario = linha || `{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('${chave}')}</p> : `;
   const posicao = corpo.indexOf(ternario);
   exigir(posicao !== -1,
     `"${nome}" deixou de encolher para uma linha honesta sem evidência. O módulo continua presente por contrato; o que ele não pode é gastar uma tela de telemóvel a desenhar um traço.`);
@@ -212,6 +228,57 @@ for (const { nome, componente, calculo, chave, pesado } of ENCOLHEM) {
   const posicaoDoPesado = corpo.indexOf(pesado);
   exigir(posicaoDoPesado > posicao,
     `"${nome}" desenha "${pesado}" fora do ramo com evidência: o corpo pesado voltou a ocupar a tela mesmo quando não há o que mostrar.`);
+}
+
+// ---------------------------------------------------------------------------
+// 4b. O limiar de "Cada nota separada" (decisão de 01/09/2026).
+// ---------------------------------------------------------------------------
+//
+// A regra do bloco 4 diz que um módulo sem evidência encolhe. Esta secção diz
+// que evidência PEQUENA DE MAIS conta como não ter, e mede as três construções
+// que fazem isso ser verdade em vez de ser uma intenção escrita ao lado.
+//
+// Não repete o bloco acima: ali prova-se que existe um ramo que encolhe; aqui
+// prova-se o que abre esse ramo, o número que o abre, e que a frase mostrada é
+// a que corresponde ao motivo. Sem estas, alguém podia deixar `semEvidencia`
+// no sítio e pôr o limiar a zero, e o cartão voltava a desenhar 100/0/0/0/0
+// com o guarda verde.
+const corpoDasNotas = corpoDaDeclaracao(painel, 'RatingTrends') || '';
+const declaracaoDoMinimo = painel.match(/const MINIMO_DE_AVALIACOES = (\d+);/);
+
+exigir(declaracaoDoMinimo !== null,
+  `O limiar de "Cada nota separada" deixou de existir em ${PAINEL}. Sem ele o cartão volta a desenhar cinco linhas rectas a partir de dez avaliações, que foi o que Marcelo viu na conta dele em 01/09/2026.`);
+// O número é 20 e a conta está no contrato: com menos, o degrau de uma única
+// avaliação passa de 5 pontos percentuais, e o cartão chama "atenção" a
+// qualquer movimento. Um limiar de 1 ou de 0 é o mesmo que não ter limiar, e
+// esta é a asserção que o impede de ser esvaziado por dentro.
+exigir(declaracaoDoMinimo !== null && Number(declaracaoDoMinimo[1]) === 20,
+  `O limiar de "Cada nota separada" deixou de ser 20 avaliações (está ${declaracaoDoMinimo ? declaracaoDoMinimo[1] : 'ausente'}). O número sai da conta registrada em "Gráfico com amostra pequena" no contrato de produto, e mudá-lo é uma decisão de produto, não um ajuste.`);
+
+// O limiar tem de ser comparado, e não apenas declarado. Uma constante que
+// ninguém lê é decoração.
+exigir(corpoDasNotas.includes('const poucasAvaliacoes = !semLeitura && avaliacoesLidas < MINIMO_DE_AVALIACOES;'),
+  '"Cada nota separada" declara o limiar mas deixou de o comparar com a amostra. Uma constante que ninguém lê não encolhe cartão nenhum.');
+
+// A base contada é a amostra que o Binno buscou, e não um total do perfil nem
+// a soma da janela. É o número que a frase mostra ao dono, e ele tem de ser o
+// mesmo número que o cartão usa para desenhar.
+exigir(corpoDasNotas.includes('const avaliacoesLidas = hasDistribution\n    ? snapshot.sample.reviewCount\n    : weeks.slice(-8).reduce((total, week) => total + week.reviewCount, 0);'),
+  '"Cada nota separada" deixou de contar a amostra que o Binno buscou. Medir outro total faz o cartão encolher, ou abrir, por um número que ele não usa para desenhar nada, e põe na frase um número que o dono não reconhece.');
+
+// Os dois motivos de encolher continuam a ter frases diferentes. Colapsá-los
+// numa só faz o painel dizer "depois que o Binno buscar as suas avaliações" a
+// quem já tem uma busca feita, que é uma frase falsa na tela de quem paga.
+exigir(corpoDasNotas.includes("semLeitura ? t('dashboard.cockpit.approved.distributionEmpty') : t('dashboard.cockpit.approved.distributionTooFew'"),
+  '"Cada nota separada" passou a dizer a mesma coisa nos dois motivos de encolher. Sem leitura nenhuma falta o Binno procurar; com leitura pequena faltam avaliações, e o que o dono faz a seguir é diferente em cada caso.');
+
+// E a frase da amostra pequena tem de dizer os dois números: quantas há hoje e
+// a partir de quantas o gráfico aparece. Uma linha que só diz "poucas
+// avaliações" manda o dono adivinhar quantas faltam.
+for (const catalogo of CATALOGOS.map((caminho) => JSON.parse(readFileSync(caminho, 'utf8')))) {
+  const texto = catalogo.dashboard?.cockpit?.approved?.distributionTooFew_other || '';
+  exigir(texto.includes('{{count}}') && texto.includes('{{minimo}}'),
+    'A linha honesta de "Cada nota separada" com amostra pequena deixou de dizer quantas avaliações há hoje e a partir de quantas o gráfico aparece. Sem os dois números ela manda o dono adivinhar o que falta.');
 }
 
 // A reputação encolhe em duas metades separadas, porque tem duas evidências

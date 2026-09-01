@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useInternalFeedback } from '@/hooks/useInternalFeedback';
-import { caseHasContact, orderPendingCasesByRecency } from '@/lib/internalCasePriority';
+import type { InternalCase } from '@/hooks/useInternalFeedback';
+import { caseHasContact } from '@/lib/internalCasePriority';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 /**
@@ -16,27 +16,39 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
  * completo assim que não houver nenhum. Sem caso pendente, retorna `null` e a
  * Visão geral fica idêntica à descrita no contrato.
  *
- * Reaproveita `useInternalFeedback`, a mesma fonte usada em `/reviews`, para
- * não criar um segundo caminho de leitura para o mesmo dado.
+ * A LEITURA SUBIU PARA O PAINEL EM 01/09/2026, E PORQUÊ.
+ *
+ * Até aqui este bloco chamava `useInternalFeedback` por dentro e decidia
+ * sozinho se aparecia. Isso deixava a faixa de Ação cega: ela não tinha como
+ * saber se ia desenhar um cartão ou nada, e por isso empilhava tudo à largura
+ * toda. No portátil o dono via duas coisas onde cabiam quatro, e foi disso que
+ * ele se queixou em 01/09/2026: "poderia dividir a tela ao meio e apresentar
+ * mais coisas na primeira dobra".
+ *
+ * Agora quem lê `internal_feedback` é o painel, UMA vez, e passa a lista já
+ * ordenada para cá. Continua a haver um único caminho de leitura para este
+ * dado. A faixa usa a MESMA lista para decidir a largura da fila ao lado, o
+ * que é o oposto de duas regras a discordar: é uma só, lida num sítio só.
+ *
+ * O `casos.length === 0` abaixo não é uma segunda regra, é o chão: quem chamar
+ * este componente com a lista vazia não desenha uma caixa vermelha vazia.
  *
  * A ordem (mais recente primeiro; contato só marca o selo, não reordena) vem
- * de `orderPendingCasesByRecency`, em `src/lib/internalCasePriority.ts`. O
- * caso que este bloco destaca é o primeiro item dessa ordem, e a fila única
- * de `/reviews` (`src/lib/filaDeRespostas.ts`) ordena pela mesma função: as
- * duas telas não podem divergir sobre qual comentário é o mais recente.
+ * de `orderPendingCasesByRecency`, em `src/lib/internalCasePriority.ts`, e é
+ * aplicada pelo painel antes de chamar isto. O caso destacado é o primeiro
+ * item dessa ordem, e a fila única de `/reviews`
+ * (`src/lib/filaDeRespostas.ts`) ordena pela mesma função: as duas telas não
+ * podem divergir sobre qual comentário é o mais recente.
  *
  * O link leva à âncora da fila (`#fila-de-respostas`), onde o caso destacado
  * aparece somado às outras origens desde 30/08/2026.
  */
-const PendingCommentsBanner = ({ userId }: { userId?: string }) => {
+const PendingCommentsBanner = ({ casos }: { casos: InternalCase[] }) => {
   const { t, i18n } = useOwnerTranslation();
-  const { loading, cases } = useInternalFeedback(userId || '');
 
-  if (loading) return null;
+  if (casos.length === 0) return null;
 
-  const pendingOrdered = orderPendingCasesByRecency(cases);
-  if (pendingOrdered.length === 0) return null;
-
+  const pendingOrdered = casos;
   const highlighted = pendingOrdered[0];
   const quote = highlighted.feedback_text?.trim();
   const who = highlighted.customer_name?.trim() || t('dashboard.cockpit.layout.anonymousReviewer');

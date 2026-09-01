@@ -239,8 +239,17 @@ const requirements = [
   // bloco retorne nulo sem caso pendente, a segunda exige que ele fique
   // sempre antes da fila quando existir, sem deslocar a fila da posicao
   // dela quando ele nao existir.
-  ['bloco de comentários pendentes some por completo sem caso sem tratar', pendingCommentsBanner.includes('if (pendingOrdered.length === 0) return null;')],
-  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner userId={userId} />') && filaDoPainel(dashboard).length > 0 && dashboard.indexOf('<PendingCommentsBanner userId={userId} />') < posicaoDaFila(dashboard)],
+  //
+  // REAPONTADAS EM 01/09/2026. A leitura de `internal_feedback` subiu para o
+  // painel nesse dia, para a faixa de Acao poder decidir a largura da fila ao
+  // lado do cartao (ver "Primeira dobra do portatil" no contrato). O
+  // componente passou a receber a lista ja ordenada, e as duas ancoras
+  // acompanharam. As REGRAS sao as mesmas, palavra por palavra: sem caso sem
+  // tratar o bloco devolve nulo, e quando existe fica antes da fila. O que
+  // mudou foi a construcao que as cumpre, por isso foram reapontadas e nao
+  // apagadas.
+  ['bloco de comentários pendentes some por completo sem caso sem tratar', pendingCommentsBanner.includes('if (casos.length === 0) return null;')],
+  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner casos={comentariosInternos} />') && filaDoPainel(dashboard).length > 0 && dashboard.indexOf('<PendingCommentsBanner casos={comentariosInternos} />') < posicaoDaFila(dashboard)],
   ['coleta pede nome público', coletaInteira.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
   ['coleta aceita somente campos específicos de permalink', coletaInteira.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !coletaInteira.includes("'reviewUri', 'url'")],
   ['coleta temporária continua sem agenda e com limite explícito', collectorCore.includes("maxReviews: 50") && collectorCore.includes("APIFY_EXPERIMENTAL_COOLDOWN")],
