@@ -28,9 +28,9 @@ entregue.
 | Página oficial e demo | Publicadas | Demo é ilustrativa e não cria automação real. |
 | Cockpit | Consolidado | Depende da origem disponível para preencher métricas. |
 | Apify | Piloto manual funcional | Sem agenda, teto e intervalo de segurança ativos. |
-| Google oficial | Banco preparado | API desativada, OAuth em Teste e sem cliente específico do Binno; faltam acesso/quota, credenciais e Edge Functions. |
-| WhatsApp | Piloto local com OpenWA | Preferências e logs são locais; não há entrega recorrente em produção. |
-| Cobrança | Preço apresentado | Não há checkout, assinatura nem cobrança automática. |
+| Google oficial | Pré-requisitos em andamento | As APIs Business Information e Account Management estão ativadas no projeto `app-review-505612`; o pedido Basic foi preparado e ainda não foi enviado. Faltam aprovação, cliente OAuth próprio, segredos e Edge Functions. |
+| WhatsApp | Piloto local com OpenWA | O envio manual local foi validado; o canal não pode ser usado como entrega recorrente ou multiempresa. Arquitetura de transição em `docs/arquitetura-openwa-piloto.md`. |
+| Cobrança | Conta Stripe pronta | A conta EUR está habilitada para pagamentos e repasses; não há checkout, assinatura nem cobrança automática. |
 | Privacidade | Correção aplicada | QR público usa uma função mínima; perfis e links só podem ser lidos pelo respetivo dono. |
 
 ## Execução por lotes
@@ -51,18 +51,27 @@ necessários, sem expor telefone, dados de assinatura ou outros links do dono.
 
 ### Lote 2. Conexão oficial do Perfil da Empresa
 
-**Pré-requisitos externos, sem custo novo conhecido:** acesso Basic do Google
-para o projeto correto, APIs habilitadas e cliente OAuth Web configurado.
+**Pré-requisitos externos, sem custo novo conhecido:** aprovação Basic do Google
+para o projeto correto e cliente OAuth Web configurado.
 
-1. Confirmar o acesso Basic do Google e habilitar somente as APIs aprovadas.
-2. Cadastrar no cofre do Supabase `GOOGLE_OAUTH_CLIENT_ID`,
+1. Enviar e acompanhar o pedido Basic do Google para o projeto
+   `app-review-505612` (número `288079352399`). As APIs My Business Business
+   Information e My Business Account Management já estão ativadas. O Google
+   informa análise em até 14 dias; quota de 300 QPM confirma a aprovação.
+2. Após a aprovação, habilitar Google My Business API, que é a API usada pela
+   fila e respostas `v4` do Binno. Ela só aparece no Console depois da
+   aprovação Basic.
+3. Criar um cliente OAuth Web exclusivo do Binno. Não reutilizar o cliente
+   `NOA Local Growth Cockpit`, pois redirects, segredos e auditoria pertencem
+   a outro produto.
+4. Cadastrar no cofre do Supabase `GOOGLE_OAUTH_CLIENT_ID`,
    `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI` e `APP_URL`.
-3. A migration `20260814193000_google_business_profile_connection.sql` já está
+5. A migration `20260814193000_google_business_profile_connection.sql` já está
    aplicada no banco de produção. Publicar as funções
    `start-google-business-oauth`, `google-business-oauth-callback` e
    `sync-google-business-profile` somente depois das credenciais.
-4. Ligar a flag pública de OAuth apenas depois da verificação técnica.
-5. Com um gestor presente, conectar, escolher uma localização e sincronizar
+6. Ligar a flag pública de OAuth apenas depois da verificação técnica.
+7. Com um gestor presente, conectar, escolher uma localização e sincronizar
    até o fim da paginação. Conferir média, total e pendências contra o Perfil
    da Empresa.
 
@@ -96,26 +105,32 @@ mudou, por que importa e o que o gestor pode fazer.
 
 ### Lote 4. WhatsApp de produção
 
-**Exige decisão de fornecedor, política de consentimento e orçamento.**
+**Ponte de piloto definida; produção exige decisão de fornecedor, política de
+consentimento e orçamento.**
 
-1. Escolher provedor oficial de WhatsApp Business e definir custo por conversa,
-   templates, limites e responsável operacional.
-2. Persistir no servidor o número confirmado, consentimento, interesses,
+1. Usar OpenWA somente como relé de piloto isolado: número dedicado,
+   sessão por piloto, servidor privado, chave de menor privilégio e disparo
+   manual confirmado. Nunca expor o dashboard ou a API local na internet.
+2. Antes de qualquer envio recorrente, persistir no servidor o número
+   confirmado, consentimento, interesses,
    fuso, frequência e histórico de entrega.
 3. Implementar fila de envio, idempotência, logs, falha, opt-out e limites.
 4. Enviar apenas alertas elegíveis e resumos configurados pelo gestor.
-5. Validar com um número de teste e depois com o primeiro piloto consentido.
+5. Antes de vender entrega recorrente, migrar para WhatsApp Business Platform
+   oficial ou provedor homologado e definir custo por conversa, templates,
+   limites e responsável operacional.
 
 **Resultado:** o Binno chega ao gestor com uma ação útil, sem depender de um
 processo local aberto nem de envio manual da equipa.
 
 ### Lote 5. Cobrança, operação e venda
 
-**Exige decisão comercial e financeira.**
+**A conta Stripe está conectada e habilitada. A configuração comercial e
+financeira continua uma decisão.**
 
 1. Confirmar plano, moeda, impostos, período de teste, cancelamento e suporte.
-2. Escolher e configurar checkout, assinatura, webhooks e acesso por status de
-   pagamento.
+2. Criar no Stripe produto/preço e configurar Checkout, assinatura, webhooks
+   e acesso por status de pagamento, depois da confirmação comercial.
 3. Publicar termos, privacidade, política de dados de avaliações e canal de
    suporte.
 4. Instrumentar o funil comercial: visita, cadastro, onboarding concluído,
