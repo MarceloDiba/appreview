@@ -13,8 +13,8 @@ import type { EntradaDoRascunho } from '@/lib/rascunhoDoModelo';
  *
  * Ela devolve `{ rascunho }` quando o modelo respondeu E o texto passou pelas
  * verificações dela, que dependem do canal: sem travessão e sem revelar
- * automação nos dois, sem promessa de reparação no público, sem troca por
- * avaliação no privado. Em qualquer outro caso devolve um objeto com
+ * automação nos dois, sem promessa de reparação no público, e sem falar de
+ * avaliação, nota, estrelas ou Google no privado. Em qualquer outro caso devolve um objeto com
  * `code` e um estado HTTP fora do 2xx, que o cliente do Supabase entrega como
  * `error`.
  *

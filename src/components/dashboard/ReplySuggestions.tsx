@@ -59,9 +59,10 @@ const LOCALES: ReplyLocale[] = ['pt', 'es', 'en'];
  *
  * O RASCUNHO QUE LÊ A AVALIAÇÃO (31/08/2026)
  *
- * O painel de variantes continua inteiro. O que mudou é que, numa avaliação
- * PÚBLICA, o painel pede também um rascunho a `sugerir-resposta`, que lê o que
- * o cliente escreveu, e o põe como um cartão A MAIS, à frente das variantes.
+ * O painel de variantes continua inteiro. O que mudou é que o painel pede
+ * também um rascunho a `sugerir-resposta`, que lê o que o cliente escreveu, e o
+ * põe como um cartão A MAIS, à frente das variantes. (Em 31/08 isto valia só
+ * para a avaliação pública; desde 01/09 vale para os dois canais, ver abaixo.)
  * Nenhuma variante é reescrita: o título e a dica de cada uma descrevem o texto
  * que o molde produz ("Curta e directa", "A escolha segura quando ainda não
  * sabe o que correu mal"), e pôr o texto do modelo debaixo desses rótulos seria
@@ -75,14 +76,16 @@ const LOCALES: ReplyLocale[] = ['pt', 'es', 'en'];
  * está certa, porque uma oferta de dinheiro debaixo de uma avaliação ensina o
  * próximo leitor que uma estrela vale dinheiro. Em privado ela era o contrário
  * do que o dono quer dizer, e o molde tem uma variante inteira para isso
- * (`com-reparacao`, "Com uma compensação").
+ * (`com-reparacao`, "Com uma reparação" em Portugal e "Com uma compensação" no
+ * Brasil).
  *
  * Marcelo pediu o rascunho para o privado nesse dia. O que mudou não foi este
  * componente relaxar uma regra: foi a função ganhar DOIS canais, com listas de
  * recusa diferentes. O privado permite oferecer resolver e proíbe, no lugar,
- * trocar seja o que for por apagar ou mudar uma avaliação pública, que é o que
- * a dica da variante `com-reparacao` já dizia ao dono por escrito e passou a
- * ser verificado no texto.
+ * qualquer menção a avaliação, nota, estrelas ou Google. Uma troca tem de
+ * nomear a avaliação para existir, e um recado que responde falando da página
+ * pública está a mudar de assunto. Continua a ser uma lista de bloqueio e não
+ * uma garantia: a última defesa é o dono ler antes de enviar.
  *
  * Por isso o `channel` vai no pedido. Ele não é decoração: é ele que escolhe,
  * do outro lado, qual pedido é feito ao modelo e qual lista é aplicada ao que

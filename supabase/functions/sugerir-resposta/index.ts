@@ -268,9 +268,12 @@ Answer with JSON only, no other text:
  *   coisa certa a dizer em privado e porque o molde ja oferece na variante
  *   `com-reparacao`. E a instrucao que o canal publico proibe.
  *
- *   NAO NEGOCEIA A AVALIACAO. A frase que proibe trocar seja o que for por
- *   apagar, mudar ou melhorar uma avaliacao publica. O pedido diz, e a lista
- *   `TROCA` verifica depois, porque pedir nao e garantir.
+ *   NAO FALA DA AVALIACAO. A frase que proibe escrever as palavras avaliacao,
+ *   nota, estrelas, pontuacao e Google, agradecer por uma avaliacao, mencionar
+ *   qualquer pagina publica, ou oferecer o que quer que seja em troca de mudar
+ *   uma. O pedido diz, e a lista `FALAR_DA_AVALIACAO` verifica depois, porque
+ *   pedir nao e garantir. Verificar a MENCAO em vez da troca e o que torna a
+ *   verificacao possivel: ver o cabecalho dessa lista.
  *
  * O nome de quem escreveu entra quando existe, para o recado abrir como o molde
  * abre (`greeting`) em vez de comecar num "Ola" sem ninguem.
