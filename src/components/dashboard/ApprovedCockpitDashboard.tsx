@@ -408,20 +408,23 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
 
     {/* Referência: o que ele consulta em vez de agir. */}
     <section data-faixa="referencia" className="grid items-start gap-4 border-t border-slate-200 pt-8 lg:grid-cols-3">
-      {/* Com "Reputação no Google" na faixa de Ação, esta faixa ficaria com
-          "Boas práticas" sozinha numa coluna e dois terços de fundo vazio ao
-          lado, que é exactamente o buraco fechado horas antes. Passa ao mesmo
-          padrão da faixa de Ação: o cartão que quer largura ocupa duas
-          colunas, e os dois curtos empilham-se na terceira.
+      {/* MEDIDO NO ECRÃ em 01/09/2026, com o retrato da conta do dono (10
+          avaliações, 6 com texto, sem temas): esta faixa tinha um retângulo de
+          cerca de 1270x400 de fundo vazio. O cartão de temas é BAIXO, mesmo
+          cheio (é uma nuvem de etiquetas), e a coluna estreita ao lado dele
+          empilhava dois cartões e ficava alta. Duas colunas curtas ao lado de
+          uma coluna alta é o buraco de sempre, virado ao contrário.
 
-          Os temas são o que quer largura aqui: são etiquetas que embrulham. O
-          QR tem duas linhas de número e Boas práticas uma orientação de cada
-          vez, e os dois juntos enchem a altura de um cartão de temas. */}
-      <div className="min-w-0 lg:col-span-2 lg:row-start-1"><TopicsCard snapshot={snapshot} /></div>
-      <div className="grid min-w-0 items-start gap-4 lg:col-start-3 lg:row-start-1">
-        <div id={QR_ANCHOR_ID} className="min-w-0 scroll-mt-16 lg:scroll-mt-4"><QrCard funnel={funnel.data} /></div>
-        <div className="min-w-0"><DailyPractice snapshot={snapshot} /></div>
-      </div>
+          O desenho segue a ALTURA de cada cartão, e não só a largura que ele
+          quer ler. Os temas querem largura e não têm altura: levam a linha
+          inteira. O QR e as boas práticas têm alturas parecidas entre si, e
+          por isso ficam lado a lado por baixo, em vez de empilhados.
+
+          Marcelo, no mesmo dia: "só quero melhorar esse ponto que pode ficar
+          com 4 colunas". */}
+      <div className="min-w-0 lg:col-span-3 lg:row-start-1"><TopicsCard snapshot={snapshot} /></div>
+      <div id={QR_ANCHOR_ID} className="min-w-0 scroll-mt-16 lg:row-start-2 lg:scroll-mt-4"><QrCard funnel={funnel.data} /></div>
+      <div className="min-w-0 lg:col-span-2 lg:row-start-2"><DailyPractice snapshot={snapshot} /></div>
       {/*
         O Radar calmo fecha a página. Fica filho DIRETO da grade, sem div à
         volta, porque `check-ordem-por-decisao` procura esta expressão inteira

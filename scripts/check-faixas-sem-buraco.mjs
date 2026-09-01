@@ -91,13 +91,34 @@ for (const [nome, classes] of faixas) {
 //
 // Elas são encontradas pela FORMA, e não por um id: qualquer coluna estreita
 // nova entra automaticamente nesta regra em vez de nascer desguardada.
+// Qualquer coluna estreita que EXISTA tem de alinhar ao topo. Não se exige que
+// exista: em 01/09/2026 a da Referência foi desfeita de propósito, porque
+// empilhar dois cartões ali era justamente o que criava o buraco de baixo.
 const colunasEstreitas = [...painel.matchAll(/<div className="grid ([^"]*lg:col-start-3[^"]*)"/g)];
-exigir(colunasEstreitas.length >= 1,
-  `As colunas estreitas que empilham os cartões curtos sumiram do painel (${colunasEstreitas.length} encontradas, esperada pelo menos a da Referência). Sem elas, cada cartão curto volta a ser um item solto da grade e a faixa volta a ter um terço vazio.`);
 for (const coluna of colunasEstreitas) {
   exigir(/\bitems-start\b/.test(coluna[1]),
     'Uma coluna estreita de cartões curtos deixou de alinhar ao topo, e o cartão de cima volta a esticar até à altura do irmão com branco por dentro.');
 }
+
+// A FAIXA DE REFERÊNCIA, colocada pela ALTURA de cada cartão (01/09/2026).
+//
+// Medido no ecrã com o retrato da conta do dono: a versão anterior punha os
+// temas em duas colunas e empilhava o QR e as boas práticas na terceira, e
+// deixava um retângulo de cerca de 1270x400 de fundo vazio. O cartão de temas é
+// baixo mesmo cheio (é uma nuvem de etiquetas) e a coluna empilhada era alta.
+//
+// As três linhas abaixo prendem a colocação que resolve isso. Cada uma sozinha
+// deixaria o buraco voltar por uma porta diferente.
+const colocacao = (marca) => {
+  const achado = painel.match(new RegExp(`<div ([^>]*)><${marca}`));
+  return achado ? achado[1] : '';
+};
+exigir(/lg:col-span-3[^>]*lg:row-start-1|lg:row-start-1[^>]*lg:col-span-3/.test(colocacao('TopicsCard')),
+  'Os temas deixaram de ocupar a linha inteira na primeira linha da Referência. Em duas colunas, com a altura que este cartão tem, sobra um retângulo de fundo vazio ao lado do que estiver na terceira.');
+exigir(/lg:row-start-2/.test(colocacao('QrCard')) && !/lg:col-span/.test(colocacao('QrCard')),
+  'O "Do QR ao Google" saiu da segunda linha da Referência, ou passou a ocupar mais de uma coluna. Ele são duas linhas de número e é o cartão estreito desta linha.');
+exigir(/lg:col-span-2/.test(colocacao('DailyPractice')) && /lg:row-start-2/.test(colocacao('DailyPractice')),
+  'As "Boas práticas" saíram da segunda linha da Referência, ou deixaram de ocupar as duas colunas ao lado do QR. Empilhadas por baixo do QR, elas devolvem à faixa a coluna alta que o desenho de 01/09 foi tirar.');
 // A âncora do QR tem de continuar a existir e a apontar para o cartão do QR, e
 // não para a coluna inteira: quem chega por ela vem ver o QR.
 const ancoraDoQr = painel.match(/<div id=\{QR_ANCHOR_ID\} className="([^"]*)">\s*<QrCard/);
