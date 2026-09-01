@@ -843,9 +843,9 @@
       "consent": "Autoriza o acesso diretamente no Google. O Binno não vê a sua palavra-passe nem publica respostas automaticamente.",
       "connect": "Ligar Google",
       "connecting": "A abrir Google…",
-      "waitingTitle": "Ligação oficial ao Google em preparação",
-      "waitingDescription": "A fila completa de avaliações e o Radar só aparecem depois da autorização oficial do Perfil de Empresa. Não vamos pedir a sua palavra-passe nem fingir que a ligação funcionou.",
-      "waitingHelp": "Já pode concluir o QR com o link público do Google na configuração guiada. Ele leva o cliente à página certa, qualquer que seja a nota.",
+      "waitingTitle": "Ligação oficial do Google, quando chegar",
+      "waitingDescription": "A sua fila já funciona: o Binno procura as suas avaliações e monta a fila no bloco abaixo. A ligação oficial acrescenta o histórico completo do perfil e mostra as respostas que já publicou no Google.",
+      "waitingHelp": "O Binno nunca pede a sua palavra-passe nem finge que a ligação funcionou.",
       "unavailable": "A ligação oficial ao Perfil de Empresa ainda está a ser configurada neste ambiente.",
       "startError": "Não foi possível iniciar a ligação ao Google. Tente novamente mais tarde."
     },
