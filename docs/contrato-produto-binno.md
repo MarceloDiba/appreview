@@ -521,7 +521,50 @@ desta decisão, e nenhum deixa de aparecer numa das duas versões. A do ecrã
 grande e a do telemóvel mostram os mesmos módulos na mesma sequência. A coluna
 lateral única deixou de existir: cada faixa tem a sua, com os cartões curtos
 daquela faixa, para que o portátil não fique com uma coluna de cartões largos e
-a ordem continue a mesma nos dois aparelhos.
+a ordem continue a mesma nos dois aparelhos. **A lateral por faixa durou um dia:
+ver "Faixas sem buraco" abaixo, que a substitui sem tocar na ordem.**
+
+### Faixas sem buraco (decisão de 01/09/2026)
+
+**Estado:** autorizada por Marcelo em 01/09/2026, nas palavras dele: "continuamos
+mal estruturados e com espaços vazios".
+
+Isto muda o DESENHO das faixas e não muda a ordem. Ação continua primeiro,
+Mudança segunda e Referência última; cada módulo continua na faixa que a decisão
+de 31/08/2026 lhe deu; dentro da faixa a sequência continua a mesma, e é essa
+sequência que o telemóvel lê. Nenhum módulo saiu, fundiu-se com outro ou trocou
+de lugar.
+
+**O que estava errado, medido no ecrã e não deduzido do código.** A lateral por
+faixa segurava um único cartão curto: "O que mudou na semana" na Mudança, "Boas
+práticas" na Referência. A coluna larga ao lado tinha dois ou três cartões e era
+sempre muito mais alta. No portátil, a 1280, o que sobrava do lado direito eram
+dois retângulos de fundo vazio de cerca de 340x590 e 340x500. Era isso que ele
+estava a ver.
+
+**O que passa a valer.** Cada faixa é a mesma grade de três colunas, e os
+cartões emparelham por altura em vez de se empilharem numa lateral: o cartão
+largo ocupa duas colunas, o cartão curto ocupa a terceira ao lado dele, e o
+cartão que precisa de largura ocupa a linha inteira por baixo. Nenhuma coluna
+fica sozinha a segurar a altura da faixa. No telemóvel a grade é uma coluna só,
+como já era, e a sequência não muda.
+
+**As faixas alinham ao topo.** Sem isso a grade estica cada cartão até à altura
+do vizinho mais alto, e o vazio não desaparece: entra para dentro do cartão. Era
+assim que o "Do QR ao Google" ficava com 137px de branco por baixo do último
+número. Um cartão com um buraco dentro é pior do que um intervalo entre cartões,
+porque o buraco parece conteúdo em falta.
+
+**Um traço separa as faixas, e continua sem haver rótulo.** A regra de não
+escrever "Ação" acima de um cartão que já diz o que é continua inteira; o que
+entra é um traço, que não escreve nada. Ele existe porque sem ele todos os
+intervalos da página mediam quase o mesmo, 24px entre faixas contra 20px entre
+cartões da mesma faixa, e a fronteira entre "o que fazer" e "o que mudou" era o
+mesmo acontecimento visual que a fronteira entre dois cartões vizinhos. O
+intervalo entre faixas passa a ser maior que o intervalo dentro delas, e é essa
+diferença, e não o traço sozinho, que faz as três lerem-se como três grupos.
+
+O guarda é `npm run check:faixas-sem-buraco`.
 
 **O "Plano de hoje" sai, em todas as versões.** Nas palavras de Marcelo, ele
 "não soma em nada".

@@ -259,35 +259,78 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
   // alerta ele é leitura de consulta e fecha. `radarEmAcao` e a sua negação
   // garantem que ele aparece uma vez, sempre.
   const radarEmAcao = getAdvisorReading(snapshot).kind === 'alert';
-  return <div className="space-y-6">
+  // O ESQUELETO das faixas, mudado em 01/09/2026 pelo que o portátil mostrava:
+  // "continuamos mal estruturados e com espaços vazios".
+  //
+  // Até aqui cada faixa era uma coluna larga mais uma lateral fixa de 340px com
+  // UM cartão curto dentro. A lateral acabava muito antes da coluna larga, e o
+  // que sobrava do lado direito do portátil eram dois retângulos de fundo vazio,
+  // de cerca de 340x590 em Mudança e 340x500 em Referência. Era isso que ele
+  // estava a ver, e está medido no ecrã, não deduzido do código.
+  //
+  // Agora cada faixa é a MESMA grade de três colunas, e os cartões emparelham
+  // por altura em vez de se empilharem numa lateral: o cartão largo ocupa duas
+  // colunas, o cartão curto ocupa a terceira ao lado dele, e o cartão que
+  // precisa de largura ocupa a linha inteira por baixo. O buraco deixa de
+  // existir porque nenhuma coluna fica sozinha a segurar a altura da faixa.
+  //
+  // Duas coisas que isto NÃO muda, que são as que o contrato prende:
+  //
+  // 1. A ordem. As faixas continuam Ação, Mudança e Referência, e cada módulo
+  //    continua na faixa que a decisão de 31/08/2026 lhe deu. Dentro da faixa a
+  //    sequência do DOM também é a mesma, e é ela que o telemóvel lê: volume,
+  //    cada nota, o que mudou; reputação, QR, temas, boas práticas, Radar.
+  // 2. A presença. Nenhum módulo saiu, fundiu-se com outro ou trocou de faixa.
+  //
+  // `items-start` é metade da correção, e não um detalhe: sem ele a grade
+  // estica cada cartão até à altura do vizinho mais alto, e o vazio muda de
+  // sítio em vez de desaparecer. Era assim que o "Do QR ao Google" ficava com
+  // 137px de branco por baixo do último número, dentro do próprio cartão.
+  //
+  // O traço e o `pt-8` acima de Mudança e de Referência são o que faz as três
+  // faixas lerem-se como três grupos. Sem eles todos os intervalos da página
+  // mediam quase o mesmo, 24px entre faixas contra 20px entre cartões da mesma
+  // faixa, e a fronteira entre "o que fazer" e "o que mudou" era o mesmo
+  // acontecimento visual que a fronteira entre dois cartões vizinhos. Não é
+  // rótulo: o contrato proíbe escrever "Ação" acima de um cartão que já diz o
+  // que é, e um traço não escreve nada.
+  return <div className="space-y-8 lg:space-y-10">
     <MobileSummary snapshot={snapshot} queue={queue} temFila={temFila} />
 
     {/* Ação: o que ele precisa de decidir ou fazer agora. */}
-    <section data-faixa="acao" className="space-y-5">
+    <section data-faixa="acao" className="space-y-4">
       {radarEmAcao && <RadarNow snapshot={snapshot} />}
       {!demo && <PendingCommentsBanner userId={userId} />}
       <div id={QUEUE_ANCHOR_ID} className="scroll-mt-16 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} /></div>
     </section>
 
     {/* Mudança: o que se mexeu desde a última vez. */}
-    <section data-faixa="mudanca" className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div className="min-w-0 space-y-5">
-        <VolumeCard weeks={history} />
-        <RatingTrends weeks={history} snapshot={snapshot} />
-      </div>
-      <div className="space-y-5"><WeeklyChange weeks={history} /></div>
+    <section data-faixa="mudanca" className="grid items-start gap-4 border-t border-slate-200 pt-8 lg:grid-cols-3">
+      <div className="min-w-0 lg:col-span-2 lg:row-start-1"><VolumeCard weeks={history} /></div>
+      {/* "Cada nota separada" leva a linha inteira: são cinco gráficos com o
+          número ao lado, e a 560px cada um ficava do tamanho de um selo. */}
+      <div className="min-w-0 lg:col-span-3 lg:row-start-2"><RatingTrends weeks={history} snapshot={snapshot} /></div>
+      <div className="min-w-0 lg:col-start-3 lg:row-start-1"><WeeklyChange weeks={history} /></div>
     </section>
 
     {/* Referência: o que ele consulta em vez de agir. */}
-    <section data-faixa="referencia" className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div className="min-w-0 space-y-5">
-        <ReputationCard snapshot={snapshot} />
-        <div id={QR_ANCHOR_ID} className="grid scroll-mt-16 gap-5 md:grid-cols-2 lg:scroll-mt-4"><QrCard funnel={funnel.data} /><TopicsCard snapshot={snapshot} /></div>
+    <section data-faixa="referencia" className="grid items-start gap-4 border-t border-slate-200 pt-8 lg:grid-cols-3">
+      <div className="min-w-0 lg:col-span-2 lg:row-start-1"><ReputationCard snapshot={snapshot} /></div>
+      {/* O QR fica na coluna estreita e os temas nas duas largas: o QR tem duas
+          linhas de número e os temas têm etiquetas que querem largura. Ao
+          contrário, era o QR que ficava com meia tela de branco por baixo. */}
+      <div id={QR_ANCHOR_ID} className="grid min-w-0 scroll-mt-16 items-start gap-4 md:grid-cols-2 lg:col-span-3 lg:row-start-2 lg:grid-cols-3 lg:scroll-mt-4">
+        <div className="min-w-0"><QrCard funnel={funnel.data} /></div>
+        <div className="min-w-0 lg:col-span-2"><TopicsCard snapshot={snapshot} /></div>
       </div>
-      <div className="space-y-5">
-        <DailyPractice snapshot={snapshot} />
-        {!radarEmAcao && <RadarNow snapshot={snapshot} />}
-      </div>
+      <div className="min-w-0 lg:col-start-3 lg:row-start-1"><DailyPractice snapshot={snapshot} /></div>
+      {/*
+        O Radar calmo fecha a página. Fica filho DIRETO da grade, sem div à
+        volta, porque `check-ordem-por-decisao` procura esta expressão inteira
+        para provar que ele aparece na Referência; embrulhá-lo escondia o módulo
+        do guarda. A largura dele vem de `lg:col-span-3`, no próprio componente.
+      */}
+      {!radarEmAcao && <RadarNow snapshot={snapshot} />}
     </section>
   </div>;
 };
@@ -323,7 +366,7 @@ const RadarNow = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
       : reading.kind === 'strength'
         ? t('dashboard.advisorPilot.radarLineStrength', { topic, mentions: reading.mentions })
         : t('dashboard.advisorPilot.radarLineMonitor');
-  return <p className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm leading-5 ${urgent ? 'border-red-200 bg-red-50/60 text-red-950' : 'border-violet-200 bg-violet-50/50 text-slate-700'}`}>
+  return <p className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm leading-5 lg:col-span-3 ${urgent ? 'border-red-200 bg-red-50/60 text-red-950' : 'border-violet-200 bg-violet-50/50 text-slate-700'}`}>
     {urgent ? <AlertTriangle className="h-4 w-4 shrink-0 text-red-700" aria-hidden="true" /> : null}
     <span className="min-w-0">{linha}</span>
   </p>;
@@ -447,7 +490,7 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
   // guarda nome, texto ou link, o que já não é verdade desde que o piloto
   // Apify passou a reter isso por até 14 dias no navegador. Este bloco some
   // sozinho assim que a fila tiver uma avaliação, oficial ou do piloto.
-  if (!selected) return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5">
+  if (!selected) return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-4 sm:p-5">
     <h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2>
     <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50/60 p-4">
       <p className="font-semibold text-amber-950">{t('dashboard.cockpit.reviews.lockedTitle')}</p>
@@ -457,10 +500,10 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
   </CardContent></Card>;
 
   return <Card className="overflow-hidden border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-0">
-    <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2><span className="text-sm text-slate-500">{t('dashboard.cockpit.approved.queuePosition', { current: index + 1, total: reviews.length })}</span></div>
-    <div className="p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex flex-wrap items-center gap-2"><p className="font-semibold text-slate-950">{selected.reviewerName || t('dashboard.cockpit.layout.anonymousReviewer')}</p><Stars rating={selected.rating} medium /></div><p className="mt-1 text-xs text-slate-500">{formatAge(selected.publishedAt, i18n.language)}</p></div><div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => select(index - 1)} disabled={index === 0}><ChevronLeft className="mr-1 h-4 w-4" />{t('dashboard.cockpit.approved.previous')}</Button><Button variant="outline" size="sm" onClick={() => select(index + 1)} disabled={index >= reviews.length - 1}>{t('dashboard.cockpit.approved.next')}<ChevronRight className="ml-1 h-4 w-4" /></Button></div></div>
+    <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.queueTitle')}</h2><span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.queuePosition', { current: index + 1, total: reviews.length })}</span></div>
+    <div className="p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex flex-wrap items-center gap-2"><p className="font-semibold text-slate-950">{selected.reviewerName || t('dashboard.cockpit.layout.anonymousReviewer')}</p><Stars rating={selected.rating} medium /></div><p className="mt-1 text-xs text-slate-500">{formatAge(selected.publishedAt, i18n.language)}</p></div><div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => select(index - 1)} disabled={index === 0}><ChevronLeft className="mr-1 h-4 w-4" />{t('dashboard.cockpit.approved.previous')}</Button><Button variant="outline" size="sm" onClick={() => select(index + 1)} disabled={index >= reviews.length - 1}>{t('dashboard.cockpit.approved.next')}<ChevronRight className="ml-1 h-4 w-4" /></Button></div></div>
       <blockquote className="mt-5 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">“{selected.comment}”</blockquote>
-      <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4"><div className="flex flex-wrap items-center gap-2"><span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-[#2457D6]">{t('dashboard.cockpit.layout.replyTitle')}</span>{/*
+      <div className="mt-5 rounded-xl border border-slate-200 bg-white p-3 sm:p-4"><div className="flex flex-wrap items-center gap-2"><span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-[#2457D6]">{t('dashboard.cockpit.layout.replyTitle')}</span>{/*
               A etiqueta existe para o DONO saber se esta a ler o modelo ou o
               texto padrao. Na demonstraçao publica (`binno.pro` e `/demo`) nao
               ha dono nem modelo: e uma ilustraçao do produto a funcionar, e o
@@ -488,7 +531,7 @@ const VolumeCard = ({ weeks }: { weeks: Week[] }) => {
   const previous = weeks.slice(-9, -1);
   const average = previous.length ? previous.reduce((sum, week) => sum + week.reviewCount, 0) / previous.length : 0;
   const change = !semEvidencia && average > 0 ? Math.round(((current.reviewCount - average) / average) * 100) : null;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.volumeTitle')}</h2>{semEvidencia ? null : <span className="whitespace-nowrap text-sm text-slate-500">{t('dashboard.cockpit.approved.volumeWindow')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.volumeEmpty')}</p> : <><div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center"><div className="h-12 w-40 shrink-0"><ResponsiveContainer width="100%" height="100%"><LineChart data={weeks}><Line type="monotone" dataKey="reviewCount" stroke="#2457D6" strokeWidth={3} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div><p className="text-lg font-semibold text-slate-950">{current.reviewCount} <span className="text-sm font-normal text-slate-600">{t('dashboard.cockpit.approved.volumeThisWeek')} {t('dashboard.cockpit.approved.volumeAverage', { average: Math.round(average) })}</span></p></div>{change !== null && change <= -25 && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p><strong>{t('dashboard.cockpit.approved.volumeDrop', { percent: Math.abs(change) })}</strong> {t('dashboard.cockpit.approved.volumeDropRest')}</p></div>}</>}</CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-4 sm:p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.volumeTitle')}</h2>{semEvidencia ? null : <span className="whitespace-nowrap text-xs text-slate-500">{t('dashboard.cockpit.approved.volumeWindow')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.volumeEmpty')}</p> : <><div className="mt-4 flex flex-col gap-3 sm:mt-5 sm:flex-row sm:items-center sm:gap-4"><div className="h-12 w-full shrink-0 sm:w-40 lg:w-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={weeks}><Line type="monotone" dataKey="reviewCount" stroke="#2457D6" strokeWidth={3} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div><p className="text-lg font-semibold text-slate-950">{current.reviewCount} <span className="text-sm font-normal text-slate-600">{t('dashboard.cockpit.approved.volumeThisWeek')} {t('dashboard.cockpit.approved.volumeAverage', { average: Math.round(average) })}</span></p></div>{change !== null && change <= -25 && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p><strong>{t('dashboard.cockpit.approved.volumeDrop', { percent: Math.abs(change) })}</strong> {t('dashboard.cockpit.approved.volumeDropRest')}</p></div>}</>}</CardContent></Card>;
 };
 
 const share = (weeks: Week[], rating: Rating) => weeks.reduce((sum, week) => sum + week.ratingBreakdown[rating], 0) / Math.max(1, weeks.reduce((sum, week) => sum + week.reviewCount, 0));
@@ -515,7 +558,7 @@ const RatingTrends = ({ weeks, snapshot }: { weeks: Week[]; snapshot: Experiment
   const lowCurrent = rows.filter((row) => row.rating === '1' || row.rating === '2').reduce((sum, row) => sum + (row.current || 0), 0);
   const lowPrevious = rows.filter((row) => row.rating === '1' || row.rating === '2').reduce((sum, row) => sum + (row.previous || 0), 0);
   const needsAttention = hasHistory && five.current < (five.previous || 0) || hasHistory && lowCurrent > lowPrevious;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.distributionTitle')}</h2>{semEvidencia ? null : <span className="text-sm text-slate-500">{t('dashboard.cockpit.approved.ratingsNoStacking')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.distributionEmpty')}</p> : <><div className="mt-5 divide-y divide-slate-200">{rows.map((row) => { const risk = hasHistory && row.current !== null && (row.rating === '5' ? row.current < (row.previous || 0) : Number(row.rating) <= 2 && row.current > (row.previous || 0)); return <div key={row.rating} className="grid grid-cols-[40px_1fr_auto] items-center gap-2 py-3 sm:grid-cols-[52px_1fr_auto] sm:gap-3"><span className="text-sm font-semibold text-slate-800">{row.rating}<Star className="ml-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" /></span><div className="h-8 min-w-16 sm:min-w-24">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={row.series}><Line type="monotone" dataKey="value" stroke={risk ? '#C2413A' : '#D4A72C'} strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><span className="text-right text-xs leading-5 text-slate-500"><strong className="text-slate-900">{row.current === null ? '—' : `${row.current}%`}</strong> {t('dashboard.cockpit.approved.ratingsBefore')} {row.previous === null ? '—' : `${row.previous}%`} {risk && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-red-700">{t('dashboard.cockpit.approved.ratingsAttention')}</span>}</span></div>; })}</div>{needsAttention && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p>{t('dashboard.cockpit.approved.ratingsShift', { fiveBefore: five.previous, fiveNow: five.current, lowBefore: lowPrevious, lowNow: lowCurrent })}</p></div>}<SampleSourceNote snapshot={snapshot} /></>}</CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-4 sm:p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.distributionTitle')}</h2>{semEvidencia ? null : <span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.ratingsNoStacking')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.distributionEmpty')}</p> : <><div className="mt-5 divide-y divide-slate-200">{rows.map((row) => { const risk = hasHistory && row.current !== null && (row.rating === '5' ? row.current < (row.previous || 0) : Number(row.rating) <= 2 && row.current > (row.previous || 0)); return <div key={row.rating} className="grid grid-cols-[32px_minmax(0,1fr)_104px] items-center gap-2 py-3 sm:grid-cols-[52px_minmax(0,1fr)_208px] sm:gap-3"><span className="text-sm font-semibold text-slate-800">{row.rating}<Star className="ml-1 inline h-3.5 w-3.5 fill-amber-400 text-amber-400" /></span><div className="h-8 min-w-16 sm:min-w-24">{hasHistory && <ResponsiveContainer width="100%" height="100%"><LineChart data={row.series}><Line type="monotone" dataKey="value" stroke={risk ? '#C2413A' : '#D4A72C'} strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer>}</div><span className="text-right text-xs leading-5 text-slate-500"><strong className="text-slate-900">{row.current === null ? '—' : `${row.current}%`}</strong> {t('dashboard.cockpit.approved.ratingsBefore')} {row.previous === null ? '—' : `${row.previous}%`} {risk && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-red-700">{t('dashboard.cockpit.approved.ratingsAttention')}</span>}</span></div>; })}</div>{needsAttention && <div className="mt-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-5 text-red-950"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /><p>{t('dashboard.cockpit.approved.ratingsShift', { fiveBefore: five.previous, fiveNow: five.current, lowBefore: lowPrevious, lowNow: lowCurrent })}</p></div>}<SampleSourceNote snapshot={snapshot} /></>}</CardContent></Card>;
 };
 
 /**
@@ -531,7 +574,7 @@ const ReputationCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) =
   const last30 = snapshot.sample.insights?.reviewsLast30Days;
   const hasDistribution = snapshot.sample.reviewCount > 0;
   const semMedidas = (replyHours === null || replyHours === undefined) && (last30 === null || last30 === undefined);
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.reputationTitle')}</h2><span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.reputationFreshness')}</span></div><div className="mt-4 hidden items-end gap-3 lg:flex"><p className="text-4xl font-medium tracking-tight text-slate-950">{decimal.format(snapshot.business.googleRating)}</p><Stars rating={Math.round(snapshot.business.googleRating)} medium /></div><p className="mt-1 hidden text-sm text-slate-600 lg:block">{integer.format(snapshot.business.googleReviewCount)} {t('dashboard.cockpit.approved.reviewsTotal')}</p>{hasDistribution ? <div className="mt-5 space-y-2">{ratings.map((rating) => { const count = snapshot.sample.ratingBreakdown[rating]; const width = Math.round((count / snapshot.sample.reviewCount) * 100); return <div key={rating} className="grid grid-cols-[28px_1fr_36px] items-center gap-2 text-xs"><span>{rating}★</span><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`${Number(rating) <= 2 ? 'bg-red-500' : 'bg-amber-400'} h-full rounded-full`} style={{ width: `${width}%` }} /></div><span className="text-right text-slate-600">{width}%</span></div>; })}</div> : <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.reputationBreakdownEmpty')}</p>}{semMedidas ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.reputationMetricsEmpty')}</p> : <div className="mt-5 grid grid-cols-2 gap-3"><Metric label={t('dashboard.cockpit.layout.averageReplyTime')} value={replyHours === null || replyHours === undefined ? '—' : `${Math.round(replyHours)} h`} /><Metric label={t('dashboard.cockpit.layout.newReviews30d')} value={last30 === null || last30 === undefined ? '—' : `+${last30}`} tone="positive" /></div>}<SampleSourceNote snapshot={snapshot} /></CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-4 sm:p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.approved.reputationTitle')}</h2><span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.reputationFreshness')}</span></div><div className="mt-4 hidden items-end gap-3 lg:flex"><p className="text-4xl font-medium tracking-tight text-slate-950">{decimal.format(snapshot.business.googleRating)}</p><Stars rating={Math.round(snapshot.business.googleRating)} medium /></div><p className="mt-1 hidden text-sm text-slate-600 lg:block">{integer.format(snapshot.business.googleReviewCount)} {t('dashboard.cockpit.approved.reviewsTotal')}</p>{hasDistribution ? <div className="mt-5 space-y-2">{ratings.map((rating) => { const count = snapshot.sample.ratingBreakdown[rating]; const width = Math.round((count / snapshot.sample.reviewCount) * 100); return <div key={rating} className="grid grid-cols-[28px_1fr_36px] items-center gap-2 text-xs"><span>{rating}★</span><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`${Number(rating) <= 2 ? 'bg-red-500' : 'bg-amber-400'} h-full rounded-full`} style={{ width: `${width}%` }} /></div><span className="text-right text-slate-600">{width}%</span></div>; })}</div> : <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.reputationBreakdownEmpty')}</p>}{semMedidas ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.reputationMetricsEmpty')}</p> : <div className="mt-5 grid grid-cols-2 gap-3"><Metric label={t('dashboard.cockpit.layout.averageReplyTime')} value={replyHours === null || replyHours === undefined ? '—' : `${Math.round(replyHours)} h`} /><Metric label={t('dashboard.cockpit.layout.newReviews30d')} value={last30 === null || last30 === undefined ? '—' : `+${last30}`} tone="positive" /></div>}<SampleSourceNote snapshot={snapshot} /></CardContent></Card>;
 };
 
 const Metric = ({ label, value, tone }: { label: string; value: string; tone?: 'positive' }) => <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs leading-4 text-slate-500">{label}</p><p className={`mt-2 text-xl font-semibold ${tone === 'positive' ? 'text-emerald-700' : 'text-slate-950'}`}>{value}</p></div>;
@@ -561,7 +604,7 @@ const DailyPractice = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) =>
     : reading.kind === 'strength'
       ? { title: t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions }), body: t('dashboard.advisorPilot.strengthAction', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`) }), action: t('dashboard.advisorPilot.reviewEvidence'), target: QUEUE_ANCHOR_ID }
     : unresolved ? { title: t('dashboard.cockpit.approved.practiceUnansweredTitle', { count: unresolved }), body: t('dashboard.cockpit.approved.practiceUnansweredBody'), action: t('dashboard.cockpit.approved.practiceUnansweredAction'), target: QUEUE_ANCHOR_ID } : { title: t('dashboard.cockpit.approved.practicePhotoTitle'), body: t('dashboard.cockpit.approved.practicePhotoBody'), action: t('dashboard.cockpit.approved.practicePhotoAction'), target: QR_ANCHOR_ID };
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.practiceTitle')}</h2><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button asChild variant="link" className="mt-2 h-auto px-0 text-[#2457D6]"><a href={`#${practice.target}`}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></a></Button></CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-4 sm:p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.approved.practiceTitle')}</h2><p className="mt-4 font-medium text-slate-900">{practice.title}</p><p className="mt-1 text-sm leading-5 text-slate-600">{practice.body}</p><Button asChild variant="link" className="mt-2 h-auto px-0 text-[#2457D6]"><a href={`#${practice.target}`}>{practice.action}<ChevronRight className="ml-1 h-4 w-4" /></a></Button></CardContent></Card>;
 };
 
 /*
@@ -580,7 +623,7 @@ const WeeklyChange = ({ weeks }: { weeks: Week[] }) => {
   const current = weeks.at(-1)?.ownerReplies || 0;
   const { t } = useOwnerTranslation();
   const semEvidencia = weeks.length === 0;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="font-semibold text-slate-950">{t('dashboard.cockpit.approved.weekTitle')}</h2>{semEvidencia ? null : <span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.weekWindow')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('whatsappPilot.weeklyChangeEmpty')}</p> : <div className="mt-4 flex items-center gap-3"><div className="h-8 w-20"><ResponsiveContainer width="100%" height="100%"><LineChart data={weeks}><Line type="monotone" dataKey="ownerReplies" stroke="#2457D6" strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div><p className="text-sm leading-5 text-slate-600">{current ? t('dashboard.cockpit.approved.weekReplies', { count: current }) : t('whatsappPilot.weeklyChangeEmpty')}</p></div>}</CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-4 sm:p-5"><div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.approved.weekTitle')}</h2>{semEvidencia ? null : <span className="text-xs text-slate-500">{t('dashboard.cockpit.approved.weekWindow')}</span>}</div>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('whatsappPilot.weeklyChangeEmpty')}</p> : <div className="mt-4 flex items-center gap-3"><div className="h-8 w-20"><ResponsiveContainer width="100%" height="100%"><LineChart data={weeks}><Line type="monotone" dataKey="ownerReplies" stroke="#2457D6" strokeWidth={2.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div><p className="text-sm leading-5 text-slate-600">{current ? t('dashboard.cockpit.approved.weekReplies', { count: current }) : t('whatsappPilot.weeklyChangeEmpty')}</p></div>}</CardContent></Card>;
 };
 
 /*
@@ -598,7 +641,7 @@ const WeeklyChange = ({ weeks }: { weeks: Week[] }) => {
 const QrCard = ({ funnel }: { funnel: { qrOpens: number; googleClicks: number } | null }) => {
   const { t } = useOwnerTranslation();
   const semEvidencia = funnel === null;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.approved.qrTitle')}</h2>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.qrEmpty')}</p> : <dl className="mt-5 space-y-3"><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrOpened')}</dt><dd className="font-semibold text-slate-950">{funnel.qrOpens}</dd></div><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrClicked')}</dt><dd className="font-semibold text-slate-950">{funnel.googleClicks}</dd></div></dl>}</CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-4 sm:p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.approved.qrTitle')}</h2>{semEvidencia ? <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.qrEmpty')}</p> : <dl className="mt-5 space-y-3"><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrOpened')}</dt><dd className="font-semibold text-slate-950">{funnel.qrOpens}</dd></div><div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2"><dt className="text-sm text-slate-600">{t('dashboard.cockpit.approved.qrClicked')}</dt><dd className="font-semibold text-slate-950">{funnel.googleClicks}</dd></div></dl>}</CardContent></Card>;
 };
 
 /**
@@ -618,7 +661,7 @@ const TopicsCard = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
       : reading.kind === 'strength'
         ? <><p className="text-xs font-semibold text-emerald-700">{t('dashboard.advisorPilot.opportunityTitle')}</p><p className="mt-1 text-sm leading-5 text-slate-700">{t('dashboard.advisorPilot.strengthBody', { topic: t(`dashboard.cockpit.topicLabels.${reading.topic}`), mentions: reading.mentions })}</p></>
         : null;
-  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.topicsTitle')}</h2>{topics.length ? <div className="mt-5 flex flex-wrap gap-2">{topics.map((topic) => <span key={topic.id} className={`rounded-full px-3 py-1.5 text-xs font-medium ${topic.sentiment === 'negative' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>{t(`dashboard.cockpit.topicLabels.${topic.id}`)} · {topic.count}</span>)}</div> : <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.topicsEmpty')}</p>}{topics.length ? <>{detail && <div className="mt-5 border-t border-slate-200 pt-4">{detail}</div>}<SampleSourceNote snapshot={snapshot} /></> : null}</CardContent></Card>;
+  return <Card className="border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"><CardContent className="p-4 sm:p-5"><h2 className="text-lg font-semibold text-slate-950">{t('dashboard.cockpit.layout.topicsTitle')}</h2>{topics.length ? <div className="mt-5 flex flex-wrap gap-2">{topics.map((topic) => <span key={topic.id} className={`rounded-full px-3 py-1.5 text-xs font-medium ${topic.sentiment === 'negative' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>{t(`dashboard.cockpit.topicLabels.${topic.id}`)} · {topic.count}</span>)}</div> : <p className="mt-2 text-sm text-slate-500">{t('dashboard.cockpit.approved.topicsEmpty')}</p>}{topics.length ? <>{detail && <div className="mt-5 border-t border-slate-200 pt-4">{detail}</div>}<SampleSourceNote snapshot={snapshot} /></> : null}</CardContent></Card>;
 };
 
 export default ApprovedCockpitDashboard;

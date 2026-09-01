@@ -93,12 +93,32 @@ if (calculo) {
 // guarda acompanha: em vez do texto traduzido, ela fixa a chave que o desenha.
 // A força é a mesma, e um pouco maior: apagar a chave do JSX quebra este
 // guarda, e apagá-la dos catálogos quebra o check:i18n-owner.
-const linhaDasNotas = painel.match(/grid-cols-\[40px_1fr_auto\][\s\S]{0,1400}?approved\.ratingsAttention/);
+//
+// **Reapontado em 01/09/2026.** A âncora era `grid-cols-[40px_1fr_auto]`, e a
+// terceira coluna deixou de ser `auto` nesse dia. O motivo está no ecrã, não no
+// código: `auto` mede-se pelo conteúdo DA PRÓPRIA LINHA, e o conteúdo muda de
+// linha para linha, porque só algumas levam o rótulo "atenção". As cinco linhas
+// ficavam com cinco terceiras colunas de larguras diferentes, e portanto com
+// cinco gráficos de larguras diferentes: as mesmas 12 semanas desenhadas em
+// cinco escalas horizontais, empilhadas, como se fossem comparáveis. Uma
+// largura fixa faz as cinco partilharem a mesma escala.
+//
+// A asserção foi reapontada e não apagada: a regra que ela protege (a linha
+// cabe na largura do cartão no telemóvel) continua viva, e é a construção que
+// a cumpre que mudou.
+const linhaDasNotas = painel.match(/grid-cols-\[32px_minmax\(0,1fr\)_104px\][\s\S]{0,1400}?approved\.ratingsAttention/);
 exigir(linhaDasNotas !== null,
   'A linha de "Cada nota separada" perdeu a grade estreita do celular, ou perdeu o rótulo de atenção que ela precisa caber, que é o que a impede de estourar a largura do cartão.');
 if (linhaDasNotas) {
   exigir(!/whitespace-nowrap/.test(linhaDasNotas[0]),
     'whitespace-nowrap voltou à linha de "Cada nota separada": no celular ela força a grade além da largura do cartão e o rótulo "atenção" vaza para fora.');
+  // A coluna do número não pode voltar a `auto` em nenhum dos dois tamanhos. É
+  // esta asserção, e não a âncora acima, que impede o defeito de voltar por
+  // baixo: alguém pode reescrever a grade do telemóvel mantendo o token que a
+  // âncora procura e devolver `auto` ao `sm:`, e os gráficos do portátil
+  // voltavam a ter cinco larguras.
+  exigir(!/grid-cols-\[[^\]]*_auto\]/.test(linhaDasNotas[0]),
+    'A coluna do número em "Cada nota separada" voltou a ser `auto`. Ela mede-se pelo conteúdo da própria linha, e como só algumas linhas levam o rótulo "atenção", os cinco gráficos ficam com cinco larguras e desenham as mesmas 12 semanas em cinco escalas diferentes.');
 }
 
 // 7. O contrato precisa continuar registrando a exceção. Sem isso o código
