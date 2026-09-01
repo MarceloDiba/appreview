@@ -97,29 +97,46 @@ const PROIBIDO: Array<{ padrao: RegExp; motivo: string }> = [
 // o que o cliente le.
 const MODELO = Deno.env.get('OPENAI_MODEL') || 'gpt-4.1-nano';
 
-const PEDIDO = (negocio: string, nota: number | null, comentario: string) => `Você escreve a resposta pública de um negócio a uma avaliação de cliente.
+/**
+ * O pedido e escrito em INGLES, e a resposta vem em JSON com o idioma declarado
+ * antes do texto. As duas coisas foram descobertas a testar, em 01/09/2026,
+ * depois de Marcelo ver uma resposta em portugues para uma avaliacao em ingles.
+ *
+ * O pedido anterior estava escrito em portugues e mandava "responda no MESMO
+ * idioma". O modelo respondia em portugues a tudo: a lingua do pedido vence a
+ * instrucao sobre a lingua. Reescrever o pedido em ingles sozinho foi pior,
+ * porque ai ele respondia em espanhol a tudo.
+ *
+ * O que resolve e nao pedir que ele adivinhe em silencio: ele DECLARA o idioma
+ * num campo, e so depois escreve. Declarar primeiro prende o resto.
+ *
+ * A chave do JSON e `reply` e nao `resposta` por um motivo achado no teste: com
+ * a chave em portugues, ao responder em espanhol o modelo traduzia a propria
+ * chave para `respuesta` e o texto chegava vazio.
+ */
+const PEDIDO = (negocio: string, nota: number | null, comentario: string) => `You reply to customer reviews as the owner of "${negocio}".
 
-Negócio: ${negocio}
-Nota dada: ${nota === null ? 'o cliente não deu nota' : `${nota} de 5`}
-O que o cliente escreveu:
+Rating given: ${nota === null ? 'none' : `${nota} out of 5`}
+The review, verbatim:
 """
 ${comentario}
 """
 
-Escreva a resposta que o dono do negócio publicaria.
+Step 1. Identify the language the review is written in.
+Step 2. Write the owner's public reply ENTIRELY in that same language.
 
-Regras, todas obrigatórias:
-- Responda no MESMO idioma em que o cliente escreveu. Se ele escreveu em espanhol, responda em espanhol.
-- Responda ao que ele disse de facto. Cite o assunto concreto que ele mencionou. Nada de texto que serviria para qualquer avaliação.
-- Fale como um dono de negócio pequeno fala: simples, direto, sem palavras corporativas.
-- Nunca prometa reembolso, desconto, cortesia ou qualquer reparação, em nenhum idioma.
-- Nunca invente facto sobre o negócio que não esteja no que o cliente escreveu.
-- Nunca diga ou sugira que é uma inteligência artificial.
-- Não use travessão nem meio-risco. Use vírgula ou ponto.
-- Entre 2 e 5 frases.
-- Termine com o nome do negócio numa linha própria.
+Rules for the reply, all mandatory:
+- Name the concrete thing the customer mentioned. A reply that would fit any review is wrong.
+- Sound like a small business owner talking, plain and direct, no corporate words.
+- Never promise a refund, discount, voucher, free item or any compensation.
+- Never invent a fact about the business that is not in the review.
+- Never say or imply you are an AI.
+- No em dash and no en dash.
+- Between 2 and 5 sentences.
+- End with "${negocio}" on its own line.
 
-Devolva apenas o texto da resposta, sem aspas e sem explicação.`;
+Answer with JSON only, no other text:
+{"language":"<the review\'s language, in English>","reply":"<the reply>"}`;
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -157,8 +174,9 @@ Deno.serve(async (request) => {
       body: JSON.stringify({
         model: MODELO,
         messages: [{ role: 'user', content: PEDIDO(negocio, nota, recorte) }],
-        temperature: 0.4,
+        temperature: 0.3,
         max_tokens: 400,
+        response_format: { type: 'json_object' },
       }),
     });
 
@@ -168,7 +186,18 @@ Deno.serve(async (request) => {
     }
 
     const dados = await resposta.json();
-    const rascunho = String(dados?.choices?.[0]?.message?.content ?? '').trim();
+    const bruto = String(dados?.choices?.[0]?.message?.content ?? '').trim();
+    let rascunho = '';
+    let idioma = '';
+    try {
+      const objeto = JSON.parse(bruto) as Record<string, unknown>;
+      rascunho = String(objeto?.reply ?? '').trim();
+      idioma = String(objeto?.language ?? '').trim();
+    } catch {
+      // JSON invalido e o mesmo que resposta vazia: quem chamou fica com o
+      // texto antigo, em vez de receber o objeto cru na caixa.
+      rascunho = '';
+    }
     if (!rascunho) return json({ code: 'MODELO_VAZIO', error: 'O modelo devolveu vazio.' }, 502);
 
     // A verificacao, que e a parte que garante em vez de pedir.
@@ -181,7 +210,7 @@ Deno.serve(async (request) => {
       return json({ code: 'RASCUNHO_RECUSADO', error: 'O rascunho ficou longo demais para uma resposta pública.' }, 422);
     }
 
-    return json({ rascunho, modelo: MODELO });
+    return json({ rascunho, idioma, modelo: MODELO });
   } catch (erro) {
     return json({ code: 'MODELO_INDISPONIVEL', error: String(erro).slice(0, 160) }, 502);
   }

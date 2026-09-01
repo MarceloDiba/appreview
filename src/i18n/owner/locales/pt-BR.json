@@ -843,9 +843,9 @@
       "consent": "Você autoriza o acesso diretamente no Google. O Binno não vê sua senha e não publica respostas automaticamente.",
       "connect": "Conectar Google",
       "connecting": "Abrindo Google…",
-      "waitingTitle": "Conexão oficial do Google em preparação",
-      "waitingDescription": "A fila completa de avaliações e o Radar só aparecem depois da autorização oficial do Perfil da Empresa. Não vamos pedir sua senha nem fingir que a conexão funcionou.",
-      "waitingHelp": "Você já pode concluir o QR com o link público do Google na configuração guiada. Ele leva o cliente à página correta, independentemente da nota.",
+      "waitingTitle": "Conexão oficial do Google, quando chegar",
+      "waitingDescription": "A sua fila já funciona: o Binno busca as suas avaliações e monta a fila no bloco abaixo. A conexão oficial acrescenta o histórico completo do perfil e mostra as respostas que você já publicou no Google.",
+      "waitingHelp": "O Binno nunca pede a sua senha nem finge que a conexão funcionou.",
       "unavailable": "A conexão oficial com o Perfil da Empresa ainda está sendo configurada neste ambiente.",
       "startError": "Não foi possível iniciar a conexão com o Google. Tente novamente mais tarde."
     },
