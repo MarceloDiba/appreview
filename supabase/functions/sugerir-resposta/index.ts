@@ -209,6 +209,25 @@ const MODELO = Deno.env.get('OPENAI_MODEL') || 'gpt-4.1-nano';
  * ou qualquer outro pais cai em Portugal. Duas regras diferentes para a mesma
  * decisao dariam ao dono um molde numa variante e um rascunho noutra, na mesma
  * tela.
+ *
+ * ONDE ESTA INSTRUCAO VIVE NO PEDIDO, E POR QUE ISSO IMPORTA
+ *
+ * Ela NAO pode ficar na frase que escolhe o idioma. A primeira versao, escrita
+ * horas antes neste mesmo dia, colava-a no fim do Step 2 ("write in that same
+ * language. If that language is Portuguese, write Brazilian Portuguese"), e
+ * mencionar uma variante do portugues ali dentro ATRAI o modelo para o
+ * portugues: Marcelo abriu um comentario privado escrito em ingles e recebeu o
+ * rascunho em portugues do Brasil, com o molde ao lado correctamente em ingles.
+ *
+ * O cabecalho dos pedidos ja avisava disto por outras palavras ("a lingua do
+ * pedido vence a instrucao sobre a lingua"), e eu provei a variante so com
+ * textos em portugues. Nao testei se ela estragava os outros dois idiomas.
+ *
+ * A forma que resolve, medida: a variante sai do Step 2 e vira a ULTIMA regra,
+ * condicional e com escape explicito ("if it is any other language, this rule
+ * does not apply and you must ignore it completely"). Medida em 20 chamadas,
+ * 5 por combinacao de pais e idioma do cliente: 20 certas, contra 1 errada em
+ * 6 na forma antiga.
  */
 const VARIANTE_DO_PORTUGUES = (pais: string | null) => pais === 'BR'
   ? 'If that language is Portuguese, write Brazilian Portuguese (use "voce").'
@@ -240,8 +259,8 @@ The review, verbatim:
 ${comentario}
 """
 
-Step 1. Identify the language the review is written in.
-Step 2. Write the owner's public reply ENTIRELY in that same language. ${VARIANTE_DO_PORTUGUES(pais)}
+Step 1. Identify the language the review is written in. It may be any language.
+Step 2. Write the owner's public reply ENTIRELY in that same language, whatever it is.
 
 Rules for the reply, all mandatory:
 - Name the concrete thing the customer mentioned. A reply that would fit any review is wrong.
@@ -252,6 +271,8 @@ Rules for the reply, all mandatory:
 - No em dash and no en dash.
 - Between 2 and 5 sentences.
 - End with "${negocio}" on its own line.
+
+Last rule, and it applies ONLY if the language you identified in Step 1 is Portuguese. If it is any other language, this rule does not apply and you must ignore it completely: ${VARIANTE_DO_PORTUGUES(pais)}
 
 Answer with JSON only, no other text:
 {"language":"<the review\'s language, in English>","reply":"<the reply>"}`;
@@ -287,8 +308,8 @@ What the customer wrote, verbatim:
 ${comentario}
 """
 
-Step 1. Identify the language the customer wrote in.
-Step 2. Write the owner's private message ENTIRELY in that same language. ${VARIANTE_DO_PORTUGUES(pais)}
+Step 1. Identify the language the customer wrote in. It may be any language.
+Step 2. Write the owner's private message ENTIRELY in that same language, whatever it is.
 
 Rules for the message, all mandatory:
 - Name the concrete thing the customer mentioned. A message that would fit anyone is wrong.
@@ -301,6 +322,8 @@ Rules for the message, all mandatory:
 - No em dash and no en dash.
 - Between 3 and 6 sentences.
 ${cliente ? `- Open by greeting ${cliente} by name.` : ''}- End with "${negocio}" on its own line.
+
+Last rule, and it applies ONLY if the language you identified in Step 1 is Portuguese. If it is any other language, this rule does not apply and you must ignore it completely: ${VARIANTE_DO_PORTUGUES(pais)}
 
 Answer with JSON only, no other text:
 {"language":"<the customer's language, in English>","reply":"<the message>"}`;

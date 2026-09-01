@@ -253,8 +253,32 @@ if (inicioVariante >= 0 && fimVariante > inicioVariante) {
   exigir('o pais "br" em minusculas nao vira brasileiro, como no molde',
     /European Portuguese/.test(VARIANTE('br')));
 }
-exigir('os dois pedidos aplicam a variante do portugues',
-  /VARIANTE_DO_PORTUGUES\(pais\)/.test(pedidoPublico) && /VARIANTE_DO_PORTUGUES\(pais\)/.test(pedidoPrivado));
+// ONDE a variante vive no pedido, e nao so QUE ela e aplicada.
+//
+// Em 01/09/2026 ela nasceu colada a frase do Step 2 ("write in that same
+// language. If that language is Portuguese, write Brazilian Portuguese"), e
+// mencionar uma variante do portugues ali ATRAI o modelo para o portugues:
+// Marcelo abriu um comentario privado escrito em INGLES e recebeu o rascunho
+// em portugues do Brasil, com o molde ao lado correctamente em ingles. Medido
+// depois: 1 erro em 6 na forma antiga, 0 em 20 na nova.
+//
+// A assercao anterior so exigia que a variante fosse aplicada, e ficava verde
+// com ela no sitio que causava o defeito.
+for (const [nome, pedido] of [['publico', pedidoPublico], ['privado', pedidoPrivado]]) {
+  exigir(`o pedido ${nome} aplica a variante do portugues`, /VARIANTE_DO_PORTUGUES\(pais\)/.test(pedido));
+  // A frase que escolhe o idioma nao pode falar de portugues nenhum.
+  const passoDoIdioma = (pedido.match(/Step 1\.[\s\S]*?Step 2\.[^\n]*/) || [''])[0];
+  exigir(
+    `o pedido ${nome} nao menciona portugues na frase que escolhe o idioma`,
+    passoDoIdioma.length > 0 && !/VARIANTE_DO_PORTUGUES|Portuguese|Brazilian/.test(passoDoIdioma),
+  );
+  // E a variante tem de trazer o escape, senao ela volta a ser uma instrucao
+  // incondicional escrita mais abaixo.
+  exigir(
+    `o pedido ${nome} manda ignorar a variante quando o idioma nao e portugues`,
+    /applies ONLY if the language you identified in Step 1 is Portuguese[\s\S]{0,140}ignore it completely/.test(pedido),
+  );
+}
 
 // 10. O canal tem de atravessar o cliente ate a funcao. Sem esta linha, tudo
 // acima esta correcto e o painel continua a pedir sempre em publico.
