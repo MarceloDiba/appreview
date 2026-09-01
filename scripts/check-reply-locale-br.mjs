@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -126,6 +126,9 @@ const nullCountry = build({ text: genericText, businessCountry: null })[0];
 const emptyCountry = build({ text: genericText, businessCountry: '' })[0];
 const unknownCountry = build({ text: genericText, businessCountry: 'FR' })[0];
 
+const demonstracaoPublica = readFileSync('src/components/marketing/BinnoDemoCockpit.tsx', 'utf8');
+const painelDoCockpit = readFileSync('src/components/dashboard/ApprovedCockpitDashboard.tsx', 'utf8');
+
 const requirements = [
   // 1. Português: byte-idêntico ao texto capturado.
   ['PT: título da variante curta é "Curta e directa" (inalterado)', ptGeneric?.title === 'Curta e directa'],
@@ -156,6 +159,33 @@ const requirements = [
   ['País nulo escrito de propósito: cai no texto de Portugal de hoje', nullCountry?.body === ptGenericExpectedBody],
   ['País vazio: cai no texto de Portugal de hoje', emptyCountry?.body === ptGenericExpectedBody],
   ['País desconhecido (nem BR nem PT): cai no texto de Portugal de hoje', unknownCountry?.body === ptGenericExpectedBody],
+
+  // 5. A DEMONSTRAÇÃO PÚBLICA fala a língua do site (01/09/2026).
+  //
+  // Sem país, o molde cai no português de Portugal. O binno.pro tem três
+  // idiomas, e Marcelo viu a demonstração dizer "Se puder falar connosco
+  // directamente, resolvemos isto consigo" para público brasileiro, ao lado de
+  // avaliações de exemplo já escritas em brasileiro ("prato executivo",
+  // "equipe"): o exemplo contradizia-se a si próprio.
+  //
+  // Fixar 'BR' trocaria o defeito de lado, porque o piloto seguinte é em
+  // Portugal. Exige-se que a demonstração SIGA o idioma do site, com a mesma
+  // regra do resto do produto: só 'pt-BR' vira brasileiro.
+  ['a demonstração pública diz de que país é o negócio de exemplo',
+    /demoBusinessCountry=\{copy\.locale === 'pt-BR' \? 'BR' : null\}/.test(demonstracaoPublica)],
+  ['a demonstração não fixa o país num literal, o que trocaria o defeito de lado',
+    !/demoBusinessCountry="(BR|PT)"/.test(demonstracaoPublica) && !/demoBusinessCountry=\{'(BR|PT)'\}/.test(demonstracaoPublica)],
+  // LIDO e nao GUARDADO: `useState(prop)` so usa o valor inicial, e o idioma
+  // do site chega um render depois. Guardado, ficava preso ao null do primeiro
+  // quadro, compilava, passava nos guardas, e a tela continuava em portugues de
+  // Portugal. So apareceu ao abrir a pagina e ler o texto.
+  ['o painel LÊ o país da demonstração a cada render, em vez de o guardar no primeiro',
+    /const businessCountry = demo \? demoBusinessCountry : paisDoPerfil;/.test(painelDoCockpit)
+    && !/useState<string \| null>\(demoBusinessCountry\)/.test(painelDoCockpit)],
+  // Quem tem sessão continua a ler o perfil: o valor da demonstração não pode
+  // sobreviver à leitura real.
+  ['quem tem sessão continua a ler o país do próprio perfil',
+    /setPaisDoPerfil\(data\?\.business_country \|\| null\);/.test(painelDoCockpit)],
 ];
 
 const failed = requirements.filter(([, ok]) => !ok).map(([label]) => label);

@@ -19,7 +19,17 @@ const BinnoDemoCockpit = ({ copy, compact = false }: { copy: MarketingCopy; comp
   <section className={`overflow-hidden rounded-2xl border border-slate-200 bg-[#f5f7f9] shadow-[0_18px_60px_rgba(15,23,42,0.10)] ${compact ? 'pointer-events-none' : ''}`}>
     <CockpitHeader copy={copy} />
     <div className={compact ? 'max-h-[660px] overflow-hidden p-4 sm:p-5' : 'p-4 sm:p-6'}>
-      <ApprovedCockpitDashboard snapshot={ILLUSTRATIVE_DEMO_SNAPSHOT} demo demoFunnel={ILLUSTRATIVE_DEMO_FUNNEL} />
+      {/* A demonstração fala a língua do site, e não uma fixa.
+          `pt-BR` pede o português do Brasil; `pt-PT` e o inglês caem no de
+          Portugal, que é o padrão histórico. Sem isto, o visitante brasileiro
+          lia "connosco directamente" no primeiro exemplo que via, ao lado de
+          avaliações escritas em brasileiro. */}
+      <ApprovedCockpitDashboard
+        snapshot={ILLUSTRATIVE_DEMO_SNAPSHOT}
+        demo
+        demoFunnel={ILLUSTRATIVE_DEMO_FUNNEL}
+        demoBusinessCountry={copy.locale === 'pt-BR' ? 'BR' : null}
+      />
     </div>
   </section>
 );

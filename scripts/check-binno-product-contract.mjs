@@ -161,7 +161,7 @@ const requirements = [
   // O `phone` saiu deste `select` com a configuração do WhatsApp, que se mudou
   // para `/whatsapp` e passou a ler o telefone lá. O país do negócio ficou.
   ['o painel lê profiles.business_country do dono', /select\('business_country'\)/.test(dashboardCodigo)],
-  ['o painel ATRIBUI ao estado o país que leu, em vez de um valor fixo', /setBusinessCountry\(data\?\.business_country \|\| null\)/.test(dashboardCodigo)],
+  ['o painel ATRIBUI ao estado o país que leu, em vez de um valor fixo', /setPaisDoPerfil\(data\?\.business_country \|\| null\)/.test(dashboardCodigo)],
   // Em 31/08/2026 a fila do painel passou a pedir o rascunho a
   // `supabase/functions/sugerir-resposta`, que lê o que o cliente escreveu.
   // `buildReplySuggestions` deixou de ser a FONTE do rascunho e passou a ser o

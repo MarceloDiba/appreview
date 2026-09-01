@@ -206,7 +206,7 @@ const MobileSummary = ({ snapshot, queue, temFila }: { snapshot: ExperimentalApi
   );
 };
 
-const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }: { snapshot: ExperimentalApifySnapshot; userId?: string; demo?: boolean; demoFunnel?: ReviewFunnelMetrics }) => {
+const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel, demoBusinessCountry = null }: { snapshot: ExperimentalApifySnapshot; userId?: string; demo?: boolean; demoFunnel?: ReviewFunnelMetrics; demoBusinessCountry?: string | null }) => {
   const official = useGoogleBusinessReviewQueue(import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined);
   const liveFunnel = useReviewFunnelMetrics(userId);
   const funnel = demoFunnel ? { ...liveFunnel, data: demoFunnel } : liveFunnel;
@@ -233,7 +233,25 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
   // O telefone do onboarding saía desta mesma leitura, para a configuração do
   // WhatsApp que vivia ao fim da página. Em 31/08/2026 a configuração mudou-se
   // para `/whatsapp` e leva o telefone consigo; aqui ficou só o país.
-  const [businessCountry, setBusinessCountry] = useState<string | null>(null);
+  const [paisDoPerfil, setPaisDoPerfil] = useState<string | null>(null);
+  /**
+   * O país do negócio, de duas origens que nunca se misturam.
+   *
+   * Com sessão, vem do perfil, lido uma vez. Na demonstração pública não há
+   * perfil nenhum, e sem país o molde cai no português de Portugal: em
+   * 01/09/2026 Marcelo viu a demonstração dizer "Se puder falar connosco
+   * directamente, resolvemos isto consigo" a um público brasileiro, ao lado de
+   * avaliações de exemplo já escritas em brasileiro ("prato executivo",
+   * "equipe"). O exemplo contradizia-se a si próprio.
+   *
+   * ISTO É LIDO, E NÃO GUARDADO, e a diferença custou uma correção. A primeira
+   * versão fazia `useState(demoBusinessCountry)`, e `useState` só usa o valor
+   * inicial: o idioma do site chega um render DEPOIS, porque o hook que o
+   * detecta corre num efeito. O estado guardava o `null` do primeiro quadro e
+   * nunca mais mudava. Compilava, passava nos guardas, e na tela continuava em
+   * português de Portugal. Só apareceu ao abrir a página e ler o texto.
+   */
+  const businessCountry = demo ? demoBusinessCountry : paisDoPerfil;
   /**
    * "Já se leu o país" é uma pergunta diferente de "qual é o país", e o painel
    * precisava das duas. `businessCountry` nasce `null`, e `null` também é a
@@ -260,10 +278,10 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
       try {
         const { data } = await supabase.from('profiles').select('business_country').eq('id', userId).maybeSingle();
         if (!active) return;
-        setBusinessCountry(data?.business_country || null);
+        setPaisDoPerfil(data?.business_country || null);
       } catch {
         if (!active) return;
-        setBusinessCountry(null);
+        setPaisDoPerfil(null);
       } finally {
         // No `finally` de propósito: uma leitura que falhou também é uma
         // leitura feita, e o painel não pode ficar à espera para sempre.
