@@ -865,6 +865,34 @@ O guarda é `npm run check:ordem-por-decisao`.
   tendência, causa ou oportunidade.
 - Temas recorrentes só viram oportunidade ou alerta com comentários e contexto
   suficientes; comentário → tema → ação operacional.
+- **Os temas saem de ler as avaliações, e o número sai das avaliações.**
+  *Decidido em 01/09/2026, depois de Marcelo apontar o cartão a zero pela
+  terceira vez. Até essa data "Temas mais citados" procurava sete conjuntos de
+  palavras-chave — comida, prato, cozinha, entrega, ambiente, limpeza, espera,
+  preço — que são vocabulário de restaurante. Medido nas avaliações reais do
+  negócio dele, uma agência digital: zero das seis casava qualquer gaveta, e
+  não casaria com sessenta em vez de seis. Não faltavam dados; faltava ao
+  módulo saber ler. É a mesma doença do gerador de respostas e do detector de
+  idioma, corrigidos no mesmo dia pela mesma razão.*
+
+  O modelo **agrupa e não conta**: para cada tema devolve os NÚMEROS das
+  avaliações que o mencionam, e a contagem e o sentimento são calculados no
+  código a partir dessas avaliações e das notas delas. Um índice inventado é
+  filtrado contra a lista real antes de somar, e um tema apontado por menos de
+  **duas** avaliações é descartado. Um número inventado num painel de reputação
+  é pior do que nenhum, porque o dono decide com ele.
+
+  Isto é o que esta secção já exigia — "comentário → tema" — e que a versão por
+  palavras-chave cumpria na letra e falhava no propósito: agora o caminho de
+  volta do tema para os comentários existe de verdade.
+
+  As palavras-chave **continuam** por baixo, como chão para um restaurante em
+  que elas acertem, e o Radar continua a lê-las: trocar uma leitura grátis e
+  determinística por uma que depende de rede seria pagar duas vezes pela mesma
+  coisa. Uma falha do modelo nunca apaga o módulo; ele cai no chão ou na linha
+  honesta. A demonstração pública não paga chamada nenhuma, e paga-se uma vez
+  por retrato: a chave inclui o instante da coleta, por isso uma coleta nova
+  reagrupa e uma revisita não. Guardado por `scripts/check-temas-que-leem.mjs`.
 - Boas práticas aparecem como um box na Visão geral, uma orientação por vez,
   com rotação estável e prioridade para respostas pendentes quando houver
   evidência. Não são uma aba prioritária nem uma lista de explicações longas.

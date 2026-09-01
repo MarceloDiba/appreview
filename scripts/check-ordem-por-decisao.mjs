@@ -112,7 +112,7 @@ const MODULOS = [
   // dele, e está registada no contrato com a data e a razão.
   ['acao', '<ReputationCard snapshot={snapshot} />', 'Reputação no Google'],
   ['referencia', '<QrCard funnel={funnel.data} />', 'Do QR ao Google'],
-  ['referencia', '<TopicsCard snapshot={snapshot} />', 'Temas mais citados'],
+  ['referencia', '<TopicsCard snapshot={snapshot} userId={userId} demo={demo} />', 'Temas mais citados'],
   ['referencia', '<DailyPractice snapshot={snapshot} />', 'Boas práticas'],
 ];
 

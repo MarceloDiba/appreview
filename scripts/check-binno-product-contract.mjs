@@ -118,7 +118,7 @@ const requirements = [
   // asserção fica como está porque a regra nova contém a antiga; quem prova as
   // faixas inteiras é `scripts/check-ordem-por-decisao.mjs`.
   ['painel mantém a fila antes das métricas', filaDoPainel(dashboard).length > 0 && dashboard.includes('<VolumeCard weeks={history} />') && posicaoDaFila(dashboard) < dashboard.indexOf('<VolumeCard weeks={history} />')],
-  ['painel mantém volume, notas, QR e temas', ['<VolumeCard weeks={history} />', '<RatingTrends weeks={history} snapshot={snapshot} />', '<QrCard funnel={funnel.data} />', '<TopicsCard snapshot={snapshot} />'].every((token) => dashboard.includes(token))],
+  ['painel mantém volume, notas, QR e temas', ['<VolumeCard weeks={history} />', '<RatingTrends weeks={history} snapshot={snapshot} />', '<QrCard funnel={funnel.data} />', '<TopicsCard snapshot={snapshot} userId={userId} demo={demo} />'].every((token) => dashboard.includes(token))],
   // Em 31/08/2026 Marcelo tirou da coluna lateral o "Resumo no WhatsApp" (era
   // atalho para uma tela que ganhou destino próprio) e a "Completude do
   // perfil" (sem a ligação oficial nunca teve o que medir), e tirou da página o
