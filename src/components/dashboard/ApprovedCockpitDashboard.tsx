@@ -495,6 +495,7 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
         businessName: snapshot.business.name,
         channel: 'public',
         customerName: selected.reviewerName ?? null,
+        businessCountry,
       },
       pedirRascunhoAoBinno,
     ).then((resultado) => {

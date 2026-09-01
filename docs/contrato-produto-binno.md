@@ -783,6 +783,16 @@ O guarda é `npm run check:ordem-por-decisao`.
   reparação por avaliação viola as políticas do Google e pode custar a ficha do
   cliente.
 
+  **A variante do português segue o país do negócio, nos dois canais.** O modelo
+  escreve na língua do cliente, mas a língua não escolhe a variante: sem
+  instrução, ele cai no português do Brasil. Ao provar o canal privado em
+  01/09/2026, os quatro rascunhos saíram em brasileiro para um negócio em
+  Portugal, que é onde está o piloto. A regra é a mesma de `resolveContentLocale`
+  no molde, de propósito: só `business_country` exactamente `'BR'` vira
+  brasileiro; ausente, vazio ou qualquer outro país cai em Portugal. Duas regras
+  diferentes para a mesma decisão dariam ao dono um molde numa variante e um
+  rascunho noutra, na mesma tela.
+
   O canal viaja no corpo do pedido, do painel até à função, e o **padrão é
   `public`**: um chamador que não conheça o campo recebe o canal com as regras
   mais apertadas. Fixar o canal num literal no painel ou na fila é proibido — é

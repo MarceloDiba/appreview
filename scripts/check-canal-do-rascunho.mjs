@@ -157,6 +157,40 @@ exigir('o pedido privado diz ao modelo que isto nao e publicado',
 exigir('os dois pedidos continuam a declarar o idioma antes de escrever',
   /Identify the language/.test(pedidoPublico) && /Identify the language/.test(pedidoPrivado));
 
+// 9b. A variante do portugues segue o pais do NEGOCIO, com a mesma regra do
+// molde. Ao provar o canal privado em 01/09/2026, os quatro rascunhos sairam em
+// brasileiro para um negocio em Portugal: o modelo escreve na lingua do
+// cliente, mas a lingua nao escolhe a variante. Para o piloto, que e em
+// Portugal, um recado do dono escrito em brasileiro le-se como escrito por
+// outra pessoa.
+//
+// A regra e EXECUTADA, e nao procurada: extrai-se a funcao do arquivo e
+// pergunta-se-lhe por cada pais. Uma condicao invertida, ou um `toUpperCase`
+// que fizesse 'br' passar a brasileiro, ficaria verde numa busca por nome.
+const inicioVariante = fonte.indexOf('const VARIANTE_DO_PORTUGUES');
+const fimVariante = fonte.indexOf('const PEDIDO_PUBLICO');
+exigir('a variante do portugues continua a existir e a ser legivel',
+  inicioVariante >= 0 && fimVariante > inicioVariante);
+if (inicioVariante >= 0 && fimVariante > inicioVariante) {
+  const VARIANTE = new Function(
+    `${fonte.slice(inicioVariante, fimVariante).replace(/: string \| null/g, '')}\nreturn VARIANTE_DO_PORTUGUES;`,
+  )();
+  exigir('o pais BR pede portugues do Brasil', /Brazilian Portuguese/.test(VARIANTE('BR')));
+  for (const pais of ['PT', 'ES', '', null]) {
+    exigir(
+      `o pais ${pais === null ? 'ausente' : `"${pais}"`} pede portugues de Portugal`,
+      /European Portuguese/.test(VARIANTE(pais)),
+    );
+  }
+  // A mesma exigencia que `check-reply-locale-br` faz ao molde: 'br' minusculo
+  // NAO e 'BR'. Duas regras diferentes para a mesma decisao dariam ao dono um
+  // molde numa variante e um rascunho noutra, na mesma tela.
+  exigir('o pais "br" em minusculas nao vira brasileiro, como no molde',
+    /European Portuguese/.test(VARIANTE('br')));
+}
+exigir('os dois pedidos aplicam a variante do portugues',
+  /VARIANTE_DO_PORTUGUES\(pais\)/.test(pedidoPublico) && /VARIANTE_DO_PORTUGUES\(pais\)/.test(pedidoPrivado));
+
 // 10. O canal tem de atravessar o cliente ate a funcao. Sem esta linha, tudo
 // acima esta correcto e o painel continua a pedir sempre em publico.
 const cliente = readFileSync(CLIENTE, 'utf8');
@@ -166,6 +200,24 @@ exigir('o cliente envia o nome de quem escreveu, que o recado privado usa para a
 
 const politica = readFileSync(POLITICA, 'utf8');
 exigir('a entrada do rascunho carrega o canal', /channel: ReplyChannel/.test(politica));
+exigir('o cliente envia o pais do negocio, que escolhe a variante do portugues',
+  /businessCountry: entrada\.businessCountry/.test(cliente));
+exigir('a entrada do rascunho carrega o pais do negocio', /businessCountry: string \| null/.test(politica));
+// A leitura tem de ser DENTRO da entrada de `pedirRascunho`, e nao no arquivo
+// inteiro. A primeira versao procurava `businessCountry,` no ficheiro todo e
+// ficava verde com a linha apagada do pedido, porque `buildReplySuggestions`
+// tem uma propriedade com o mesmo nome umas linhas abaixo. Apanhado ao tentar
+// prova-la vermelha em 01/09/2026.
+for (const [tela, arquivo] of [
+  ['/reviews', 'src/components/dashboard/ReplySuggestions.tsx'],
+  ['o cockpit', 'src/components/dashboard/ApprovedCockpitDashboard.tsx'],
+]) {
+  const entrada = readFileSync(arquivo, 'utf8').match(/pedirRascunho\([\s\S]*?\{([\s\S]*?)\},/);
+  exigir(`${tela}: a entrada do pedido continua legivel`, entrada !== null);
+  if (entrada) {
+    exigir(`${tela} passa o pais do negocio no pedido`, /\n\s*businessCountry,\n/.test(entrada[1]));
+  }
+}
 
 if (falhas.length) {
   console.error('Canal do rascunho: %d protecao(oes) falharam.\n', falhas.length);

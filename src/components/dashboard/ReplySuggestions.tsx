@@ -145,6 +145,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
         // proibido de oferecer o que ele quer oferecer.
         channel,
         customerName: customerName ?? null,
+        businessCountry,
       },
       pedirRascunhoAoBinno,
     ).then((resultado) => { if (vivo) setDoModelo(resultado); });

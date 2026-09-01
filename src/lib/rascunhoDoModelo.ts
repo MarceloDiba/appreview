@@ -91,6 +91,16 @@ export interface EntradaDoRascunho {
    * abrir como o molde privado abre em vez de começar num "Olá" sem ninguém.
    */
   customerName: string | null;
+  /**
+   * `profiles.business_country`, para o modelo escrever português de Portugal ou
+   * do Brasil. Mesma regra e mesmo campo que `resolveContentLocale` usa para as
+   * variantes do molde: só `'BR'` exacto vira brasileiro.
+   *
+   * Sem ele, o rascunho saía em brasileiro para um negócio em Portugal enquanto
+   * o molde ao lado, na mesma tela, saía em português de Portugal. Achado a
+   * provar o canal privado em 01/09/2026.
+   */
+  businessCountry: string | null;
 }
 
 /** O transporte, injetado: aqui não se sabe que existe rede nem Supabase. */

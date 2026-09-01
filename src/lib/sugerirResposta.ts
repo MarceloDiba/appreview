@@ -39,6 +39,7 @@ export const pedirRascunhoAoBinno = async (entrada: EntradaDoRascunho): Promise<
       // proibido de oferecer o que o dono quer oferecer.
       channel: entrada.channel,
       customerName: entrada.customerName,
+      businessCountry: entrada.businessCountry,
     },
   });
 

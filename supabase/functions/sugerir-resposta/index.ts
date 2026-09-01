@@ -173,6 +173,30 @@ const PROIBIDO: Record<Canal, Regra[]> = {
 const MODELO = Deno.env.get('OPENAI_MODEL') || 'gpt-4.1-nano';
 
 /**
+ * A variante do portugues segue o pais do NEGOCIO, e nao o texto do cliente.
+ *
+ * POR QUE ISTO E PRECISO (01/09/2026)
+ *
+ * Ao provar o canal privado, os quatro rascunhos sairam em portugues do Brasil
+ * ("Oi Ana", "voce poderia", "compartilhar") para um negocio em Portugal. O
+ * modelo escreve na lingua do cliente, mas a lingua nao escolhe a variante: sem
+ * instrucao, ele cai no portugues que mais viu.
+ *
+ * Para o piloto isto nao e um detalhe. O primeiro cliente e em Portugal, e um
+ * recado do dono de um restaurante portugues escrito em brasileiro le-se como
+ * escrito por outra pessoa, que e o oposto do que este texto existe para fazer.
+ *
+ * A regra e a MESMA de `resolveContentLocale` em `src/lib/replySuggestions.ts`,
+ * de proposito: so o valor exactamente 'BR' vira brasileiro, e ausente, vazio
+ * ou qualquer outro pais cai em Portugal. Duas regras diferentes para a mesma
+ * decisao dariam ao dono um molde numa variante e um rascunho noutra, na mesma
+ * tela.
+ */
+const VARIANTE_DO_PORTUGUES = (pais: string | null) => pais === 'BR'
+  ? 'If that language is Portuguese, write Brazilian Portuguese (use "voce").'
+  : 'If that language is Portuguese, write European Portuguese as spoken in Portugal (use "si" or "voce" as in Portugal, never "voce" in the Brazilian way, and never Brazilian spellings or Brazilian expressions).';
+
+/**
  * Os pedidos sao escritos em INGLES, e a resposta vem em JSON com o idioma
  * declarado antes do texto. As duas coisas foram descobertas a testar, em
  * 01/09/2026, depois de Marcelo ver uma resposta em portugues para uma
@@ -190,7 +214,7 @@ const MODELO = Deno.env.get('OPENAI_MODEL') || 'gpt-4.1-nano';
  * a chave em portugues, ao responder em espanhol o modelo traduzia a propria
  * chave para `respuesta` e o texto chegava vazio.
  */
-const PEDIDO_PUBLICO = (negocio: string, nota: number | null, comentario: string) => `You reply to customer reviews as the owner of "${negocio}".
+const PEDIDO_PUBLICO = (negocio: string, nota: number | null, comentario: string, pais: string | null) => `You reply to customer reviews as the owner of "${negocio}".
 
 Rating given: ${nota === null ? 'none' : `${nota} out of 5`}
 The review, verbatim:
@@ -199,7 +223,7 @@ ${comentario}
 """
 
 Step 1. Identify the language the review is written in.
-Step 2. Write the owner's public reply ENTIRELY in that same language.
+Step 2. Write the owner's public reply ENTIRELY in that same language. ${VARIANTE_DO_PORTUGUES(pais)}
 
 Rules for the reply, all mandatory:
 - Name the concrete thing the customer mentioned. A reply that would fit any review is wrong.
@@ -233,7 +257,7 @@ Answer with JSON only, no other text:
  * O nome de quem escreveu entra quando existe, para o recado abrir como o molde
  * abre (`greeting`) em vez de comecar num "Ola" sem ninguem.
  */
-const PEDIDO_PRIVADO = (negocio: string, nota: number | null, comentario: string, cliente: string | null) => `You draft a PRIVATE message from the owner of "${negocio}" to one customer who sent private feedback. It is not published anywhere and nobody else reads it. It is a direct message, like a phone message written down.
+const PEDIDO_PRIVADO = (negocio: string, nota: number | null, comentario: string, cliente: string | null, pais: string | null) => `You draft a PRIVATE message from the owner of "${negocio}" to one customer who sent private feedback. It is not published anywhere and nobody else reads it. It is a direct message, like a phone message written down.
 
 ${cliente ? `The customer's name: ${cliente}` : 'The customer left no name.'}
 Rating given: ${nota === null ? 'none' : `${nota} out of 5`}
@@ -243,7 +267,7 @@ ${comentario}
 """
 
 Step 1. Identify the language the customer wrote in.
-Step 2. Write the owner's private message ENTIRELY in that same language.
+Step 2. Write the owner's private message ENTIRELY in that same language. ${VARIANTE_DO_PORTUGUES(pais)}
 
 Rules for the message, all mandatory:
 - Name the concrete thing the customer mentioned. A message that would fit anyone is wrong.
@@ -288,14 +312,16 @@ Deno.serve(async (request) => {
   // canal com as regras mais apertadas. Um chamador antigo, um campo com erro
   // de escrita e um campo ausente levam todos ao mesmo lugar seguro.
   const canal: Canal = corpo.channel === 'private' ? 'private' : 'public';
+  // Mesma regra de `resolveContentLocale`: so 'BR' exacto vira brasileiro.
+  const pais = typeof corpo.businessCountry === 'string' && corpo.businessCountry.trim() ? corpo.businessCountry.trim() : null;
 
   if (comentario.length < 3) return json({ code: 'SEM_COMENTARIO', error: 'Sem texto para responder.' }, 422);
   // Um comentario absurdamente longo e quase sempre colagem ou ataque. Cortar
   // protege o custo e o tempo de resposta sem perder o assunto.
   const recorte = comentario.slice(0, 1500);
   const pedido = canal === 'private'
-    ? PEDIDO_PRIVADO(negocio, nota, recorte, cliente)
-    : PEDIDO_PUBLICO(negocio, nota, recorte);
+    ? PEDIDO_PRIVADO(negocio, nota, recorte, cliente, pais)
+    : PEDIDO_PUBLICO(negocio, nota, recorte, pais);
 
   try {
     const resposta = await fetch('https://api.openai.com/v1/chat/completions', {
