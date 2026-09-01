@@ -402,16 +402,62 @@ for (const [nome, comportamento] of [
     'regra 5: a etiqueta desaparece quando o texto passa a ser do dono, em vez de mentir sobre a origem',
     /if \(origem === 'dono'\) return null;/.test(etiqueta),
   );
+  // A REGRA e a mesma nas duas telas: a etiqueta e desenhada, e a origem dela
+  // sai de `rascunhoNaTela` em vez de uma segunda decisao. O que difere e que
+  // a fila de /reviews tambem lhe passa o CANAL, desde 01/09/2026: num
+  // comentario privado nao ha avaliacao nenhuma, e "escrito a partir desta
+  // avaliacao" era a etiqueta a nomear errado o que descreve. O cockpit nao
+  // passa canal porque a fila dele so tem avaliacoes do Google.
   for (const [nome, , fonte] of SUPERFICIES) {
     exigir(
       `regra 5: ${nome} desenha a etiqueta de origem, e a origem vem de rascunhoNaTela`,
-      /<OrigemDoRascunho origem=\{naTela\.origem\} \/>/.test(fonte),
+      /<OrigemDoRascunho origem=\{naTela\.origem\}( canal=\{channel\})? \/>/.test(fonte),
     );
   }
-  for (const chave of ['draftFromReview', 'draftReading', 'draftStandard']) {
+  exigir(
+    'regra 5: a fila de /reviews passa o canal a etiqueta, senao o comentario privado diz "avaliacao"',
+    /<OrigemDoRascunho origem=\{naTela\.origem\} canal=\{channel\} \/>/.test(sugestoes),
+  );
+  // A ALTURA DA CAIXA, executada.
+  //
+  // O recado privado e UM paragrafo, sem quebra de linha nenhuma. A conta
+  // anterior era `body.split('\n').length + 2`, ou seja tres linhas, e a
+  // ultima frase e a assinatura ficavam cortadas dentro da caixa. Visto no
+  // ecra por Marcelo em 01/09/2026; as respostas publicas tem tres ou quatro
+  // paragrafos e por isso nunca mostraram o defeito.
+  //
+  // A expressao e extraida do ficheiro e CORRIDA. Procurar por `body.length`
+  // provaria que a palavra esta la, nao que a caixa cabe.
+  const expressaoDasLinhas = sugestoes.match(/rows=\{([^}]+(?:\}[^}]*)*?)\}\n/);
+  exigir('a caixa continua a declarar a altura dela', expressaoDasLinhas !== null);
+  if (expressaoDasLinhas) {
+    const linhas = new Function('body', `return ${expressaoDasLinhas[1]};`);
+    const recadoPrivado = 'Oi Ana, sinto muito que voce esteja tendo dificuldades para fazer login na App. Voce poderia me dizer se aparece alguma mensagem de erro ou o que exatamente acontece quando tenta entrar? Quero te ajudar a resolver isso o mais rapido possivel. Espero que possamos fazer a sua experiencia melhorar. Noa Digital';
+    exigir(
+      `um recado de um paragrafo cabe na caixa sem ser cortado (deu ${linhas(recadoPrivado)} linhas para ${recadoPrivado.length} caracteres)`,
+      linhas(recadoPrivado) >= 5,
+    );
+    const respostaPublica = 'Ola, Cliente,\n\nMuito obrigado pelas suas palavras.\n\nCa o esperamos da proxima.\n\nNoa Digital';
+    exigir(
+      'uma resposta de varios paragrafos continua a caber',
+      linhas(respostaPublica) >= respostaPublica.split('\n').length,
+    );
+    // E o tecto continua la, senao uma colagem enorme empurra a fila para fora
+    // da tela.
+    exigir(
+      'uma colagem enorme nao estica a caixa sem fim',
+      linhas('x'.repeat(20000)) <= 14,
+    );
+  }
+
+  exigir(
+    'regra 5: a etiqueta escolhe a palavra pelo canal',
+    /canal === 'private' \? 'reply\.draftFromComment' : 'reply\.draftFromReview'/.test(etiqueta),
+  );
+  for (const chave of ['draftFromReview', 'draftFromComment', 'draftReading', 'draftStandard']) {
     exigir(
       `regra 5: a etiqueta partilhada usa a chave reply.${chave}`,
-      etiqueta.includes(`t('reply.${chave}')`),
+      etiqueta.includes(`'reply.${chave}'`),
     );
     for (const idioma of ['pt-BR', 'pt-PT', 'en']) {
       const catalogo = JSON.parse(ler(`src/i18n/owner/locales/${idioma}.json`));

@@ -292,7 +292,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
             <div key={cartao.id} className="rounded-lg border border-gray-200 bg-white p-3">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-medium text-gray-900">{cartao.title}</p>
-                <OrigemDoRascunho origem={naTela.origem} />
+                <OrigemDoRascunho origem={naTela.origem} canal={channel} />
               </div>
               <p className="mt-0.5 text-xs text-gray-500">{cartao.hint}</p>
 
@@ -301,7 +301,21 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
                 onChange={(e) =>
                   setDrafts((prev) => ({ ...prev, [cartao.chave]: e.target.value }))
                 }
-                rows={Math.min(12, body.split('\n').length + 2)}
+                /*
+                 * A altura conta o texto, e não só as quebras de linha.
+                 *
+                 * O recado privado é UM parágrafo, sem quebra nenhuma, e a
+                 * conta anterior dava-lhe três linhas: a última frase e a
+                 * assinatura ficavam cortadas dentro da caixa. Visto no ecrã
+                 * por Marcelo em 01/09/2026. As respostas públicas têm três ou
+                 * quatro parágrafos e por isso nunca mostraram o defeito.
+                 *
+                 * ~70 caracteres por linha é o que cabe nesta largura; o
+                 * máximo de 14 impede que uma colagem enorme empurre o resto
+                 * da fila para fora da tela, e o `resize-y` continua lá para
+                 * quem quiser mais.
+                 */
+                rows={Math.min(14, Math.max(body.split('\n').length + 2, Math.ceil(body.length / 70) + 1))}
                 className="mt-3 resize-y text-sm"
                 aria-label={t('reply.textareaLabel', { title: cartao.title })}
               />

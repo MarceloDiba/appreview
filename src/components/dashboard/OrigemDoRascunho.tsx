@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReplyChannel } from '@/lib/replySuggestions';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import type { OrigemNaTela } from '@/lib/rascunhoDoModelo';
 
@@ -23,11 +24,19 @@ import type { OrigemNaTela } from '@/lib/rascunhoDoModelo';
  * o texto é dele, e qualquer uma das três frases abaixo seria mentira sobre a
  * origem do que está na caixa.
  */
-const OrigemDoRascunho = ({ origem }: { origem: OrigemNaTela }) => {
+/**
+ * `canal` existe por uma palavra. Num comentário privado, deixado no formulário
+ * do QR, não há avaliação nenhuma: dizer "escrito a partir desta avaliação" ali
+ * é a etiqueta a nomear errado o que ela descreve, e foi o que Marcelo viu em
+ * 01/09/2026 no primeiro comentário privado com rascunho do modelo. O padrão é
+ * `public` para o chamador que não tem canal (o cockpit, cuja fila só tem
+ * avaliações do Google) continuar igual.
+ */
+const OrigemDoRascunho = ({ origem, canal = 'public' }: { origem: OrigemNaTela; canal?: ReplyChannel }) => {
   const { t } = useOwnerTranslation();
   if (origem === 'dono') return null;
   return <span className="text-xs text-slate-500">{origem === 'modelo'
-    ? t('reply.draftFromReview')
+    ? t(canal === 'private' ? 'reply.draftFromComment' : 'reply.draftFromReview')
     : origem === 'pedindo'
       ? t('reply.draftReading')
       : t('reply.draftStandard')}</span>;
