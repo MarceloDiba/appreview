@@ -1132,7 +1132,9 @@
   },
   "reply": {
     "modelTitle": "Reply to this review",
+    "modelTitlePrivate": "Message to this customer",
     "modelHint": "Written from what the customer wrote, in their language.",
+    "modelHintPrivate": "Written from what they wrote, in their language. Only they read it.",
     "draftFromReview": "Written from this review",
     "draftReading": "Reading the review",
     "draftStandard": "Standard text",

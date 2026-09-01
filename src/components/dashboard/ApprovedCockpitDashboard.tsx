@@ -486,7 +486,16 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
     setDoModelo((atual) => ({ ...atual, [selected.id]: { origem: 'pedindo' } }));
     void pedirRascunho(
       selected.id,
-      { comment: selected.comment, rating: selected.rating, businessName: snapshot.business.name },
+      // Esta fila e so de avaliacoes do Google (ver `official.reviews` acima),
+      // por isso o canal e sempre o publico: o que sair daqui vai ser publicado
+      // debaixo da avaliacao, onde prometer reparacao esta proibido.
+      {
+        comment: selected.comment,
+        rating: selected.rating,
+        businessName: snapshot.business.name,
+        channel: 'public',
+        customerName: selected.reviewerName ?? null,
+      },
       pedirRascunhoAoBinno,
     ).then((resultado) => {
       if (vivo) setDoModelo((atual) => ({ ...atual, [selected.id]: resultado }));

@@ -515,14 +515,18 @@ exigir(
 const cartaoDoModelo = sugestoes.match(/\{\s*id: 'do-modelo',[\s\S]*?\n\s*\}\]/);
 exigir('/reviews: o cartao do modelo deixou de existir.', cartaoDoModelo !== null);
 if (cartaoDoModelo) {
+  // Desde 01/09/2026 o rotulo segue o CANAL: chamar "Resposta a esta avaliaçao"
+  // a um recado privado seria a mesma etiqueta a mentir que esta secçao existe
+  // para impedir, so que noutra direcçao. Exige-se as duas chaves, e continua a
+  // exigir-se que nenhuma venha do molde.
   exigir(
     '/reviews: o cartao do modelo tem nome proprio, e nao o titulo de uma variante do molde',
-    /title: t\('reply\.modelTitle'\),/.test(cartaoDoModelo[0])
+    /title: t\(channel === 'private' \? 'reply\.modelTitlePrivate' : 'reply\.modelTitle'\),/.test(cartaoDoModelo[0])
     && !/title: suggestions\[0\]/.test(cartaoDoModelo[0]),
   );
   exigir(
     '/reviews: o cartao do modelo tem dica propria, e nao a dica de uma variante do molde',
-    /hint: t\('reply\.modelHint'\),/.test(cartaoDoModelo[0])
+    /hint: t\(channel === 'private' \? 'reply\.modelHintPrivate' : 'reply\.modelHint'\),/.test(cartaoDoModelo[0])
     && !/hint: suggestions\[0\]/.test(cartaoDoModelo[0]),
   );
 }
@@ -563,14 +567,37 @@ if (chaveDoModelo) {
   );
 }
 
-// 3. O comentario privado NAO e pedido ao modelo. A funcao esta escrita e
-//    implantada para o publico: manda assinar com o nome do negocio e RECUSA
-//    promessa de reparacao, que em privado e a coisa certa a dizer e tem uma
-//    variante inteira do molde (`com-reparacao`).
+// 3. O comentario privado TAMBEM e pedido ao modelo, desde 01/09/2026, e o que
+//    o torna seguro nao e um portao neste componente: e o canal viajar ate a
+//    funçao, que tem uma lista de recusa por canal.
+//
+//    Ate esse dia havia aqui um portao (`if (channel !== 'public') return;`) e
+//    ele estava certo enquanto a funçao so sabia falar em publico. Marcelo
+//    pediu o privado nesse dia; a funçao ganhou dois canais, e o portao deixou
+//    de proteger o que quer que fosse. Apaga-lo sem por nada no lugar deixaria
+//    o comentario privado a ser pedido pela lista do publico, que e o defeito
+//    que o portao existia para impedir. Por isso as duas asserçoes abaixo.
 exigir(
-  '/reviews: o painel de sugestoes recusa pedir rascunho fora do canal publico',
-  /if \(channel !== 'public'\) return;/.test(sugestoes),
+  '/reviews: o painel deixou de recusar o comentario privado',
+  !/if \(channel !== 'public'\) return;/.test(sugestoes),
 );
+// O `channel` tem de ir no corpo do pedido, e tem de ser O DA PROPRIEDADE. Um
+// literal aqui (`channel: 'public'`) deixaria este componente com um aspecto
+// perfeitamente correcto e mandaria todo comentario privado do QR pela lista
+// do publico, que e a mesma classe de defeito que a auditoria de 31/08
+// encontrou no chamador: quem obedece nao prova quem manda.
+const entradaDoPedido = sugestoes.match(/void pedirRascunho\(\s*reviewId,\s*\{([\s\S]*?)\},/);
+exigir('/reviews: a entrada do pedido continua legivel', entradaDoPedido !== null);
+if (entradaDoPedido) {
+  exigir(
+    '/reviews: o painel manda o canal que recebeu, e nao um canal fixo',
+    /\n\s*channel,\n/.test(entradaDoPedido[1]) && !/channel: '(public|private)'/.test(entradaDoPedido[1]),
+  );
+  exigir(
+    '/reviews: o painel manda o nome de quem escreveu, que o recado privado usa para abrir',
+    /customerName: customerName \?\? null,/.test(entradaDoPedido[1]),
+  );
+}
 // A METADE QUE FALTAVA, e que a auditoria de 31/08/2026 encontrou.
 //
 // A asserçao acima guarda so o portao DENTRO do painel. Quem decide o canal e o

@@ -67,22 +67,29 @@ const LOCALES: ReplyLocale[] = ['pt', 'es', 'en'];
  * sabe o que correu mal"), e pôr o texto do modelo debaixo desses rótulos seria
  * uma etiqueta a mentir sobre o que está na caixa.
  *
- * POR QUE O COMENTÁRIO PRIVADO NÃO PASSA POR AQUI
+ * O COMENTÁRIO PRIVADO TAMBÉM (01/09/2026)
  *
- * `channel === 'private'` é uma mensagem directa a quem deixou contacto no QR,
- * e não uma resposta publicada. A função `sugerir-resposta` está escrita e
- * implantada para o público, e as regras dela dizem-no: pede "a resposta que o
- * dono do negócio publicaria", manda terminar com o nome do negócio numa linha
- * própria (uma assinatura pública) e RECUSA qualquer promessa de reparação.
- * Essa última regra existe porque em público uma oferta de dinheiro ou refeição
- * atrai reclamação por interesse; em privado, ela é exactamente a coisa certa a
- * dizer, e o molde tem uma variante inteira para isso (`com-reparacao`).
+ * Até este dia, `channel === 'private'` não passava por aqui, e a razão estava
+ * escrita neste mesmo lugar: a função `sugerir-resposta` estava afinada para o
+ * público e RECUSAVA qualquer promessa de reparação. Em público essa recusa
+ * está certa, porque uma oferta de dinheiro debaixo de uma avaliação ensina o
+ * próximo leitor que uma estrela vale dinheiro. Em privado ela era o contrário
+ * do que o dono quer dizer, e o molde tem uma variante inteira para isso
+ * (`com-reparacao`, "Com uma compensação").
  *
- * Mandar o texto privado por uma função afinada para o público entregaria ao
- * dono um recado assinado como se fosse um comunicado, e proibido de oferecer o
- * que ele quer oferecer. O comentário privado fica com as variantes privadas do
- * molde, escritas para essa conversa. Um rascunho lido para o canal privado
- * pede outro pedido ao modelo, e outra implantação da função.
+ * Marcelo pediu o rascunho para o privado nesse dia. O que mudou não foi este
+ * componente relaxar uma regra: foi a função ganhar DOIS canais, com listas de
+ * recusa diferentes. O privado permite oferecer resolver e proíbe, no lugar,
+ * trocar seja o que for por apagar ou mudar uma avaliação pública, que é o que
+ * a dica da variante `com-reparacao` já dizia ao dono por escrito e passou a
+ * ser verificado no texto.
+ *
+ * Por isso o `channel` vai no pedido. Ele não é decoração: é ele que escolhe,
+ * do outro lado, qual pedido é feito ao modelo e qual lista é aplicada ao que
+ * ele devolver. E o cartão muda de rótulo com ele, porque chamar "Resposta a
+ * esta avaliação" a um recado privado seria uma etiqueta a mentir sobre o que
+ * está na caixa, que é a mesma razão de o cartão do modelo não reaproveitar os
+ * títulos das variantes do molde.
  */
 const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
   reviewId,
@@ -114,8 +121,6 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
   // avaliação. Cada cartão continua protegido um a um por `rascunhoNaTela`.
   useEffect(() => {
     if (!open) return;
-    // O comentário privado não passa por aqui. Ver o cabeçalho do componente.
-    if (channel !== 'public') return;
     const comentario = (text || '').trim();
     // Sem texto não há o que ler, e a função devolveria `SEM_COMENTARIO`.
     if (comentario.length < 3) return;
@@ -130,11 +135,21 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
     setDoModelo({ origem: 'pedindo' });
     void pedirRascunho(
       reviewId,
-      { comment: comentario, rating, businessName: businessName ?? null },
+      {
+        comment: comentario,
+        rating,
+        businessName: businessName ?? null,
+        // O canal deste painel É o canal do pedido. Fixá-lo num literal aqui
+        // mandaria todo comentário privado do QR pela lista do público, com
+        // este componente a parecer correcto: o recado chegaria ao dono
+        // proibido de oferecer o que ele quer oferecer.
+        channel,
+        customerName: customerName ?? null,
+      },
       pedirRascunhoAoBinno,
     ).then((resultado) => { if (vivo) setDoModelo(resultado); });
     return () => { vivo = false; };
-  }, [open, channel, reviewId, text, rating, businessName]);
+  }, [open, channel, reviewId, text, rating, businessName, customerName]);
 
   const suggestions = useMemo(
     () =>
@@ -171,8 +186,8 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
       ? [{
           id: 'do-modelo',
           chave: `modelo:${reviewId}`,
-          title: t('reply.modelTitle'),
-          hint: t('reply.modelHint'),
+          title: t(channel === 'private' ? 'reply.modelTitlePrivate' : 'reply.modelTitle'),
+          hint: t(channel === 'private' ? 'reply.modelHintPrivate' : 'reply.modelHint'),
           padrao: suggestions[0]?.body || '',
           doModelo,
         }]

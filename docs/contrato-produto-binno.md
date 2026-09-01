@@ -760,15 +760,36 @@ O guarda é `npm run check:ordem-por-decisao`.
   origem é para o dono. Em `binno.pro` e `/demo` não há dono nem modelo, e
   estampar "Texto padrão" ali explicava o nosso plano B a quem devia estar a ver
   o produto a funcionar.
-- **O comentário privado não passa pelo modelo.** `channel === 'private'` é uma
-  mensagem directa a quem deixou contacto no QR, não uma resposta publicada. A
-  função `sugerir-resposta` está escrita e implantada para o público: pede "a
-  resposta que o dono publicaria", manda assinar com o nome do negócio e recusa
-  qualquer promessa de reparação. Essa recusa é certa em público e errada em
-  privado, onde oferecer resolver é exactamente o que o dono quer dizer, e onde o
-  molde já tem uma variante inteira para isso (`com-reparacao`). O comentário
-  privado fica com as variantes privadas do molde. Um rascunho lido para o canal
-  privado exige outro pedido ao modelo e outra implantação da função.
+- **O rascunho do modelo tem dois canais, e a diferença é de regras.**
+  *Alterado em 01/09/2026, a pedido de Marcelo ("quero que resolva o privado
+  também"). Até essa data esta cláusula dizia que o comentário privado não
+  passava pelo modelo, e a razão era boa: a função `sugerir-resposta` só sabia
+  falar em público, e as regras dela recusam qualquer promessa de reparação.
+  Essa recusa é certa em público e errada em privado, onde oferecer resolver é
+  exactamente o que o dono quer dizer, e onde o molde já tem uma variante
+  inteira para isso (`com-reparacao`). A cláusula não foi relaxada: a função
+  ganhou o segundo canal que faltava.*
+
+  `public` é a resposta que o dono publica debaixo da avaliação, para
+  desconhecidos lerem. Nela a função **recusa qualquer promessa de reparação**:
+  oferecer dinheiro, desconto ou refeição em público ensina o próximo leitor que
+  uma avaliação de uma estrela vale dinheiro.
+
+  `private` é o recado directo a quem deixou contacto no formulário do QR, que
+  mais ninguém lê. Nela a função **permite oferecer resolver**, e recusa no lugar
+  **trocar seja o que for por apagar, mudar ou melhorar uma avaliação pública** —
+  a mesma proibição que a dica da variante `com-reparacao` já escrevia ao dono, e
+  que passou a ser verificada no texto em vez de confiada ao modelo. Trocar
+  reparação por avaliação viola as políticas do Google e pode custar a ficha do
+  cliente.
+
+  O canal viaja no corpo do pedido, do painel até à função, e o **padrão é
+  `public`**: um chamador que não conheça o campo recebe o canal com as regras
+  mais apertadas. Fixar o canal num literal no painel ou na fila é proibido — é
+  o que mandaria todo comentário privado pela lista do público com tudo o resto
+  aparentemente correcto. Guardado por `scripts/check-canal-do-rascunho.mjs`,
+  que corre as duas listas lado a lado, e por `check-rascunho-que-le.mjs`, que
+  mede quem escolhe o canal.
 
 ### Leitura de reputação e recomendações
 
