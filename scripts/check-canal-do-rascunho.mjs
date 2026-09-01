@@ -24,6 +24,7 @@
 // Cada caso abaixo foi provado vermelho quebrando exactamente a regra que ele
 // nomeia, em 01/09/2026.
 import { readFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 
 const FUNCAO = 'supabase/functions/sugerir-resposta/index.ts';
 const CLIENTE = 'src/lib/sugerirResposta.ts';
@@ -98,30 +99,64 @@ exigir('privado: oferecer reembolso PASSA (en)',
 exigir('privado: convidar de volta por conta da casa PASSA, que e a variante com-reparacao do molde',
   !recusa('private', 'Gostaria de receber voce de novo, por nossa conta, e mostrar como deveria ter sido.'));
 
-// 5. O que SO o privado recusa: trocar qualquer coisa pela avaliacao publica.
-exigir('privado: trocar reparacao por apagar a avaliacao e recusado (pt)',
-  recusa('private', 'Oferecemos um jantar se puder apagar a avaliacao que deixou.'));
-exigir('privado: pedir para mudar a nota e recusado (pt)',
-  recusa('private', 'Depois de resolvermos, pode mudar a sua avaliacao no Google?'));
-exigir('privado: a ordem inversa da frase tambem e recusada (pt)',
-  recusa('private', 'A avaliacao publica, se quiser retirar depois, fica ao seu criterio.'));
-exigir('privado: trocar por mudar a resenha e recusado (es)',
-  recusa('private', 'Te invitamos a cenar si puedes cambiar la resena que dejaste.'));
-exigir('privado: trocar por apagar a review e recusado (en)',
-  recusa('private', 'We will refund you in exchange for deleting the review you left.'));
-exigir('privado: pedir para subir a nota e recusado (en)',
-  recusa('private', 'Once we fix this, would you consider updating your rating?'));
-
-// 6. E o falso positivo que o corte de pontuacao existe para evitar.
+// 5. O que SO o privado recusa: falar da avaliacao publica, de todo.
 //
-// O texto abaixo tem a palavra de avaliacao E um verbo de mudar, mas com um
-// ponto final entre os dois: sao duas frases sem relacao, e nao uma troca. A
-// primeira versao desta assercao usava um texto SEM palavra de avaliacao
-// nenhuma, e por isso ficava verde com qualquer janela, incluindo uma que
-// atravessasse pontuacao. Ficava verde tambem com a regra partida, ou seja,
-// nao provava coisa nenhuma. Achado ao tentar prova-la vermelha em 01/09/2026.
-exigir('privado: um ponto final entre a avaliacao e o verbo separa duas frases, e nao e troca',
-  !recusa('private', 'Lamento a avaliacao que teve de deixar. Vou melhorar o turno da noite.'));
+// As frases abaixo NAO sao inventadas para o guarda passar. Sao as que uma
+// auditoria adversarial escreveu em 01/09/2026 contra a versao anterior desta
+// lista, que tentava apanhar a TROCA por proximidade de verbo e alvo. Dezoito
+// trocas plausiveis, dezoito a passar. Ficam aqui porque uma assercao que usa
+// os textos que ja derrotaram a regra vale mais do que uma que usa os textos
+// que a regra foi escrita para apanhar.
+for (const [idioma, frase] of [
+  ['pt', 'Ofereco-lhe um jantar por nossa conta se puder tirar a avaliacao do Google.'],
+  ['pt', 'Damos-lhe a proxima refeicao se quiser baixar a nota que nos deu.'],
+  ['pt', 'Damos-lhe um vale se puder editar o que escreveu na avaliacao.'],
+  ['pt', 'Depois de resolvermos, pode reconsiderar a avaliacao que nos deixou?'],
+  ['pt', 'Se aceitar o jantar por nossa conta, agradecia que apagasse depois aquilo que escreveu de nos na pagina publica do Google.'],
+  ['es', 'Te invitamos a cenar si puedes borrar la resena que dejaste.'],
+  ['es', 'Te devolvemos el dinero si retiras la puntuacion que nos pusiste.'],
+  ['es', 'Con gusto te compensamos si cambias tu valoracion.'],
+  ['en', 'We would love to comp your next dinner if you could take that review down.'],
+  ['en', 'We will send you a gift card if you withdraw the review from our page.'],
+  ['en', 'Happy to refund you, and I would appreciate it if you bumped us to five stars.'],
+  ['en', 'Once we sort this out, would you consider updating your rating?'],
+]) {
+  exigir(`privado: "${frase.slice(0, 46)}..." e recusado (${idioma})`, recusa('private', frase));
+}
+
+// 6. E o que TEM de continuar a passar. Cada um destes foi um falso positivo
+// medido na versao anterior: o alvo sem fronteira de palavra apanhava
+// "starter", "start" e "Subway", e o cliente que se chamasse "Cinco Estrelas"
+// tinha o canal partido para sempre por se assinar.
+for (const [porque, frase] of [
+  ['starter nao e star', 'I am sorry the starter was cold, I will improve what comes out of the kitchen.'],
+  ['start nao e star', 'Let me change how we start the evening service so this does not happen again.'],
+  ['Subway nao e subir', 'Lamento pela espera, aqui no Subway queremos fazer melhor.'],
+  ['tomar nota nao e a nota', 'Vou tomar nota disso e falar com a equipa do turno da noite.'],
+  ['um recado bom em pt', 'Ola Joao, lamento muito pela espera de 40 minutos. Gostaria de entender melhor o que aconteceu. Pode dizer-me em que dia veio ate ca? Quero resolver isto consigo.'],
+  ['um recado bom em es', 'Hola, lamento que la comida llegara fria. Quiero entender que paso para poder mejorarlo. Podrias decirme a que hora hiciste el pedido?'],
+  ['um recado bom em en', 'Hi Sarah, I am sorry you could not log in. I would like to fix this for you. Could you tell me what happens when you try?'],
+]) {
+  exigir(`privado: ${porque}, e o recado passa`, !recusa('private', frase));
+}
+
+// O nome do negocio sai do texto ANTES da conferencia, e isso nao vive na
+// lista: vive no corpo da funcao. Sem isso, um negocio chamado "Cinco
+// Estrelas" e recusado por se assinar, e o pedido MANDA assinar.
+const recorteDoNome = fonte.match(/const paraConferir = ([^;]+);/);
+exigir('o nome do negocio sai do texto antes de ser conferido', recorteDoNome !== null);
+if (recorteDoNome) {
+  exigir(
+    'o recorte tira mesmo o nome, em vez de copiar o texto inteiro',
+    recorteDoNome[1].replace(/\s+/g, ' ').trim() === "negocio ? rascunho.split(negocio).join(' ') : rascunho",
+  );
+  // E a lista tem de ser aplicada ao TEXTO RECORTADO. Recortar e depois
+  // conferir o original deixa a linha no lugar e nao muda nada.
+  exigir(
+    'a lista e aplicada ao texto sem o nome do negocio, e nao ao original',
+    /padrao\.test\(paraConferir\)/.test(fonte) && !/padrao\.test\(rascunho\)/.test(fonte),
+  );
+}
 
 // 7. Um recado privado real, dos que o modelo devolveu no teste de 01/09/2026,
 // tem de atravessar a lista inteira sem ser recusado. Sem isto, um canal
@@ -151,9 +186,39 @@ exigir('o pedido publico continua a proibir prometer reparacao',
 exigir('o pedido privado autoriza oferecer resolver',
   /You MAY offer to fix it/.test(pedidoPrivado));
 exigir('o pedido privado proibe negociar a avaliacao publica',
-  /NEVER offer anything in exchange for deleting, changing, improving or updating a public review/.test(pedidoPrivado));
+  /NEVER write the words review, rating, stars, score, Google/.test(pedidoPrivado)
+  && /never offer anything in exchange for changing one/.test(pedidoPrivado));
 exigir('o pedido privado diz ao modelo que isto nao e publicado',
   /not published anywhere/.test(pedidoPrivado));
+// Os dois pedidos existirem no ficheiro nao prova que o privado e USADO. A
+// auditoria de 01/09/2026 trocou `PEDIDO_PRIVADO` por `PEDIDO_PUBLICO` na
+// escolha e os dois guardas ficaram verdes: o canal privado receberia o pedido
+// que diz "Write the owner's PUBLIC reply" e que proibe oferecer reparacao,
+// que e o defeito que este trabalho inteiro existe para resolver.
+const escolhaDoPedido = fonte.match(/const pedido = canal === 'private'\s*\?\s*([A-Z_]+)\([^)]*\)\s*:\s*([A-Z_]+)\(/);
+exigir('a funcao escolhe o pedido pelo canal, e a escolha e legivel', escolhaDoPedido !== null);
+if (escolhaDoPedido) {
+  exigir('o canal privado recebe o PEDIDO PRIVADO', escolhaDoPedido[1] === 'PEDIDO_PRIVADO');
+  exigir('o canal publico recebe o PEDIDO PUBLICO', escolhaDoPedido[2] === 'PEDIDO_PUBLICO');
+}
+
+// I1 da mesma auditoria: a funcao pode deixar de LER os campos do corpo com
+// tudo o resto verde. `const pais = null;` desfazia o commit inteiro da
+// variante do portugues sem uma linha vermelha.
+for (const [campo, nome] of [['businessCountry', 'o pais do negocio'], ['customerName', 'o nome de quem escreveu']]) {
+  const leitura = new RegExp(`const (pais|cliente) = typeof corpo\\.${campo} === 'string'`);
+  exigir(`a funcao le ${nome} do corpo do pedido, em vez de o fixar`, leitura.test(fonte));
+}
+
+// M1: o tecto do privado. Baixa-lo para 1 fazia o canal recusar tudo e
+// entregar sempre o molde, em silencio.
+const tecto = fonte.match(/const tecto = canal === 'private' \? (\d+) : (\d+);/);
+exigir('os dois tectos de tamanho continuam declarados pelo canal', tecto !== null);
+if (tecto) {
+  exigir('o tecto do recado privado da para 3 a 6 frases', Number(tecto[1]) === 1600);
+  exigir('o tecto da resposta publica nao mudou', Number(tecto[2]) === 1200);
+}
+
 exigir('os dois pedidos continuam a declarar o idioma antes de escrever',
   /Identify the language/.test(pedidoPublico) && /Identify the language/.test(pedidoPrivado));
 
@@ -199,6 +264,7 @@ exigir('o cliente envia o nome de quem escreveu, que o recado privado usa para a
   /customerName: entrada\.customerName/.test(cliente));
 
 const politica = readFileSync(POLITICA, 'utf8');
+const sugestoes = readFileSync('src/components/dashboard/ReplySuggestions.tsx', 'utf8');
 exigir('a entrada do rascunho carrega o canal', /channel: ReplyChannel/.test(politica));
 exigir('o cliente envia o pais do negocio, que escolhe a variante do portugues',
   /businessCountry: entrada\.businessCountry/.test(cliente));
@@ -218,6 +284,107 @@ for (const [tela, arquivo] of [
     exigir(`${tela} passa o pais do negocio no pedido`, /\n\s*businessCountry,\n/.test(entrada[1]));
   }
 }
+
+// ---------------------------------------------------------------------------
+// C4 da auditoria de 01/09/2026: QUEM escolhe o canal, e mais ninguem.
+// ---------------------------------------------------------------------------
+//
+// Trocar `channel: 'public'` por `'private'` no cockpit deixava os dois guardas
+// e o `tsc` verdes, e fazia a fila de avaliacoes do Google ser rascunhada pela
+// lista do PRIVADO, que PERMITE prometer reembolso e refeicao gratis. O dono
+// copiava para a pagina publica dele uma resposta a prometer dinheiro.
+//
+// A defesa e enumerar as telas e prender a expressao de cada uma. A contagem
+// entra junto: uma tela nova que desenhe `ReplySuggestions` sem entrar nesta
+// lista fica vermelha por existir, em vez de nascer desguardada.
+const TELAS_COM_CANAL = [
+  ['src/components/dashboard/reviews/FilaDeRespostas.tsx',
+    "channel={item.origem === 'comentario-privado' ? 'private' : 'public'}",
+    'a fila somada escolhe pela ORIGEM do item, que e a unica que mistura os dois'],
+  ['src/components/dashboard/reviews/ReviewCard.tsx',
+    'channel="public"',
+    'a leitura publica do Google em Definicoes, que so tem avaliacoes do Google'],
+];
+for (const [arquivo, expressao, porque] of TELAS_COM_CANAL) {
+  exigir(`${arquivo}: ${porque}`, readFileSync(arquivo, 'utf8').includes(expressao));
+}
+const telasQueDesenham = ['src/components/dashboard/reviews/FilaDeRespostas.tsx', 'src/components/dashboard/reviews/ReviewCard.tsx'];
+// `<ReplySuggestions` casa tambem a declaracao do proprio componente
+// (`const ReplySuggestions: React.FC<...`), que nao e uma tela que o desenhe.
+// O ficheiro que o define sai da conta.
+const encontradas = execSync("grep -rl '<ReplySuggestions' src/ || true", { encoding: 'utf8' })
+  .split('\n').map((linha) => linha.trim())
+  .filter((linha) => linha && linha !== 'src/components/dashboard/ReplySuggestions.tsx').sort();
+exigir(
+  `so as telas conhecidas desenham o painel de sugestoes (encontradas: ${encontradas.join(', ') || 'nenhuma'})`,
+  encontradas.length === telasQueDesenham.length && telasQueDesenham.every((t) => encontradas.includes(t)),
+);
+// E o cockpit, que nao desenha o painel mas paga a chamada por conta propria.
+exigir(
+  'o cockpit pede em publico, porque a fila dele e so de avaliacoes do Google',
+  /channel: 'public',/.test(readFileSync('src/components/dashboard/ApprovedCockpitDashboard.tsx', 'utf8')),
+);
+
+// ---------------------------------------------------------------------------
+// C5 da mesma auditoria: o privado pode ser desligado outra vez.
+// ---------------------------------------------------------------------------
+//
+// A assercao anterior negava UMA escrita exacta (`if (channel !== 'public')`).
+// Acrescentar `if (channel === 'private') return;` uma linha abaixo deixava os
+// dois guardas verdes e desligava a funcionalidade que Marcelo pediu. Passa a
+// negar-se QUALQUER saida antecipada que olhe para o canal, dentro do efeito.
+const efeitoDoPedido = sugestoes.slice(
+  sugestoes.indexOf('useEffect(() => {'),
+  sugestoes.indexOf('const suggestions = useMemo('),
+);
+exigir('o efeito que pede o rascunho continua legivel', efeitoDoPedido.length > 0);
+exigir(
+  'o efeito nao tem saida antecipada nenhuma que olhe para o canal',
+  !/if \([^)]*\bchannel\b[^)]*\)\s*return/.test(efeitoDoPedido),
+);
+exigir(
+  'o efeito continua a pedir o rascunho, em vez de nao fazer nada',
+  /void pedirRascunho\(/.test(efeitoDoPedido),
+);
+
+// ---------------------------------------------------------------------------
+// I2 da auditoria de 01/09/2026: nao pagar a chamada antes de saber o pais.
+// ---------------------------------------------------------------------------
+//
+// `businessCountry` nasce `null` e so e preenchido depois de um `await` ao
+// perfil, e `null` tambem e a resposta legitima de quem nao tem pais gravado:
+// os dois estados eram o mesmo valor. A fila do piloto ja esta no retrato
+// quando o painel monta, entao o pedido partia no primeiro quadro com o pais
+// a `null`, e o cache do rascunho e por id: o primeiro resultado prende-se a
+// sessao e nao se corrige quando o perfil chega. Um dono brasileiro ficava com
+// a primeira avaliacao respondida em portugues de Portugal ao lado de um molde
+// em pt-BR, na mesma tela.
+const cockpit = readFileSync('src/components/dashboard/ApprovedCockpitDashboard.tsx', 'utf8');
+exigir(
+  'o cockpit distingue "ja se leu o pais" de "o pais e nulo"',
+  /const \[paisLido, setPaisLido\] = useState\(false\);/.test(cockpit),
+);
+exigir(
+  'o cockpit espera pelo pais antes de pagar a chamada',
+  /if \(!paisLido\) return;/.test(cockpit),
+);
+// Sem isto o efeito nao reexecuta quando o perfil chega, e o rascunho nunca e
+// pedido: a espera passa a ser permanente, que e pior do que o defeito.
+exigir(
+  'o efeito reexecuta quando o pais chega',
+  /\}, \[selected\?\.id, demo, paisLido\]\);/.test(cockpit),
+);
+// E a leitura tem de terminar mesmo quando falha, senao uma rede em baixo
+// deixa o painel a espera para sempre.
+exigir(
+  'uma leitura de perfil que falha tambem conta como lida',
+  /finally \{[\s\S]{0,200}setPaisLido\(true\)/.test(cockpit),
+);
+// Sem sessao nao ha perfil para esperar.
+exigir(
+  'sem sessao o painel nao fica a espera de um perfil que nao vem',
+  /if \(!userId\) \{ setPaisLido\(true\); return; \}/.test(cockpit),
+);
 
 if (falhas.length) {
   console.error('Canal do rascunho: %d protecao(oes) falharam.\n', falhas.length);

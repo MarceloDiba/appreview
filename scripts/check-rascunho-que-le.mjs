@@ -788,9 +788,16 @@ for (const [nome, padrao] of [
 // escreve. O cache do modulo ja garante o numero de chamadas (provado acima),
 // mas depender de `actions` faria a fila reexecutar o efeito por tecla, que e a
 // forma literal do que a regra 4 proibe.
+// `paisLido` entrou nas dependencias em 01/09/2026: o pedido passou a esperar
+// pela leitura do perfil, e sem a dependencia o efeito nunca reexecutava quando
+// ela chegava. A REGRA e a mesma, e continua a ser o que se prende aqui: o
+// efeito nao pode depender de `actions`, que muda a cada letra que o dono
+// escreve. As duas metades sao precisas: a lista exacta, e a ausencia de
+// `actions` nela.
 exigir(
   'regra 4: o efeito do rascunho depende da avaliaçao selecionada, e nao do que o dono digita',
-  /\}, \[selected\?\.id, demo\]\);/.test(painel),
+  /\}, \[selected\?\.id, demo, paisLido\]\);/.test(painel)
+  && !/\}, \[[^\]]*\bactions\b[^\]]*\]\);/.test(painel),
 );
 
 // ---------------------------------------------------------------------------
@@ -902,10 +909,13 @@ exigir(
 exigir(
   'a funçao deixou de PERCORRER a lista de proibicoes sobre o rascunho do modelo',
   // `PROIBIDO[canal]` e nao `PROIBIDO`: desde 01/09/2026 a lista aplicada
-  // depende do canal. O que continua a ser exigido e o mesmo, e e o que a
-  // auditoria de 31/08 apanhou em falta: que ela seja PERCORRIDA sobre o
-  // rascunho, e nao apenas definida.
-  /for \(const \{ padrao, motivo \} of PROIBIDO\[canal\]\)[\s\S]{0,200}padrao\.test\(rascunho\)/.test(semComentarios(funcao)),
+  // depende do canal. E o texto conferido e `paraConferir`, que e o rascunho
+  // sem o nome do negocio: a auditoria do mesmo dia mostrou que um cliente
+  // chamado "Cinco Estrelas" era recusado por se assinar, e o pedido MANDA
+  // assinar. O que continua a ser exigido e o mesmo, e e o que a auditoria de
+  // 31/08 apanhou em falta: que a lista seja PERCORRIDA sobre o rascunho, e
+  // nao apenas definida.
+  /for \(const \{ padrao, motivo \} of PROIBIDO\[canal\]\)[\s\S]{0,200}padrao\.test\(paraConferir\)/.test(semComentarios(funcao)),
 );
 
 // Lido COM comentarios de proposito: o que se exige aqui e a advertencia, e ela

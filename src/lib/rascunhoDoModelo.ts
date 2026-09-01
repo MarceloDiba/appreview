@@ -79,8 +79,10 @@ export interface EntradaDoRascunho {
    * `private` é o recado directo a quem deixou contacto no formulário do QR, que
    * mais ninguém lê. Aí oferecer resolver é exactamente a coisa certa a dizer, e
    * o molde já tem uma variante inteira para isso (`com-reparacao`). O que o
-   * privado ganha no lugar é a proibição de trocar seja o que for por apagar ou
-   * mudar uma avaliação pública, que viola as políticas do Google.
+   * privado ganha no lugar é a recusa de QUALQUER menção a avaliação, nota,
+   * estrelas ou Google: uma troca tem de nomear a avaliação para existir, e um
+   * recado que responde falando da página pública está a mudar de assunto. É
+   * uma lista de bloqueio e não uma garantia; a última defesa é o dono ler.
    *
    * Até 01/09/2026 o comentário privado não tinha rascunho do modelo nenhum, por
    * não haver onde pôr esta diferença. Marcelo pediu-o nesse dia.

@@ -95,7 +95,11 @@ const TEXTOS_REMOVIDOS_EM_31_08 = [
 // leitura no `select`, a ATRIBUIÇÃO do valor lido ao estado, a passagem à fila
 // pela prop e o uso na chamada que monta a resposta. Quebrar qualquer elo fica
 // vermelho. Só assim a frase "mais apertado do que antes" é verdadeira.
-const FILA_DO_PAINEL = /<ResponseQueue reviews=\{queue\} snapshot=\{snapshot\} demo=\{demo\} businessCountry=\{businessCountry\} \/>/g;
+// A prop `paisLido` entrou em 01/09/2026 (ver o guarda do canal do rascunho): o
+// cockpit passou a esperar pela leitura do perfil antes de pagar a chamada ao
+// modelo, porque `null` significava ao mesmo tempo "ainda não li" e "não tem
+// país". A cadeia exigida abaixo é a mesma, elo a elo; só ganhou um elo.
+const FILA_DO_PAINEL = /<ResponseQueue reviews=\{queue\} snapshot=\{snapshot\} demo=\{demo\} businessCountry=\{businessCountry\} paisLido=\{paisLido\} \/>/g;
 // Uma atribuição comentada satisfaria uma busca por texto sem existir.
 const semComentarios = (fonte) => fonte
   .replace(/\/\*[\s\S]*?\*\//g, ' ')

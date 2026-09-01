@@ -223,8 +223,27 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
   // WhatsApp que vivia ao fim da página. Em 31/08/2026 a configuração mudou-se
   // para `/whatsapp` e leva o telefone consigo; aqui ficou só o país.
   const [businessCountry, setBusinessCountry] = useState<string | null>(null);
+  /**
+   * "Já se leu o país" é uma pergunta diferente de "qual é o país", e o painel
+   * precisava das duas. `businessCountry` nasce `null`, e `null` também é a
+   * resposta legítima de quem não tem país gravado: os dois estados eram o
+   * mesmo valor.
+   *
+   * O preço apareceu numa auditoria em 01/09/2026. A fila do piloto Apify já
+   * está no retrato quando o painel monta, por isso há avaliação selecionada
+   * no primeiro quadro e o pedido do rascunho partia antes do `await` ao
+   * perfil, com o país a `null`. O modelo recebia "escreva português de
+   * Portugal", o cache do rascunho é por id da avaliação e prende o primeiro
+   * resultado à sessão, e o dono brasileiro ficava com a primeira avaliação da
+   * fila respondida em português de Portugal ao lado de um molde em pt-BR, na
+   * mesma tela. É o defeito que a variante foi corrigir, com o sinal trocado.
+   *
+   * Em Portugal `null` calha no lado certo, e por isso o piloto não o mostrava.
+   */
+  const [paisLido, setPaisLido] = useState(false);
   useEffect(() => {
-    if (!userId) return;
+    // Sem sessão não há perfil para esperar, e a espera nunca acabaria.
+    if (!userId) { setPaisLido(true); return; }
     let active = true;
     const loadProfile = async () => {
       try {
@@ -234,6 +253,10 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
       } catch {
         if (!active) return;
         setBusinessCountry(null);
+      } finally {
+        // No `finally` de propósito: uma leitura que falhou também é uma
+        // leitura feita, e o painel não pode ficar à espera para sempre.
+        if (active) setPaisLido(true);
       }
     };
     void loadProfile();
@@ -370,7 +393,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
 
           No telemóvel isto empilha na ordem da decisão: o que expira primeiro,
           depois o que ele abriu o painel para fazer, e a leitura por último. */}
-      <div id={QUEUE_ANCHOR_ID} className="min-w-0 scroll-mt-16 lg:col-span-2 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} /></div>
+      <div id={QUEUE_ANCHOR_ID} className="min-w-0 scroll-mt-16 lg:col-span-2 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} paisLido={paisLido} /></div>
       <div className="min-w-0"><ReputationCard snapshot={snapshot} /></div>
     </section>
 
@@ -465,7 +488,13 @@ const RadarNow = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
  * sem nenhum chamador.
  */
 
-const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean; businessCountry: string | null }) => {
+/**
+ * `paisLido` é uma propriedade e não um estado daqui: quem lê o perfil é o
+ * painel, e esta fila só precisa de saber se a leitura já terminou. Sem ela, o
+ * pedido do rascunho parte no primeiro quadro com o país ainda a `null`, e o
+ * cache prende esse resultado à sessão. Ver `paisLido` no painel.
+ */
+const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry, paisLido }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean; businessCountry: string | null; paisLido: boolean }) => {
   const { t, i18n } = useOwnerTranslation();
   const [selectedId, setSelectedId] = useState<string | null>(reviews[0]?.id || null);
   const [editing, setEditing] = useState(false);
@@ -493,6 +522,10 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
     // Sem texto não há o que ler, e a função devolveria `SEM_COMENTARIO`. O
     // template já responde a uma avaliação que é só nota.
     if (selected.comment.trim().length < 3) return;
+    // Esperar pelo país antes de pagar a chamada. Ver `paisLido`: o cache do
+    // rascunho é por id e prende o primeiro resultado, por isso um pedido que
+    // parta cedo demais não se corrige sozinho quando o perfil chega.
+    if (!paisLido) return;
     // Regra 3, aplicada antes de gastar: com rascunho ESCRITO pelo dono nesta
     // avaliação, a resposta do modelo não teria como entrar na tela.
     //
@@ -528,7 +561,7 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry }: { r
     });
     return () => { vivo = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected?.id, demo]);
+  }, [selected?.id, demo, paisLido]);
 
   // Quem decide o que está na caixa é `rascunhoNaTela`, e não este componente:
   // a ordem das três perguntas É a regra 3, e ela vive num lugar que se prova

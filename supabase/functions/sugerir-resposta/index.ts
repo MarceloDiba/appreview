@@ -126,41 +126,59 @@ const REPARACAO: Regra[] = [
 ];
 
 /**
- * So no PRIVADO: nada pode ser oferecido em troca de apagar, mudar ou melhorar
- * uma avaliacao publica.
+ * So no PRIVADO: o recado nao fala da avaliacao publica. De nenhuma maneira.
  *
- * Esta e a regra que substitui a da reparacao quando o canal muda. Ela nao e
- * uma preferencia de estilo: as politicas do Google proibem incentivar
- * avaliacoes, e uma unica frase destas num recado que o cliente pode capturar
- * chega para custar a ficha do negocio. A dica da variante `com-reparacao` do
- * molde ja diz isto ao dono por escrito desde que existe; aqui passa a ser
- * verificado no texto em vez de confiado ao modelo.
+ * POR QUE A REGRA E ESTA, E NAO "NAO TROCAR"
  *
- * A forma apanha as duas ordens da frase, porque as duas sao naturais: o verbo
- * antes do substantivo ("apagar a sua avaliacao") e o substantivo antes do
- * verbo ("a avaliacao, se quiser retirar"). A janela entre os dois e curta e
- * nao atravessa pontuacao final, para que duas frases seguidas sem relacao
- * ("Lamento a sua avaliacao. Vou melhorar o servico") nao contem como troca.
+ * A primeira versao desta lista, escrita na mesma manha, tentava apanhar a
+ * TROCA: um verbo de apagar ou mudar perto de uma palavra de avaliacao. Uma
+ * auditoria adversarial mediu-a em 01/09/2026 e ela falhava nos dois sentidos,
+ * o que era previsivel: "oferecer X em troca de mudar Y" e uma relacao entre
+ * partes da frase, e uma expressao regular nao le relacoes.
  *
- * Um falso positivo aqui custa o template, que ja esta na tela. Um falso
- * negativo custa a ficha do cliente. A assimetria manda apertar.
+ *   Falso negativo: 18 trocas plausiveis escritas a mao, 18 passaram. Faltavam
+ *   verbos ("tirar", "editar", "reconsiderar", "withdraw", "bump"), faltavam
+ *   alvos ("a nota" sozinha, "opinion", "puntuacion") e a janela de 40
+ *   caracteres nao chegava para uma oracao relativa no meio.
+ *
+ *   Falso positivo: 5 de 10 recados legitimos foram RECUSADOS, e eram as
+ *   frases mais provaveis de todas ("obrigado pela avaliacao, vou melhorar o
+ *   turno da noite"). Pior, os alvos nao tinham fronteira de palavra: `star`
+ *   apanhava "starter", `estrela` apanhava o nome de um cliente chamado "Cinco
+ *   Estrelas", e esse nome entra em TODO rascunho porque o pedido manda
+ *   assina-lo. Esse cliente teria o canal privado partido para sempre, sem
+ *   erro nenhum na tela: um rascunho recusado cai no molde em silencio.
+ *
+ * A regra nova e a que uma expressao regular SABE verificar, e e mais forte:
+ * o recado privado nao menciona avaliacao, nota, estrelas nem Google. Qualquer
+ * troca tem de nomear a avaliacao para existir, logo toda troca cai aqui. E a
+ * regra tambem e certa por si: quem escreveu no formulario da mesa escreveu ao
+ * dono, e um recado que responde falando da pagina publica esta a mudar de
+ * assunto.
+ *
+ * MEDIDO ANTES DE ESCRITO. Com a linha do pedido a proibir estas palavras, 10
+ * recados privados de teste (pt, es, en, com e sem nota, queixa e elogio)
+ * deram ZERO mencoes. A regra estrita nao custa rascunho nenhum na pratica.
+ *
+ * O NOME DO NEGOCIO SAI DO TEXTO ANTES DA CONFERENCIA. E a unica parte do
+ * rascunho que nao foi o modelo que escolheu: o pedido manda termina-lo com o
+ * nome. Um negocio chamado "Estrela do Norte" nao pode ser recusado por se
+ * assinar.
+ *
+ * As entradas ficam separadas por idioma para o guarda poder provar cada uma
+ * vermelha por si.
  */
-const TIRAR_PT = 'apag\\w*|remov\\w*|retir\\w*|mud\\w*|alter\\w*|melhor\\w*|aument\\w*|sub\\w*|rever|revej\\w*|atualiz\\w*|actualiz\\w*|corrig\\w*';
-const ALVO_PT = 'avalia[çc][ãa]o|avalia[çc][õo]es|coment[áa]rio p[úu]blico|nota p[úu]blica|estrela\\w*|review';
-const TIRAR_ES = 'borr\\w*|elimin\\w*|quit\\w*|retir\\w*|cambi\\w*|modific\\w*|mejor\\w*|sub\\w*|actualiz\\w*|corrig\\w*';
-const ALVO_ES = 'rese[ñn]a\\w*|valoraci[óo]n\\w*|comentario p[úu]blico|estrella\\w*|review';
-const TIRAR_EN = 'delet\\w*|remov\\w*|take down|chang\\w*|edit\\w*|updat\\w*|rais\\w*|improv\\w*|revis\\w*';
-const ALVO_EN = 'review\\w*|rating\\w*|star\\w*|public comment';
-
-const TROCA: Regra[] = [
-  { padrao: new RegExp(`(?:(?:${TIRAR_PT})[^.!?\\n]{0,40}(?:${ALVO_PT}))|(?:(?:${ALVO_PT})[^.!?\\n]{0,40}(?:${TIRAR_PT}))|em troca d`, 'i'), motivo: 'troca por avaliacao (pt)' },
-  { padrao: new RegExp(`(?:(?:${TIRAR_ES})[^.!?\\n]{0,40}(?:${ALVO_ES}))|(?:(?:${ALVO_ES})[^.!?\\n]{0,40}(?:${TIRAR_ES}))|a cambio d`, 'i'), motivo: 'troca por avaliacao (es)' },
-  { padrao: new RegExp(`(?:(?:${TIRAR_EN})[^.!?\\n]{0,40}(?:${ALVO_EN}))|(?:(?:${ALVO_EN})[^.!?\\n]{0,40}(?:${TIRAR_EN}))|in exchange for`, 'i'), motivo: 'troca por avaliacao (en)' },
+const FALAR_DA_AVALIACAO: Regra[] = [
+  // `nota` leva uma excecao: "tomar nota" e uma frase normal de quem promete
+  // agir, e nao uma referencia a pontuacao.
+  { padrao: /\b(avalia[çc][õoãa]\w*|(?<!tomar )(?<!tomei )(?<!tomo )(?<!tomarei )notas?|estrelas?|google)\b/i, motivo: 'fala da avaliacao publica (pt)' },
+  { padrao: /\b(rese[ñn]as?|valoraci[óo]n\w*|puntuaci[óo]n\w*|calificaci[óo]n\w*|estrellas?|google)\b/i, motivo: 'fala da avaliacao publica (es)' },
+  { padrao: /\b(reviews?|ratings?|stars?|scores?|google)\b/i, motivo: 'fala da avaliacao publica (en)' },
 ];
 
 const PROIBIDO: Record<Canal, Regra[]> = {
   public: [...SEMPRE_PROIBIDO, ...REPARACAO],
-  private: [...SEMPRE_PROIBIDO, ...TROCA],
+  private: [...SEMPRE_PROIBIDO, ...FALAR_DA_AVALIACAO],
 };
 
 // Escolhido em 31/08/2026 comparando tres modelos com os comentarios reais da
@@ -273,7 +291,7 @@ Rules for the message, all mandatory:
 - Name the concrete thing the customer mentioned. A message that would fit anyone is wrong.
 - Speak as one person to another. Say "I", not "we", wherever the language allows it. No corporate words.
 - You MAY offer to fix it, to talk, to have them come back, or to make it right. This is private, so making it right is the point.
-- NEVER offer anything in exchange for deleting, changing, improving or updating a public review or rating. That is prohibited and would cost the business its listing. Do not mention public reviews at all.
+- NEVER write the words review, rating, stars, score, Google, or their equivalents in the language you are writing. Do not thank them for a review, do not mention any public page, and never offer anything in exchange for changing one. They wrote to the owner directly, so refer only to what they told you.
 - Ask one concrete question that helps the owner understand what happened.
 - Never invent a fact about the business that is not in what the customer wrote.
 - Never say or imply you are an AI.
@@ -360,8 +378,14 @@ Deno.serve(async (request) => {
 
     // A verificacao, que e a parte que garante em vez de pedir. A lista muda
     // com o canal: ver o cabecalho.
+    //
+    // O nome do negocio sai do texto ANTES de ser conferido. E a unica parte
+    // do rascunho que nao foi o modelo que escolheu (o pedido manda assinar
+    // com ele), e um negocio chamado "Estrela do Norte" ou "Cinco Estrelas"
+    // seria recusado por se assinar, para sempre e sem erro na tela.
+    const paraConferir = negocio ? rascunho.split(negocio).join(' ') : rascunho;
     for (const { padrao, motivo } of PROIBIDO[canal]) {
-      if (padrao.test(rascunho)) {
+      if (padrao.test(paraConferir)) {
         return json({ code: 'RASCUNHO_RECUSADO', error: `O rascunho continha ${motivo}.` }, 422);
       }
     }

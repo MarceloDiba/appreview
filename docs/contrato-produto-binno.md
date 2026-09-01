@@ -793,11 +793,32 @@ O guarda é `npm run check:ordem-por-decisao`.
 
   `private` é o recado directo a quem deixou contacto no formulário do QR, que
   mais ninguém lê. Nela a função **permite oferecer resolver**, e recusa no lugar
-  **trocar seja o que for por apagar, mudar ou melhorar uma avaliação pública** —
-  a mesma proibição que a dica da variante `com-reparacao` já escrevia ao dono, e
-  que passou a ser verificada no texto em vez de confiada ao modelo. Trocar
-  reparação por avaliação viola as políticas do Google e pode custar a ficha do
-  cliente.
+  **qualquer menção a avaliação, nota, estrelas ou Google**.
+
+  *A regra da recusa privada foi reescrita em 01/09/2026, no mesmo dia, depois de
+  uma auditoria adversarial medir a primeira versão. Essa versão tentava apanhar
+  a TROCA — um verbo de apagar ou mudar perto de uma palavra de avaliação — e
+  falhava nos dois sentidos, o que era previsível: "oferecer X em troca de mudar
+  Y" é uma relação entre partes da frase, e uma expressão regular não lê
+  relações. Dezoito trocas plausíveis escritas à mão passaram todas; e cinco de
+  dez recados legítimos foram recusados, incluindo a frase mais provável de
+  todas ("obrigado pela avaliação, vou melhorar o turno da noite"). Um cliente
+  chamado "Cinco Estrelas" tinha o canal privado partido para sempre, porque o
+  pedido manda assinar com o nome do negócio.*
+
+  A regra nova é mais forte e é do tipo que uma expressão regular sabe
+  verificar. **Qualquer troca tem de nomear a avaliação para existir**, logo toda
+  troca cai. E ela é certa por si: quem escreveu no formulário da mesa escreveu
+  ao dono, e um recado que responde falando da página pública está a mudar de
+  assunto. O nome do negócio sai do texto antes da conferência, por ser a única
+  parte que não foi o modelo que escolheu.
+
+  **Isto continua a ser uma lista de bloqueio, e não uma garantia.** Ela não
+  entende o texto: uma troca escrita sem nomear a avaliação ("passe cá amanhã
+  que arranjamos aquilo da internet") passa inteira. A última defesa continua a
+  ser o dono ler antes de enviar, e é por isso que o Binno não envia nada em
+  nome dele. Trocar reparação por avaliação viola as políticas do Google e pode
+  custar a ficha do cliente.
 
   **A variante do português segue o país do negócio, nos dois canais.** O modelo
   escreve na língua do cliente, mas a língua não escolhe a variante: sem
@@ -811,11 +832,26 @@ O guarda é `npm run check:ordem-por-decisao`.
 
   O canal viaja no corpo do pedido, do painel até à função, e o **padrão é
   `public`**: um chamador que não conheça o campo recebe o canal com as regras
-  mais apertadas. Fixar o canal num literal no painel ou na fila é proibido — é
-  o que mandaria todo comentário privado pela lista do público com tudo o resto
-  aparentemente correcto. Guardado por `scripts/check-canal-do-rascunho.mjs`,
-  que corre as duas listas lado a lado, e por `check-rascunho-que-le.mjs`, que
-  mede quem escolhe o canal.
+  mais apertadas.
+
+  **Quem escolhe o canal é enumerado, e não livre.** Três telas o escolhem: a
+  fila somada de `/reviews`, que o deriva da ORIGEM do item e é a única que
+  mistura os dois; a leitura pública do Google em Definições; e o cockpit. As
+  duas últimas fixam-no em `public` num literal, e isso está certo, porque
+  ambas as filas só contêm avaliações do Google. O que é proibido é uma tela
+  nova escolher canal sem entrar nessa lista, e o guarda conta as telas que
+  desenham o painel de sugestões justamente para que uma nova nasça vermelha em
+  vez de nascer desguardada. *(A cláusula anterior dizia que fixar o canal num
+  literal era proibido; era falso, e a auditoria de 01/09/2026 mostrou que a
+  regra escrita não descrevia o código. O risco real nunca foi o literal: foi
+  ninguém estar a medi-lo. Trocar `'public'` por `'private'` no cockpit deixava
+  todos os guardas verdes e fazia o dono copiar para a página pública dele uma
+  resposta a prometer dinheiro.)*
+
+  Guardado por `scripts/check-canal-do-rascunho.mjs`, que corre as duas listas
+  lado a lado, enumera as telas e prova que o pedido privado é escolhido e não
+  apenas escrito; e por `check-rascunho-que-le.mjs`, que mede a fila somada e o
+  painel de sugestões.
 
 ### Leitura de reputação e recomendações
 
