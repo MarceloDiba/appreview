@@ -491,12 +491,20 @@ longa outra vez, porque o problema nunca foi o número de cartões. Era a ordem.
 São três faixas:
 
 - **Ação.** O que ele precisa de decidir ou fazer agora: os comentários internos
-  à espera, as avaliações do Google à espera de resposta, e o Radar quando ele
-  tem um alerta de verdade.
+  à espera, as avaliações do Google à espera de resposta, a reputação no Google,
+  e o Radar quando ele tem um alerta de verdade.
+
+  *A reputação subiu da Referência para cá em 01/09/2026, a pedido de Marcelo:
+  "suba Reputação no Google para o lado de Avaliações no Google, assim a pessoa
+  enxerga as métricas mais importantes de uma só vez". É uma excepção declarada
+  à regra desta secção, e não uma revogação dela: a reputação continua a ser
+  leitura e não decisão, e está aqui porque é a leitura que o dono quer ver ao
+  mesmo tempo que a fila, não porque tenha passado a ser uma acção. Nenhum outro
+  módulo de consulta sobe por este precedente sem uma decisão própria.*
 - **Mudança.** O que se mexeu desde a última vez: o volume de avaliações, cada
   nota separada, o que mudou na semana. Só quando existe histórico que sustente
   a comparação; sem ele, estes módulos dizem isso e ficam pequenos.
-- **Referência.** O que ele consulta em vez de agir: a reputação no Google, o QR
+- **Referência.** O que ele consulta em vez de agir: o QR
   para o Google, os temas mais citados, as boas práticas, e o Radar quando ele
   está calmo.
 
@@ -614,14 +622,22 @@ cabiam quatro módulos.
 **O que passa a valer.** A faixa é a mesma grade de três colunas das outras
 duas. A repartição segue o que cada cartão tem de deixar ler, e não o tamanho
 que calharia ter: a fila de respostas é onde o dono lê uma avaliação inteira e
-um rascunho inteiro, e leva duas colunas; os comentários internos são uma
-contagem, um nome, uma data e uma citação curta, e levam a terceira, ao lado
-da fila em vez de por cima dela. No telemóvel continua a ser uma coluna só.
+um rascunho inteiro, e leva duas colunas; a reputação no Google leva a terceira,
+ao lado dela. O bloco de comentários internos atravessa a faixa inteira, acima
+das duas, porque um comentário privado com nota baixa expira e tem de ser a
+primeira coisa que ele vê. No telemóvel continua a ser uma coluna só, e a ordem
+é a da decisão: o que expira, o que ele veio fazer, e a leitura por último.
 
-**Sem comentários internos, a fila volta às três colunas.** Reservar um terço
-da largura para um cartão que não está lá é o buraco que "Faixas sem buraco"
-foi tirar da tela, e ele não volta por esta porta. Para a faixa poder decidir
-isto, a leitura de `internal_feedback` subiu para o painel: é a MESMA leitura
+**REVISTO NO MESMO DIA, algumas horas depois.** A versão da manhã punha os
+comentários internos na terceira coluna e fazia a fila TROCAR de largura
+conforme eles existissem, porque eles desaparecem numa conta em dia e a coluna
+ficaria vazia. Com a reputação nessa coluna, que está sempre desenhada, a
+coluna deixou de poder ficar vazia e a largura variável deixou de ter o que
+resolver: uma largura condicional agora seria pior, porque sem comentário
+interno a fila esticaria por cima da reputação. A regra que aquela condicional
+servia continua inteira, e é "Faixas sem buraco"; mudou a construção que a
+cumpre. Para a faixa poder decidir isto, a leitura de `internal_feedback` subiu
+para o painel: é a MESMA leitura
 de antes, feita uma vez só, e a lista que decide a largura é a mesma que
 desenha o cartão. Nunca podem discordar porque são a mesma lista.
 

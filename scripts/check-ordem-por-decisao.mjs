@@ -105,7 +105,12 @@ const MODULOS = [
   ['mudanca', '<VolumeCard weeks={history} />', 'Volume de avaliações'],
   ['mudanca', '<RatingTrends weeks={history} snapshot={snapshot} />', 'Cada nota separada'],
   ['mudanca', '<WeeklyChange weeks={history} />', 'O que mudou na semana'],
-  ['referencia', '<ReputationCard snapshot={snapshot} />', 'Reputação no Google'],
+  // Subiu para a faixa de Ação em 01/09/2026, a pedido de Marcelo: "assim a
+  // pessoa enxerga as métricas mais importantes de uma só vez". A regra que
+  // esta linha protege continua a mesma para os nove módulos (desenhado uma
+  // vez, na faixa que a decisão lhe deu); mudou a decisão sobre qual faixa é a
+  // dele, e está registada no contrato com a data e a razão.
+  ['acao', '<ReputationCard snapshot={snapshot} />', 'Reputação no Google'],
   ['referencia', '<QrCard funnel={funnel.data} />', 'Do QR ao Google'],
   ['referencia', '<TopicsCard snapshot={snapshot} />', 'Temas mais citados'],
   ['referencia', '<DailyPractice snapshot={snapshot} />', 'Boas práticas'],

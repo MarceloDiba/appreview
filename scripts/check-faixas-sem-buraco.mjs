@@ -83,13 +83,28 @@ for (const [nome, classes] of faixas) {
     `A faixa "${nome}" é uma grade e deixou de alinhar ao topo. Sem items-start cada cartão estica até à altura do vizinho mais alto, e o espaço vazio entra para dentro do cartão em vez de sair da página.`);
 }
 
-// A grade do QR e dos temas vive dentro da Referência e tem o mesmo problema
-// pela mesma razão: o QR tem duas linhas de número e os temas têm etiquetas.
-const gradeDoQr = painel.match(/<div id=\{QR_ANCHOR_ID\} className="([^"]*)"/);
-exigir(gradeDoQr !== null, 'A grade do QR e dos temas sumiu do painel.');
-if (gradeDoQr) {
-  exigir(/\bitems-start\b/.test(gradeDoQr[1]),
-    'A grade do QR e dos temas deixou de alinhar ao topo, e o "Do QR ao Google" volta a esticar até à altura dos temas com branco por baixo do último número.');
+// As COLUNAS ESTREITAS que empilham cartões curtos ao lado de um cartão largo
+// têm o mesmo problema pela mesma razão, e desde 01/09/2026 há duas: uma em
+// cada faixa em grade que usa este padrão (Reputação e comentários ao lado da
+// fila; QR e boas práticas ao lado dos temas). Sem `items-start` o cartão de
+// cima estica até à altura do irmão e o branco entra para dentro dele.
+//
+// Elas são encontradas pela FORMA, e não por um id: qualquer coluna estreita
+// nova entra automaticamente nesta regra em vez de nascer desguardada.
+const colunasEstreitas = [...painel.matchAll(/<div className="grid ([^"]*lg:col-start-3[^"]*)"/g)];
+exigir(colunasEstreitas.length >= 1,
+  `As colunas estreitas que empilham os cartões curtos sumiram do painel (${colunasEstreitas.length} encontradas, esperada pelo menos a da Referência). Sem elas, cada cartão curto volta a ser um item solto da grade e a faixa volta a ter um terço vazio.`);
+for (const coluna of colunasEstreitas) {
+  exigir(/\bitems-start\b/.test(coluna[1]),
+    'Uma coluna estreita de cartões curtos deixou de alinhar ao topo, e o cartão de cima volta a esticar até à altura do irmão com branco por dentro.');
+}
+// A âncora do QR tem de continuar a existir e a apontar para o cartão do QR, e
+// não para a coluna inteira: quem chega por ela vem ver o QR.
+const ancoraDoQr = painel.match(/<div id=\{QR_ANCHOR_ID\} className="([^"]*)">\s*<QrCard/);
+exigir(ancoraDoQr !== null, 'A âncora do QR deixou de estar no cartão do QR.');
+if (ancoraDoQr) {
+  exigir(/\bscroll-mt-16\b/.test(ancoraDoQr[1]),
+    'A âncora do QR perdeu a margem de rolagem, e quem chega por ela fica com o cartão colado ao topo.');
 }
 
 // ---------------------------------------------------------------------------
@@ -155,26 +170,50 @@ if (contentor) {
 // que a decisão acima tirou das outras duas: um terço de fundo vazio ao lado
 // de um cartão alto, sempre que o dono não tiver comentário interno por
 // tratar, que é o estado normal de uma conta em dia.
-const classesDaFila = painel.match(/<div id=\{QUEUE_ANCHOR_ID\} className=\{`([^`]*)`\}/);
+// ALTERADO EM 01/09/2026, e a regra não mudou: continua a ser "a fila nunca
+// tem um terço de fundo vazio ao lado". Mudou a construção que a cumpre.
+//
+// Até esta manhã a fila trocava de largura conforme houvesse ou não comentário
+// interno por tratar, porque esse cartão era o único candidato à coluna
+// estreita e desaparecia numa conta em dia. Marcelo pediu nesse dia que
+// "Reputação no Google" subisse para o lado da fila, e esse cartão está SEMPRE
+// desenhado: a coluna estreita deixou de poder ficar vazia, e a largura
+// variável deixou de ter o que resolver. Uma largura condicional agora seria
+// pior: sem comentário interno, a fila esticava por cima da Reputação.
+//
+// O que passa a ser exigido é o par: a fila fixa em duas colunas E um cartão
+// que está sempre na terceira. Exigir só a largura deixaria passar exactamente
+// o buraco antigo.
+const classesDaFila = painel.match(/<div id=\{QUEUE_ANCHOR_ID\} className="([^"]*)"/);
 exigir(classesDaFila !== null,
   'A fila de respostas deixou de declarar a largura dela na faixa de Ação. Sem essa expressão a faixa volta a ser uma pilha de cartões à largura toda, e a primeira dobra do portátil volta a mostrar dois módulos onde cabem quatro.');
 if (classesDaFila) {
-  // As duas larguras E a condição que escolhe entre elas. Procurar só por
-  // `lg:col-span-2` deixaria passar uma largura fixa de duas colunas, que é
-  // precisamente o buraco.
-  exigir(/temComentariosInternos \? 'lg:col-span-2' : 'lg:col-span-3'/.test(classesDaFila[1]),
-    'A fila de respostas deixou de trocar de largura conforme existir ou não cartão de comentários internos. Fixa em duas colunas, ela deixa um terço de fundo vazio ao lado sempre que não há comentário por tratar; fixa em três, o cartão volta a empilhar-se por cima dela.');
+  exigir(/\blg:col-span-2\b/.test(classesDaFila[1]),
+    'A fila de respostas deixou de ocupar duas colunas na faixa de Ação. À largura toda, ela empurra "Reputação no Google" e "Comentários internos" para baixo da primeira dobra, que é o oposto do que a decisão de 01/09 pediu.');
 }
-
-// E a condição tem de nascer da MESMA lista que o cartão desenha. Duas
-// leituras do mesmo dado, uma para a largura e outra para o conteúdo, são o
-// defeito que `src/lib/internalCasePriority.ts` já regista ter custado a este
-// projeto uma vez: elas divergem em silêncio na primeira vez que alguém mexer
-// numa delas, e aqui a divergência é uma coluna vazia ou um cartão espremido.
-exigir(/const temComentariosInternos = comentariosInternos\.length > 0;/.test(painel),
-  'A largura da faixa de Ação deixou de sair da lista de comentários internos. Uma segunda leitura para decidir a largura pode discordar da que desenha o cartão, e o resultado na tela é uma coluna vazia ou um cartão sem espaço.');
-exigir(/<PendingCommentsBanner casos=\{comentariosInternos\} \/>/.test(painel),
-  'O cartão de comentários internos deixou de receber a mesma lista que decide a largura da fila ao lado dele.');
+// O conteúdo da faixa de Ação, do `<section>` dela até ao seguinte. Ler o
+// painel inteiro deixaria esta asserção verde com a Reputação em qualquer
+// outra faixa, que é o buraco que ela existe para impedir.
+const inicioDaAcao = painel.indexOf('<section data-faixa="acao"');
+const fimDaAcao = painel.indexOf('<section data-faixa="mudanca"');
+exigir(inicioDaAcao >= 0 && fimDaAcao > inicioDaAcao, 'A faixa de Ação deixou de ser legível no painel.');
+const corpoDaAcao = inicioDaAcao >= 0 && fimDaAcao > inicioDaAcao ? painel.slice(inicioDaAcao, fimDaAcao) : '';
+exigir(/<ReputationCard snapshot=\{snapshot\} \/>/.test(corpoDaAcao),
+  'A faixa de Ação perdeu o cartão que garante que a coluna estreita nunca fica vazia. Sem ele, a fila fixa em duas colunas deixa um terço de fundo vazio ao lado sempre que não há comentário interno por tratar, que é o estado normal de uma conta em dia.');
+// O cartão de comentários é o que PODE desaparecer, e por isso é o que leva o
+// `empty:hidden`: sem ele, uma conta em dia paga 16px de branco por cima da
+// Reputação. Medido no ecrã em 01/09.
+// A caixa que embrulha o cartão de comentários, seja qual for a largura dela:
+// o que se exige é o `empty:hidden` E a mesma lista que o painel lê. Prender a
+// `className` inteira obrigava a mexer nesta linha a cada mudança de largura,
+// e uma asserção que se reescreve a cada mudança deixa de ser lida.
+const caixaDosComentarios = painel.match(/<div className="([^"]*)"><PendingCommentsBanner casos=\{comentariosInternos\} \/><\/div>/);
+exigir(caixaDosComentarios !== null,
+  'O cartão de comentários internos deixou de receber a mesma lista que o painel lê, ou saiu da caixa própria dele.');
+if (caixaDosComentarios) {
+  exigir(/\bempty:hidden\b/.test(caixaDosComentarios[1]),
+    'O cartão de comentários internos deixou de esconder-se quando está vazio. Vazio e visível, ele continua a ser um item da grade e o intervalo dele fica na tela: 16px de branco por cima da fila em toda conta em dia.');
+}
 
 // ---------------------------------------------------------------------------
 // 6. O contrato registra as decisões.

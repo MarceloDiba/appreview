@@ -212,7 +212,6 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
     () => orderPendingCasesByRecency(internos.cases),
     [internos.cases],
   );
-  const temComentariosInternos = comentariosInternos.length > 0;
   // `profiles.business_country` decide a variante do português da resposta
   // sugerida (pt-BR vs. pt-PT), pela mesma regra do cartão impresso em
   // `src/lib/businessLocale.ts`. Fica em `null` enquanto o perfil não
@@ -324,34 +323,55 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
 
         A repartição segue o que cada cartão precisa de ler, e não o tamanho
         que ele calharia ter. A fila é onde o dono lê uma avaliação inteira e
-        um rascunho inteiro, e pede largura de texto; os comentários internos
-        são uma contagem, um nome, uma data e uma citação curta, e cabem numa
-        coluna estreita. Por isso a fila leva duas colunas e o cartão de
-        contagens a terceira, ao lado dela e não por cima.
+        um rascunho inteiro, e pede largura de texto.
 
-        A ORDEM NÃO MUDA, e é o que o contrato prende: os comentários internos
-        continuam primeiro no DOM, que é a ordem que o telemóvel lê, e a faixa
-        continua a ser a primeira das três. No telemóvel isto é uma coluna só,
-        exactamente como era.
+        SEGUNDA MUDANÇA NO MESMO DIA, a pedido de Marcelo: "suba Reputação no
+        Google para o lado de Avaliações no Google, assim a pessoa enxerga as
+        métricas mais importantes de uma só vez". A Reputação passa a ocupar a
+        terceira coluna, ao lado da fila.
 
-        SEM CARTÃO DE CONTAGENS A FILA VOLTA ÀS TRÊS COLUNAS. É a mesma regra
-        de "Faixas sem buraco": uma coluna sozinha a segurar a altura de uma
-        faixa é o buraco que aquela decisão foi tirar da tela, e reservar um
-        terço da largura para um cartão que não existe seria reintroduzi-lo
-        aqui. `temComentariosInternos` sai da MESMA lista que o cartão
-        desenha, por isso os dois nunca podem discordar. */}
+        Isso resolveu de caminho o que a primeira mudança tinha resolvido com
+        uma condicional. Nessa altura o único candidato à terceira coluna era o
+        cartão de comentários internos, que DESAPARECE numa conta em dia, e por
+        isso a fila trocava de largura para não deixar um terço vazio. A
+        Reputação está sempre lá: a coluna estreita deixou de poder ficar vazia
+        e a largura variável deixou de ter o que resolver. Uma largura
+        condicional agora seria pior, porque sem comentário interno a fila
+        esticava por cima da Reputação.
+
+        O bloco de comentários passou a atravessar a faixa inteira, acima dos
+        dois. A ORDEM NÃO MUDA, e é o que o contrato prende: ele continua
+        primeiro no DOM, que é a ordem que o telemóvel lê, porque um comentário
+        privado com nota baixa expira e o cliente ainda está lá. No telemóvel a
+        faixa empilha na ordem da decisão: o que expira, depois o que ele abriu
+        o painel para fazer, e a leitura por último. */}
     <section data-faixa="acao" className="grid items-start gap-4 lg:grid-cols-3">
       {radarEmAcao && <RadarNow snapshot={snapshot} />}
-      <div className="grid min-w-0 items-start gap-4 lg:col-span-3 lg:grid-cols-3">
-        {/* `empty:hidden` nao e enfeite. Sem comentario por tratar o cartao
-            devolve `null`, e esta caixa fica sem filho nenhum: continua a ser
-            um item da grade, e o `gap-4` continua a contar com ela. Medido no
-            ecra, isso custava 16px de branco por cima da fila no telemovel,
-            em toda conta em dia. Escondida, ela deixa de ser item e o
-            intervalo desaparece com ela. */}
-        <div className="min-w-0 empty:hidden lg:col-start-3 lg:row-start-1"><PendingCommentsBanner casos={comentariosInternos} /></div>
-        <div id={QUEUE_ANCHOR_ID} className={`min-w-0 scroll-mt-16 lg:row-start-1 lg:scroll-mt-4 ${temComentariosInternos ? 'lg:col-span-2' : 'lg:col-span-3'}`}><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} /></div>
-      </div>
+      {/* O bloco de comentários pendentes atravessa a faixa inteira e fica
+          ACIMA da fila, porque é isso que o contrato manda: um comentário
+          privado com nota baixa expira, o cliente ainda está no restaurante ou
+          acabou de sair. Ele tem de ser a primeira coisa, e no telemóvel a
+          ordem do DOM é a ordem da tela.
+
+          `empty:hidden` não é enfeite. Sem caso por tratar o cartão devolve
+          `null` e esta caixa fica sem filho nenhum: continua a ser item da
+          grade, e o `gap-4` continua a contar com ela. Medido no ecrã, isso
+          custava 16px de branco por cima da fila em toda conta em dia. */}
+      <div className="min-w-0 empty:hidden lg:col-span-3"><PendingCommentsBanner casos={comentariosInternos} /></div>
+      {/* A fila e a Reputação lado a lado, decisão de Marcelo em 01/09/2026:
+          "suba Reputação no Google para o lado de Avaliações no Google, assim a
+          pessoa enxerga as métricas mais importantes de uma só vez".
+
+          A fila leva duas colunas porque tem de mostrar uma avaliação E um
+          rascunho ao lado. A Reputação leva a terceira, e é ela que garante que
+          a terceira coluna nunca fica vazia: era essa a razão de a fila trocar
+          de largura conforme houvesse comentário interno, e com um cartão que
+          está sempre lá a largura variável deixou de ter o que resolver.
+
+          No telemóvel isto empilha na ordem da decisão: o que expira primeiro,
+          depois o que ele abriu o painel para fazer, e a leitura por último. */}
+      <div id={QUEUE_ANCHOR_ID} className="min-w-0 scroll-mt-16 lg:col-span-2 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} /></div>
+      <div className="min-w-0"><ReputationCard snapshot={snapshot} /></div>
     </section>
 
     {/* Mudança: o que se mexeu desde a última vez. */}
@@ -365,15 +385,20 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel }
 
     {/* Referência: o que ele consulta em vez de agir. */}
     <section data-faixa="referencia" className="grid items-start gap-4 border-t border-slate-200 pt-8 lg:grid-cols-3">
-      <div className="min-w-0 lg:col-span-2 lg:row-start-1"><ReputationCard snapshot={snapshot} /></div>
-      {/* O QR fica na coluna estreita e os temas nas duas largas: o QR tem duas
-          linhas de número e os temas têm etiquetas que querem largura. Ao
-          contrário, era o QR que ficava com meia tela de branco por baixo. */}
-      <div id={QR_ANCHOR_ID} className="grid min-w-0 scroll-mt-16 items-start gap-4 md:grid-cols-2 lg:col-span-3 lg:row-start-2 lg:grid-cols-3 lg:scroll-mt-4">
-        <div className="min-w-0"><QrCard funnel={funnel.data} /></div>
-        <div className="min-w-0 lg:col-span-2"><TopicsCard snapshot={snapshot} /></div>
+      {/* Com "Reputação no Google" na faixa de Ação, esta faixa ficaria com
+          "Boas práticas" sozinha numa coluna e dois terços de fundo vazio ao
+          lado, que é exactamente o buraco fechado horas antes. Passa ao mesmo
+          padrão da faixa de Ação: o cartão que quer largura ocupa duas
+          colunas, e os dois curtos empilham-se na terceira.
+
+          Os temas são o que quer largura aqui: são etiquetas que embrulham. O
+          QR tem duas linhas de número e Boas práticas uma orientação de cada
+          vez, e os dois juntos enchem a altura de um cartão de temas. */}
+      <div className="min-w-0 lg:col-span-2 lg:row-start-1"><TopicsCard snapshot={snapshot} /></div>
+      <div className="grid min-w-0 items-start gap-4 lg:col-start-3 lg:row-start-1">
+        <div id={QR_ANCHOR_ID} className="min-w-0 scroll-mt-16 lg:scroll-mt-4"><QrCard funnel={funnel.data} /></div>
+        <div className="min-w-0"><DailyPractice snapshot={snapshot} /></div>
       </div>
-      <div className="min-w-0 lg:col-start-3 lg:row-start-1"><DailyPractice snapshot={snapshot} /></div>
       {/*
         O Radar calmo fecha a página. Fica filho DIRETO da grade, sem div à
         volta, porque `check-ordem-por-decisao` procura esta expressão inteira
