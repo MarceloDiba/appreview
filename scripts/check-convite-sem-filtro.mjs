@@ -17,7 +17,7 @@ import ts from 'typescript';
 const { tipoDoContacto, apenasDigitos } = await import(
   pathToFileURL(resolve(process.cwd(), 'src/lib/contactoDoCliente.ts')).href
 );
-const { mensagemDoConvite, linkDeWhatsApp } = await import(
+const { mensagemDoConvite, linkDeWhatsApp, idiomaDoConvite } = await import(
   pathToFileURL(resolve(process.cwd(), 'src/lib/convite.ts')).href
 );
 
@@ -52,7 +52,12 @@ exigir(
 // nome da coluna mente, e essa mentira nao pode espalhar-se pelo produto.
 // ---------------------------------------------------------------------------
 exigir('um numero com indicativo e telefone', tipoDoContacto('+5579998380767') === 'telefone');
-exigir('um numero com espacos e travessoes tambem e telefone', tipoDoContacto('(79) 99838-0767') === 'telefone');
+// A CLASSIFICACAO nao exige indicativo, e nao e ela que monta o endereco: ela
+// so decide se o produto desenha o caminho do telefone ou o do email. Quem
+// exige indicativo e `linkDeWhatsApp`, mais abaixo, e ha uma assercao la a
+// provar que um numero local NAO vira link.
+exigir('um numero local com espacos e travessoes continua a ser classificado como telefone',
+  tipoDoContacto('(79) 99838-0767') === 'telefone');
 exigir('um endereco de email e email', tipoDoContacto('carol@exemplo.com') === 'email');
 exigir('vazio nao e nada', tipoDoContacto('') === 'nenhum');
 exigir('nulo nao e nada', tipoDoContacto(null) === 'nenhum');
@@ -81,6 +86,16 @@ exigir('o portugues de Portugal e diferente do do Brasil',
   mensagemDoConvite({ ...base, idioma: 'pt-PT' }) !== mensagemDoConvite({ ...base, idioma: 'pt-BR' }));
 exigir('o ingles existe', /review|Google/i.test(mensagemDoConvite({ ...base, idioma: 'en' })));
 
+// A LINGUA VEM DO PAIS DO NEGOCIO, e nao da preferencia de painel do dono.
+// Regra igual a de `resolveContentLocale` em `src/lib/replySuggestions.ts`:
+// so 'BR' exacto vira brasileiro, tudo o resto cai no portugues de Portugal.
+exigir('o pais BR escolhe o portugues do Brasil', idiomaDoConvite('BR') === 'pt-BR');
+exigir('o pais PT escolhe o portugues de Portugal', idiomaDoConvite('PT') === 'pt-PT');
+exigir('sem pais lido, o padrao historico e o portugues de Portugal',
+  idiomaDoConvite(null) === 'pt-PT' && idiomaDoConvite(undefined) === 'pt-PT');
+exigir('so BR exacto vira brasileiro: minusculas e codigos de tres letras nao',
+  idiomaDoConvite('br') === 'pt-PT' && idiomaDoConvite('BRA') === 'pt-PT' && idiomaDoConvite('') === 'pt-PT');
+
 // ---------------------------------------------------------------------------
 // O LINK. O Binno nao envia: monta o endereco e o dono toca.
 // ---------------------------------------------------------------------------
@@ -92,6 +107,24 @@ exigir('a mensagem vai codificada no link',
 exigir('um email nao vira link de whatsapp', linkDeWhatsApp('carol@exemplo.com', msg) === null);
 exigir('sem contacto nao ha link', linkDeWhatsApp(null, msg) === null);
 exigir('sem mensagem nao ha link', linkDeWhatsApp('+5579998380767', '') === null);
+
+// O INDICATIVO. `wa.me` le o numero como internacional, sempre: sem `+55`, o
+// `7` de `79998380767` vira o indicativo da Russia e o dono manda o convite a
+// um desconhecido. Foi o que aconteceria com a sexta das seis linhas reais de
+// 02/09/2026, a unica escrita sem indicativo.
+exigir('um numero LOCAL, sem indicativo, nao vira link de whatsapp',
+  linkDeWhatsApp('(79) 99838-0767', msg) === null);
+exigir('um numero local escrito so com digitos tambem nao vira link',
+  linkDeWhatsApp('79998380767', msg) === null);
+exigir('com indicativo e simbolos pelo meio, o link sai com os digitos limpos',
+  linkDeWhatsApp('+55 (79) 99838-0767', msg) === `https://wa.me/5579998380767?text=${encodeURIComponent(msg)}`);
+exigir('doze algarismos sem o mais ja trazem indicativo, e viram link',
+  linkDeWhatsApp('351912345678', msg)?.startsWith('https://wa.me/351912345678?text=') === true);
+// Sem link do WhatsApp o cartao mostra so o botao de copiar, o caminho que ja
+// existia para o email. A mensagem continua a existir: o que desaparece e o
+// botao que abriria a conversa errada.
+exigir('sem indicativo a mensagem continua a existir, e so o link e que nao',
+  mensagemDoConvite(base) !== '' && linkDeWhatsApp('(79) 99838-0767', msg) === null);
 
 // ---------------------------------------------------------------------------
 // O CONVITE NA TELA. Ao lado de cada comentário privado, para toda a nota.
@@ -138,7 +171,30 @@ exigir('sem mensagem nao ha link', linkDeWhatsApp('+5579998380767', '') === null
 // analisava uma árvore que não representa o ficheiro e dizia que estava tudo
 // bem — isso é vacuidade, não protecção.
 //
-// DUAS FORMAS FICARAM DE FORA, DE PROPÓSITO, E É PRECISO SABER QUAIS SÃO:
+// RONDA 3 DE CORREÇÃO (02/09/2026). A revisão final do ramo achou um TERCEIRO
+// buraco, e ele era mais largo do que os dois declarados: o guarda vigiava o
+// atributo `linkDeAvaliacao` do cartão e EXCLUÍA de propósito o atributo
+// `casos`, com o argumento escrito aqui de que «`casos` depende de `rating`
+// legitimamente». Mas `casos` é a lista de onde sai o cliente convidado, e uma
+// linha só bastava para o convite desaparecer nas notas baixas com os seis
+// guardas verdes e o `tsc` a passar:
+//
+//   const comentariosInternos = useMemo(
+//     () => orderPendingCasesByRecency(internos.cases).filter((caso) => (caso.rating ?? 0) >= 4),
+//     [internos.cases],
+//   );
+//
+// Isto é diferente das duas formas abaixo em espécie, e não em grau: aquelas
+// exigem código com cara de estar a esconder um componente, e esta parece uma
+// afinação inocente da lista, a 200 linhas do convite. Era a forma mais
+// provável de o filtro voltar por acidente. `casos` passou a ser vigiado, nos
+// dois ficheiros (ver `ATRIBUTOS_VIGIADOS`), e o argumento que dispensava
+// vigiá-lo foi apagado.
+//
+// DUAS FORMAS CONTINUAM DE FORA, DE PROPÓSITO, E É PRECISO SABER QUAIS SÃO.
+// Um cabeçalho que diz «estas são as portas abertas» e deixa a mais larga de
+// fora é pior do que não declarar nada; estas duas são a lista completa
+// DEPOIS de a terceira ter sido tapada:
 //
 // 1. Esconder por CSS: `<div className={nota >= 4 ? '' : 'hidden'}>` à volta
 //    do convite. Este guarda lê expressões condicionais e atributos JSX
@@ -356,12 +412,24 @@ const elementosJsxComNome = (raiz, nomeDaTag) => colher(raiz, (n) =>
   (ts.isJsxSelfClosingElement(n) && n.tagName.getText(raiz) === nomeDaTag)
   || (ts.isJsxOpeningElement(n) && n.tagName.getText(raiz) === nomeDaTag));
 
+// Os atributos que fazem o convite desaparecer, e que por isso não podem
+// depender da nota. São vigiados NOS DOIS ficheiros, com a mesma lista: a
+// lição da ronda 2 foi que vigiar um atributo no painel e deixá-lo aberto no
+// cartão é a mesma porta com outra maçaneta.
+//
+// - `linkDeAvaliacao`: sem link não há mensagem, e sem mensagem não há convite.
+// - `casos`: é a lista de onde sai o cliente convidado. Filtrá-la por nota
+//   («…`.filter((caso) => (caso.rating ?? 0) >= 4)`») faz o convite
+//   desaparecer para as notas baixas sem tocar no convite nem no cartão, a 200
+//   linhas de distância, com cara de afinação inocente da lista. Até
+//   02/09/2026 este guarda EXCLUÍA `casos` de propósito, com o argumento de
+//   que ele «depende de `rating` legitimamente». Depende, para ordenar e
+//   contar; não depende para escolher quem entra.
+const ATRIBUTOS_VIGIADOS = ['linkDeAvaliacao', 'casos'];
+
 // Verdadeiro se algum destes elementos está, directa ou indirectamente,
-// condicionado à nota — pelas condições que o envolvem OU por um atributo
-// nomeado (o painel só precisa de proteger `linkDeAvaliacao`, que é a
-// propriedade que faz o convite desaparecer; `casos` depende de `rating`
-// legitimamente, por ser a lista inteira dos comentários, e não deve ser
-// verificado).
+// condicionado à nota, pelas condições que o envolvem OU por um dos atributos
+// vigiados acima.
 const escondidoPelaNota = (raiz, elementos, nomesDeAtributosSensiveis) => {
   for (const elemento of elementos) {
     const condicoes = condicoesQueEnvolvem(elemento);
@@ -399,10 +467,43 @@ exigir('as propriedades do componente do convite foram lidas na arvore de sintax
 exigir('o componente do convite nao recebe a nota',
   !membrosDoConvite.some((membro) => /rating|nota/i.test(membro.name?.getText(raizDoConvite) || '')));
 
+// ---------------------------------------------------------------------------
+// A LINGUA DA MENSAGEM, NA TELA. Quem le a mensagem e o CLIENTE, e por isso
+// ela segue o pais do NEGOCIO. `i18n.language` e a preferencia de painel do
+// DONO, guardada no navegador e trocavel no seletor: ate 02/09/2026 era dai
+// que a variante saia, e um dono brasileiro com o painel em portugues de
+// Portugal mandava "Se lhe apetecer, deixe a sua opiniao" a um cliente
+// brasileiro. E o defeito de 01/09/2026 outra vez, no mesmo painel, com a
+// licao ja escrita ao lado.
+//
+// Lido na arvore de sintaxe, e transitivamente: nao interessa como a variavel
+// se chama, interessa de onde o valor vem.
+// ---------------------------------------------------------------------------
+exigir('o componente do convite recebe o pais do negocio',
+  membrosDoConvite.some((membro) => membro.name?.getText(raizDoConvite) === 'businessCountry'));
+
+const chamadasDaMensagem = chamadasDe(raizDoConvite, 'mensagemDoConvite');
+exigir('o guarda encontrou a chamada que monta a mensagem', chamadasDaMensagem.length > 0);
+const origemDaMensagem = chamadasDaMensagem.map((c) => textoTransitivo(raizDoConvite, c)).join(' ');
+exigir('a lingua da mensagem vem do pais do negocio',
+  /businessCountry/.test(origemDaMensagem));
+exigir('a lingua da mensagem NAO vem da preferencia de painel do dono',
+  !/i18n\.language|resolvedLanguage/.test(origemDaMensagem));
+
+// O valor tem de CHEGAR ate ao convite, e cada elo e um sitio onde ele se pode
+// perder em silencio: o painel passa ao cartao, o cartao passa ao convite.
+const atributoJsx = (raiz, elemento, nome) => elemento.attributes.properties.find((a) =>
+  ts.isJsxAttribute(a) && a.name.getText(raiz) === nome);
+const passaOPais = (raiz, elementos) => elementos.length > 0 && elementos.every((elemento) => {
+  const atributo = atributoJsx(raiz, elemento, 'businessCountry');
+  if (!atributo || !atributo.initializer || !ts.isJsxExpression(atributo.initializer)) return false;
+  return /businessCountry/.test(atributo.initializer.expression?.getText(raiz) || '');
+});
+
 // O cartao desenha o convite: um elemento JSX real, lido na arvore de
 // sintaxe. Um comentario nunca satisfaz isto.
 const elementosDoConviteNoCartao = elementosJsxComNome(raizDoCartao, 'ConviteParaAvaliar');
-exigir('o cartao desenha o convite em cada caso (na arvore de sintaxe — um comentario nao conta)',
+exigir('o cartao desenha o convite ao lado do comentario destacado (na arvore de sintaxe: um comentario nao conta)',
   elementosDoConviteNoCartao.length > 0);
 // Sem condicional de nota a volta do convite, nem em nenhuma propriedade dele,
 // em qualquer grafia — nao so a forma `rating > 3` que a versao anterior
@@ -413,7 +514,9 @@ exigir('o cartao desenha o convite em cada caso (na arvore de sintaxe — um com
 // outro.
 exigir('o cartao nao esconde o convite por causa da nota, em nenhuma forma',
   elementosDoConviteNoCartao.length === 0
-  || !escondidoPelaNota(raizDoCartao, elementosDoConviteNoCartao, ['linkDeAvaliacao']));
+  || !escondidoPelaNota(raizDoCartao, elementosDoConviteNoCartao, ATRIBUTOS_VIGIADOS));
+exigir('o cartao passa o pais do negocio ao convite (senao a mensagem sai na lingua do painel do dono)',
+  passaOPais(raizDoCartao, elementosDoConviteNoCartao));
 
 // O painel: quem decide o `linkDeAvaliacao` que o cartao recebe. E a
 // alavanca que esconde o convite sem tocar no cartao nem no componente —
@@ -422,9 +525,11 @@ exigir('o cartao nao esconde o convite por causa da nota, em nenhuma forma',
 const elementosDoCartaoNoPainel = elementosJsxComNome(raizDoPainel, 'PendingCommentsBanner');
 exigir('o painel desenha o cartao de comentarios pendentes (na arvore de sintaxe)',
   elementosDoCartaoNoPainel.length > 0);
-exigir('o painel nao condiciona o link de avaliacao do Google (nem o cartao inteiro) a nota do comentario, em nenhuma forma',
+exigir('o painel nao condiciona a lista de casos, nem o link de avaliacao, nem o cartao inteiro, a nota do comentario, em nenhuma forma',
   elementosDoCartaoNoPainel.length === 0
-  || !escondidoPelaNota(raizDoPainel, elementosDoCartaoNoPainel, ['linkDeAvaliacao']));
+  || !escondidoPelaNota(raizDoPainel, elementosDoCartaoNoPainel, ATRIBUTOS_VIGIADOS));
+exigir('o painel passa o pais do negocio ao cartao, o mesmo que ja passa a fila de respostas',
+  passaOPais(raizDoPainel, elementosDoCartaoNoPainel));
 
 // E3 (ronda 2): a chave existir no catalogo nao prova que alguem a use.
 // Reverter os dois toasts do I3/M1 de volta para `inviteCopy` deixava o
@@ -451,6 +556,49 @@ for (const idioma of ['pt-PT', 'pt-BR', 'en']) {
       typeof catalogo?.invite?.[chave] === 'string' && catalogo.invite[chave].length > 0);
   }
 }
+
+// ---------------------------------------------------------------------------
+// O LINK DE AVALIACAO DO GOOGLE, e o criterio que decide que ele existe.
+//
+// O painel dizia, num comentario, que usava "o mesmo jeito que `useSetupStatus`
+// decide se o negocio ja tem endereco do Google". Nao usava: o `useSetupStatus`
+// exige URL nao vazio e o painel aceitava a primeira entrada com "google" na
+// plataforma, tivesse ela endereco ou nao. Com uma entrada "Google Reviews" sem
+// URL e uma "Google Maps" com URL, o passo a passo dizia ao dono que estava
+// completo e o convite dizia-lhe para ligar o link.
+//
+// Os DOIS lados sao medidos, e nao so o que foi corrigido: um criterio que
+// promete ser igual a outro tem de ficar vermelho quando qualquer um dos dois
+// se mexer. A declaracao e lida na arvore de sintaxe, e nao no ficheiro em
+// bruto, para que um comentario nunca a satisfaca.
+// ---------------------------------------------------------------------------
+const semEspacos = (texto) => texto.replace(/\s+/g, '');
+const declaracaoDoLink = declaracaoPorNome(raizDoPainel, 'linkDeAvaliacaoDoGoogle');
+exigir('o guarda encontrou no painel a declaracao do link de avaliacao do Google',
+  declaracaoDoLink !== undefined);
+const textoDoLink = declaracaoDoLink ? semEspacos(declaracaoDoLink.getText(raizDoPainel)) : '';
+exigir('o painel so aceita como link do Google uma entrada com URL nao vazio',
+  textoDoLink.includes("platform.toLowerCase().includes('google')&&!!link.url?.trim()"));
+const setupStatus = semEspacos(readFileSync('src/hooks/useSetupStatus.ts', 'utf8'));
+exigir('useSetupStatus continua a exigir a mesma coisa, e os dois criterios nao podem divergir em silencio',
+  setupStatus.includes("platform?.toLowerCase().includes('google')&&!!l.url?.trim()"));
+
+// ---------------------------------------------------------------------------
+// O CONTRATO DE PRODUTO. Ele descreve o produto, e por isso nao pode prometer
+// no presente uma coisa que nao esta aplicada, nem dizer "sempre" quando o
+// convite so existe onde ja havia aviso. As quatro linhas abaixo sao os quatro
+// pontos que a revisao final de 02/09/2026 mandou escrever la.
+// ---------------------------------------------------------------------------
+const contrato = readFileSync('docs/contrato-produto-binno.md', 'utf8');
+exigir('o contrato diz "sempre que ha aviso", e nao "sempre"',
+  /Passa a ser escrita\s+sempre que há aviso/.test(contrato));
+exigir('o contrato diz que a migracao esta escrita e POR APLICAR',
+  /Estado da migração do aviso: escrita e por aplicar/.test(contrato)
+  && /20260902120000_convite_sem_filtro\.sql/.test(contrato));
+exigir('o contrato regista o convite na tela, para qualquer nota',
+  /O convite também aparece na tela, para qualquer nota/.test(contrato));
+exigir('o contrato regista que o Binno nao envia, o dono toca',
+  /O Binno não envia o convite: ele escreve, o dono toca/.test(contrato));
 
 if (falhas.length) {
   console.error('Convite sem filtro: %d protecao(oes) falharam.\n', falhas.length);

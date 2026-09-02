@@ -48,10 +48,18 @@ const PendingCommentsBanner = ({
   casos,
   nomeDoNegocio,
   linkDeAvaliacao,
+  businessCountry,
 }: {
   casos: InternalCase[];
   nomeDoNegocio: string;
   linkDeAvaliacao: string | null;
+  /**
+   * `profiles.business_country`, lido pelo painel e passado por aqui só para
+   * chegar ao convite: a mensagem que o cliente recebe segue o país do
+   * NEGÓCIO, e não a língua em que o dono escolheu ver o painel. Ver o
+   * cabeçalho de `ConviteParaAvaliar`.
+   */
+  businessCountry: string | null;
 }) => {
   const { t, i18n } = useOwnerTranslation();
 
@@ -117,6 +125,7 @@ const PendingCommentsBanner = ({
                 contacto={highlighted.customer_email}
                 nomeDoNegocio={nomeDoNegocio}
                 linkDeAvaliacao={linkDeAvaliacao}
+                businessCountry={businessCountry}
               />
             </div>
             <div className="mt-4">

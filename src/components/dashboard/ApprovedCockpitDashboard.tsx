@@ -227,11 +227,16 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel, 
   // O link de avaliação do Google, para o convite ao lado do comentário
   // pendente (`PendingCommentsBanner`). MESMA leitura de `platform_links` que
   // as Definições usam; o cartão não lê nada sozinho, recebe por propriedade.
-  // A entrada é a que tem "google" na plataforma, do mesmo jeito que
-  // `useSetupStatus` decide se o negócio já tem endereço do Google.
+  //
+  // O CRITÉRIO É O DE `useSetupStatus`, ELO A ELO: a plataforma diz "google" E
+  // o endereço não está vazio. Até 02/09/2026 esta linha exigia só a primeira
+  // metade, e o comentário aqui afirmava que eram iguais quando não eram. O
+  // dono com uma entrada "Google Reviews" sem endereço e uma "Google Maps" com
+  // endereço via o passo a passo dizer que estava completo e o convite dizer
+  // para ligar o link: `find` parava na primeira entrada, que não tem URL.
   const { externalLinks } = useExternalLinks(userId, { silent: true });
   const linkDeAvaliacaoDoGoogle = useMemo(
-    () => externalLinks.find((link) => link.platform.toLowerCase().includes('google'))?.url?.trim() || null,
+    () => externalLinks.find((link) => link.platform.toLowerCase().includes('google') && !!link.url?.trim())?.url?.trim() || null,
     [externalLinks],
   );
   // `profiles.business_country` decide a variante do português da resposta
@@ -420,7 +425,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel, 
           `null` e esta caixa fica sem filho nenhum: continua a ser item da
           grade, e o `gap-4` continua a contar com ela. Medido no ecrã, isso
           custava 16px de branco por cima da fila em toda conta em dia. */}
-      <div className="min-w-0 empty:hidden lg:col-span-3"><PendingCommentsBanner casos={comentariosInternos} nomeDoNegocio={snapshot.business.name} linkDeAvaliacao={linkDeAvaliacaoDoGoogle} /></div>
+      <div className="min-w-0 empty:hidden lg:col-span-3"><PendingCommentsBanner casos={comentariosInternos} nomeDoNegocio={snapshot.business.name} linkDeAvaliacao={linkDeAvaliacaoDoGoogle} businessCountry={businessCountry} /></div>
       {/* A fila e a Reputação lado a lado, decisão de Marcelo em 01/09/2026:
           "suba Reputação no Google para o lado de Avaliações no Google, assim a
           pessoa enxerga as métricas mais importantes de uma só vez".

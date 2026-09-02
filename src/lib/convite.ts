@@ -44,12 +44,53 @@ export const mensagemDoConvite = (entrada: EntradaDoConvite): string => {
 };
 
 /**
- * O endereço que abre o WhatsApp com a mensagem já escrita. `null` quando não
- * há por onde: sem contacto, sem mensagem, ou com um contacto que é e-mail.
- * Quem chama desenha outro botão nesse caso, em vez de um que não faz nada.
+ * A língua da mensagem segue o país do NEGÓCIO, e nunca a preferência de
+ * painel do dono.
+ *
+ * Quem lê esta mensagem é o cliente, não o dono. `i18n.language` é o idioma em
+ * que o dono escolheu ver o painel dele, guardado no navegador e trocável no
+ * seletor: um dono brasileiro com o painel em português de Portugal mandaria
+ * «Se lhe apetecer, deixe a sua opinião» a um cliente brasileiro, e com o
+ * painel em inglês mandaria em inglês. É o defeito de 01/09/2026 outra vez, o
+ * mesmo que a resposta sugerida já corrigiu.
+ *
+ * A regra é a do resto do produto (`resolveContentLocale`, em
+ * `src/lib/replySuggestions.ts`): só `'BR'` exacto vira brasileiro. Ausente,
+ * vazio ou qualquer outro país cai no português de Portugal, que é o padrão
+ * histórico, para que um país por ler nunca vire um brasileirismo indevido nem
+ * o contrário.
+ */
+export const idiomaDoConvite = (paisDoNegocio: string | null | undefined): EntradaDoConvite['idioma'] =>
+  (paisDoNegocio === 'BR' ? 'pt-BR' : 'pt-PT');
+
+/**
+ * O endereço que abre o WhatsApp com a mensagem já escrita.
+ *
+ * `wa.me` LÊ O NÚMERO COMO INTERNACIONAL, sempre, e não tem indicativo por
+ * omissão. `wa.me/79998380767` não é um número de Aracaju a que faltou o
+ * `+55`: o WhatsApp lê o `7` da frente como indicativo da Rússia e abre a
+ * conversa com um desconhecido. Das seis linhas reais de 02/09/2026, cinco
+ * começavam por `+55` e a sexta estava escrita `(79) 99838-0767`.
+ *
+ * Por isso o endereço só é montado quando o indicativo está lá: o contacto
+ * começa por `+`, ou tem 12 a 15 algarismos (12 é o mais curto que já traz
+ * indicativo, 15 é o máximo do E.164). Onze ou menos é número local, e um
+ * número local não tem para onde ser enviado.
+ *
+ * A classificação de `tipoDoContacto` NÃO muda por causa disto: ela responde
+ * "isto é telefone ou e-mail", e a resposta continua a ser telefone. Quem
+ * exige indicativo é só quem monta o endereço.
+ *
+ * `null` quando não há por onde, e são quatro casos: sem mensagem, sem
+ * contacto, com um contacto que é e-mail, e com um telefone sem indicativo.
+ * Nesse caso quem chama desenha só o botão de copiar, o caminho que já existia
+ * para o e-mail, em vez de um botão que abre a conversa errada.
  */
 export const linkDeWhatsApp = (contacto: string | null, mensagem: string): string | null => {
   if (!mensagem.trim()) return null;
   if (tipoDoContacto(contacto) !== 'telefone') return null;
-  return `https://wa.me/${apenasDigitos(contacto || '')}?text=${encodeURIComponent(mensagem)}`;
+  const escrito = (contacto || '').trim();
+  const digitos = apenasDigitos(escrito);
+  if (!escrito.startsWith('+') && digitos.length < 12) return null;
+  return `https://wa.me/${digitos}?text=${encodeURIComponent(mensagem)}`;
 };

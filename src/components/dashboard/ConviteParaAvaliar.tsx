@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Copy, MessageCircle } from 'lucide-react';
-import { mensagemDoConvite, linkDeWhatsApp } from '@/lib/convite';
+import { mensagemDoConvite, linkDeWhatsApp, idiomaDoConvite } from '@/lib/convite';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 /**
@@ -14,22 +14,34 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
  *
  * O Binno não envia: o botão abre o WhatsApp do dono com a mensagem escrita, e
  * é ele quem toca em enviar.
+ *
+ * A MENSAGEM SAI NA LÍNGUA DO CLIENTE, NÃO NA DO PAINEL (correcção de
+ * 02/09/2026). Até aqui a variante vinha de `i18n.language`, que é a
+ * preferência de painel do DONO: um dono brasileiro a ler o painel em
+ * português de Portugal mandava «Se lhe apetecer, deixe a sua opinião» a um
+ * cliente brasileiro, e com o painel em inglês mandava em inglês. É palavra
+ * por palavra o defeito de 01/09/2026 que a resposta sugerida já tinha
+ * corrigido, no mesmo painel. Agora a variante sai de `businessCountry`
+ * (`profiles.business_country`), pela regra partilhada `idiomaDoConvite`.
+ *
+ * Os rótulos dos botões continuam em `t(...)`, e isso é outra coisa: quem os
+ * lê é o dono, na tela dele.
  */
 interface ConviteParaAvaliarProps {
   nomeDoCliente: string | null;
   contacto: string | null;
   nomeDoNegocio: string;
   linkDeAvaliacao: string | null;
+  /** `profiles.business_country`. Decide a variante do português da mensagem. */
+  businessCountry: string | null;
 }
 
 const ConviteParaAvaliar: React.FC<ConviteParaAvaliarProps> = ({
-  nomeDoCliente, contacto, nomeDoNegocio, linkDeAvaliacao,
+  nomeDoCliente, contacto, nomeDoNegocio, linkDeAvaliacao, businessCountry,
 }) => {
-  const { t, i18n } = useOwnerTranslation();
+  const { t } = useOwnerTranslation();
   const [copiado, setCopiado] = useState(false);
-  const idioma = (['pt-PT', 'pt-BR', 'en'] as const).includes(i18n.language as never)
-    ? (i18n.language as 'pt-PT' | 'pt-BR' | 'en')
-    : 'pt-PT';
+  const idioma = idiomaDoConvite(businessCountry);
 
   const mensagem = mensagemDoConvite({ nomeDoCliente, nomeDoNegocio, linkDeAvaliacao, idioma });
   // Sem link de avaliação não há convite nenhum a fazer, e dizer porquê é mais
