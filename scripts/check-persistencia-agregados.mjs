@@ -103,6 +103,19 @@ const COLUNAS_PERMITIDAS = new Set([
   'reviews_last_30_days',
   'average_response_hours',
   'topics',
+  // ACRESCENTADA EM 02/09/2026, e a razao importa mais do que a coluna.
+  //
+  // `weekly_history` guarda as semanas do historico: data de inicio, quantas
+  // avaliacoes, a divisao por nota e quantas o dono respondeu. Sao contagens e
+  // datas. NAO ha nome de avaliador, texto de avaliacao nem link — e esta
+  // lista existe exactamente para que essa conferencia seja feita por alguem,
+  // uma coluna de cada vez, antes de a coluna existir.
+  //
+  // Ela entrou porque o historico so vivia no `localStorage` do navegador que
+  // coletou: quem trocasse de aparelho, ou recebesse uma coleta feita pelo
+  // servidor, via numeros e nenhum grafico. Ver
+  // `scripts/check-historico-que-sobrevive.mjs`.
+  'weekly_history',
   'source',
 ]);
 

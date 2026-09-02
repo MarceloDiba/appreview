@@ -35,7 +35,7 @@ export const useReputationSnapshot = (userId?: string) => {
       setLoading(true);
       const { data, error } = await supabase
         .from('google_business_reputation_snapshots')
-        .select('captured_at, total_reviews, average_rating, rating_breakdown, unanswered_review_count, reviews_last_30_days, average_response_hours, topics, source')
+        .select('captured_at, total_reviews, average_rating, rating_breakdown, unanswered_review_count, reviews_last_30_days, average_response_hours, topics, weekly_history, source')
         .eq('user_id', userId)
         .order('captured_at', { ascending: false })
         .limit(1)

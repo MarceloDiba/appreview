@@ -793,7 +793,7 @@
         "qrTitle": "From QR to Google",
         "qrOpened": "QR opened",
         "qrClicked": "Clicked through to Google",
-        "volumeEmpty": "How many reviews you get each week appears here after the second fetch.",
+        "volumeEmpty": "There are no weeks to compare yet. This appears once your reviews span more than one week.",
         "distributionEmpty": "Each rating on its own line appears here once Binno fetches your reviews.",
         "distributionTooFew_one": "With 1 review fetched, there is nothing yet for the chart to separate. From {{minimo}} on, each rating on its own line appears here.",
         "distributionTooFew_other": "With {{count}} reviews fetched, a single review already shifts the chart a lot. From {{minimo}} on, each rating on its own line appears here.",
