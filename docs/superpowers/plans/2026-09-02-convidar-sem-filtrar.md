@@ -522,7 +522,7 @@ export const linkDeWhatsApp = (contacto: string | null, mensagem: string): strin
 cd ~/binno/maps && node --experimental-strip-types scripts/check-convite-sem-filtro.mjs
 ```
 
-Esperado: `Convite sem filtro: 25 protecoes verdes.`
+Esperado: `Convite sem filtro: 23 protecoes verdes.` (as 20 desta tarefa mais as 3 da Tarefa 1)
 
 - [ ] **Passo 6: provar as asserções vermelhas**
 
@@ -552,7 +552,7 @@ import pathlib;p=pathlib.Path('src/lib/convite.ts');s=p.read_text()
 p.write_text(s.replace(\"if (tipoDoContacto(contacto) !== 'telefone') return null;\",''))"
 node --experimental-strip-types scripts/check-convite-sem-filtro.mjs  # VERMELHO: um email nao vira link
 cp /tmp/c.ts src/lib/convite.ts
-node --experimental-strip-types scripts/check-convite-sem-filtro.mjs  # 25 verdes
+node --experimental-strip-types scripts/check-convite-sem-filtro.mjs  # 23 verdes
 ```
 
 - [ ] **Passo 7: apontar o guarda para o interpretador certo**
