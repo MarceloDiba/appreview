@@ -469,6 +469,23 @@ exigir('o segredo do dreno vem do Vault, e nao escrito no ficheiro',
 exigir('o dreno so chama quando ha alguma coisa na fila',
   /if v_pendentes = 0 then\s+return;\s+end if;/.test(migracaoExecutavel));
 
+// 3.1b O RESUMO TEM QUEM O CHAME. Descoberto ao conferir a producao em
+// 02/09/2026: `cron.job` tinha um unico trabalho, o do Telegram, e existia uma
+// so linha `weekly` enfileirada pelo materializador, de 31/08. O resumo semanal
+// nao estava a falhar — nao estava a acontecer. Sem estas duas linhas, todo o
+// resto deste ramo fica a espera de um chamador que nao existe.
+exigir('o resumo semanal e chamado pelo agendador',
+  /select cron\.schedule\('binno-resumo-semanal', '\*\/15 \* \* \* \*', 'select public\.chamar_resumo_semanal\(\);'\);/.test(migracaoExecutavel));
+exigir('agendar o resumo duas vezes nao cria dois trabalhos',
+  /perform cron\.unschedule\('binno-resumo-semanal'\);/.test(migracaoExecutavel));
+exigir('quem chama o resumo aponta para o materializador',
+  /functions\/v1\/materialize-whatsapp-notifications/.test(migracaoExecutavel));
+// A chave `weekly:<data local>` e o que torna 96 chamadas por dia inofensivas:
+// sem ela, o dono recebia o resumo de quinze em quinze minutos.
+exigir('a chave por dia local e o que impede o resumo de sair 96 vezes',
+  /idempotency_key: `weekly:\$\{local\.date\}`,/.test(materializadorExecutavel)
+  && /ignoreDuplicates: true/.test(materializadorExecutavel));
+
 // 3.2 A ORDEM no despachante. Reservar antes de saber que ha chave poria as
 // linhas em `sending` sem ninguem para as enviar, e elas ficavam presas nesse
 // estado para sempre. A ordem e o comportamento, e nao uma questao de estilo.

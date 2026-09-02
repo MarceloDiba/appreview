@@ -219,3 +219,80 @@ end;
 $$;
 
 select cron.schedule('binno-email', '*/5 * * * *', 'select public.drenar_relatorios_por_email();');
+
+-- ---------------------------------------------------------------------------
+-- E O RESUMO SEMANAL PASSA A TER QUEM O CHAME.
+-- ---------------------------------------------------------------------------
+--
+-- ISTO NAO ESTAVA PLANEADO, E FOI A PRODUCAO QUE O DISSE.
+--
+-- Ao conferir o estado real da fila em 02/09/2026, antes de aplicar esta
+-- migracao, apareceram tres factos que desmentiam o que se assumia:
+--
+--   1. `cron.job` tem UM trabalho, `binno-telegram`. Nao ha nenhum a chamar
+--      `materialize-whatsapp-notifications`.
+--   2. So existe UMA linha `weekly` enfileirada pelo materializador,
+--      `weekly:2026-08-31`, entregue a 31/08 as 08:00. Nenhuma depois.
+--   3. As duas linhas `weekly` do dia 01/09 sao ensaios manuais — leem-se pela
+--      chave, `ensaio-formato-resumo-2026-09-01` e `ensaio-demonstracao-...`.
+--
+-- Ou seja: o resumo semanal nao estava a falhar. Nao estava a ACONTECER. O
+-- codigo que o monta existe, esta implantado e nunca e chamado, e isso e pior
+-- do que uma falha, porque uma falha deixa uma linha `failed` que alguem pode
+-- ver. Isto nao deixava nada.
+--
+-- Sem estas linhas, tudo o que este ficheiro faz — o canal de e-mail, o
+-- compositor, o drenador — ficaria a espera de um chamador que nao existe.
+--
+-- POR QUE DE 15 EM 15 MINUTOS
+--
+-- O materializador nao decide se e hora: ele COMPARA. Para cada dono le o fuso
+-- horario, o dia da semana escolhido e a hora escolhida, e so enfileira depois
+-- de a hora local ter passado. A chave `weekly:<data local>` garante uma linha
+-- por dia por dono, aconteca a chamada uma vez ou noventa e seis.
+--
+-- Logo o intervalo nao decide SE o resumo sai, decide com que atraso: de hora a
+-- hora, um resumo pedido para as 09:00 podia sair as 09:59. Quinze minutos poem
+-- o pior caso em catorze, que e o que se pode chamar "de manha".
+create or replace function public.chamar_resumo_semanal()
+returns void
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_segredo text;
+begin
+  select decrypted_secret into v_segredo
+    from vault.decrypted_secrets where name = 'binno_worker_secret';
+  if v_segredo is null then
+    -- Sem segredo nao ha chamada possivel. Fica dito no log do proprio cron, que
+    -- e o unico sitio onde ha o que escrever: aqui ainda nao existe linha
+    -- nenhuma na fila para carregar o motivo.
+    raise warning 'chamar_resumo_semanal: segredo ausente no Vault';
+    return;
+  end if;
+
+  perform net.http_post(
+    url := 'https://tjbznhwdjyabuacrfqie.supabase.co/functions/v1/materialize-whatsapp-notifications',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'x-binno-worker-secret', v_segredo
+    ),
+    body := '{}'::jsonb,
+    timeout_milliseconds := 20000
+  );
+exception when others then
+  raise warning 'chamar_resumo_semanal falhou: %', sqlerrm;
+end;
+$function$;
+
+do $$
+begin
+  perform cron.unschedule('binno-resumo-semanal');
+exception when others then
+  null;
+end;
+$$;
+
+select cron.schedule('binno-resumo-semanal', '*/15 * * * *', 'select public.chamar_resumo_semanal();');
