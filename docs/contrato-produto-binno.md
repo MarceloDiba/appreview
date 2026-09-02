@@ -930,6 +930,13 @@ O guarda é `npm run check:ordem-por-decisao`.
   iniciada pelo gestor, pode enviar um alerta ao próprio número configurado se
   houver consentimento, sinal elegível e sessão local ligada. Continua sem
   agenda, webhook, retry, importação de conversas ou operação de produção.
+- **O convite para avaliar no Google nunca depende da nota.**
+  *Decidido em 02/09/2026.* Convidar só quem deu 4 ou 5 é solicitação seletiva,
+  e a política do Google proíbe: perfis apanhados nisso perdem avaliações. O QR
+  já não filtrava (o `ReviewChooser` mostra as duas portas lado a lado, sem
+  perguntar a nota), mas o aviso ao dono filtrava: a linha que mandava convidar
+  para o Google só era escrita quando a nota era 4 ou 5. Passa a ser escrita
+  sempre. Guardado por `scripts/check-convite-sem-filtro.mjs`.
 
 ## 5. Fontes de dados e integrações
 
