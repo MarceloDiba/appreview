@@ -410,6 +410,54 @@ exigir(
   /if \(!userId\) \{ setPaisLido\(true\); return; \}/.test(cockpit),
 );
 
+// ---------------------------------------------------------------------------
+// A SEGUNDA TENTATIVA (02/09/2026).
+// ---------------------------------------------------------------------------
+//
+// Marcelo abriu um comentario privado que dizia so "Voce e top", com nota 3, e
+// recebeu um molde a perguntar o que tinha faltado para a visita ser boa. O
+// rascunho do modelo tinha sido RECUSADO e caiu no molde em silencio.
+//
+// Medido a repetir o caso: o modelo escrevia "o que te levou a me dar essa
+// avaliacao de tres" — a frase mais natural para um elogio com nota media — e
+// a regra do canal privado proibe a palavra "avaliacao". Duas recusas em
+// quatro. Com a segunda tentativa: uma recusa em seis, salva, zero perdidas.
+//
+// A regra NAO se afrouxa: qualquer troca por avaliacao tem de nomear a
+// avaliacao. O que mudou foi a consequencia.
+exigir(
+  'uma recusa vira um pedido de novo, e nao um molde em silencio',
+  /const TENTATIVAS = 2;/.test(fonte) && /for \(let tentativa = 0; tentativa < TENTATIVAS/.test(fonte),
+);
+// Duas, e nao mais: sem tecto, um rascunho teimoso gastaria chamadas sem fim.
+exigir(
+  'sao no maximo duas tentativas, para uma recusa teimosa nao gastar sem fim',
+  /const TENTATIVAS = 2;/.test(fonte) && !/TENTATIVAS = [3-9]/.test(fonte),
+);
+// O pedido de repeticao tem de DIZER a regra quebrada. Repetir o mesmo pedido
+// so gastaria outra chamada a espera de sorte.
+exigir(
+  'a repeticao diz ao modelo qual regra ele quebrou',
+  /Your previous answer was REJECTED because \$\{ultimaCorrecao\}/.test(fonte),
+);
+exigir(
+  'a correcao vem da regra que foi violada, e nao de um texto generico',
+  /ultimaCorrecao = violada\s*\?\s*violada\.correcao/.test(fonte),
+);
+// Toda regra tem de trazer a sua correcao, senao a repeticao fica muda para
+// aquela e volta a ser sorte.
+{
+  const bloco = fonte.slice(fonte.indexOf('const SEMPRE_PROIBIDO'), fonte.indexOf('const PROIBIDO:'));
+  const motivos = (bloco.match(/motivo: '/g) || []).length;
+  const correcoes = (bloco.match(/correcao: '/g) || []).length;
+  exigir(`toda regra traz a correcao dela (${motivos} motivos, ${correcoes} correcoes)`, motivos > 0 && motivos === correcoes);
+}
+// E o chao nao muda: falhando as duas, o molde entra, exatamente como antes.
+exigir(
+  'falhando as duas tentativas, o molde continua a ser o chao',
+  /return json\(\{ code: 'RASCUNHO_RECUSADO', error: `O rascunho continha \$\{ultimoMotivo\}, nas duas tentativas\.` \}, 422\);/.test(fonte),
+);
+
 if (falhas.length) {
   console.error('Canal do rascunho: %d protecao(oes) falharam.\n', falhas.length);
   for (const falha of falhas) console.error(' - %s', falha);

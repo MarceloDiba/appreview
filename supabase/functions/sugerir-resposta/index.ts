@@ -67,7 +67,7 @@ const TRAVESSAO = String.fromCharCode(0x2014);
 const MEIO_RISCO = String.fromCharCode(0x2013);
 
 type Canal = 'public' | 'private';
-type Regra = { padrao: RegExp; motivo: string };
+type Regra = { padrao: RegExp; motivo: string; correcao: string };
 
 /**
  * O que NENHUM rascunho pode conter, em canal nenhum.
@@ -85,10 +85,12 @@ type Regra = { padrao: RegExp; motivo: string };
 const SEMPRE_PROIBIDO: Regra[] = [
   // Marcelo, em 30/08/2026: "usam travessao, nunca usaria isso, ja deixa claro
   // que e IA". O tracinho longo e a marca mais reconhecivel de texto gerado.
-  { padrao: new RegExp(`[${TRAVESSAO}${MEIO_RISCO}]`), motivo: 'travessao' },
+  { padrao: new RegExp(`[${TRAVESSAO}${MEIO_RISCO}]`), motivo: 'travessao',
+    correcao: 'it used an em dash or an en dash. Write it again with the same meaning, using only commas, full stops or a new sentence.' },
   // Dizer que e um assistente quebra a voz do negocio, em qualquer lingua e em
   // qualquer canal.
-  { padrao: /\b(intelig[eê]ncia artificial|assistente virtual|sou uma? (IA|intelig)|inteligencia artificial|asistente virtual|artificial intelligence|virtual assistant|language model|an? AI\b)/i, motivo: 'revela automacao' },
+  { padrao: /\b(intelig[eê]ncia artificial|assistente virtual|sou uma? (IA|intelig)|inteligencia artificial|asistente virtual|artificial intelligence|virtual assistant|language model|an? AI\b)/i, motivo: 'revela automacao',
+    correcao: 'it said or implied you are an AI. Write it again as the owner speaking, with no mention of assistants, models or automation.' },
 ];
 
 /**
@@ -120,9 +122,12 @@ const SEMPRE_PROIBIDO: Regra[] = [
  * e a forma mais natural de prometer reembolso em portugues.
  */
 const REPARACAO: Regra[] = [
-  { padrao: /\b(reembols|devolv|devolu[cç]|ressarc|desconto|cortesia|brinde|gr[aá]tis|compensa|por (nossa|minha) conta|sem custo|sem qualquer custo|oferta da casa|vale de)/i, motivo: 'promessa de reparacao (pt)' },
-  { padrao: /\b(descuento|reembols|devolver|devolvere|devoluci|cortes[ií]a|obsequio|gratis|compensa|resarci|sin (coste|cargo|costo)|invita la casa|vale de)/i, motivo: 'promessa de reparacao (es)' },
-  { padrao: /\b(refund|discount|voucher|coupon|rebate|reimburs|compensat|complimentary|on the house|free of charge|for free|at no (cost|charge)|free (meal|drink|dessert|night|stay|room)|gift (card|voucher))/i, motivo: 'promessa de reparacao (en)' },
+  { padrao: /\b(reembols|devolv|devolu[cç]|ressarc|desconto|cortesia|brinde|gr[aá]tis|compensa|por (nossa|minha) conta|sem custo|sem qualquer custo|oferta da casa|vale de)/i, motivo: 'promessa de reparacao (pt)',
+    correcao: 'it promised a refund, a discount, a voucher, a free item or some form of compensation. Write the reply again with the same meaning, offering none of those. You may apologise and say what you will change, but promise nothing that costs money.' },
+  { padrao: /\b(descuento|reembols|devolver|devolvere|devoluci|cortes[ií]a|obsequio|gratis|compensa|resarci|sin (coste|cargo|costo)|invita la casa|vale de)/i, motivo: 'promessa de reparacao (es)',
+    correcao: 'it promised a refund, a discount, a voucher, a free item or some form of compensation. Write the reply again with the same meaning, offering none of those. You may apologise and say what you will change, but promise nothing that costs money.' },
+  { padrao: /\b(refund|discount|voucher|coupon|rebate|reimburs|compensat|complimentary|on the house|free of charge|for free|at no (cost|charge)|free (meal|drink|dessert|night|stay|room)|gift (card|voucher))/i, motivo: 'promessa de reparacao (en)',
+    correcao: 'it promised a refund, a discount, a voucher, a free item or some form of compensation. Write the reply again with the same meaning, offering none of those. You may apologise and say what you will change, but promise nothing that costs money.' },
 ];
 
 /**
@@ -171,9 +176,12 @@ const REPARACAO: Regra[] = [
 const FALAR_DA_AVALIACAO: Regra[] = [
   // `nota` leva uma excecao: "tomar nota" e uma frase normal de quem promete
   // agir, e nao uma referencia a pontuacao.
-  { padrao: /\b(avalia[çc][õoãa]\w*|(?<!tomar )(?<!tomei )(?<!tomo )(?<!tomarei )notas?|estrelas?|google)\b/i, motivo: 'fala da avaliacao publica (pt)' },
-  { padrao: /\b(rese[ñn]as?|valoraci[óo]n\w*|puntuaci[óo]n\w*|calificaci[óo]n\w*|estrellas?|google)\b/i, motivo: 'fala da avaliacao publica (es)' },
-  { padrao: /\b(reviews?|ratings?|stars?|scores?|google)\b/i, motivo: 'fala da avaliacao publica (en)' },
+  { padrao: /\b(avalia[çc][õoãa]\w*|(?<!tomar )(?<!tomei )(?<!tomo )(?<!tomarei )notas?|estrelas?|google)\b/i, motivo: 'fala da avaliacao publica (pt)',
+    correcao: 'it used one of the forbidden words: review, rating, stars, score, Google, or their equivalent in the language you wrote. Write the message again with the same meaning and the same warmth, without any of those words. Refer to WHAT THE CUSTOMER TOLD YOU, never to the score they gave.' },
+  { padrao: /\b(rese[ñn]as?|valoraci[óo]n\w*|puntuaci[óo]n\w*|calificaci[óo]n\w*|estrellas?|google)\b/i, motivo: 'fala da avaliacao publica (es)',
+    correcao: 'it used one of the forbidden words: review, rating, stars, score, Google, or their equivalent in the language you wrote. Write the message again with the same meaning and the same warmth, without any of those words. Refer to WHAT THE CUSTOMER TOLD YOU, never to the score they gave.' },
+  { padrao: /\b(reviews?|ratings?|stars?|scores?|google)\b/i, motivo: 'fala da avaliacao publica (en)',
+    correcao: 'it used one of the forbidden words: review, rating, stars, score, Google, or their equivalent in the language you wrote. Write the message again with the same meaning and the same warmth, without any of those words. Refer to WHAT THE CUSTOMER TOLD YOU, never to the score they gave.' },
 ];
 
 const PROIBIDO: Record<Canal, Regra[]> = {
@@ -367,13 +375,35 @@ Deno.serve(async (request) => {
     ? PEDIDO_PRIVADO(negocio, nota, recorte, cliente, pais)
     : PEDIDO_PUBLICO(negocio, nota, recorte, pais);
 
-  try {
+  /**
+   * UMA SEGUNDA TENTATIVA, e por que ela existe.
+   *
+   * Ate 02/09/2026 um rascunho recusado caia direto no molde, em silencio.
+   * Marcelo abriu um comentario privado que dizia so "Voce e top", com nota 3,
+   * e recebeu um molde a perguntar o que tinha faltado para a visita ser boa.
+   * Nao fazia sentido nenhum, e ele nao tinha como saber porque.
+   *
+   * A causa, medida a repetir o caso quatro vezes: DUAS foram recusadas, e as
+   * duas pela mesma palavra. O modelo escrevia "o que te levou a me dar essa
+   * avaliacao de tres", que e a frase mais natural do mundo para um elogio com
+   * nota media, e a regra do canal privado proibe a palavra "avaliacao".
+   *
+   * A regra esta certa e nao se afrouxa: qualquer troca por avaliacao tem de
+   * nomear a avaliacao, e e isso que ela apanha. O que estava errado era a
+   * consequencia. Uma recusa passa a ser um PEDIDO DE NOVO, com a regra
+   * quebrada dita ao modelo em ingles, e nao um molde sem sentido.
+   *
+   * Duas tentativas, nao mais: se a segunda tambem violar, o molde entra, que e
+   * exatamente o que acontecia antes. O custo extra so existe quando ha recusa,
+   * e uma chamada deste modelo custa fraccoes de centimo.
+   */
+  const gerar = async (texto: string) => {
     const resposta = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${chave}` },
       body: JSON.stringify({
         model: MODELO,
-        messages: [{ role: 'user', content: pedido }],
+        messages: [{ role: 'user', content: texto }],
         temperature: 0.3,
         // O recado privado tem uma frase a mais e uma pergunta, e o corte por
         // orcamento chegaria como JSON partido, ou seja, como template.
@@ -381,48 +411,63 @@ Deno.serve(async (request) => {
         response_format: { type: 'json_object' },
       }),
     });
-
     if (!resposta.ok) {
       const detalhe = await resposta.text().catch(() => '');
-      return json({ code: 'MODELO_RECUSOU', error: `O modelo devolveu ${resposta.status}.`, detalhe: detalhe.slice(0, 200) }, 502);
+      return { erro: json({ code: 'MODELO_RECUSOU', error: `O modelo devolveu ${resposta.status}.`, detalhe: detalhe.slice(0, 200) }, 502) };
     }
-
     const dados = await resposta.json();
     const bruto = String(dados?.choices?.[0]?.message?.content ?? '').trim();
-    let rascunho = '';
-    let idioma = '';
     try {
       const objeto = JSON.parse(bruto) as Record<string, unknown>;
-      rascunho = String(objeto?.reply ?? '').trim();
-      idioma = String(objeto?.language ?? '').trim();
+      return { rascunho: String(objeto?.reply ?? '').trim(), idioma: String(objeto?.language ?? '').trim() };
     } catch {
-      // JSON invalido e o mesmo que resposta vazia: quem chamou fica com o
-      // texto antigo, em vez de receber o objeto cru na caixa.
-      rascunho = '';
+      // JSON invalido e o mesmo que resposta vazia.
+      return { rascunho: '', idioma: '' };
     }
-    if (!rascunho) return json({ code: 'MODELO_VAZIO', error: 'O modelo devolveu vazio.' }, 502);
+  };
 
-    // A verificacao, que e a parte que garante em vez de pedir. A lista muda
-    // com o canal: ver o cabecalho.
-    //
-    // O nome do negocio sai do texto ANTES de ser conferido. E a unica parte
-    // do rascunho que nao foi o modelo que escolheu (o pedido manda assinar
-    // com ele), e um negocio chamado "Estrela do Norte" ou "Cinco Estrelas"
-    // seria recusado por se assinar, para sempre e sem erro na tela.
-    const paraConferir = negocio ? rascunho.split(negocio).join(' ') : rascunho;
-    for (const { padrao, motivo } of PROIBIDO[canal]) {
-      if (padrao.test(paraConferir)) {
-        return json({ code: 'RASCUNHO_RECUSADO', error: `O rascunho continha ${motivo}.` }, 422);
+  const TENTATIVAS = 2;
+
+  try {
+    let ultimaCorrecao = '';
+    let ultimoMotivo = '';
+
+    for (let tentativa = 0; tentativa < TENTATIVAS; tentativa += 1) {
+      const textoDoPedido = tentativa === 0
+        ? pedido
+        : `${pedido}\n\nYour previous answer was REJECTED because ${ultimaCorrecao} Keep everything else the same: same language, same warmth, same facts, same length. Answer with JSON only, in the same shape.`;
+
+      const saida = await gerar(textoDoPedido);
+      if (saida.erro) return saida.erro;
+      const rascunho = saida.rascunho || '';
+      const idioma = saida.idioma || '';
+      if (!rascunho) return json({ code: 'MODELO_VAZIO', error: 'O modelo devolveu vazio.' }, 502);
+
+      // A verificacao, que e a parte que garante em vez de pedir. A lista muda
+      // com o canal: ver o cabecalho.
+      //
+      // O nome do negocio sai do texto ANTES de ser conferido. E a unica parte
+      // do rascunho que nao foi o modelo que escolheu (o pedido manda assinar
+      // com ele), e um negocio chamado "Estrela do Norte" ou "Cinco Estrelas"
+      // seria recusado por se assinar, para sempre e sem erro na tela.
+      const paraConferir = negocio ? rascunho.split(negocio).join(' ') : rascunho;
+      const violada = PROIBIDO[canal].find(({ padrao }) => padrao.test(paraConferir));
+      // O recado privado tem uma frase a mais que a resposta publica, e o molde
+      // privado ja e mais longo que o publico. O tecto acompanha.
+      const tecto = canal === 'private' ? 1600 : 1200;
+      const longoDemais = rascunho.length > tecto;
+
+      if (!violada && !longoDemais) {
+        return json({ rascunho, idioma, modelo: MODELO, canal, tentativas: tentativa + 1 });
       }
-    }
-    // O recado privado tem uma frase a mais que a resposta publica, e o molde
-    // privado ja e mais longo que o publico. O tecto acompanha.
-    const tecto = canal === 'private' ? 1600 : 1200;
-    if (rascunho.length > tecto) {
-      return json({ code: 'RASCUNHO_RECUSADO', error: 'O rascunho ficou longo demais.' }, 422);
+
+      ultimoMotivo = violada ? violada.motivo : 'longo demais';
+      ultimaCorrecao = violada
+        ? violada.correcao
+        : `it was too long. Write it again, shorter, under ${tecto} characters, keeping the same meaning.`;
     }
 
-    return json({ rascunho, idioma, modelo: MODELO, canal });
+    return json({ code: 'RASCUNHO_RECUSADO', error: `O rascunho continha ${ultimoMotivo}, nas duas tentativas.` }, 422);
   } catch (erro) {
     return json({ code: 'MODELO_INDISPONIVEL', error: String(erro).slice(0, 160) }, 502);
   }

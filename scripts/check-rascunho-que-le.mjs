@@ -961,7 +961,14 @@ exigir(
   // assinar. O que continua a ser exigido e o mesmo, e e o que a auditoria de
   // 31/08 apanhou em falta: que a lista seja PERCORRIDA sobre o rascunho, e
   // nao apenas definida.
-  /for \(const \{ padrao, motivo \} of PROIBIDO\[canal\]\)[\s\S]{0,200}padrao\.test\(paraConferir\)/.test(semComentarios(funcao)),
+  // A construcao mudou em 02/09/2026 e a regra nao: o laco virou um `find`,
+  // porque uma recusa passou a ser um pedido de novo em vez de um molde em
+  // silencio, e a repeticao precisa de SABER qual regra foi violada. O que
+  // continua a ser exigido e o mesmo que a auditoria de 31/08 apanhou em
+  // falta: que a lista seja APLICADA ao rascunho, e nao apenas definida.
+  /const violada = PROIBIDO\[canal\]\.find\(\(\{ padrao \}\) => padrao\.test\(paraConferir\)\);/.test(semComentarios(funcao))
+  // E que o resultado dela decida: sem isto, a lista corre e ninguem olha.
+  && /if \(!violada && !longoDemais\)/.test(semComentarios(funcao)),
 );
 
 // Lido COM comentarios de proposito: o que se exige aqui e a advertencia, e ela
