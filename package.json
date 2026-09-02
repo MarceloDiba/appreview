@@ -24,7 +24,7 @@
     "check:canal-do-rascunho": "node scripts/check-canal-do-rascunho.mjs",
     "check:temas-que-leem": "node --experimental-strip-types scripts/check-temas-que-leem.mjs",
     "check:aviso-formatado": "node scripts/check-aviso-formatado.mjs",
-    "check:convite-sem-filtro": "node scripts/check-convite-sem-filtro.mjs",
+    "check:convite-sem-filtro": "node --experimental-strip-types scripts/check-convite-sem-filtro.mjs",
     "check:faixas-sem-buraco": "node scripts/check-faixas-sem-buraco.mjs",
     "check:idioma-do-cliente": "node --experimental-strip-types scripts/check-idioma-do-cliente.mjs",
     "check:public-qr-security": "node scripts/check-public-qr-security.mjs",
