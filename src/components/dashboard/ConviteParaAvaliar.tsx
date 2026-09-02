@@ -43,9 +43,9 @@ const ConviteParaAvaliar: React.FC<ConviteParaAvaliarProps> = ({
       await navigator.clipboard.writeText(mensagem);
       setCopiado(true);
       window.setTimeout(() => setCopiado(false), 2000);
-      toast.success(t('invite.inviteCopy'));
+      toast.success(t('invite.inviteCopied'));
     } catch {
-      toast.error(t('invite.inviteCopy'));
+      toast.error(t('invite.inviteCopyError'));
     }
   };
 
@@ -62,7 +62,7 @@ const ConviteParaAvaliar: React.FC<ConviteParaAvaliarProps> = ({
           </Button>
         )}
         <Button size="sm" variant="outline" onClick={() => void copiar()}>
-          <Copy className="mr-2 h-4 w-4" />{copiado ? t('invite.inviteCopy') : t('invite.inviteCopy')}
+          <Copy className="mr-2 h-4 w-4" />{copiado ? t('invite.inviteCopied') : t('invite.inviteCopy')}
         </Button>
       </div>
     </div>

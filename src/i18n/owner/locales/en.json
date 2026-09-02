@@ -50,7 +50,9 @@
     "inviteHint": "For any rating. Inviting only happy customers is against Google policy.",
     "inviteWhatsApp": "Send on WhatsApp",
     "inviteCopy": "Copy message",
-    "inviteNoLink": "Add your Google review link in Settings to be able to invite."
+    "inviteNoLink": "Add your Google review link in Settings to be able to invite.",
+    "inviteCopied": "Message copied",
+    "inviteCopyError": "Could not copy. Select the text and copy it by hand."
   },
   "nav": {
     "dashboard": "Dashboard",

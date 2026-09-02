@@ -229,7 +229,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel, 
   // as Definições usam; o cartão não lê nada sozinho, recebe por propriedade.
   // A entrada é a que tem "google" na plataforma, do mesmo jeito que
   // `useSetupStatus` decide se o negócio já tem endereço do Google.
-  const { externalLinks } = useExternalLinks(userId);
+  const { externalLinks } = useExternalLinks(userId, { silent: true });
   const linkDeAvaliacaoDoGoogle = useMemo(
     () => externalLinks.find((link) => link.platform.toLowerCase().includes('google'))?.url?.trim() || null,
     [externalLinks],

@@ -50,7 +50,9 @@
     "inviteHint": "Vale para qualquer nota. Convidar só quem gostou é proibido pelo Google.",
     "inviteWhatsApp": "Enviar por WhatsApp",
     "inviteCopy": "Copiar mensagem",
-    "inviteNoLink": "Ligue o link de avaliação do Google nas Configurações para poder convidar."
+    "inviteNoLink": "Ligue o link de avaliação do Google nas Configurações para poder convidar.",
+    "inviteCopied": "Mensagem copiada",
+    "inviteCopyError": "Não deu para copiar. Selecione o texto e copie na mão."
   },
   "nav": {
     "dashboard": "Painel",

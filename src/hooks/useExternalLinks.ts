@@ -15,7 +15,18 @@ export interface ExternalLinkWithMeta extends PlatformLink {
   place_id?: string;
 }
 
-export const useExternalLinks = (userId: string | undefined) => {
+export const useExternalLinks = (
+  userId: string | undefined,
+  // `silent`: quem le so para exibir (ex.: o convite no painel, que so quer
+  // o endereco do Google, sem gerir estado de erro nenhum) nao deveria
+  // herdar um aviso escrito para quem esta a EDITAR links nas Definicoes. Sem
+  // isto, uma rede fraca fazia o dono abrir o painel e ver "Nao foi possivel
+  // carregar os links", uma frase das Definicoes numa tela onde ele nao
+  // mexeu em link nenhum. `setError` continua a acontecer (estado interno),
+  // so o `toast` fica calado.
+  options: { silent?: boolean } = {},
+) => {
+  const { silent = false } = options;
   const { t } = useOwnerTranslation();
   const [externalLinks, setExternalLinks] = useState<ExternalLinkWithMeta[]>([
     { platform: 'Google Reviews', url: '', place_id: '', validation_status: 'pending' },
@@ -89,7 +100,7 @@ export const useExternalLinks = (userId: string | undefined) => {
       const errorMessage = error instanceof Error ? error.message : 'Error loading external links';
       console.error('Error loading external links:', errorMessage);
       setError(t('settings.links.loadError'));
-      toast.error(t('settings.links.loadError'));
+      if (!silent) toast.error(t('settings.links.loadError'));
     } finally {
       setIsLoading(false);
     }
