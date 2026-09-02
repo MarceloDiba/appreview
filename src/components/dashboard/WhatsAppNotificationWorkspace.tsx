@@ -9,7 +9,7 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import type { LocalWhatsAppState } from '@/hooks/useLocalWhatsApp';
 import { maskInternationalPhone, sendLocalWhatsAppText } from '@/lib/localWhatsApp';
 import { defaultPilotNotificationPreferences, type PilotNotificationPreferences, readLatestPilotNotificationDelivery, readPilotNotificationPreferences, savePilotNotificationPreferences } from '@/lib/pilotNotificationPreferences';
-import { enqueueWhatsAppTest, getWhatsAppDeliveryState, saveWhatsAppDeliveryPreferences, type WhatsAppDelivery } from '@/lib/whatsappDelivery';
+import { destinoLegivel, enqueueWhatsAppTest, getWhatsAppDeliveryState, saveWhatsAppDeliveryPreferences, type WhatsAppDelivery } from '@/lib/whatsappDelivery';
 import { lerEstadoDaLigacao } from '@/lib/whatsappConnection';
 
 /**
@@ -49,6 +49,9 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, onboardingPhone }
   const [deliveries, setDeliveries] = useState<WhatsAppDelivery[]>([]);
   const [ultimoTeste, setUltimoTeste] = useState<WhatsAppDelivery | null>(null);
   const [ultimaFalha, setUltimaFalha] = useState<WhatsAppDelivery | null>(null);
+  // O endereço da conta, para a tela poder DIZER para onde o relatório vai.
+  // Sem ele a opção "por e-mail" pede confiança sem dar como conferir.
+  const [emailDaConta, setEmailDaConta] = useState<string | null>(null);
   const testRecipient = preferences.recipient;
   const directReady = localWhatsApp.status === 'ready' && localWhatsApp.session;
   const ready = backendState === 'ready' || Boolean(directReady);
@@ -71,6 +74,7 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, onboardingPhone }
     setDeliveries(state.deliveries);
     setUltimoTeste(state.lastTest);
     setUltimaFalha(state.lastFailure);
+    setEmailDaConta(state.accountEmail);
     if (state.preferences) setPreferences(state.preferences);
     setBackendState('ready');
     return state;
@@ -228,10 +232,16 @@ export const WhatsAppNotificationWorkspace = ({ localWhatsApp, onboardingPhone }
       <p className="mt-1 text-sm text-slate-600">{t('whatsappPilot.interestsBody')}</p>
       <div className="mt-4 space-y-3">{choices.map((choice) => <label key={choice.key} className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm leading-5 text-slate-700"><Checkbox checked={preferences[choice.key]} onCheckedChange={(checked) => setChoice(choice.key, checked === true)} /><span><strong className="block text-slate-950">{choice.title}</strong>{choice.body}</span></label>)}</div>
       <div className="mt-5 grid gap-4 sm:grid-cols-3"><label className="text-sm font-medium text-slate-700 sm:col-span-2">{t('whatsappPilot.notificationRecipient')}<div className="mt-2"><InternationalPhoneField id="whatsapp-recipient" value={preferences.recipient} onChange={(recipient) => setPreferences((current) => ({ ...current, recipient }))} placeholder="(00) 00000-0000" ariaLabel={t('whatsappPilot.notificationRecipient')} /></div><span className="mt-1 block text-xs font-normal leading-5 text-slate-500">{onboardingPhone ? t('whatsappPilot.onboardingPhoneHint') : t('whatsappPilot.notificationRecipientHint')}</span></label><label className="text-sm font-medium text-slate-700">{t('dashboard.cockpit.whatsapp.time')}<Input type="time" value={preferences.time} onChange={(event) => setPreferences((current) => ({ ...current, time: event.target.value }))} className="mt-2" /></label></div>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-sm font-medium text-slate-700">{t('dashboard.cockpit.whatsapp.frequency')}<select value={preferences.day} onChange={(event) => setPreferences((current) => ({ ...current, day: event.target.value as PilotNotificationPreferences['day'] }))} className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="monday">{t('dashboard.cockpit.whatsapp.schedule.monday')}</option><option value="friday">{t('dashboard.cockpit.whatsapp.schedule.friday')}</option></select></label></div>
+      {/*
+        A frequência e o canal ficam lado a lado porque são a mesma pergunta
+        vista de dois lados: quando o relatório chega, e por onde. O canal só
+        governa o RESUMO; os avisos urgentes seguem o canal do dono, e é o texto
+        de apoio que diz isso, para ninguém trocar uma coisa a pensar na outra.
+      */}
+      <div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-sm font-medium text-slate-700">{t('dashboard.cockpit.whatsapp.frequency')}<select value={preferences.day} onChange={(event) => setPreferences((current) => ({ ...current, day: event.target.value as PilotNotificationPreferences['day'] }))} className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="monday">{t('dashboard.cockpit.whatsapp.schedule.monday')}</option><option value="friday">{t('dashboard.cockpit.whatsapp.schedule.friday')}</option></select></label><label className="text-sm font-medium text-slate-700">{t('whatsappPilot.weeklyChannelLabel')}<select value={preferences.weeklyChannel} onChange={(event) => setPreferences((current) => ({ ...current, weeklyChannel: event.target.value === 'mensagem' ? 'mensagem' : 'email' }))} className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="email">{t('whatsappPilot.weeklyChannelEmail')}</option><option value="mensagem">{t('whatsappPilot.weeklyChannelMessage')}</option></select><span className="mt-1 block text-xs font-normal leading-5 text-slate-500">{preferences.weeklyChannel === 'email' ? (emailDaConta ? t('whatsappPilot.weeklyChannelEmailHint', { email: emailDaConta }) : t('whatsappPilot.weeklyChannelEmailHintSemConta')) : t('whatsappPilot.weeklyChannelMessageHint')}</span></label></div>
       <label className="mt-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-sm leading-5 text-amber-950"><Checkbox checked={preferences.consented} onCheckedChange={(checked) => setPreferences((current) => ({ ...current, consented: checked === true }))} /><span>{t('dashboard.advisorPilot.notificationsConsent')}</span></label>
       <Button onClick={() => void savePreferences().catch((error) => setSendState({ status: 'error', detail: error instanceof Error ? error.message : t('whatsappPilot.backendUnavailable') }))} className="mt-4 w-full rounded-full bg-[#2457D6] hover:bg-[#1d47b0] sm:w-auto"><Send className="mr-2 h-4 w-4" aria-hidden="true" />{backendState === 'ready' ? t('whatsappPilot.save') : t('dashboard.cockpit.whatsapp.saveLocal')}</Button>{saved && <p className="mt-3 text-sm text-emerald-700">{backendState === 'ready' ? t('whatsappPilot.preferencesSaved') : t('dashboard.advisorPilot.preferencesSaved')}</p>}
-      <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-5 text-slate-700"><p className="font-semibold text-slate-950">{t('dashboard.cockpit.whatsapp.historyTitle')}</p><p className="mt-1">{deliveries[0] ? t(`whatsappPilot.delivery.${deliveries[0].status}`, { recipient: maskInternationalPhone(deliveries[0].recipient) }) : latestAdvisorDelivery?.status === 'sent' ? t('dashboard.advisorPilot.whatsappSent') : latestAdvisorDelivery?.status === 'failed' ? t('dashboard.advisorPilot.whatsappFailed') : t('dashboard.cockpit.whatsapp.historyEmpty')}</p></div>
+      <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-5 text-slate-700"><p className="font-semibold text-slate-950">{t('dashboard.cockpit.whatsapp.historyTitle')}</p><p className="mt-1">{deliveries[0] ? t(`whatsappPilot.delivery.${deliveries[0].status}`, { recipient: destinoLegivel(deliveries[0].recipient) }) : latestAdvisorDelivery?.status === 'sent' ? t('dashboard.advisorPilot.whatsappSent') : latestAdvisorDelivery?.status === 'failed' ? t('dashboard.advisorPilot.whatsappFailed') : t('dashboard.cockpit.whatsapp.historyEmpty')}</p></div>
     </CardContent></Card>
   </div>;
 };

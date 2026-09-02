@@ -10,6 +10,12 @@ export type PilotNotificationPreferences = {
   recipient: string;
   day: 'monday' | 'friday';
   time: string;
+  /**
+   * Por onde sai o RESUMO semanal, e só ele. Os avisos urgentes seguem o canal
+   * do dono (`canal_do_aviso`), porque um comentário de uma estrela tem de
+   * chegar em minutos ao aparelho que ele abre, e não a uma caixa de entrada.
+   */
+  weeklyChannel: 'mensagem' | 'email';
   consented: boolean;
 };
 
@@ -33,6 +39,11 @@ export const defaultPilotNotificationPreferences: PilotNotificationPreferences =
   recipient: '',
   day: 'monday',
   time: '09:00',
+  // O padrão é o e-mail pela mesma razão escrita na migração
+  // `20260902230000_email_como_canal.sql`: o resumo por mensagem cai hoje no
+  // `openwa`, e o número do piloto está bloqueado desde 31/08. Manter
+  // `mensagem` seria manter toda a gente num canal morto.
+  weeklyChannel: 'email',
   consented: false,
 };
 

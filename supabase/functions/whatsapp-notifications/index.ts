@@ -44,6 +44,18 @@ const preferenceInput = (body: Record<string, unknown>) => {
     feedback_enabled: body.feedbackEnabled === true,
     weekly_day: day,
     delivery_time: deliveryTime,
+    // POR ONDE SAI O RESUMO SEMANAL, e so ele.
+    //
+    // Os avisos urgentes nao passam por aqui: eles seguem `canal_do_aviso`,
+    // porque um comentario de uma estrela tem de chegar em minutos ao canal que
+    // o dono abre, e nao a uma caixa de entrada. O resumo de segunda le-se ao
+    // cafe, e ai o e-mail ganha: as barras por nota, os temas e a comparacao da
+    // semana nao cabem numa mensagem de telemovel.
+    //
+    // Um valor desconhecido cai em `email` em vez de recusar o formulario
+    // inteiro: e uma preferencia de apresentacao, e recusar a gravacao das
+    // outras seis por causa dela seria desproporcionado.
+    weekly_channel: body.weeklyChannel === 'mensagem' ? 'mensagem' : 'email',
     consented_at: body.consented === true ? new Date().toISOString() : null,
   };
 };
@@ -64,7 +76,9 @@ serve(async (request) => {
   const admin = createClient(supabaseUrl, serviceRoleKey);
   const body = await request.json().catch(() => ({})) as Record<string, unknown>;
 
-  const COLUNAS_DA_ENTREGA = 'id, kind, status, recipient_e164, provider_message_id, last_error_code, created_at, updated_at';
+  // `recipient_email` entra em 02/09/2026: uma linha de e-mail nao tem telefone,
+  // e sem esta coluna a tela nao sabe para onde a mensagem foi.
+  const COLUNAS_DA_ENTREGA = 'id, kind, status, recipient_e164, recipient_email, provider_message_id, last_error_code, created_at, updated_at';
 
   if (body.action === 'get') {
     /**
@@ -91,7 +105,16 @@ serve(async (request) => {
       // nao chegou hoje, e a falha pode ser de qualquer tipo de mensagem.
       admin.from('whatsapp_outbox').select(COLUNAS_DA_ENTREGA).eq('user_id', user.id).eq('status', 'failed').order('created_at', { ascending: false }).limit(1).maybeSingle(),
     ]);
-    return json({ preferences, deliveries: deliveries || [], last_test: lastTest || null, last_failure: ultimaFalha || null });
+    // O e-mail da conta viaja com o resto porque a tela precisa de o MOSTRAR.
+    // "Vai por e-mail" sem dizer para qual endereco obriga o dono a confiar sem
+    // poder conferir, e o endereco da conta e o unico que ele nunca escolheu.
+    return json({
+      preferences,
+      deliveries: deliveries || [],
+      last_test: lastTest || null,
+      last_failure: ultimaFalha || null,
+      account_email: user.email || null,
+    });
   }
 
   if (body.action === 'save-preferences') {

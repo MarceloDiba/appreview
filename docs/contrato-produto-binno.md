@@ -1121,6 +1121,81 @@ mudou, e por quê:
   cadeia, sem retorno nulo antes dela. Devolver `null` no estado calmo, que é a
   forma óbvia de o esconder, fica vermelho.
 
+## O relatório semanal por e-mail (02/09/2026)
+
+**Aviso urgente e resumo semanal são coisas diferentes, e saem por canais
+diferentes.** Um comentário privado de uma estrela tem de chegar em minutos ao
+aparelho que o dono abre, e continua a seguir `canal_do_aviso`: Telegram para
+quem o ligou, OpenWA para os outros. O resumo de segunda-feira lê-se ao café, e
+o dono escolhe onde o quer, em `weekly_channel`. Trocar um pelo outro — mandar
+avisos para uma caixa de entrada, ou o relatório completo para uma mensagem de
+telemóvel — é a violação que este bloco proíbe.
+
+**O padrão do resumo é o e-mail, e a razão é aritmética e não de gosto.** Até
+02/09/2026 o resumo era enfileirado sem canal nenhum, caía no padrão `openwa`, e
+o número do piloto está bloqueado desde 31/08: o resumo semanal não chegava a
+ninguém, e falhava em silêncio todas as semanas porque uma linha `failed` na
+fila não acorda ninguém. O e-mail é o único canal que serve qualquer cliente
+hoje, sem depender da aprovação da Meta.
+
+**O relatório é escrito uma vez e servido em dois formatos.** O compositor vive
+em `supabase/functions/_shared/relatorioSemanal.ts` e devolve o texto curto (para
+WhatsApp e Telegram) e o HTML longo (para e-mail) a partir da MESMA leitura do
+retrato da coleta. Escrever uma segunda composição só para o e-mail é proibido:
+as duas divergem na primeira vez que alguém mexe numa delas, e a divergência é
+invisível — o dono recebe uma nota por WhatsApp e outra por e-mail, e ninguém
+descobre até um cliente perguntar.
+
+**O relatório não pode afirmar mais do que sabe.** As barras por nota são da
+amostra lida, e o texto ao lado delas diz isso. A comparação da semana usa a
+última semana FECHADA contra a anterior, e nunca a que está a decorrer — senão o
+relatório de segunda de manhã diria sempre que o negócio piorou. Uma semana sem
+avaliações não tem média: escrever "média 0,0" seria dizer ao dono que ele levou
+zeros. E o estado máximo de uma entrega por e-mail é `accepted`, porque o Resend
+aceita a mensagem e a entrega acontece depois; sem webhook de entrega, dizer
+`delivered` é o produto a afirmar o que não sabe.
+
+**Todo relatório acaba num passo.** Se há avaliações à espera de resposta, o
+passo é responder; se não há, é convidar. Um relatório sem passo é um extrato
+bancário, e a prioridade do cliente é vender e aumentar avaliações.
+
+**Sem a chave do Resend, a fila espera.** Enquanto o canal não estiver
+configurado, `email-dispatch` recusa-se a correr e as linhas ficam em `queued`:
+quando a chave chegar, o relatório sai com atraso mas inteiro. Marcar `failed`
+apagaria relatórios por causa de uma configuração que falta, e o dono nunca
+saberia que existiram. A verificação da chave acontece ANTES de reservar linhas,
+senão elas ficam presas em `sending` sem ninguém para as enviar.
+
+**Nota zero não é nota, e nome vazio não cancela o relatório.** Um negócio
+recém-colhido traz `googleRating: 0`, e escrever "Nota atual: 0,0" diz ao dono
+que ele levou zeros — a mesma desonestidade que a média da semana já proíbe.
+Sem nota, o bloco não sai. Sem nome legível, o relatório sai com "seu negócio":
+trocar um relatório imperfeito por relatório nenhum é a troca errada.
+
+**O nome vem do Google, e é domado antes de entrar em qualquer sítio.** Espaços
+colapsados (uma quebra de linha sobrevivia ao `trim` e chegava ao assunto do
+e-mail), asteriscos removidos (emparelham com o negrito e o partem) e um tecto
+de 80 caracteres (um nome de cinco mil fazia o corpo passar do limite de 4096 da
+fila, e o resumo desaparecia em silêncio).
+
+**Nada que devia ser enfileirado pode desaparecer sem rasto.** Um `check`
+recusado, um dono sem endereço: os dois ficam no log com o dono nomeado. Uma
+contagem na resposta HTTP diz que aconteceu; só o log diz a quem.
+
+**A reserva da fila é fechada ao navegador.** `claim_whatsapp_outbox_por_canal`
+é `security definer` e devolve linhas inteiras — com o e-mail e o relatório do
+dono lá dentro. No Postgres, `execute` numa função nova é concedido a PUBLIC por
+omissão, e o PostgREST expõe o esquema `public` a `anon`. O `revoke` existia em
+produção e não existia no repositório: quem reconstruísse o banco a partir das
+migrações ficava com a fila aberta a qualquer pessoa. Vale o mesmo para os dois
+drenadores e para `canal_do_aviso`.
+
+Guardado por `scripts/check-relatorio-por-email.mjs`, que corre o compositor de
+verdade com retratos reais, APLICA a migração num Postgres descartável sobre uma
+tabela com linhas dentro — para provar que nenhuma inserção que hoje funciona
+passa a ser recusada — e lê as permissões resultantes do próprio banco, em vez
+de procurar a palavra `revoke` no ficheiro.
+
 O teste não substitui
 revisão de produto: qualquer mudança visual ou de fluxo ainda deve ser
 comparada com este documento antes de ser aceita.

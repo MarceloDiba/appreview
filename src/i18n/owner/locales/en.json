@@ -1209,7 +1209,13 @@
     "testeACaminho": "The test went out and there is no confirmation yet that it arrived. Tap refresh in a moment.",
     "testeFalhou": "The test did not reach your WhatsApp. Check the number above and send it again.",
     "testeExpirado": "The last test that arrived is no longer recent enough to prove the connection is still up. Run the test again.",
-    "testeVoltar": "Go back without testing"
+    "testeVoltar": "Go back without testing",
+    "weeklyChannelLabel": "Where to get the report",
+    "weeklyChannelEmail": "By email",
+    "weeklyChannelMessage": "By WhatsApp or Telegram",
+    "weeklyChannelEmailHint": "The full report, with the bar for each rating and the themes, goes to {{email}}.",
+    "weeklyChannelEmailHintSemConta": "The full report goes to your account email.",
+    "weeklyChannelMessageHint": "It goes out on the same channel as the alerts: Telegram if you connected it, WhatsApp otherwise."
   },
   "localWhatsApp": {
     "proxyUnavailable": "The local OpenWA proxy is unavailable. Start the preview with BINNO_ENABLE_OPENWA_PROXY=true and configure the local key.",
