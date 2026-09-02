@@ -92,6 +92,34 @@ exigir('um email nao vira link de whatsapp', linkDeWhatsApp('carol@exemplo.com',
 exigir('sem contacto nao ha link', linkDeWhatsApp(null, msg) === null);
 exigir('sem mensagem nao ha link', linkDeWhatsApp('+5579998380767', '') === null);
 
+// ---------------------------------------------------------------------------
+// O CONVITE NA TELA. Ao lado de cada comentário privado, para toda a nota.
+// ---------------------------------------------------------------------------
+const convite = readFileSync('src/components/dashboard/ConviteParaAvaliar.tsx', 'utf8');
+const cartao = readFileSync('src/components/dashboard/PendingCommentsBanner.tsx', 'utf8');
+
+exigir('o convite na tela usa a mensagem partilhada, e nao escreve a propria',
+  /mensagemDoConvite\(/.test(convite) && !/Oi \$\{|Olá \$\{/.test(convite));
+exigir('o convite na tela monta o link pela funcao partilhada',
+  /linkDeWhatsApp\(/.test(convite));
+// A regra deste plano, na tela: o componente nao recebe a nota, logo nao pode
+// esconder-se por causa dela.
+exigir('o componente do convite nao recebe a nota',
+  !/rating|nota/i.test(convite.slice(convite.indexOf('interface'), convite.indexOf('=> {'))));
+exigir('o cartao desenha o convite em cada caso',
+  /<ConviteParaAvaliar/.test(cartao));
+// Sem condicional de nota a volta do convite dentro do cartao.
+exigir('o cartao nao esconde o convite por causa da nota',
+  !/rating\s*[><=]=?\s*\d[\s\S]{0,80}<ConviteParaAvaliar/.test(cartao));
+
+for (const idioma of ['pt-PT', 'pt-BR', 'en']) {
+  const catalogo = JSON.parse(readFileSync(`src/i18n/owner/locales/${idioma}.json`, 'utf8'));
+  for (const chave of ['inviteTitle', 'inviteHint', 'inviteWhatsApp', 'inviteCopy', 'inviteNoLink']) {
+    exigir(`${idioma}.json tem texto para invite.${chave}`,
+      typeof catalogo?.invite?.[chave] === 'string' && catalogo.invite[chave].length > 0);
+  }
+}
+
 if (falhas.length) {
   console.error('Convite sem filtro: %d protecao(oes) falharam.\n', falhas.length);
   for (const falha of falhas) console.error(' - %s', falha);

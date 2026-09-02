@@ -253,7 +253,13 @@ const requirements = [
   // mudou foi a construcao que as cumpre, por isso foram reapontadas e nao
   // apagadas.
   ['bloco de comentários pendentes some por completo sem caso sem tratar', pendingCommentsBanner.includes('if (casos.length === 0) return null;')],
-  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner casos={comentariosInternos} />') && filaDoPainel(dashboard).length > 0 && dashboard.indexOf('<PendingCommentsBanner casos={comentariosInternos} />') < posicaoDaFila(dashboard)],
+  // A ancora perdeu o ' />' final na Tarefa 3 de 'convidar-sem-filtrar'
+  // (02/09/2026): o cartao passou a receber `nomeDoNegocio` e
+  // `linkDeAvaliacao`, e o `casos={comentariosInternos}` deixou de ser a
+  // ultima prop antes do fecho. A ancora continua a exigir a MESMA invocacao
+  // especifica, com `casos={comentariosInternos}`; so nao exige mais que ela
+  // seja a unica prop.
+  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner casos={comentariosInternos}') && filaDoPainel(dashboard).length > 0 && dashboard.indexOf('<PendingCommentsBanner casos={comentariosInternos}') < posicaoDaFila(dashboard)],
   ['coleta pede nome público', coletaInteira.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
   ['coleta aceita somente campos específicos de permalink', coletaInteira.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !coletaInteira.includes("'reviewUri', 'url'")],
   ['coleta temporária continua sem agenda e com limite explícito', collectorCore.includes("maxReviews: 50") && collectorCore.includes("APIFY_EXPERIMENTAL_COOLDOWN")],

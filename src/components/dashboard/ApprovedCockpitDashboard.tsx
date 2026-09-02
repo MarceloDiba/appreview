@@ -21,6 +21,7 @@ import OrigemDoRascunho from '@/components/dashboard/OrigemDoRascunho';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdvisorReading } from '@/lib/advisorReading';
 import { useInternalFeedback } from '@/hooks/useInternalFeedback';
+import { useExternalLinks } from '@/hooks/useExternalLinks';
 import { orderPendingCasesByRecency } from '@/lib/internalCasePriority';
 import PendingCommentsBanner from '@/components/dashboard/PendingCommentsBanner';
 import { sampleWasTruncated } from '@/lib/reputationSnapshotReading';
@@ -223,6 +224,16 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel, 
     () => orderPendingCasesByRecency(internos.cases),
     [internos.cases],
   );
+  // O link de avaliação do Google, para o convite ao lado do comentário
+  // pendente (`PendingCommentsBanner`). MESMA leitura de `platform_links` que
+  // as Definições usam; o cartão não lê nada sozinho, recebe por propriedade.
+  // A entrada é a que tem "google" na plataforma, do mesmo jeito que
+  // `useSetupStatus` decide se o negócio já tem endereço do Google.
+  const { externalLinks } = useExternalLinks(userId);
+  const linkDeAvaliacaoDoGoogle = useMemo(
+    () => externalLinks.find((link) => link.platform.toLowerCase().includes('google'))?.url?.trim() || null,
+    [externalLinks],
+  );
   // `profiles.business_country` decide a variante do português da resposta
   // sugerida (pt-BR vs. pt-PT), pela mesma regra do cartão impresso em
   // `src/lib/businessLocale.ts`. Fica em `null` enquanto o perfil não
@@ -409,7 +420,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel, 
           `null` e esta caixa fica sem filho nenhum: continua a ser item da
           grade, e o `gap-4` continua a contar com ela. Medido no ecrã, isso
           custava 16px de branco por cima da fila em toda conta em dia. */}
-      <div className="min-w-0 empty:hidden lg:col-span-3"><PendingCommentsBanner casos={comentariosInternos} /></div>
+      <div className="min-w-0 empty:hidden lg:col-span-3"><PendingCommentsBanner casos={comentariosInternos} nomeDoNegocio={snapshot.business.name} linkDeAvaliacao={linkDeAvaliacaoDoGoogle} /></div>
       {/* A fila e a Reputação lado a lado, decisão de Marcelo em 01/09/2026:
           "suba Reputação no Google para o lado de Avaliações no Google, assim a
           pessoa enxerga as métricas mais importantes de uma só vez".

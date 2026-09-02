@@ -100,7 +100,11 @@ if (marcadores.length === FAIXAS.length) {
 // desenhado uma vez, na faixa que a decisão lhe deu. Mudou a construção que a
 // cumpre, e por isso a âncora foi reapontada em vez de apagada.
 const MODULOS = [
-  ['acao', '<PendingCommentsBanner casos={comentariosInternos} />', 'Comentários internos'],
+  // A ancora perdeu o ' />' final na Tarefa 3 de 'convidar-sem-filtrar'
+  // (02/09/2026): o cartao passou a receber `nomeDoNegocio` e
+  // `linkDeAvaliacao`, e `casos={comentariosInternos}` deixou de ser a
+  // ultima prop antes do fecho da tag.
+  ['acao', '<PendingCommentsBanner casos={comentariosInternos}', 'Comentários internos'],
   ['acao', '<ResponseQueue reviews={queue}', 'Avaliações no Google (fila de respostas)'],
   ['mudanca', '<VolumeCard weeks={history} />', 'Volume de avaliações'],
   ['mudanca', '<RatingTrends weeks={history} snapshot={snapshot} />', 'Cada nota separada'],
