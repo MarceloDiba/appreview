@@ -116,27 +116,22 @@ const sqlOutbox = readFileSync(join(migracoes, '20260821193000_whatsapp_delivery
 
 // `auth.users` e do Supabase; aqui basta a chave que as tabelas referenciam.
 //
-// `public.canal_do_aviso` E OUTRA COISA, E PRECISA DE SER DITA. As migracoes
-// de 01/09 e 02/09 chamam-na na linha do `insert`, e ela NAO ESTA DEFINIDA EM
-// NENHUMA MIGRACAO DESTE RAMO: quem a cria e
-// `20260831030000_telegram_como_ponte.sql`, que ficou noutro ramo quando o
-// despacho do Telegram voltou ao repositorio em 01/09/2026 sem ela. Num banco
-// vazio, sem esta definicao, o `insert` levanta excepcao, o
-// `exception when others` do proprio gatilho engole-a como aviso, e NENHUM
-// aviso e enfileirado: foi exactamente isso que aconteceu ao carregar as
-// migracoes de setembro pela primeira vez, em 02/09/2026.
+// ATE 02/09/2026 VIVIA AQUI UM TALAO, e a historia dele vale mais do que a
+// linha que ele ocupava. As migracoes de 01/09 e 02/09 chamam
+// `public.canal_do_aviso` na linha do `insert`, e essa funcao nao estava
+// definida em migracao nenhuma: foi criada direto no servidor em 31/08, no dia
+// do bloqueio do WhatsApp, e nunca escrita no repositorio. Num banco vazio o
+// `insert` levantava excepcao, o `exception when others` do proprio gatilho
+// engolia-a, e NENHUM aviso era enfileirado, em silencio. Foi este guarda que
+// o descobriu, ao correr contra um banco limpo pela primeira vez.
 //
-// O talao abaixo devolve sempre 'openwa', o unico valor que o `check` do
-// `provider` deste ramo aceita alem de 'meta-cloud'. Isto e honesto para o
-// que este guarda mede: ele le `kind` e `body`, e o canal de entrega nao entra
-// em nenhum dos dois. O que o talao NAO faz e tapar o buraco do repositorio,
-// que continua la e esta escrito no relatorio de 02/09/2026.
+// A funcao voltou ao repositorio em `20260831030000_telegram_como_ponte.sql`,
+// com a data em que passou a existir no servidor, e este guarda passou a
+// carrega-la como carrega as outras. O talao saiu: agora o que corre aqui e a
+// funcao de verdade.
 const BOOTSTRAP = `
 create schema if not exists auth;
 create table if not exists auth.users (id uuid primary key);
-
-create or replace function public.canal_do_aviso(p_user_id uuid)
-returns text language sql immutable as $canal$ select 'openwa'::text $canal$;
 
 ${extrairCreateTable(sqlEsquemaOriginal, 'internal_feedback')}
 ${extrairCreateTable(sqlOutbox, 'whatsapp_notification_preferences')}
@@ -156,6 +151,9 @@ const ATE_ANTES = [
 const NOVAS = [
   '20260830210000_nota_opcional_no_comentario.sql',
   '20260830220000_aviso_de_elogio_com_comentario.sql',
+  // A ponte do Telegram. Traz `canal_do_aviso`, que o gatilho chama na linha
+  // do `insert`: sem ela o aviso nao e enfileirado e o gatilho cala-se.
+  '20260831030000_telegram_como_ponte.sql',
   '20260901200000_aviso_com_emoji_e_negrito.sql',
   '20260902120000_convite_sem_filtro.sql',
 ];
@@ -316,11 +314,32 @@ function psqlValor(db, sql) {
   );
 }
 
+/**
+ * O Postgres descartavel nao tem `pg_cron` nem `pg_net`, que sao extensoes do
+ * Supabase. Este guarda mede o CAMINHO DO AVISO: quem e avisado, quantas
+ * vezes, e o que a mensagem diz. O agendamento e a chamada HTTP que ENTREGAM a
+ * mensagem sao outra coisa, e nao entram em nenhuma das assercoes.
+ *
+ * Por isso a infraestrutura de entrega e retirada antes de carregar, e nada
+ * mais. O filtro e estreito de proposito e esta escrito por extenso: tira as
+ * linhas `create extension`, o bloco que desagenda e a linha que agenda. Se
+ * alguem um dia puser logica de aviso dentro de um desses blocos, ela deixa de
+ * ser medida aqui, e e por isso que este comentario existe.
+ *
+ * O que NAO se retira, e que era o problema real: `public.canal_do_aviso`. Ela
+ * e chamada na linha do `insert` do gatilho e ate 02/09/2026 nao existia em
+ * migracao nenhuma. Agora existe, e corre aqui como corre em producao.
+ */
+const semInfraestruturaDeEntrega = (sql) => sql
+  .replace(/^create extension if not exists [a-z_]+;\s*$/gim, '')
+  .replace(/^do \$\$\s*\nbegin\s*\n\s*perform cron\.unschedule[\s\S]*?\$\$;\s*$/gim, '')
+  .replace(/^select cron\.schedule\([\s\S]*?\);\s*$/gim, '');
+
 function montarBanco(db, listaDeMigracoes) {
   psql('postgres', `create database ${db};`);
   psql(db, BOOTSTRAP);
   for (const nome of listaDeMigracoes) {
-    psql(db, readFileSync(join(migracoes, nome), 'utf8'));
+    psql(db, semInfraestruturaDeEntrega(readFileSync(join(migracoes, nome), 'utf8')));
   }
   psql(db, ROTEIRO);
 }
