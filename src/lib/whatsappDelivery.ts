@@ -1,11 +1,19 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { PilotNotificationPreferences } from '@/lib/pilotNotificationPreferences';
+import { maskInternationalPhone } from '@/lib/localWhatsApp';
 
 export type WhatsAppDelivery = {
   id: string;
   kind: 'test' | 'alert' | 'weekly' | 'reply-reminder' | 'profile-reminder';
   status: 'queued' | 'sending' | 'accepted' | 'delivered' | 'read' | 'failed' | 'skipped' | 'cancelled';
-  recipient: string;
+  /**
+   * Para onde a mensagem foi. NULO numa linha de e-mail, que entrega por
+   * `recipient_email` e não tem telefone nenhum — desde 02/09/2026. Quem
+   * desenhar isto na tela tem de tratar o nulo: `maskInternationalPhone`
+   * chamava `.replace` num nulo e rebentava o cartão de histórico do dono na
+   * primeira segunda-feira com relatório por e-mail.
+   */
+  recipient: string | null;
   providerMessageId?: string | null;
   errorCode?: string | null;
   createdAt: string;
@@ -49,7 +57,8 @@ type WireDelivery = {
   id: string;
   kind: WhatsAppDelivery['kind'];
   status: WhatsAppDelivery['status'];
-  recipient_e164: string;
+  recipient_e164: string | null;
+  recipient_email: string | null;
   provider_message_id: string | null;
   last_error_code: string | null;
   created_at: string;
@@ -72,11 +81,34 @@ const toPreferences = (value: WirePreferences | null | undefined): PilotNotifica
   consented: Boolean(value.consented_at),
 } : null;
 
+/**
+ * O destino, como o dono o lê.
+ *
+ * Um telefone sai mascarado, porque a tela não precisa de o mostrar inteiro e
+ * ele fica à vista de quem passar ao lado. Um e-mail sai como está: é o
+ * endereço da própria conta, ele já o conhece, e mascará-lo esconderia
+ * exatamente a informação que ele veio confirmar.
+ *
+ * Sem destino nenhum devolve a frase neutra em vez de rebentar. Até 02/09/2026
+ * esta função não existia e a tela chamava `maskInternationalPhone` direto:
+ * na primeira segunda-feira com relatório por e-mail, `recipient_e164` chega
+ * nulo, `.replace` de um nulo levanta `TypeError`, e o cartão de histórico
+ * derrubava o render do painel inteiro.
+ */
+export const destinoLegivel = (destino: string | null | undefined): string => {
+  const limpo = (destino || '').trim();
+  if (!limpo) return 'número informado';
+  return limpo.includes('@') ? limpo : maskInternationalPhone(limpo);
+};
+
 const toDelivery = (value: WireDelivery): WhatsAppDelivery => ({
   id: value.id,
   kind: value.kind,
   status: value.status,
-  recipient: value.recipient_e164,
+  // O e-mail entra como destino visível quando não há telefone: o dono precisa
+  // de ver PARA ONDE foi, e "número informado" no lugar de um endereço seria a
+  // tela a esconder o que sabe.
+  recipient: value.recipient_e164 ?? value.recipient_email ?? null,
   providerMessageId: value.provider_message_id,
   errorCode: value.last_error_code,
   createdAt: value.created_at,

@@ -54,7 +54,7 @@ import { existsSync, globSync, mkdtempSync, readFileSync, rmSync, writeFileSync 
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
-  assuntoDoRelatorio, escaparHtml, htmlDoRelatorio, lerRetrato, mediaDaSemana,
+  assuntoDoRelatorio, cortarAssunto, escaparHtml, htmlDoRelatorio, lerRetrato, mediaDaSemana,
   passoDaSemana, relatorioSemanal, semAsterisco, semanasParaComparar, textoDoRelatorio,
 } from '../supabase/functions/_shared/relatorioSemanal.ts';
 
@@ -110,8 +110,19 @@ exigir('o assunto tambem sai sem os asteriscos do nome',
 
 // 1.2 As duas formas nascem da MESMA leitura. Uma nota no e-mail diferente da
 // nota no WhatsApp e o defeito que ter dois compositores produziria.
-exigir('a nota do texto e a mesma do e-mail',
-  hostil !== null && hostil.texto.includes('4,6') && hostil.html.includes('4,6'));
+// A versao anterior desta assercao exigia so que '4,6' aparecesse nas duas
+// formas — e dois compositores diferentes com a mesma nota ficavam verdes.
+// Agora ela corre o compositor DUAS vezes com notas diferentes e exige que as
+// duas formas mudem juntas: e isso que prova que nascem da mesma leitura.
+const comNotaA = relatorioSemanal(retrato({ nome: 'Igual' }));
+const outroRetrato = retrato({ nome: 'Igual' });
+outroRetrato.business.googleRating = 3.2;
+const comNotaB = relatorioSemanal(outroRetrato);
+exigir('a nota do texto e a mesma do e-mail, e as duas mudam juntas',
+  comNotaA !== null && comNotaB !== null
+  && comNotaA.texto.includes('4,6') && comNotaA.html.includes('4,6')
+  && comNotaB.texto.includes('3,2') && comNotaB.html.includes('3,2')
+  && !comNotaB.texto.includes('4,6') && !comNotaB.html.includes('4,6'));
 
 // 1.3 A comparacao usa a ultima semana FECHADA, e nao a que esta a decorrer.
 // Sem isto, o relatorio de segunda de manha diria sempre que o negocio piorou.
@@ -179,8 +190,8 @@ exigir('o passo aponta sempre para o painel',
   passoDaSemana(semPendentes).link === 'https://binno.pro/reviews' && passoDaSemana(comPendentes).link === 'https://binno.pro/reviews');
 exigir('o e-mail traz o botao do painel',
   hostil !== null && hostil.html.includes('href="https://binno.pro/reviews"'));
-exigir('o texto acaba no link do painel',
-  hostil !== null && hostil.texto.trimEnd().endsWith('👉 https://binno.pro'));
+exigir('o texto acaba no passo, com o link do painel',
+  hostil !== null && hostil.texto.trimEnd().endsWith(': https://binno.pro/reviews'));
 
 // 1.9 O assunto tem de trazer um numero. "Relatório semanal" e o que faz o dono
 // deixar de abrir a partir da terceira semana.
@@ -189,13 +200,59 @@ exigir('o assunto diz quantas avaliacoes chegaram, quando chegaram',
 exigir('sem avaliacoes novas, o assunto aponta o que esta a espera',
   assuntoDoRelatorio(lerRetrato(retrato({ lidas: 20, respondidas: 14 }))).includes('6 avaliações à espera'));
 
-// 1.10 O corpo em texto tem de caber no `check` de 4096 da fila, mesmo no pior
-// caso: um nome longo e todos os temas.
+// 1.10 O corpo em texto tem de caber no `check` de 4096 da fila.
+//
+// ATE A AUDITORIA DE 02/09/2026 ESTA ASSERCAO NAO PODIA FALHAR: o nome de teste
+// tinha 300 caracteres, e 300 cabem em 4096 com ou sem defesa nenhuma. Ela
+// media um input que nunca a provocava, e apagar toda a protecao de tamanho
+// deixava-a verde.
+//
+// O nome agora tem CINCO MIL caracteres, que e o que o Google aceita em campos
+// que nao sao o titulo. Sem o tecto de `nomeDoNegocio` o corpo passa dos 5000, o
+// `insert` e recusado pelo `check` da fila, e o resumo desaparece em silencio.
 const enorme = relatorioSemanal(retrato({
-  nome: 'A'.repeat(300),
+  nome: 'A'.repeat(5000),
   temas: ['service', 'wait', 'food', 'cleanliness', 'price', 'atmosphere', 'delivery'].map((id) => ({ id, count: 9, sentiment: 'mixed' })),
 }));
 exigir('o corpo em texto cabe no limite da fila', enorme !== null && enorme.texto.length >= 1 && enorme.texto.length <= 4096);
+// O tecto do assunto e chamado DIRETAMENTE. Medi-lo atraves de um retrato nao
+// funcionava: o nome ja vem limitado a 80, logo nenhum retrato chega aos 150 e a
+// assercao ficava verde com o tecto apagado. Apanhado a tentar quebra-la.
+exigir('o assunto tem tecto, e ele corta mesmo', cortarAssunto('x'.repeat(400)).length <= 150);
+exigir('um assunto curto atravessa o tecto intacto', cortarAssunto('Loja: 3 avaliações') === 'Loja: 3 avaliações');
+exigir('nenhum retrato real chega ao tecto do assunto', enorme !== null && enorme.assunto.length <= 150);
+// E o nome domado nao pode ser uma string vazia: cortar demais tira o negocio
+// do proprio relatorio.
+exigir('o nome sobrevive ao corte, encurtado e nao apagado',
+  enorme !== null && /🏪 \*A{20,}/.test(enorme.texto));
+
+// 1.10b O que vem do Google nao pode trazer quebras de linha para o assunto.
+// Um `\n` no meio do nome sobrevivia ao `trim` e chegava ao campo `subject`, a
+// um cabecalho de distancia de uma injeccao de `Bcc:`.
+const comQuebra = relatorioSemanal(retrato({ nome: 'Bar\nBcc: vitima@exemplo.com\r\nX' }));
+exigir('o assunto nunca leva quebra de linha',
+  comQuebra !== null && !/[\r\n]/.test(comQuebra.assunto));
+exigir('o nome com quebra de linha vira uma linha so',
+  comQuebra !== null && comQuebra.texto.split('\n')[0] === '🏪 *Bar Bcc: vitima@exemplo.com X*');
+
+// 1.10c NOTA ZERO NAO E NOTA. Um negocio recem-colhido traz `googleRating: 0`, e
+// "Nota atual: 0,0" diz ao dono que ele leva zeros.
+const semNota = relatorioSemanal({ business: { name: 'Loja Nova', googleRating: 0, googleReviewCount: 0 }, sample: { reviewCount: 0, ratingBreakdown: {}, ownerRepliesFound: 0 } });
+exigir('um retrato com nota zero nao anuncia nota nenhuma',
+  semNota !== null && !semNota.texto.includes('0,0') && !semNota.html.includes('0,0'));
+// E mesmo sem nota, sem historico e sem nada por responder, ele acaba num passo.
+exigir('o relatorio mais vazio possivel ainda acaba num passo',
+  semNota !== null && semNota.texto.trimEnd().endsWith('Convidar quem já foi atendido: https://binno.pro/reviews'));
+// Um bloco omitido por falta de dado nao pode deixar um buraco no meio da
+// mensagem: duas linhas em branco seguidas sao o rasto disso.
+exigir('a mensagem nao tem buracos de linhas em branco seguidas',
+  semNota !== null && !/\n\n\n/.test(semNota.texto) && hostil !== null && !/\n\n\n/.test(hostil.texto));
+
+// 1.10d Um retrato com negocio e sem nome legivel ganha recuo, em vez de deixar
+// o dono sem relatorio nenhum. Sem objecto de negocio nao ha o que ler.
+const semNome = relatorioSemanal({ business: { googleRating: 4.2, googleReviewCount: 9 }, sample: { reviewCount: 9, ratingBreakdown: { 5: 9 }, ownerRepliesFound: 9 } });
+exigir('um negocio sem nome ainda produz relatorio, com recuo',
+  semNome !== null && semNome.texto.startsWith('🏪 *seu negócio*'));
 
 // 1.11 As duas defesas, testadas sozinhas.
 exigir('escaparHtml fecha as quatro entradas',
@@ -271,6 +328,12 @@ const ATE_HOJE = [
 // existem para a migracao poder CORRER; o que eles substituem e verificado por
 // leitura na parte 3, que e onde essas linhas ficam a descoberto.
 const TALOES = `
+-- Os papeis do Supabase. Sem eles os revoke da migracao nem chegam a correr,
+-- e correr e o que permite CONFERIR a permissao resultante no banco, em vez de
+-- procurar a palavra revoke no ficheiro.
+create role anon;
+create role authenticated;
+create role service_role;
 create schema if not exists auth;
 create table if not exists auth.users (id uuid primary key);
 create schema if not exists cron;
@@ -424,6 +487,34 @@ try {
   exigir('o corpo em texto continua limitado a 4096', corpoEnorme.erro !== undefined);
   exigir('o HTML nao esta preso ao limite do corpo em texto', htmlEnorme.erro === undefined);
 
+  // 2.8b AS PERMISSOES, LIDAS DO BANCO.
+  //
+  // `claim_whatsapp_outbox_por_canal` e `security definer` e devolve linhas
+  // inteiras da fila: com este ramo, o endereco de e-mail e o relatorio do dono
+  // vao la dentro. No Postgres, `execute` numa funcao nova e concedido a PUBLIC
+  // por omissao, e o PostgREST expoe o esquema `public` a `anon` com a chave
+  // publicavel. Sem revoke, qualquer pessoa chamava a reserva do navegador,
+  // recebia os relatorios de todos os donos e deixava as linhas presas em
+  // `sending`. Encontrado na auditoria de 02/09/2026.
+  const podeExecutar = (assinatura, papel) => psql(
+    `select has_function_privilege('${papel}', '${assinatura}', 'execute');`,
+  ).trim();
+  for (const papel of ['anon', 'authenticated']) {
+    exigir(`${papel} nao pode reservar a fila`,
+      podeExecutar('public.claim_whatsapp_outbox_por_canal(text, integer)', papel) === 'f');
+    exigir(`${papel} nao pode disparar o drenador do e-mail`,
+      podeExecutar('public.drenar_relatorios_por_email()', papel) === 'f');
+    exigir(`${papel} nao pode disparar o resumo semanal`,
+      podeExecutar('public.chamar_resumo_semanal()', papel) === 'f');
+    exigir(`${papel} nao pode perguntar o canal de um dono`,
+      podeExecutar('public.canal_do_aviso(uuid)', papel) === 'f');
+  }
+  // E quem PRECISA continua a poder: fechar de mais para todos parava a fila.
+  exigir('a chave de servico continua a poder reservar a fila',
+    podeExecutar('public.claim_whatsapp_outbox_por_canal(text, integer)', 'service_role') === 't');
+  exigir('a chave de servico continua a poder ler o canal do dono',
+    podeExecutar('public.canal_do_aviso(uuid)', 'service_role') === 't');
+
   // 2.9 E o drenador do e-mail so reserva o que e dele. Sem isto, o
   // retransmissor do OpenWA rouba um relatorio, como aconteceu em 31/08 entre o
   // OpenWA e o Telegram.
@@ -432,8 +523,12 @@ try {
     .trim().split('\n').filter(Boolean);
   exigir('a reserva do e-mail so traz linhas de e-mail',
     reservadas.length > 0 && reservadas.every((linha) => linha === 'email'));
-  exigir('as linhas dos outros canais ficaram por reservar',
-    psql("select count(*) from public.whatsapp_outbox where provider <> 'email' and status = 'queued';").trim() !== '0');
+  // `!== '0'` deixava passar cinco de seis linhas roubadas. O numero e comparado
+  // com o que existia ANTES da reserva: nenhuma linha de outro canal pode ter
+  // mudado de estado.
+  exigir('nenhuma linha de outro canal foi tocada pela reserva do e-mail',
+    psql("select count(*) from public.whatsapp_outbox where provider <> 'email' and status = 'queued';").trim()
+      === psql("select count(*) from public.whatsapp_outbox where provider <> 'email';").trim());
 } finally {
   if (ligado) { try { execFileSync(PG_CTL, ['-D', dados, '-m', 'immediate', 'stop'], { stdio: 'ignore' }); } catch { /* ja parou */ } }
   rmSync(dir, { recursive: true, force: true });
@@ -495,8 +590,12 @@ exigir('o despachante confere a chave ANTES de reservar linhas',
   posicaoDaChave > 0 && posicaoDaReserva > 0 && posicaoDaChave < posicaoDaReserva);
 // Sem chave a fila ESPERA. Marcar `failed` apagaria relatorios por causa de uma
 // configuracao que falta, e o dono nunca saberia que existiram.
-const antesDaReserva = despachoExecutavel.slice(0, posicaoDaReserva);
-exigir('sem chave, nenhuma linha e marcada como falhada', !/status: 'failed'/.test(antesDaReserva));
+// `indexOf` a devolver -1 faz `slice(0, -1)` cortar o ficheiro quase todo e a
+// assercao fica verde por vacuidade. A posicao e conferida antes de ser usada.
+const antesDaReserva = posicaoDaReserva > 0 ? despachoExecutavel.slice(0, posicaoDaReserva) : '';
+exigir('a reserva foi encontrada no despachante, senao nada abaixo prova nada', posicaoDaReserva > 0);
+exigir('sem chave, nenhuma linha e marcada como falhada',
+  antesDaReserva.length > 0 && !/status: 'failed'/.test(antesDaReserva));
 exigir('o despachante so reserva o canal do e-mail',
   /claim_whatsapp_outbox_por_canal', \{ p_provider: 'email'/.test(despachoExecutavel));
 // O Resend aceita; a entrega acontece depois e chega por webhook, que nao
@@ -507,8 +606,16 @@ exigir('o estado maximo do e-mail e `accepted`, e nao `delivered`',
 // e-mail vazio.
 exigir('o e-mail leva as duas versoes, HTML e texto',
   /html: html \?\? undefined,/.test(despachoExecutavel) && /text: corpo,/.test(despachoExecutavel));
+// Procurar so a string provava que ela existe. Trocar `status: 'failed'` por
+// `'queued'` nesse ramo deixava a linha a ser reservada para sempre, com a
+// assercao verde. Agora le-se o RAMO inteiro.
+const ramoSemDestino = despachoExecutavel.slice(
+  despachoExecutavel.indexOf('if (!destino)'),
+  despachoExecutavel.indexOf("resultados.push({ id: linha.id, estado: 'sem-destino' })"),
+);
+exigir('o ramo sem destino existe e e legivel', ramoSemDestino.length > 40);
 exigir('uma linha de e-mail sem destino falha com nome, em vez de ficar presa',
-  /EMAIL_SEM_DESTINO/.test(despachoExecutavel));
+  /EMAIL_SEM_DESTINO/.test(ramoSemDestino) && /status: 'failed'/.test(ramoSemDestino));
 exigir('o remetente pode mudar sem mexer no codigo',
   /Deno\.env\.get\('RESEND_FROM'\)/.test(despachoExecutavel));
 
@@ -535,6 +642,30 @@ exigir('sem endereco nenhum, o relatorio nao e enfileirado',
 exigir('uma linha de e-mail nao leva telefone, e uma de mensagem nao leva HTML',
   /recipient_e164: porEmail \? null : preference\.recipient_e164,/.test(materializadorExecutavel)
   && /body_html: porEmail \? relatorio\.html : null,/.test(materializadorExecutavel));
+
+// 3.3b O QUE NAO ENTRA NA FILA TEM DE FICAR ESCRITO EM ALGUM SITIO.
+// Ate a auditoria de 02/09/2026 um `check` recusado fazia o resumo desaparecer
+// sem rasto: nem linha na fila, nem linha no log, nem numero na resposta.
+exigir('um resumo recusado pela fila fica no log com o dono nomeado',
+  /if \(enqueueError\) console\.error\(/.test(materializadorExecutavel));
+exigir('um dono sem endereco de e-mail fica no log, e nao so numa contagem',
+  /console\.error\('resumo semanal sem destino de e-mail para %s'/.test(materializadorExecutavel));
+
+// 3.3c A RESERVA DA FILA NAO PODE ESTAR ABERTA AO NAVEGADOR.
+// `security definer` + `execute` a PUBLIC por omissao no Postgres + PostgREST a
+// expor o esquema `public` a `anon` = qualquer pessoa chama a reserva com a
+// chave publicavel, recebe o e-mail e o corpo do relatorio de todos os donos, e
+// deixa as linhas presas em `sending`. Em producao o revoke existe; no
+// repositorio nao existia, e quem reconstruisse o banco ficava com a fila
+// aberta. Encontrado na auditoria de 02/09/2026.
+exigir('a reserva por canal e fechada ao navegador',
+  /revoke all on function public\.claim_whatsapp_outbox_por_canal\(text, integer\) from public, anon, authenticated;/.test(migracaoExecutavel)
+  && /grant execute on function public\.claim_whatsapp_outbox_por_canal\(text, integer\) to service_role;/.test(migracaoExecutavel));
+exigir('os dois drenadores tambem sao fechados ao navegador',
+  /revoke all on function public\.drenar_relatorios_por_email\(\) from public, anon, authenticated;/.test(migracaoExecutavel)
+  && /revoke all on function public\.chamar_resumo_semanal\(\) from public, anon, authenticated;/.test(migracaoExecutavel));
+exigir('a funcao do canal do aviso deixou de estar aberta ao navegador',
+  /revoke all on function public\.canal_do_aviso\(uuid\) from public, anon, authenticated;/.test(migracaoExecutavel));
 
 // 3.4 O compositor nao pode importar nada. Sem `import`, o mesmo ficheiro corre
 // dentro do Deno e dentro deste guarda — e e isso que deixa a parte 1 executar

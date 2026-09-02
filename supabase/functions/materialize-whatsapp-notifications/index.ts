@@ -90,6 +90,10 @@ serve(async (request) => {
         destinoDoEmail = endereco(conta?.user?.email);
       }
       if (!destinoDoEmail) {
+        // Fica no log com o dono nomeado. A contagem na resposta HTTP diz que
+        // aconteceu; so o log diz a QUEM, que e a unica coisa que permite ir
+        // corrigir. Descoberto na auditoria de 02/09/2026.
+        console.error('resumo semanal sem destino de e-mail para %s', preference.user_id);
         semDestino.push(preference.user_id);
         continue;
       }
@@ -110,7 +114,14 @@ serve(async (request) => {
       body_html: porEmail ? relatorio.html : null,
       idempotency_key: `weekly:${local.date}`,
     }, { onConflict: 'user_id,idempotency_key', ignoreDuplicates: true });
-    if (!enqueueError) queued += 1;
+    // O ERRO DE ENFILEIRAMENTO DEIXOU DE SER DESCARTADO.
+    //
+    // Ate 02/09/2026 esta linha era so `if (!enqueueError) queued += 1;`. Um
+    // `check` recusado — corpo acima de 4096, canal fora da lista, destino em
+    // falta — fazia o resumo desaparecer sem deixar rasto nenhum: nem linha na
+    // fila, nem linha no log, nem numero na resposta.
+    if (enqueueError) console.error('resumo semanal nao entrou na fila para %s: %s', preference.user_id, enqueueError.message);
+    else queued += 1;
   }
   return json({ queued, semDestino: semDestino.length, checkedAt: now.toISOString() });
 });

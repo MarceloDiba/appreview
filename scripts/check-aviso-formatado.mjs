@@ -138,9 +138,15 @@ exigir('o nome e o email do cliente tambem entram sem asteriscos',
 // A `opportunity.phrase` que esta assercao media ate 02/09/2026 deixou de vir no
 // retrato da coleta, e o que sobrou a proteger e o nome — que e o unico texto do
 // resumo que o Binno nao escreveu.
+// O nome passou a ser domado em `nomeDoNegocio` (02/09/2026): alem do
+// asterisco, ele colapsa espacos — uma quebra de linha no nome do Google
+// sobrevivia ao `trim` e chegava ao assunto do e-mail — e poe um tecto de
+// comprimento, porque um nome de cinco mil caracteres fazia o corpo passar o
+// `check` de 4096 da fila e o resumo desaparecia em silencio.
 exigir('o texto que vem do Google entra no resumo sem asteriscos',
   /export const semAsterisco = \(texto: string\): string => texto\.replace\(\/\\\*\/g, ''\);/.test(resumo)
-  && /nome: semAsterisco\(nome\),/.test(resumo));
+  && /const domado = semAsterisco\(limpo\);/.test(resumo)
+  && /const nome = nomeDoNegocio\(negocio\.name\);/.test(resumo));
 
 // 7. O que Marcelo pediu, no texto: negrito, quebras de linha, link no fim.
 exigir('o aviso do comentario privado tem negrito', /\*Comentário privado agora\*/.test(migracao));
@@ -154,8 +160,13 @@ exigir('o contacto deixado continua marcado com o proprio emoji',
   /array_append\(linhas, format\('📱 Contato deixado: %s', contato\)\);/.test(migracao));
 exigir('o aviso do comentario privado acaba no link do painel',
   /array_append\(linhas, '👉 https:\/\/binno\.pro\/reviews'\);/.test(migracao));
-exigir('o resumo acaba no link do painel',
-  /linhas\.push\(`👉 \$\{PAINEL\}`\);/.test(resumo) && /export const PAINEL = 'https:\/\/binno\.pro';/.test(resumo));
+// O RESUMO ACABA NUM PASSO, e nao apenas num link. Mudou em 02/09/2026, na
+// auditoria: um retrato sem nota, sem historico e sem nada por responder — um
+// negocio recem-colhido — produzia tres linhas, o nome e o endereco. O contrato
+// diz que todo relatorio acaba num passo, e a versao curta nao o cumpria.
+exigir('o resumo acaba no passo a dar, com o link do painel',
+  /linhas\.push\(`👉 \$\{semAsterisco\(passo\.titulo\)\}: \$\{PAINEL_DAS_RESPOSTAS\}`\);/.test(resumo)
+  && /export const PAINEL_DAS_RESPOSTAS = 'https:\/\/binno\.pro\/reviews';/.test(resumo));
 exigir('o aviso separa os blocos com linha em branco',
   (migracao.match(/array_append\(linhas, ''\)/g) || []).length >= 3);
 

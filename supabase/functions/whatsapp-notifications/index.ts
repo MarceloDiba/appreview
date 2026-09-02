@@ -76,7 +76,9 @@ serve(async (request) => {
   const admin = createClient(supabaseUrl, serviceRoleKey);
   const body = await request.json().catch(() => ({})) as Record<string, unknown>;
 
-  const COLUNAS_DA_ENTREGA = 'id, kind, status, recipient_e164, provider_message_id, last_error_code, created_at, updated_at';
+  // `recipient_email` entra em 02/09/2026: uma linha de e-mail nao tem telefone,
+  // e sem esta coluna a tela nao sabe para onde a mensagem foi.
+  const COLUNAS_DA_ENTREGA = 'id, kind, status, recipient_e164, recipient_email, provider_message_id, last_error_code, created_at, updated_at';
 
   if (body.action === 'get') {
     /**

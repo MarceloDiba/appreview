@@ -296,3 +296,46 @@ end;
 $$;
 
 select cron.schedule('binno-resumo-semanal', '*/15 * * * *', 'select public.chamar_resumo_semanal();');
+
+-- ---------------------------------------------------------------------------
+-- QUEM PODE CHAMAR A RESERVA DA FILA.
+-- ---------------------------------------------------------------------------
+--
+-- Encontrado na auditoria deste ramo, em 02/09/2026, e e a MESMA divida da
+-- ponte do Telegram vista de outro angulo.
+--
+-- `claim_whatsapp_outbox_por_canal` e `security definer`: corre com os poderes
+-- do dono da base e devolve LINHAS INTEIRAS da fila. No Postgres, `execute`
+-- numa funcao nova e concedido a PUBLIC por omissao, e o PostgREST expoe o
+-- esquema `public` a `anon` com a chave publicavel. Uma funcao assim, sem
+-- revoke, seria chamavel do navegador por qualquer pessoa:
+--
+--   supabase.rpc('claim_whatsapp_outbox_por_canal', { p_provider: 'email' })
+--
+-- e devolveria o endereco de e-mail e o corpo do relatorio de TODOS os donos —
+-- e ainda deixaria as linhas presas em `sending`, ou seja, apagaria os avisos
+-- deles pelo caminho. A `claim_whatsapp_outbox` original ja tinha estas duas
+-- linhas em `20260821193000`; a versao por canal, escrita direto no servidor em
+-- 31/08, nasceu sem elas no repositorio.
+--
+-- EM PRODUCAO O BURACO NAO EXISTE: lido em 02/09/2026, o ACL da funcao e
+-- `postgres=X | service_role=X`, sem PUBLIC. Quem a criou no servidor revogou.
+-- O que faltava era isso estar ESCRITO — quem reconstruisse o Binno a partir
+-- destas migracoes ficava com a fila aberta ao navegador, e nenhum guarda dizia
+-- nada. Aplicar estas linhas a producao nao muda nada; e para o proximo banco.
+revoke all on function public.claim_whatsapp_outbox_por_canal(text, integer) from public, anon, authenticated;
+grant execute on function public.claim_whatsapp_outbox_por_canal(text, integer) to service_role;
+
+-- Os dois drenadores sao chamados pelo `cron`, que corre como `postgres`.
+-- Ninguem mais precisa deles, e ambos disparam pedidos HTTP com o segredo do
+-- worker: deixa-los abertos e dar a qualquer pessoa um botao de esvaziar a fila.
+revoke all on function public.drenar_relatorios_por_email() from public, anon, authenticated;
+revoke all on function public.chamar_resumo_semanal() from public, anon, authenticated;
+
+-- `canal_do_aviso` continua com `execute` a `anon` desde 31/08. Ela nao
+-- devolve dado nenhum de terceiros — so 'telegram' ou 'openwa' para um id que
+-- quem pergunta ja teria de conhecer — mas tambem nao ha um so sitio no painel
+-- que a chame: quem a usa e o gatilho, que corre como `definer`, e o
+-- materializador, que corre com a chave de servico. O que nao e preciso, fecha.
+revoke all on function public.canal_do_aviso(uuid) from public, anon, authenticated;
+grant execute on function public.canal_do_aviso(uuid) to service_role;

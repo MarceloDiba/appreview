@@ -60,6 +60,8 @@ export const ROTULOS_DOS_TEMAS: Record<string, string> = {
   delivery: 'Entrega',
 };
 
+export const semAsterisco = (texto: string): string => texto.replace(/\*/g, '');
+
 const objecto = (valor: unknown): Record<string, unknown> | null =>
   valor && typeof valor === 'object' && !Array.isArray(valor) ? valor as Record<string, unknown> : null;
 
@@ -73,6 +75,34 @@ const frase = (valor: unknown): string | null => {
 };
 
 /**
+ * O nome do negócio, domado.
+ *
+ * Ele vem do Google, e as três defesas aqui existem porque as três já
+ * aconteceram ou estavam a um passo de acontecer:
+ *
+ *   ESPAÇOS COLAPSADOS. Uma quebra de linha no meio do nome sobrevivia ao
+ *   `trim`, entrava no assunto do e-mail e ficava a um cabeçalho de distância de
+ *   ser uma injeção de `Bcc:`. O Resend recebe o assunto em JSON e não em SMTP
+ *   cru, o que fecha essa porta hoje; fechá-la aqui também não depende de o
+ *   próximo canal de envio ter a mesma sorte.
+ *
+ *   TECTO DE COMPRIMENTO. O corpo em texto tem um `check` de 4096 na fila. Um
+ *   nome de cinco mil caracteres — que o Google aceita em campos que não são o
+ *   título — fazia o `insert` ser recusado, e o resumo desaparecia em silêncio.
+ *
+ *   RECUO. Um retrato com negócio mas sem nome legível ganha "seu negócio", que
+ *   era o que a versão anterior deste texto fazia. Devolver nada aqui trocava um
+ *   relatório imperfeito por relatório nenhum.
+ */
+export const LIMITE_DO_NOME = 80;
+export const nomeDoNegocio = (valor: unknown): string => {
+  const limpo = frase(typeof valor === 'string' ? valor.replace(/\s+/g, ' ') : valor);
+  if (!limpo) return 'seu negócio';
+  const domado = semAsterisco(limpo);
+  return domado.length > LIMITE_DO_NOME ? `${domado.slice(0, LIMITE_DO_NOME - 1).trimEnd()}…` : domado;
+};
+
+/**
  * O asterisco sai do texto que não é nosso.
  *
  * O corpo em texto usa `*assim*` para negrito, e é o que o WhatsApp desenha e o
@@ -80,7 +110,6 @@ const frase = (valor: unknown): string | null => {
  * ou da frase de um cliente emparelha com os nossos e põe negrito no sítio
  * errado — ou, no Telegram, faz a mensagem inteira cair para texto simples.
  */
-export const semAsterisco = (texto: string): string => texto.replace(/\*/g, '');
 
 /**
  * E no HTML, o que não é nosso não pode abrir etiqueta nenhuma.
@@ -163,8 +192,10 @@ export const lerRetrato = (resumo: unknown): Leitura | null => {
   if (!raiz) return null;
   const negocio = objecto(raiz.business);
   const amostra = objecto(raiz.sample);
-  const nome = frase(negocio?.name);
-  if (!nome) return null;
+  // Sem objecto de negócio não há retrato para ler. Com objecto e sem nome há:
+  // o nome ganha um recuo, e o resto do relatório continua verdadeiro.
+  if (!negocio) return null;
+  const nome = nomeDoNegocio(negocio.name);
 
   const insights = objecto(amostra?.insights);
   const historico = objecto(insights?.history);
@@ -184,8 +215,12 @@ export const lerRetrato = (resumo: unknown): Leitura | null => {
     .filter((tema) => tema.rotulo !== '' && tema.contagem > 0);
 
   return {
-    nome: semAsterisco(nome),
-    nota: numero(negocio?.googleRating),
+    nome,
+    // NOTA ZERO NÃO É NOTA. Um negócio recém-colhido, ou um retrato em que o
+    // Google não devolveu a média, traz `0`. Escrever "Nota atual: 0,0" diz ao
+    // dono que ele leva zeros — é a mesma desonestidade que `mediaDaSemana` já
+    // proíbe para a semana, e apanhada na auditoria de 02/09/2026.
+    nota: (numero(negocio?.googleRating) || 0) > 0 ? numero(negocio?.googleRating) : null,
     total: numero(negocio?.googleReviewCount),
     lidas,
     porNota: Object.fromEntries(['1', '2', '3', '4', '5'].map((n) => [n, numero(porNota[n]) ?? 0])),
@@ -289,9 +324,20 @@ export const textoDoRelatorio = (leitura: Leitura): string => {
     linhas.push('');
     linhas.push(`💬 Os clientes repetem: ${leitura.temas.slice(0, 3).map((tema) => semAsterisco(tema.rotulo)).join(', ')}.`);
   }
+  // O PASSO TAMBEM VAI NO TEXTO.
+  //
+  // Ate a auditoria de 02/09/2026 ele so existia no e-mail, e a versao curta
+  // podia sair sem passo nenhum. O caso que o mostrou: um negocio recem-colhido,
+  // sem nota, sem historico e sem nada por responder, produzia tres linhas — o
+  // nome e o link. O contrato diz que todo relatorio acaba num passo, e um
+  // relatorio sem passo e um extracto bancario.
+  const passo = passoDaSemana(leitura);
   linhas.push('');
-  linhas.push(`👉 ${PAINEL}`);
-  return linhas.join('\n');
+  linhas.push(`👉 ${semAsterisco(passo.titulo)}: ${PAINEL_DAS_RESPOSTAS}`);
+  // Linhas em branco seguidas sao um buraco no meio da mensagem, e aparecem
+  // sempre que um bloco e omitido por falta de dado. Colapsam aqui, uma unica
+  // vez, em vez de cada bloco ter de saber o que veio antes dele.
+  return linhas.join('\n').replace(/\n{3,}/g, '\n\n').trim();
 };
 
 /**
@@ -396,7 +442,7 @@ export const htmlDoRelatorio = (leitura: Leitura): string => {
   return `<!doctype html>
 <html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${nome} no Google</title></head>
 <body style="margin:0;padding:0;background:${CORES.fundo};">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escaparHtml(semana || `${nome} no Google`)}</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${semana ? escaparHtml(semana) : `${nome} no Google`}</div>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:${CORES.fundo};">
 <tr><td align="center" style="padding:24px 12px;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;background:${CORES.papel};border-radius:12px;border:1px solid ${CORES.linha};">
@@ -422,7 +468,30 @@ ${blocos.join('\n')}
  * Um assunto genérico é o que faz o dono não abrir a partir da terceira semana.
  * O que faz abrir é o número: a nota, ou quantas avaliações chegaram.
  */
+export const LIMITE_DO_ASSUNTO = 150;
+
 export const assuntoDoRelatorio = (leitura: Leitura): string => {
+  return cortarAssunto(assuntoBruto(leitura));
+};
+
+/**
+ * O tecto do assunto.
+ *
+ * Hoje ele NUNCA morde: o nome já vem limitado a 80 caracteres, e o resto da
+ * frase tem uns 45, logo o assunto mais longo possível fica bem abaixo dos 150.
+ * Isto foi apanhado a tentar quebrá-lo — a asserção que o media não conseguia
+ * ficar vermelha, porque nenhum retrato a alcançava.
+ *
+ * Fica na mesma, e é uma escolha: as caixas de entrada cortam por volta dos 70
+ * caracteres, e o dia em que alguém puser mais uma frase no assunto, este tecto
+ * é a diferença entre uma linha comprida e um campo que cresce a partir de
+ * texto que não é nosso. O que mudou foi a asserção, que passou a chamá-lo
+ * diretamente em vez de esperar que um retrato lá chegasse.
+ */
+export const cortarAssunto = (assunto: string): string =>
+  assunto.length > LIMITE_DO_ASSUNTO ? `${assunto.slice(0, LIMITE_DO_ASSUNTO - 1).trimEnd()}…` : assunto;
+
+const assuntoBruto = (leitura: Leitura): string => {
   const novas = leitura.comparacao ? (numero(leitura.comparacao.passada?.reviewCount) ?? 0) : null;
   if (novas !== null && novas > 0) {
     return `${leitura.nome}: ${plural(novas, 'avaliação nova', 'avaliações novas')} na semana`;

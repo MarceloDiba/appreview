@@ -1166,10 +1166,35 @@ apagaria relatórios por causa de uma configuração que falta, e o dono nunca
 saberia que existiram. A verificação da chave acontece ANTES de reservar linhas,
 senão elas ficam presas em `sending` sem ninguém para as enviar.
 
+**Nota zero não é nota, e nome vazio não cancela o relatório.** Um negócio
+recém-colhido traz `googleRating: 0`, e escrever "Nota atual: 0,0" diz ao dono
+que ele levou zeros — a mesma desonestidade que a média da semana já proíbe.
+Sem nota, o bloco não sai. Sem nome legível, o relatório sai com "seu negócio":
+trocar um relatório imperfeito por relatório nenhum é a troca errada.
+
+**O nome vem do Google, e é domado antes de entrar em qualquer sítio.** Espaços
+colapsados (uma quebra de linha sobrevivia ao `trim` e chegava ao assunto do
+e-mail), asteriscos removidos (emparelham com o negrito e o partem) e um tecto
+de 80 caracteres (um nome de cinco mil fazia o corpo passar do limite de 4096 da
+fila, e o resumo desaparecia em silêncio).
+
+**Nada que devia ser enfileirado pode desaparecer sem rasto.** Um `check`
+recusado, um dono sem endereço: os dois ficam no log com o dono nomeado. Uma
+contagem na resposta HTTP diz que aconteceu; só o log diz a quem.
+
+**A reserva da fila é fechada ao navegador.** `claim_whatsapp_outbox_por_canal`
+é `security definer` e devolve linhas inteiras — com o e-mail e o relatório do
+dono lá dentro. No Postgres, `execute` numa função nova é concedido a PUBLIC por
+omissão, e o PostgREST expõe o esquema `public` a `anon`. O `revoke` existia em
+produção e não existia no repositório: quem reconstruísse o banco a partir das
+migrações ficava com a fila aberta a qualquer pessoa. Vale o mesmo para os dois
+drenadores e para `canal_do_aviso`.
+
 Guardado por `scripts/check-relatorio-por-email.mjs`, que corre o compositor de
-verdade com retratos reais e APLICA a migração num Postgres descartável, sobre
-uma tabela com linhas dentro, para provar que nenhuma inserção que hoje funciona
-passa a ser recusada.
+verdade com retratos reais, APLICA a migração num Postgres descartável sobre uma
+tabela com linhas dentro — para provar que nenhuma inserção que hoje funciona
+passa a ser recusada — e lê as permissões resultantes do próprio banco, em vez
+de procurar a palavra `revoke` no ficheiro.
 
 O teste não substitui
 revisão de produto: qualquer mudança visual ou de fluxo ainda deve ser
