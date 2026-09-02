@@ -605,6 +605,7 @@ export type Database = {
           total_reviews: number
           unanswered_review_count: number
           user_id: string
+          weekly_history: Json | null
         }
         Insert: {
           average_rating: number
@@ -619,6 +620,7 @@ export type Database = {
           total_reviews: number
           unanswered_review_count?: number
           user_id: string
+          weekly_history?: Json | null
         }
         Update: {
           average_rating?: number
@@ -633,6 +635,7 @@ export type Database = {
           total_reviews?: number
           unanswered_review_count?: number
           user_id?: string
+          weekly_history?: Json | null
         }
         Relationships: [
           {

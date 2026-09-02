@@ -802,7 +802,7 @@
         "qrTitle": "Do QR ao Google",
         "qrOpened": "QR aberto",
         "qrClicked": "Clicou no Google",
-        "volumeEmpty": "Aqui aparece quantas avaliações você recebe por semana, depois da segunda busca.",
+        "volumeEmpty": "Ainda não há semanas para comparar. Aparece aqui assim que houver avaliações espalhadas por mais de uma semana.",
         "distributionEmpty": "Aqui aparece cada nota separada, depois que o Binno buscar as suas avaliações.",
         "distributionTooFew_one": "Com 1 avaliação buscada, o gráfico ainda não tem o que separar. A partir de {{minimo}}, cada nota separada aparece aqui.",
         "distributionTooFew_other": "Com {{count}} avaliações buscadas, uma única avaliação já muda muito o gráfico. A partir de {{minimo}}, cada nota separada aparece aqui.",

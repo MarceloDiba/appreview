@@ -25,6 +25,12 @@ export type PersistedReputationSnapshotRow = {
   average_response_hours: number | null;
   topics: unknown;
   /**
+   * As semanas guardadas com esta coleta. Nulo nas linhas anteriores a
+   * 02/09/2026, gravadas antes de o histórico ser guardado no banco: até aí
+   * ele vivia só no `localStorage` do navegador que coletou.
+   */
+  weekly_history: unknown;
+  /**
    * Proveniência da linha. `apify-experimental` significa que a distribuição
    * por nota, as não respondidas, os últimos 30 dias, o tempo de resposta e os
    * temas vieram de uma amostra de no máximo 50 avaliações; `official-google`
@@ -117,9 +123,48 @@ export const buildSnapshotFromPersistedRow = (
         reviewsLast30Days: numberOrNull(row.reviews_last_30_days),
         averageResponseHours: numberOrNull(row.average_response_hours),
         topics: readTopics(row.topics),
+        // Sem isto a linha do banco chega ao painel sem semanas nenhumas, e
+        // `weeklyHistoryOwner` escolhe o navegador ou ninguem: era assim que o
+        // grafico de volume vivia so no aparelho que coletou.
+        history: readHistory(row.weekly_history),
       },
     },
   };
+};
+
+/**
+ * As semanas guardadas com o retrato, conferidas antes de chegarem ao gráfico.
+ *
+ * O que vem do banco é `jsonb`: pode ser nulo (as linhas anteriores a
+ * 02/09/2026, gravadas antes de o histórico ser guardado), pode ser um objecto
+ * de outra forma se alguém escrever à mão, e pode ter semanas incompletas. O
+ * gráfico desenha o que receber, por isso a conferência é aqui e não lá.
+ *
+ * Uma semana sem `start` ou sem `reviewCount` é descartada em vez de virar
+ * zero: zero é uma afirmação sobre o negócio, e inventá-la desenharia uma
+ * queda que ninguém teve.
+ */
+type SemanaGuardada = { start: string; reviewCount: number; ratingBreakdown: Record<string, number>; ownerReplies: number };
+
+export const readHistory = (valor: unknown): { weeks: SemanaGuardada[] } | undefined => {
+  const bruto = (valor as { weeks?: unknown } | null | undefined)?.weeks;
+  if (!Array.isArray(bruto)) return undefined;
+  const weeks = bruto.flatMap((item) => {
+    const semana = item as Record<string, unknown>;
+    const start = typeof semana.start === 'string' ? semana.start : null;
+    const reviewCount = numberOrNull(semana.reviewCount);
+    if (!start || reviewCount === null) return [];
+    const breakdown = (semana.ratingBreakdown || {}) as Record<string, unknown>;
+    return [{
+      start,
+      reviewCount: Math.max(0, Math.trunc(reviewCount)),
+      ratingBreakdown: Object.fromEntries(
+        ['1', '2', '3', '4', '5'].map((nota) => [nota, Math.max(0, Math.trunc(numberOrZero(breakdown[nota])))]),
+      ),
+      ownerReplies: Math.max(0, Math.trunc(numberOrZero(semana.ownerReplies))),
+    }];
+  });
+  return weeks.length ? { weeks } : undefined;
 };
 
 /**

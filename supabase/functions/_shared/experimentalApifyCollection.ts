@@ -532,6 +532,11 @@ const persistAggregateSnapshot = async ({
       // Totais do negócio inteiro, lidos do próprio perfil no Google
       // (`reviewsCount` e `totalScore` do Actor). Não são números de amostra.
       total_reviews: Math.max(0, Math.trunc(numberInRange(business.googleReviewCount))),
+      // O historico semanal, que ate 02/09/2026 morria no navegador que
+      // coletou. `insights.history` ja foi calculado acima; so faltava
+      // grava-lo. Nulo quando a coleta nao produziu semanas, que e diferente
+      // de ter produzido zero.
+      weekly_history: (insights.history as unknown) ?? null,
       average_rating: Math.round(Math.min(5, Math.max(0, numberInRange(business.googleRating))) * 10) / 10,
       // Daqui para baixo tudo vem da amostra de no máximo 50 avaliações. É
       // exatamente por isso que a coluna `source` importa: no caminho oficial
