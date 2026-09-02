@@ -56,7 +56,15 @@ if (migracoesDoGatilho.length === 0) {
   process.exit(1);
 }
 const MIGRACAO = join(PASTA_DAS_MIGRACOES, migracoesDoGatilho[migracoesDoGatilho.length - 1]);
-const RESUMO = 'supabase/functions/materialize-whatsapp-notifications/index.ts';
+// O RESUMO MUDOU DE CASA EM 02/09/2026.
+//
+// Ele era montado dentro do materializador, numa funcao que so sabia escrever
+// mensagem curta. Quando o e-mail entrou como canal, a composicao saiu de la
+// para `_shared/relatorioSemanal.ts` e passou a servir os dois formatos a
+// partir da mesma leitura — senao haveria duas versoes do mesmo relatorio a
+// divergir sem ninguem ver. As duas assercoes abaixo seguiram o codigo: elas
+// protegem o resumo, e nao o ficheiro onde ele morava.
+const RESUMO = 'supabase/functions/_shared/relatorioSemanal.ts';
 
 // O cabecalho da migracao CITA o texto antigo, sem acentos, para explicar o que
 // mudou. As assercoes sobre o portugues tem de ler so a parte executavel, senao
@@ -126,9 +134,13 @@ exigir('o comentario do cliente entra sem asteriscos',
   /comentario := nullif\(btrim\(replace\(coalesce\(new\.feedback_text, ''\), '\*', ''\)\), ''\);/.test(migracao));
 exigir('o nome e o email do cliente tambem entram sem asteriscos',
   (migracao.match(/replace\(coalesce\(new\.customer_(name|email), ''\), '\*', ''\)/g) || []).length === 2);
-exigir('a frase repetida pelos clientes no resumo tambem entra sem asteriscos',
-  /const semAsterisco = \(texto: string\) => texto\.replace\(\/\\\*\/g, ''\);/.test(resumo)
-  && /semAsterisco\(opportunity\.phrase\)/.test(resumo));
+// O nome do negocio vem do Google e um asterisco dele emparelha com os nossos.
+// A `opportunity.phrase` que esta assercao media ate 02/09/2026 deixou de vir no
+// retrato da coleta, e o que sobrou a proteger e o nome — que e o unico texto do
+// resumo que o Binno nao escreveu.
+exigir('o texto que vem do Google entra no resumo sem asteriscos',
+  /export const semAsterisco = \(texto: string\): string => texto\.replace\(\/\\\*\/g, ''\);/.test(resumo)
+  && /nome: semAsterisco\(nome\),/.test(resumo));
 
 // 7. O que Marcelo pediu, no texto: negrito, quebras de linha, link no fim.
 exigir('o aviso do comentario privado tem negrito', /\*Comentário privado agora\*/.test(migracao));
@@ -142,7 +154,8 @@ exigir('o contacto deixado continua marcado com o proprio emoji',
   /array_append\(linhas, format\('📱 Contato deixado: %s', contato\)\);/.test(migracao));
 exigir('o aviso do comentario privado acaba no link do painel',
   /array_append\(linhas, '👉 https:\/\/binno\.pro\/reviews'\);/.test(migracao));
-exigir('o resumo acaba no link do painel', /lines\.push\('👉 https:\/\/binno\.pro'\);/.test(resumo));
+exigir('o resumo acaba no link do painel',
+  /linhas\.push\(`👉 \$\{PAINEL\}`\);/.test(resumo) && /export const PAINEL = 'https:\/\/binno\.pro';/.test(resumo));
 exigir('o aviso separa os blocos com linha em branco',
   (migracao.match(/array_append\(linhas, ''\)/g) || []).length >= 3);
 
