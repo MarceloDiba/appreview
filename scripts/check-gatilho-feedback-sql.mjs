@@ -18,13 +18,31 @@ import { globSync } from 'node:fs';
 //
 // Por comparacao, e nao por confianca. Ele monta dois bancos:
 //
-//   `antes`  = migracoes ate `20260830180000`, ou seja o gatilho como estava.
-//   `depois` = as mesmas mais as duas novas.
+//   `antes`  = migracoes ate `20260830180000`, ou seja o gatilho como estava
+//              antes de o aviso de elogio existir.
+//   `depois` = as mesmas mais as quatro novas, ate 02/09/2026. E a funcao que
+//              o Postgres passa a ter depois deste ramo, e nao uma versao
+//              intermedia que ninguem usa.
 //
-// Roda o mesmo roteiro de casos nos dois e exige que as linhas de fila com
-// `kind = 'feedback'` (as de reclamacao) saiam byte a byte iguais nos dois
-// bancos, texto do colapso incluido. Se qualquer palavra ou regra do caminho da
-// reclamacao mudar, os dois lados divergem e este guarda fica vermelho.
+// Roda o mesmo roteiro de casos nos dois e compara a DECISAO do caminho da
+// reclamacao: os mesmos casos avisados, o mesmo numero de avisos por caso, na
+// mesma ordem. Se alguem calar uma reclamacao, avisar duas vezes onde avisava
+// uma, ou partir o colapso, os dois lados divergem e este guarda fica vermelho.
+//
+// ATE 02/09/2026 A COMPARACAO ERA BYTE A BYTE, incluindo o texto. Deixou de o
+// poder ser porque o texto mudou de proposito duas vezes desde entao (01/09 os
+// emojis e o negrito, 02/09 o convite em todos os avisos), e um guarda que fica
+// vermelho por a mudanca aprovada ter acontecido ensina a desliga-lo. O texto
+// de HOJE nao ficou por medir: passou a ser conferido linha a linha contra a
+// regra nova, no banco `depois`.
+//
+// A LISTA DE MIGRACOES E A COISA MAIS FRAGIL DAQUI. Ela e escrita a mao, e uma
+// migracao nova que toque no gatilho e nao entre nesta lista deixa este guarda
+// a correr uma funcao que ja nao existe. Foi o que aconteceu com as de 01/09 e
+// 02/09, apanhado na revisao final do ramo em 02/09/2026: a migracao do convite
+// nunca tinha corrido em lado nenhum, e na linha da mensagem de elogio vivia,
+// verde, a afirmacao de que so o elogio convidava para o Google, ou seja
+// exactamente o comportamento que este ramo proibe.
 //
 // O QUE ELE PRECISA PARA RODAR
 //
@@ -97,9 +115,28 @@ const sqlEsquemaOriginal = readFileSync(join(migracoes, '20260711_relink_apprevi
 const sqlOutbox = readFileSync(join(migracoes, '20260821193000_whatsapp_delivery_outbox.sql'), 'utf8');
 
 // `auth.users` e do Supabase; aqui basta a chave que as tabelas referenciam.
+//
+// `public.canal_do_aviso` E OUTRA COISA, E PRECISA DE SER DITA. As migracoes
+// de 01/09 e 02/09 chamam-na na linha do `insert`, e ela NAO ESTA DEFINIDA EM
+// NENHUMA MIGRACAO DESTE RAMO: quem a cria e
+// `20260831030000_telegram_como_ponte.sql`, que ficou noutro ramo quando o
+// despacho do Telegram voltou ao repositorio em 01/09/2026 sem ela. Num banco
+// vazio, sem esta definicao, o `insert` levanta excepcao, o
+// `exception when others` do proprio gatilho engole-a como aviso, e NENHUM
+// aviso e enfileirado: foi exactamente isso que aconteceu ao carregar as
+// migracoes de setembro pela primeira vez, em 02/09/2026.
+//
+// O talao abaixo devolve sempre 'openwa', o unico valor que o `check` do
+// `provider` deste ramo aceita alem de 'meta-cloud'. Isto e honesto para o
+// que este guarda mede: ele le `kind` e `body`, e o canal de entrega nao entra
+// em nenhum dos dois. O que o talao NAO faz e tapar o buraco do repositorio,
+// que continua la e esta escrito no relatorio de 02/09/2026.
 const BOOTSTRAP = `
 create schema if not exists auth;
 create table if not exists auth.users (id uuid primary key);
+
+create or replace function public.canal_do_aviso(p_user_id uuid)
+returns text language sql immutable as $canal$ select 'openwa'::text $canal$;
 
 ${extrairCreateTable(sqlEsquemaOriginal, 'internal_feedback')}
 ${extrairCreateTable(sqlOutbox, 'whatsapp_notification_preferences')}
@@ -119,6 +156,8 @@ const ATE_ANTES = [
 const NOVAS = [
   '20260830210000_nota_opcional_no_comentario.sql',
   '20260830220000_aviso_de_elogio_com_comentario.sql',
+  '20260901200000_aviso_com_emoji_e_negrito.sql',
+  '20260902120000_convite_sem_filtro.sql',
 ];
 
 // ------------------------------------------------------------ roteiro comum
@@ -335,9 +374,23 @@ try {
     'o roteiro produziu avisos de reclamacao (senao a comparacao nao provaria nada)',
     reclamacoesAntes.length >= 6
   );
+  // ATE 02/09/2026 ESTA COMPARACAO ERA BYTE A BYTE, e provava que a chegada do
+  // aviso de elogio (30/08) nao tinha mexido no caminho da reclamacao. Duas
+  // migracoes depois, o TEXTO da reclamacao mudou de proposito: 01/09 pos
+  // emojis, negrito e acentos, e 02/09 pos o convite ao Google em TODOS os
+  // avisos. Uma comparacao byte a byte so podia ficar vermelha por dizer a
+  // verdade, e um guarda assim empurra quem vier a seguir a desligar a
+  // assercao em vez de a ler.
+  //
+  // O que continua comparado dos dois lados e a DECISAO, que e a regra que
+  // este ramo promete nao tocar: quem recebe aviso de reclamacao, quantos, e
+  // em que ordem. O colapso continua dentro disto (o caso 05 gera duas linhas
+  // dos dois lados, nao uma nem tres). O TEXTO de hoje e medido logo a seguir,
+  // linha a linha, contra a regra nova em vez de contra a antiga.
+  const decisaoDe = (fila) => fila.map((linha) => `${linha.rotulo}|${linha.kind}`);
   exigir(
-    'as reclamacoes (nota 1 a 3) saem identicas antes e depois, texto do colapso incluido',
-    JSON.stringify(reclamacoesAntes) === JSON.stringify(reclamacoesDepois)
+    'a decisao do caminho da reclamacao nao mudou: os mesmos casos, o mesmo numero de avisos, na mesma ordem',
+    JSON.stringify(decisaoDe(reclamacoesAntes)) === JSON.stringify(decisaoDe(reclamacoesDepois))
   );
 
   const porRotulo = (fila, rotulo) => fila.filter((l) => l.rotulo === rotulo);
@@ -391,13 +444,43 @@ try {
     'a mensagem de elogio nao chama o elogio de "Comentário privado"',
     msgElogio && !msgElogio.includes('Comentário privado')
   );
+  // ATE 02/09/2026 VIVIA AQUI, VERDE, "a mensagem de elogio diz para agradecer"
+  // e "a mensagem de elogio convida a publicar no Google", escritas contra uma
+  // versao da funcao em que SO o elogio convidava. O repositorio ficou com um
+  // guarda a proibir o comportamento seletivo e outro a afirma-lo. As duas
+  // frases foram reescritas para a regra nova, que e a razao de este ramo
+  // existir.
+  //
+  // A linha do agradecimento saiu na migracao de 02/09: as duas linhas de
+  // accao passaram a ser as mesmas para qualquer nota, e a primeira delas diz
+  // o que o Binno faz por ele em vez de lhe dar uma ordem.
   exigir(
-    'a mensagem de elogio diz para agradecer',
-    msgElogio && /agrade/i.test(msgElogio)
+    'a mensagem de elogio manda abrir o painel, onde o Binno escreve o recado',
+    msgElogio && msgElogio.includes('o Binno escreve um recado')
+  );
+
+  // O CONVITE NAO DEPENDE DA NOTA. Esta e a promessa do ramo de 02/09/2026,
+  // executada e nao lida: convidar so quem deu 4 ou 5 e solicitacao seletiva, e
+  // a politica do Google proibe.
+  const CONVITE = 'convide a publicar no Google';
+  exigir(
+    'o convite ao Google continua no aviso de elogio',
+    msgElogio && msgElogio.includes(CONVITE)
   );
   exigir(
-    'a mensagem de elogio convida a publicar no Google',
-    msgElogio && /Google/.test(msgElogio)
+    'o convite ao Google aparece TAMBEM no aviso de reclamacao, que e a mudanca deste ramo',
+    msgQueixa && msgQueixa.includes(CONVITE)
+  );
+  exigir(
+    'o convite diz, no proprio texto, que vale para qualquer nota',
+    msgQueixa && msgQueixa.includes('Vale para qualquer nota')
+  );
+  // A prova larga, e a unica que apanha um caso esquecido: NENHUMA das linhas
+  // desta corrida, de nota 1 a nota 5, com texto ou sem, primeira ou colapsada,
+  // pode sair sem o convite.
+  exigir(
+    'nenhum aviso desta corrida saiu sem o convite, seja qual for a nota',
+    tudoDepois.length > 0 && tudoDepois.every((linha) => linha.body.includes(CONVITE))
   );
   exigir(
     'a mensagem de elogio mantem o link do painel',
@@ -407,7 +490,25 @@ try {
     'a mensagem de elogio traz o que o cliente escreveu',
     msgElogio && msgElogio.includes('Melhor jantar do ano, equipe atenciosa.')
   );
-  exigir('a mensagem de elogio comeca por Binno, como as outras', msgElogio && msgElogio.startsWith('Binno\n'));
+  // O "Binno" de abertura saiu na migracao de 01/09/2026: quem abre cada aviso
+  // passou a ser o marcador da especie, que e o que o dono procura ao olhar
+  // para o telemovel. A assercao passa a medir isso, que e o que existe.
+  exigir('o aviso de elogio abre pelo marcador verde do elogio', msgElogio && msgElogio.startsWith('🟢 '));
+  exigir('o aviso de reclamacao abre pelo marcador vermelho', msgQueixa && msgQueixa.startsWith('🔴 '));
+
+  // E o texto da reclamacao de hoje, medido a serio, agora que a comparacao
+  // byte a byte com a versao de 30/08 deixou de poder faze-lo.
+  exigir('a reclamacao diz a nota que a pessoa deixou', msgQueixa && /\*nota 3 de 5\*/.test(msgQueixa));
+  exigir('a reclamacao traz o que a pessoa escreveu', msgQueixa && msgQueixa.includes('Demorou demais para servir.'));
+  exigir('a reclamacao acaba no link do painel', msgQueixa && msgQueixa.trimEnd().endsWith('👉 https://binno.pro/reviews'));
+  exigir('a reclamacao nao usa travessao', msgQueixa && !msgQueixa.includes('\u2014'));
+  // O colapso: a segunda linha do caso 05 e a que soma os que chegaram desde o
+  // ultimo aviso, e era esse texto que a comparacao byte a byte protegia.
+  const colapsoDaReclamacao = porRotulo(reclamacoesDepois, '05-colapso-reclamacao')[1];
+  exigir(
+    'o colapso da reclamacao continua a somar os comentarios desde o ultimo aviso',
+    colapsoDaReclamacao && /\*2 comentários privados\* desde o último aviso/.test(colapsoDaReclamacao.body)
+  );
   // Escrito pelo code point de proposito: o repositorio nao quer o travessao
   // nem dentro da regra que proibe o travessao.
   exigir(

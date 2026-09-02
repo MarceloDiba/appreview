@@ -19,10 +19,43 @@
 //      mensagem.
 //   3. Que a rede de seguranca do envio existe: formatacao recusada pelo
 //      Telegram repete em texto simples.
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const DESPACHO = 'supabase/functions/telegram-dispatch/index.ts';
-const MIGRACAO = 'supabase/migrations/20260901200000_aviso_com_emoji_e_negrito.sql';
+// A MIGRACAO NAO E APONTADA A MAO, E DESCOBERTA.
+//
+// `create or replace function` substitui o corpo inteiro: a funcao que o
+// Postgres tem e a da ULTIMA migracao que a reescreve, e nao aquela em que o
+// formato nasceu. Ate 02/09/2026 este caminho estava escrito a mao e apontava
+// para `20260901200000_aviso_com_emoji_e_negrito.sql`. Depois do ramo do
+// convite, a funcao viva passou a ser a de `20260902120000`, e as vinte e tal
+// assercoes de formato abaixo (emojis, negrito, acentos, asterisco fora da
+// citacao, citacao, contacto, link no fim, janelas de 5 e 15 minutos) ficaram
+// a proteger um fossil: apagar o bloco da citacao da migracao nova deixava
+// este guarda verde.
+//
+// Corrigir o caminho a mao resolvia hoje e voltava a partir-se na proxima
+// migracao que tocasse na funcao, em silencio e da mesma maneira. Por isso ele
+// e CALCULADO: as migracoes que contem o `create or replace` desta funcao,
+// ordenadas pelo carimbo de data que abre o nome, e a ultima ganha. Uma
+// migracao nova entra sozinha, e nao ha caminho para envelhecer.
+const PASTA_DAS_MIGRACOES = 'supabase/migrations';
+const ASSINATURA_DO_GATILHO = 'create or replace function public.notify_internal_feedback_whatsapp';
+const migracoesDoGatilho = readdirSync(PASTA_DAS_MIGRACOES)
+  .filter((nome) => nome.endsWith('.sql'))
+  .filter((nome) => readFileSync(join(PASTA_DAS_MIGRACOES, nome), 'utf8').includes(ASSINATURA_DO_GATILHO))
+  .sort();
+if (migracoesDoGatilho.length === 0) {
+  // Nenhuma migracao reescreve a funcao: nao ha o que verificar, e um guarda
+  // que nao consegue verificar tem de ficar vermelho em vez de parecer verde.
+  console.error(
+    'Aviso formatado: nao encontrei nenhuma migracao com "%s" em %s.',
+    ASSINATURA_DO_GATILHO, PASTA_DAS_MIGRACOES,
+  );
+  process.exit(1);
+}
+const MIGRACAO = join(PASTA_DAS_MIGRACOES, migracoesDoGatilho[migracoesDoGatilho.length - 1]);
 const RESUMO = 'supabase/functions/materialize-whatsapp-notifications/index.ts';
 
 // O cabecalho da migracao CITA o texto antigo, sem acentos, para explicar o que
@@ -99,6 +132,14 @@ exigir('a frase repetida pelos clientes no resumo tambem entra sem asteriscos',
 
 // 7. O que Marcelo pediu, no texto: negrito, quebras de linha, link no fim.
 exigir('o aviso do comentario privado tem negrito', /\*Comentário privado agora\*/.test(migracao));
+// A citacao do cliente e o meio da mensagem: e o que o dono abre o telemovel
+// para ler. Nenhuma das assercoes acima a media, e apagar este bloco deixava o
+// guarda verde mesmo depois de ele passar a ler a migracao certa. Foi o
+// cenario nomeado na revisao final do ramo, em 02/09/2026.
+exigir('o aviso traz a citacao do cliente, com o emoji que a marca',
+  /array_append\(linhas, format\('💬 "%s"', comentario\)\);/.test(migracao));
+exigir('o contacto deixado continua marcado com o proprio emoji',
+  /array_append\(linhas, format\('📱 Contato deixado: %s', contato\)\);/.test(migracao));
 exigir('o aviso do comentario privado acaba no link do painel',
   /array_append\(linhas, '👉 https:\/\/binno\.pro\/reviews'\);/.test(migracao));
 exigir('o resumo acaba no link do painel', /lines\.push\('👉 https:\/\/binno\.pro'\);/.test(resumo));

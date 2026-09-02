@@ -1,33 +1,40 @@
--- O aviso do comentario privado, escrito para ser lido no telemovel.
+-- O convite para avaliar no Google deixa de depender da nota.
 --
--- Marcelo, em 01/09/2026, depois de receber um aviso de ensaio: "voce pode
--- editar ela melhor, deixar pontos importantes em negrito, fazer quebra de
--- linha, enviar o link do dash ao final" e "podemos ter emojis pra nos ajudar
--- a organizar a mensagem".
+-- O QUE MUDA. Ate 02/09/2026 o aviso do comentario privado so mandava
+-- convidar para o Google quando a especie era 'feedback-praise', ou seja nota
+-- 4 ou 5; quem deu 3 ou menos nunca era convidado. Isso e solicitacao
+-- seletiva, e a politica do Google proibe: perfis apanhados nisso perdem
+-- avaliacoes. Duas analises independentes de concorrentes apontaram o
+-- nao-filtrar como a melhor vantagem de venda do Binno, e nao se vende isso
+-- enquanto o produto sugere o contrario.
 --
--- O QUE MUDA, E O QUE NAO MUDA
+-- Onde havia um `if` sobre a especie, a escolher entre "agradeca e convide a
+-- publicar no Google" (elogio) e "abra e o Binno escreve um recado" (queixa),
+-- passam a ser escritas as DUAS linhas, sempre, na mesma ordem, para qualquer
+-- nota: primeiro o que o Binno faz por ele, depois o convite.
 --
--- A REGRA de quando avisar nao muda em nada: nota nula nao avisa, nota ate 3
--- avisa e cala-se 5 minutos, nota 4 ou 5 COM texto avisa e cala-se 15 minutos,
--- nota 4 ou 5 sem texto nao avisa. O acumulado desde o ultimo aviso continua a
--- ser contado da mesma forma. So o TEXTO muda.
+-- O QUE NAO MUDA. A regra de QUANDO avisar fica intacta: nota nula nao avisa,
+-- nota ate 3 avisa e cala-se 5 minutos, nota 4 ou 5 COM texto avisa e cala-se
+-- 15 minutos, nota 4 ou 5 sem texto nao avisa. O acumulado desde o ultimo
+-- aviso, o colapso, os emojis, o negrito, a citacao, o contacto e o link do
+-- painel ficam como estavam. Por isso "sempre" aqui quer dizer "sempre que ha
+-- aviso": o convite nao passa a criar avisos onde nao havia, so deixa de
+-- faltar nos que ja existiam.
 --
--- TRES CORRECOES ALEM DO PEDIDO
+-- DE ONDE VEM O CORPO. E o da migracao de 01/09/2026
+-- (20260901200000_aviso_com_emoji_e_negrito.sql), palavra por palavra, salvo
+-- as sete linhas do `if` acima trocadas por duas. `create or replace function`
+-- exige o corpo inteiro, e e por isso que ele aparece aqui repetido; o `diff`
+-- entre os dois ficheiros e o unico sitio onde este ramo mexeu no gatilho.
 --
--- 1. Acentos. A mensagem dizia "comentarios privados desde o ultimo aviso" e
---    "elogios escritos desde o ultimo aviso", sem acentos, porque foram
---    escritas as pressas no dia do bloqueio do WhatsApp. E o dono que le isto,
---    e amanha e um prospecto que le por cima do ombro dele.
+-- ESTA MIGRACAO ESTA ESCRITA E POR APLICAR, por decisao do dono do produto.
 --
--- 2. O asterisco sai do texto do CLIENTE. O negrito do WhatsApp e *assim*, e o
---    Telegram converte os nossos asteriscos em negrito. Um asterisco escrito
---    pelo cliente dentro da citacao emparelharia com os nossos e poria negrito
---    no sitio errado. Tirar o asterisco do que nao e nosso resolve na origem.
---
--- 3. Os emojis sao MARCADORES e nao enfeite: um para a especie do aviso
---    (vermelho para queixa, verde para elogio), um para a citacao, um para o
---    contacto, um para o link. Quem le no telemovel encontra a parte que quer
---    sem ler a mensagem inteira.
+-- Guardada por scripts/check-convite-sem-filtro.mjs (o convite nao esta dentro
+-- de um `if` sobre a especie), por scripts/check-aviso-formatado.mjs (o
+-- formato do aviso: esse guarda descobre sozinho a ULTIMA migracao que
+-- reescreve esta funcao, e desde 02/09/2026 e este ficheiro) e por
+-- scripts/check-gatilho-feedback-sql.mjs, que aplica as migracoes e corre o
+-- gatilho de verdade num Postgres descartavel.
 create or replace function public.notify_internal_feedback_whatsapp()
 returns trigger
 language plpgsql
