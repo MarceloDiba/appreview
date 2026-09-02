@@ -125,10 +125,63 @@ exigir('sem mensagem nao ha link', linkDeWhatsApp('+5579998380767', '') === null
 //
 // Um comentário no código nunca satisfaz nenhuma destas perguntas: comentários
 // não fazem parte da árvore de sintaxe.
+//
+// RONDA 2 DE CORREÇÃO (02/09/2026). O revisor achou cinco formas novas de
+// esconder o convite, todas verdes. Três eram a MESMA doença que a ronda 1 já
+// dizia cobrir — buracos na propagação de valor, não ataques novos — e foram
+// fechadas: renomear numa desestruturação (`{ rating: pontos } = highlighted`)
+// não expandia `pontos`; uma função auxiliar escrita com `function` (em vez de
+// `const nome = () =>`) não era seguida; e o atributo `linkDeAvaliacao` só era
+// vigiado dentro do PAINEL, deixando o mesmo ataque aberto se escrito dentro
+// do CARTÃO. Fechado também o silêncio no parse: `ts.createSourceFile` nunca
+// lança por sintaxe partida, e sem verificar as diagnósticas o guarda
+// analisava uma árvore que não representa o ficheiro e dizia que estava tudo
+// bem — isso é vacuidade, não protecção.
+//
+// DUAS FORMAS FICARAM DE FORA, DE PROPÓSITO, E É PRECISO SABER QUAIS SÃO:
+//
+// 1. Esconder por CSS: `<div className={nota >= 4 ? '' : 'hidden'}>` à volta
+//    do convite. Este guarda lê expressões condicionais e atributos JSX
+//    nomeados — não interpreta classes, nem sabe que "hidden" esconde nada.
+// 2. Reatribuir dentro de um `if`: `let x = <ConviteParaAvaliar/>; if (nota <
+//    4) x = null;`. Este guarda sobe a árvore a partir do elemento à procura
+//    de ternários e `&&`/`||` — não segue um `if` que muda uma variável mais
+//    tarde.
+//
+// Provar estaticamente que um componente React NUNCA desaparece por causa de
+// um valor é provar uma propriedade semântica sobre código arbitrário — não é
+// possível em geral, e cada ronda de perseguir a próxima grafia dá uma
+// sensação de segurança que a ronda seguinte desmente. Este guarda apanha a
+// nota a condicionar a renderização do convite ou os atributos dele,
+// directamente ou através de variáveis e funções intermédias que a
+// referenciem. NÃO apanha esconder por classe CSS num ancestral, nem por
+// reatribuição dentro de um `if`. A última defesa continua a ser ler o código
+// da vez e olhar para o ecrã — este guarda ajuda, não substitui.
 // ---------------------------------------------------------------------------
+// Le e analisa um ficheiro. Duas protecoes vivem aqui, e nao mais abaixo,
+// porque tudo o resto depende de as duas terem passado:
+//
+// - E5: um ficheiro em falta ou ilegivel nao pode derrubar o guarda com um
+//   stack trace cru do Node por baixo das outras mensagens. Falha alto, com
+//   uma linha igual as outras.
+// - E2: `ts.createSourceFile` NUNCA lanca por sintaxe partida — o parser do
+//   TypeScript e tolerante a erros de proposito, e devolve sempre uma arvore,
+//   mesmo quando ela nao representa o ficheiro. `sourceFile.parseDiagnostics`
+//   e onde esses erros ficam gravados; sem os ler, um ficheiro com chaves por
+//   fechar passava por "arvore vazia o suficiente para nao ter nada a
+//   esconder", que e vacuidade, nao protecao.
 const analisarTsx = (caminho) => {
-  const codigo = readFileSync(caminho, 'utf8');
+  let codigo;
+  try {
+    codigo = readFileSync(caminho, 'utf8');
+  } catch (erro) {
+    exigir(`${caminho} existe e foi lido pelo guarda`, false);
+    const raizVazia = ts.createSourceFile(caminho, '', ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    return { codigo: '', raiz: raizVazia };
+  }
   const raiz = ts.createSourceFile(caminho, codigo, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  exigir(`${caminho} tem sintaxe valida (o guarda nao analisa uma arvore quebrada em silencio)`,
+    (raiz.parseDiagnostics?.length ?? 0) === 0);
   return { codigo, raiz };
 };
 
@@ -141,8 +194,15 @@ const colher = (no, predicado, achados = []) => {
   return achados;
 };
 
+// N1 (ronda 2): uma desestruturação com renome — `const { rating: pontos } =
+// highlighted;` — declara `pontos` com `name` do tipo `Identifier`, mas o
+// `VariableDeclaration` que a contém tem `name` do tipo `ObjectBindingPattern`,
+// não `Identifier`. Sem procurar dentro do padrão, `pontos` nunca era
+// encontrado, e a cadeia transitiva parava aí — o mesmo ataque, achatado, dava
+// verde no cartão E no painel (reabria o C1 fechado na ronda 1).
 const declaracaoPorNome = (raiz, nome) => colher(raiz, (n) =>
   (ts.isVariableDeclaration(n) && ts.isIdentifier(n.name) && n.name.text === nome) ||
+  (ts.isBindingElement(n) && ts.isIdentifier(n.name) && n.name.text === nome) ||
   (ts.isFunctionDeclaration(n) && n.name?.text === nome) ||
   (ts.isInterfaceDeclaration(n) && n.name.text === nome) ||
   (ts.isTypeAliasDeclaration(n) && n.name.text === nome),
@@ -234,6 +294,18 @@ const textoTransitivo = (raiz, no, profundidadeMaxima = 6) => {
       const decl = declaracaoPorNome(raiz, atual.text);
       if (decl && ts.isVariableDeclaration(decl) && decl.initializer) {
         expandir(decl.initializer, profundidade + 1);
+      } else if (decl && ts.isBindingElement(decl)) {
+        // N1: `pontos` veio de `{ rating: pontos }` — o nome ORIGINAL da
+        // propriedade (`rating`) e o que importa, nao o nome local escolhido.
+        // `propertyName` existe so quando ha renome; na forma curta
+        // `{ rating }` o proprio `name` ja e a chave.
+        pedacos.push((decl.propertyName ?? decl.name).getText(raiz));
+      } else if (decl && ts.isFunctionDeclaration(decl) && decl.body) {
+        // N2: `function podeConvidar(caso) { return (caso.rating ?? 0) >= 4; }`
+        // — a mesma funcao escrita como `const podeConvidar = (c) => ...` ja
+        // era seguida (e um VariableDeclaration com initializer); faltava so
+        // a forma `function`, que guarda a logica no `body` do proprio nome.
+        expandir(decl.body, profundidade + 1);
       }
       return;
     }
@@ -334,10 +406,14 @@ exigir('o cartao desenha o convite em cada caso (na arvore de sintaxe — um com
   elementosDoConviteNoCartao.length > 0);
 // Sem condicional de nota a volta do convite, nem em nenhuma propriedade dele,
 // em qualquer grafia — nao so a forma `rating > 3` que a versao anterior
-// adivinhava.
+// adivinhava. `linkDeAvaliacao` e vigiado AQUI TAMBEM (N3, ronda 2): a ronda 1
+// so vigiava este atributo no painel, e o mesmo ataque (condicionar
+// `linkDeAvaliacao` a nota) escrito dentro do proprio `PendingCommentsBanner`
+// ficava verde — a alavanca do C1, tapada num ficheiro e deixada aberta no
+// outro.
 exigir('o cartao nao esconde o convite por causa da nota, em nenhuma forma',
   elementosDoConviteNoCartao.length === 0
-  || !escondidoPelaNota(raizDoCartao, elementosDoConviteNoCartao, []));
+  || !escondidoPelaNota(raizDoCartao, elementosDoConviteNoCartao, ['linkDeAvaliacao']));
 
 // O painel: quem decide o `linkDeAvaliacao` que o cartao recebe. E a
 // alavanca que esconde o convite sem tocar no cartao nem no componente —
@@ -349,6 +425,24 @@ exigir('o painel desenha o cartao de comentarios pendentes (na arvore de sintaxe
 exigir('o painel nao condiciona o link de avaliacao do Google (nem o cartao inteiro) a nota do comentario, em nenhuma forma',
   elementosDoCartaoNoPainel.length === 0
   || !escondidoPelaNota(raizDoPainel, elementosDoCartaoNoPainel, ['linkDeAvaliacao']));
+
+// E3 (ronda 2): a chave existir no catalogo nao prova que alguem a use.
+// Reverter os dois toasts do I3/M1 de volta para `inviteCopy` deixava o
+// guarda verde, porque nada verificava se `inviteCopied`/`inviteCopyError`
+// apareciam de facto numa chamada a `t(...)`.
+const chavesDeTraducaoUsadas = (raiz) => {
+  const chaves = new Set();
+  for (const chamada of colher(raiz, (n) => ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === 't')) {
+    const primeiroArgumento = chamada.arguments[0];
+    if (primeiroArgumento && ts.isStringLiteralLike(primeiroArgumento)) chaves.add(primeiroArgumento.text);
+  }
+  return chaves;
+};
+const chavesUsadasNoConvite = chavesDeTraducaoUsadas(raizDoConvite);
+exigir('o convite na tela usa invite.inviteCopied ao copiar com sucesso',
+  chavesUsadasNoConvite.has('invite.inviteCopied'));
+exigir('o convite na tela usa invite.inviteCopyError quando falha a copiar',
+  chavesUsadasNoConvite.has('invite.inviteCopyError'));
 
 for (const idioma of ['pt-PT', 'pt-BR', 'en']) {
   const catalogo = JSON.parse(readFileSync(`src/i18n/owner/locales/${idioma}.json`, 'utf8'));

@@ -104,7 +104,7 @@ export const useExternalLinks = (
     } finally {
       setIsLoading(false);
     }
-  }, [userId, t]);
+  }, [userId, t, silent]);
 
   const validateGooglePlaceId = async (placeId: string, index: number) => {
     if (!placeId || !userId || !isValidPlaceId(placeId)) {
