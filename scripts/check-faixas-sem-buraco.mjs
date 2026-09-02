@@ -228,7 +228,12 @@ exigir(/<ReputationCard snapshot=\{snapshot\} \/>/.test(corpoDaAcao),
 // o que se exige é o `empty:hidden` E a mesma lista que o painel lê. Prender a
 // `className` inteira obrigava a mexer nesta linha a cada mudança de largura,
 // e uma asserção que se reescreve a cada mudança deixa de ser lida.
-const caixaDosComentarios = painel.match(/<div className="([^"]*)"><PendingCommentsBanner casos=\{comentariosInternos\} \/><\/div>/);
+// A regex ganhou `[^>]*` antes do fecho na Tarefa 3 de 'convidar-sem-filtrar'
+// (02/09/2026): o cartao passou a receber `nomeDoNegocio` e
+// `linkDeAvaliacao` depois de `casos={comentariosInternos}`. A exigencia
+// continua a mesma: a MESMA lista do painel, como primeira prop, dentro da
+// caixa propria dele.
+const caixaDosComentarios = painel.match(/<div className="([^"]*)"><PendingCommentsBanner casos=\{comentariosInternos\}[^>]*\/><\/div>/);
 exigir(caixaDosComentarios !== null,
   'O cartão de comentários internos deixou de receber a mesma lista que o painel lê, ou saiu da caixa própria dele.');
 if (caixaDosComentarios) {

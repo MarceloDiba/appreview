@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { InternalCase } from '@/hooks/useInternalFeedback';
 import { caseHasContact } from '@/lib/internalCasePriority';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import ConviteParaAvaliar from '@/components/dashboard/ConviteParaAvaliar';
 
 /**
  * O comentário privado com nota baixa é a única coisa do produto que expira:
@@ -43,7 +44,23 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
  * O link leva à âncora da fila (`#fila-de-respostas`), onde o caso destacado
  * aparece somado às outras origens desde 30/08/2026.
  */
-const PendingCommentsBanner = ({ casos }: { casos: InternalCase[] }) => {
+const PendingCommentsBanner = ({
+  casos,
+  nomeDoNegocio,
+  linkDeAvaliacao,
+  businessCountry,
+}: {
+  casos: InternalCase[];
+  nomeDoNegocio: string;
+  linkDeAvaliacao: string | null;
+  /**
+   * `profiles.business_country`, lido pelo painel e passado por aqui só para
+   * chegar ao convite: a mensagem que o cliente recebe segue o país do
+   * NEGÓCIO, e não a língua em que o dono escolheu ver o painel. Ver o
+   * cabeçalho de `ConviteParaAvaliar`.
+   */
+  businessCountry: string | null;
+}) => {
   const { t, i18n } = useOwnerTranslation();
 
   if (casos.length === 0) return null;
@@ -97,6 +114,19 @@ const PendingCommentsBanner = ({ casos }: { casos: InternalCase[] }) => {
                   {t('dashboard.cockpit.layout.pendingCommentsQuote', { quote })}
                 </p>
               )}
+              {/*
+                Sem condicao de nota, de proposito: convidar so quem deu 4 ou 5
+                e solicitacao seletiva e a politica do Google proibe. O convite
+                vale para qualquer nota, e por isso aparece aqui sem olhar para
+                `highlighted.rating`.
+              */}
+              <ConviteParaAvaliar
+                nomeDoCliente={highlighted.customer_name}
+                contacto={highlighted.customer_email}
+                nomeDoNegocio={nomeDoNegocio}
+                linkDeAvaliacao={linkDeAvaliacao}
+                businessCountry={businessCountry}
+              />
             </div>
             <div className="mt-4">
               <Button asChild className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]">

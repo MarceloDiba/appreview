@@ -930,6 +930,40 @@ O guarda é `npm run check:ordem-por-decisao`.
   iniciada pelo gestor, pode enviar um alerta ao próprio número configurado se
   houver consentimento, sinal elegível e sessão local ligada. Continua sem
   agenda, webhook, retry, importação de conversas ou operação de produção.
+- **O convite para avaliar no Google nunca depende da nota.**
+  *Decidido em 02/09/2026.* Convidar só quem deu 4 ou 5 é solicitação seletiva,
+  e a política do Google proíbe: perfis apanhados nisso perdem avaliações. O QR
+  já não filtrava (o `ReviewChooser` mostra as duas portas lado a lado, sem
+  perguntar a nota), mas o aviso ao dono filtrava: a linha que mandava convidar
+  para o Google só era escrita quando a nota era 4 ou 5. **Passa a ser escrita
+  sempre que há aviso.** "Sempre que há aviso" e não "sempre", porque a regra de
+  quando avisar não mudou nada: nota ausente continua a não gerar aviso, e nota
+  4 ou 5 sem uma palavra escrita também não. Sem aviso não há convite, e essas
+  duas portas continuam fechadas.
+- **Estado da migração do aviso: escrita e por aplicar.** O ficheiro é
+  `supabase/migrations/20260902120000_convite_sem_filtro.sql`, e não foi
+  aplicado a nenhum banco, por decisão do dono do produto. Até isso acontecer, o
+  aviso que sai do Postgres continua a ser o de 01/09/2026, aquele que só
+  convidava no elogio. Esta cláusula descreve, portanto, o produto decidido e
+  não o produto no ar; as duas coisas voltam a coincidir quando a migração for
+  aplicada.
+- **O convite também aparece na tela, para qualquer nota.** Fica ao lado do
+  comentário destacado, dentro do cartão de comentários pendentes da Visão
+  geral (`ConviteParaAvaliar`), e nunca olha para a nota: o componente nem
+  sequer a recebe. A mensagem sai na variante de português do país do negócio
+  (`profiles.business_country`, só `BR` exacto vira brasileiro), e não na língua
+  em que o dono escolheu ver o painel, porque quem a lê é o cliente. Sem o link
+  de avaliação do Google ligado nas Definições não há convite nenhum, e a tela
+  diz porquê em vez de esconder o bloco.
+- **O Binno não envia o convite: ele escreve, o dono toca.** O produto monta a
+  mensagem e o endereço que abre o WhatsApp já com ela escrita; quem carrega em
+  enviar é o dono, do telemóvel dele. É a mesma regra dos rascunhos de resposta,
+  e dispensa número de empresa, API aprovada e infraestrutura de envio. O botão
+  do WhatsApp só aparece quando o contacto deixado traz indicativo
+  internacional; sem indicativo fica apenas o copiar, porque `wa.me` lê qualquer
+  número como internacional e um número local abriria a conversa de um
+  desconhecido noutro país.
+  Guardado por `scripts/check-convite-sem-filtro.mjs`.
 
 ## 5. Fontes de dados e integrações
 

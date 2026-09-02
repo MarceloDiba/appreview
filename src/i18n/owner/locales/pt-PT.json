@@ -45,6 +45,15 @@
     "errQr": "Não foi possível criar o QR code. Tente novamente.",
     "errQrLocal": "Para testar com o telemóvel, inicie a prévia na rede local antes de criar o QR code."
   },
+  "invite": {
+    "inviteTitle": "Convidar a avaliar no Google",
+    "inviteHint": "Vale para qualquer nota. Convidar só quem gostou é proibido pelo Google.",
+    "inviteWhatsApp": "Enviar por WhatsApp",
+    "inviteCopy": "Copiar mensagem",
+    "inviteNoLink": "Ligue o link de avaliação do Google nas Definições para poder convidar.",
+    "inviteCopied": "Mensagem copiada",
+    "inviteCopyError": "Não deu para copiar. Selecione o texto e copie à mão."
+  },
   "nav": {
     "dashboard": "Painel",
     "reviews": "Avaliações",

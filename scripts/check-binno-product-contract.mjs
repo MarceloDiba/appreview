@@ -2,7 +2,26 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const root = process.cwd();
-const read = (path) => readFileSync(resolve(root, path), 'utf8');
+
+// Comentarios podem conter QUALQUER COISA, inclusive a ancora exacta que uma
+// assercao procura: um bloco de codigo comentado, ou um comentario a explicar o
+// que foi retirado, satisfaz uma busca por texto sem existir no programa. Os
+// ficheiros de CODIGO passam todos por aqui antes de serem medidos.
+//
+// Ate 02/09/2026 este ajudante existia duas vezes neste ficheiro e era aplicado
+// a dois ficheiros de doze; os outros dez eram lidos em bruto. A mesma funcao,
+// de tres linhas, ja vivia em `scripts/check-painel-no-celular.mjs`.
+//
+// O que NAO passa por aqui, de proposito: `src/index.css`, onde `/* */` e
+// sintaxe legitima e a contagem de `--primary` mede o ficheiro como ele e, e os
+// catalogos JSON, onde nao ha comentario nenhum para tirar e uma barra dupla
+// dentro de um texto seria comida por engano.
+const semComentarios = (fonte) => fonte
+  .replace(/\/\*[\s\S]*?\*\//g, ' ')
+  .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
+
+const readRaw = (path) => readFileSync(resolve(root, path), 'utf8');
+const read = (path) => semComentarios(readRaw(path));
 const dashboard = read('src/components/dashboard/ApprovedCockpitDashboard.tsx');
 const pendingCommentsBanner = read('src/components/dashboard/PendingCommentsBanner.tsx');
 const dashboardPage = read('src/pages/Dashboard.tsx');
@@ -21,21 +40,15 @@ const coletaInteira = collector + '\n' + nucleoDaColeta;
 // leem o núcleo partilhado, não mais este arquivo.
 const collectorCore = read('supabase/functions/_shared/experimentalApifyCollection.ts');
 const advisorReading = read('src/lib/advisorReading.ts');
-const estilos = read('src/index.css');
+const estilos = readRaw('src/index.css');
 // O WhatsApp saiu do painel em 31/08/2026 e virou destino do menu principal.
 // Provar que ele "saiu" exige provar para onde foi: sem isto, apagar a tela
 // inteira deixaria o guarda verde.
-// Comentários podem conter qualquer coisa, inclusive o texto exato que estas
-// asserções proíbem: os comentários desta tela explicam o atalho antigo citando
-// `'ativa'`. Sem os remover, o guarda ficaria vermelho com o código certo.
-const semComentariosDeArquivo = (fonte) => fonte
-  .replace(/\/\*[\s\S]*?\*\//g, ' ')
-  .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
 const rotas = read('src/App.tsx');
 const menu = read('src/components/layout/Navbar.tsx');
 const telaDoWhatsApp = read('src/pages/WhatsApp.tsx');
-const telaDoWhatsAppWorkspace = semComentariosDeArquivo(read('src/components/dashboard/WhatsAppNotificationWorkspace.tsx'));
-const catalogos = ['pt-BR', 'pt-PT', 'en'].map((idioma) => read(`src/i18n/owner/locales/${idioma}.json`));
+const telaDoWhatsAppWorkspace = read('src/components/dashboard/WhatsAppNotificationWorkspace.tsx');
+const catalogos = ['pt-BR', 'pt-PT', 'en'].map((idioma) => readRaw(`src/i18n/owner/locales/${idioma}.json`));
 
 // O corpo de `const Nome = ...` até o `;` que fecha a declaração, contando
 // chaves e parênteses. Sem isto, "o Radar não desenha ícone fora do alerta"
@@ -100,12 +113,7 @@ const TEXTOS_REMOVIDOS_EM_31_08 = [
 // modelo, porque `null` significava ao mesmo tempo "ainda não li" e "não tem
 // país". A cadeia exigida abaixo é a mesma, elo a elo; só ganhou um elo.
 const FILA_DO_PAINEL = /<ResponseQueue reviews=\{queue\} snapshot=\{snapshot\} demo=\{demo\} businessCountry=\{businessCountry\} paisLido=\{paisLido\} \/>/g;
-// Uma atribuição comentada satisfaria uma busca por texto sem existir.
-const semComentarios = (fonte) => fonte
-  .replace(/\/\*[\s\S]*?\*\//g, ' ')
-  .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
-const dashboardCodigo = semComentarios(dashboard);
-const corpoDoRadar = corpoDaDeclaracao(dashboardCodigo, 'RadarNow') || '';
+const corpoDoRadar = corpoDaDeclaracao(dashboard, 'RadarNow') || '';
 const filaDoPainel = (fonte) => (fonte.match(FILA_DO_PAINEL) || []);
 const posicaoDaFila = (fonte) => {
   const encontrada = filaDoPainel(fonte)[0];
@@ -140,7 +148,7 @@ const requirements = [
   // botão que era só dele ("Marcar como feito") ficou sem leitor quando o
   // "Deu resultado?" saiu. Sem esta proibição ele volta na próxima vez que
   // alguém quiser um cartão de "o que fazer hoje" na lateral.
-  ['os quatro cartões removidos em 31/08/2026 não voltam ao painel', !['<WhatsAppCard', '<ProfileCompleteness', '<ObservedResult', '<TodayPlan'].some((token) => dashboardCodigo.includes(token))],
+  ['os quatro cartões removidos em 31/08/2026 não voltam ao painel', !['<WhatsAppCard', '<ProfileCompleteness', '<ObservedResult', '<TodayPlan'].some((token) => dashboard.includes(token))],
   // Decisão de 30/08/2026: a navegação em três abas (Visão geral, Avaliações,
   // WhatsApp) virou uma tela única. A aba Avaliações não sobrevive como seção
   // porque já era, byte a byte, a mesma <ResponseQueue> da Visão geral; a aba
@@ -160,8 +168,8 @@ const requirements = [
   ['fila de respostas aparece uma única vez: a antiga aba "Avaliações" não duplica a seção', filaDoPainel(dashboard).length === 1],
   // O `phone` saiu deste `select` com a configuração do WhatsApp, que se mudou
   // para `/whatsapp` e passou a ler o telefone lá. O país do negócio ficou.
-  ['o painel lê profiles.business_country do dono', /select\('business_country'\)/.test(dashboardCodigo)],
-  ['o painel ATRIBUI ao estado o país que leu, em vez de um valor fixo', /setPaisDoPerfil\(data\?\.business_country \|\| null\)/.test(dashboardCodigo)],
+  ['o painel lê profiles.business_country do dono', /select\('business_country'\)/.test(dashboard)],
+  ['o painel ATRIBUI ao estado o país que leu, em vez de um valor fixo', /setPaisDoPerfil\(data\?\.business_country \|\| null\)/.test(dashboard)],
   // Em 31/08/2026 a fila do painel passou a pedir o rascunho a
   // `supabase/functions/sugerir-resposta`, que lê o que o cliente escreveu.
   // `buildReplySuggestions` deixou de ser a FONTE do rascunho e passou a ser o
@@ -176,8 +184,8 @@ const requirements = [
   // de chegar à caixa, e chega como o último argumento de `rascunhoNaTela`, que
   // é a posição do chão. Quem prova a precedência inteira, com o módulo a
   // correr, é `scripts/check-rascunho-que-le.mjs`.
-  ['a fila do painel usa o país do negócio na chamada que monta o texto padrão da resposta', /buildReplySuggestions\(\{[^}]*businessCountry[^}]*\}\)/.test(dashboardCodigo)],
-  ['o texto padrão da fila do painel continua alcançável: ele chega à caixa do dono como o chão do rascunho do modelo', /rascunhoNaTela\([\s\S]{0,300}?\n\s*suggestion,\n\s*\);/.test(dashboardCodigo) && /<Textarea value=\{naTela\.texto\}/.test(dashboardCodigo)],
+  ['a fila do painel usa o país do negócio na chamada que monta o texto padrão da resposta', /buildReplySuggestions\(\{[^}]*businessCountry[^}]*\}\)/.test(dashboard)],
+  ['o texto padrão da fila do painel continua alcançável: ele chega à caixa do dono como o chão do rascunho do modelo', /rascunhoNaTela\([\s\S]{0,300}?\n\s*suggestion,\n\s*\);/.test(dashboard) && /<Textarea value=\{naTela\.texto\}/.test(dashboard)],
   // A âncora do WhatsApp saiu desta linha em vez de ser reapontada: ela deixou
   // de existir com a tela, e uma asserção sobre um id que ninguém desenha fica
   // verde sem proteger nada.
@@ -192,7 +200,7 @@ const requirements = [
   // o cartão saiu, e uma asserção sobre o corpo de um componente que não existe
   // lê a string vazia e fica verde sem proteger nada. Quem impede o cartão de
   // voltar é a proibição acima.
-  ['a faixa-resumo do celular linka para a âncora da fila', /href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/.test(corpoDaDeclaracao(dashboardCodigo, 'MobileSummary') || '')],
+  ['a faixa-resumo do celular linka para a âncora da fila', /href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/.test(corpoDaDeclaracao(dashboard, 'MobileSummary') || '')],
   // A faixa-resumo do celular acrescentou um segundo link para a fila, por isso
   // a contagem acima deixou de ser exata. O que a contagem media de verdade era
   // "ninguém troca de aba": isso agora é medido diretamente, e todo link de
@@ -209,7 +217,7 @@ const requirements = [
   // inteira, e não só metade dela: sai do painel, existe como rota protegida, e
   // o menu leva até lá nas DUAS versões. Sem a terceira, apagar o link do menu
   // do celular (que é onde o dono usa o produto) passava.
-  ['a configuração do WhatsApp saiu do painel', !dashboardCodigo.includes('WhatsAppNotificationWorkspace') && !dashboard.includes("tab === 'whatsapp'")],
+  ['a configuração do WhatsApp saiu do painel', !dashboard.includes('WhatsAppNotificationWorkspace') && !dashboard.includes("tab === 'whatsapp'")],
   ['o WhatsApp é uma rota própria e protegida por autenticação', /<Route path="\/whatsapp" element=\{\s*<ProtectedRoute>\s*<WhatsApp \/>/.test(rotas)],
   ['o menu principal leva ao WhatsApp no ecrã grande e no celular', (menu.match(/to="\/whatsapp"/g) || []).length === 2],
   // O Resultado observado saiu desta linha em 31/08/2026 e virou proibição, na
@@ -253,7 +261,13 @@ const requirements = [
   // mudou foi a construcao que as cumpre, por isso foram reapontadas e nao
   // apagadas.
   ['bloco de comentários pendentes some por completo sem caso sem tratar', pendingCommentsBanner.includes('if (casos.length === 0) return null;')],
-  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner casos={comentariosInternos} />') && filaDoPainel(dashboard).length > 0 && dashboard.indexOf('<PendingCommentsBanner casos={comentariosInternos} />') < posicaoDaFila(dashboard)],
+  // A ancora perdeu o ' />' final na Tarefa 3 de 'convidar-sem-filtrar'
+  // (02/09/2026): o cartao passou a receber `nomeDoNegocio` e
+  // `linkDeAvaliacao`, e o `casos={comentariosInternos}` deixou de ser a
+  // ultima prop antes do fecho. A ancora continua a exigir a MESMA invocacao
+  // especifica, com `casos={comentariosInternos}`; so nao exige mais que ela
+  // seja a unica prop.
+  ['bloco de comentários pendentes, quando existe, fica antes da fila de respostas na Visão geral', dashboard.includes('<PendingCommentsBanner casos={comentariosInternos}') && filaDoPainel(dashboard).length > 0 && dashboard.indexOf('<PendingCommentsBanner casos={comentariosInternos}') < posicaoDaFila(dashboard)],
   ['coleta pede nome público', coletaInteira.includes("'reviewerName', 'authorName', 'reviewerDisplayName', 'name'")],
   ['coleta aceita somente campos específicos de permalink', coletaInteira.includes("['reviewUrl', 'reviewURL', 'reviewLink', 'reviewUri']") && !coletaInteira.includes("'reviewUri', 'url'")],
   ['coleta temporária continua sem agenda e com limite explícito', collectorCore.includes("maxReviews: 50") && collectorCore.includes("APIFY_EXPERIMENTAL_COOLDOWN")],
