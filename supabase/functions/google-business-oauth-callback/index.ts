@@ -31,7 +31,17 @@ serve(async (request) => {
   const state = url.searchParams.get("state");
 
   if (googleError) return redirectToApp("cancelled");
-  if (!clientId || !clientSecret || !redirectUri || !serviceRoleKey || !code || !state) {
+
+  // Env ausente e parametro ausente sao causas diferentes: a primeira e um
+  // deploy com secret faltando na propria funcao; a segunda e um pedido que
+  // nao veio do fluxo normal do Google (link velho, acesso direto ao
+  // endereco). Um "failed" mudo obrigava a adivinhar entre as duas.
+  if (!clientId || !clientSecret || !redirectUri || !serviceRoleKey) {
+    console.error("Callback do Google: configuracao do servidor incompleta");
+    return redirectToApp("failed");
+  }
+  if (!code || !state) {
+    console.error("Callback do Google: code ou state ausente no pedido");
     return redirectToApp("failed");
   }
 
@@ -42,12 +52,19 @@ serve(async (request) => {
     .eq("state_hash", await sha256(state))
     .maybeSingle();
 
-  if (
-    stateError ||
-    !oauthState ||
-    oauthState.consumed_at ||
-    new Date(oauthState.expires_at).getTime() < Date.now()
-  ) {
+  // Estas tres causas eram um so "if" com um so log. Separadas, cada uma
+  // aponta para um conserto diferente: erro de leitura ou state nunca
+  // emitido, state reaproveitado, ou state emitido ha tempo demais.
+  if (stateError || !oauthState) {
+    console.error("Callback do Google: estado nao encontrado");
+    return redirectToApp("failed");
+  }
+  if (oauthState.consumed_at) {
+    console.error("Callback do Google: estado ja consumido");
+    return redirectToApp("failed");
+  }
+  if (new Date(oauthState.expires_at).getTime() < Date.now()) {
+    console.error("Callback do Google: estado expirado");
     return redirectToApp("failed");
   }
 
@@ -56,7 +73,10 @@ serve(async (request) => {
     .update({ consumed_at: new Date().toISOString() })
     .eq("id", oauthState.id)
     .is("consumed_at", null);
-  if (consumeError) return redirectToApp("failed");
+  if (consumeError) {
+    console.error("Callback do Google: falha ao marcar o estado como consumido");
+    return redirectToApp("failed");
+  }
 
   const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -74,8 +94,16 @@ serve(async (request) => {
     scope?: string;
   };
 
-  if (!tokenResponse.ok || !token.refresh_token) {
-    console.error("Google OAuth token exchange failed", tokenResponse.status);
+  // O HTTP falhar e a resposta vir sem refresh_token sao causas diferentes: a
+  // primeira e o Google recusando o code (expirado, ja usado, credenciais
+  // erradas); a segunda costuma ser reautorizacao sem "prompt=consent", onde
+  // o Google devolve 200 mas nao reenvia o refresh_token.
+  if (!tokenResponse.ok) {
+    console.error("Callback do Google: token recusado (HTTP %s)", tokenResponse.status);
+    return redirectToApp("failed");
+  }
+  if (!token.refresh_token) {
+    console.error("Callback do Google: resposta sem refresh_token");
     return redirectToApp("failed");
   }
 
@@ -85,7 +113,7 @@ serve(async (request) => {
     p_granted_scopes: token.scope?.split(" ").filter(Boolean) || [],
   });
   if (storeError) {
-    console.error("Could not store Google OAuth grant", storeError.message);
+    console.error("Callback do Google: falha ao gravar o token (%s)", storeError.message);
     return redirectToApp("failed");
   }
 
