@@ -31,7 +31,7 @@ interface GooglePlaceDetailsResponse {
   rating?: number;
   userRatingCount?: number;
   reviews?: GooglePlacesReview[];
-  error?: { status?: string };
+  error?: { status?: string; message?: string };
 }
 
 const jsonResponse = (body: Record<string, unknown>, status = 200) =>
@@ -302,19 +302,33 @@ serve(async (req) => {
       },
     });
 
-    let data: GooglePlaceDetailsResponse;
+    // Le o corpo como texto primeiro. Um response.json() que falha caladinho
+    // foi o mesmo defeito que custou uma ida e volta inteira em 03/09/2026: o
+    // servidor tinha o motivo exato (o corpo da resposta do Google) e ninguem
+    // o registava. Ler o texto aqui garante que o motivo vai para o log mesmo
+    // quando o corpo nao e JSON (por exemplo, uma pagina de erro em HTML de
+    // um endereco desligado pelo Google).
+    const bodyText = await response.text().catch(() => '');
+    let data: GooglePlaceDetailsResponse = {};
+    let corpoInvalido = false;
     try {
-      data = await response.json();
+      data = JSON.parse(bodyText);
     } catch {
-      console.error('Google Places API (New) returned an invalid response:', response.status);
+      corpoInvalido = true;
+    }
+
+    if (corpoInvalido) {
+      console.error(
+        'Google recusou em %s: HTTP %s | corpo nao e JSON: %s',
+        'buscar detalhes do local', response.status, bodyText.slice(0, 300),
+      );
       return jsonResponse({ code: 'GOOGLE_PLACES_ERROR', error: 'Google Places API request failed' }, 502);
     }
 
     if (!response.ok) {
       console.error(
-        'Google Places API (New) request failed:',
-        response.status,
-        data.error?.status || 'UNKNOWN',
+        'Google recusou em %s: HTTP %s | status %s | %s',
+        'buscar detalhes do local', response.status, data.error?.status || '?', data.error?.message || 'sem mensagem',
       );
       return jsonResponse({ code: 'GOOGLE_PLACES_ERROR', error: 'Google Places API request failed' }, 502);
     }
