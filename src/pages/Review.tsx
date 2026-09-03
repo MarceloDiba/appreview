@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { getQrOpenEventKey, trackReviewEvent } from '@/lib/reviewFunnel';
 import { loadPublicQrBusiness } from '@/lib/publicQrBusiness';
+import BotaoDeWhatsApp from '@/components/marketing/BotaoDeWhatsApp';
+import { getMarketingCopy } from '@/i18n/marketing';
+import { detectLocale } from '@/i18n';
 
 type BusinessData = {
   id: string;
@@ -18,6 +21,11 @@ type BusinessData = {
 };
 
 import { toPublicReviewUrl } from '@/utils/tripAdvisorUtils';
+
+// A pagina do QR nao tem seletor de idioma: quem a abre e um cliente do
+// negocio, no telemovel, e o idioma vem do proprio aparelho. `detectLocale` le
+// isso; a pagina de vendas usa o seletor, que aqui nao existe.
+const copyDoContacto = getMarketingCopy(detectLocale()).contacto;
 
 const Review = () => {
   const { businessId = '' } = useParams<{ businessId: string }>();
@@ -97,12 +105,25 @@ const Review = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gray-50 p-4">
       <ReviewChooser
         businessId={businessData.id}
         businessName={businessData.name}
         userId={businessData.userId}
         externalLinks={businessData.externalLinks}
+      />
+      {/*
+        DEPOIS da escolha, e discreto, e as duas coisas sao a mesma decisao.
+        Quem abre esta pagina veio avaliar um negocio, e esse clique e o que o
+        nosso cliente paga para receber: um botao a competir com ele aqui seria
+        o Binno a roubar do proprio cliente. Fica uma linha para quem reparar —
+        que e, na pratica, o caminho pelo qual um dono de negocio descobre o
+        Binno ao ver o QR de outro.
+      */}
+      <BotaoDeWhatsApp
+        forma="discreto"
+        rotulo={`Binno · ${copyDoContacto.rotuloCurto}`}
+        mensagem={copyDoContacto.mensagemDoNegocio}
       />
     </div>
   );

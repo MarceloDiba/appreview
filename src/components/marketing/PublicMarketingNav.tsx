@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MarketingCopy } from '@/i18n/marketing';
+import MarcaBinno from '@/components/marketing/MarcaBinno';
 
 type PublicMarketingNavProps = {
   copy: MarketingCopy;
@@ -20,7 +21,7 @@ const PublicMarketingNav = ({ copy }: PublicMarketingNavProps) => {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="text-xl font-bold tracking-tight text-[#6D43C0]" aria-label="Binno">Binno</Link>
+        <Link to="/" aria-label="Binno"><MarcaBinno /></Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Navegação principal">
           {links.map((link) => (

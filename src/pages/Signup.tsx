@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
+import MarcaBinno from '@/components/marketing/MarcaBinno';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -83,7 +84,7 @@ const Signup = () => {
           <LanguageSwitcher />
         </div>
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-primary">Binno</h1>
+          <MarcaBinno tamanho="lg" />
           <p className="text-gray-600 mt-2">{t('signup.title')}</p>
         </div>
 

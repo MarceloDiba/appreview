@@ -23,6 +23,14 @@ import { corsHeaders, json, resolveMonthlyRunLimit, runExperimentalApifyCollecti
  * preço foi um pedido de coleta parado na fila desde 31/08 sem ninguém saber.
  * Um cliente que se cadastrasse abria o painel e não via dado nenhum.
  *
+ * `verify_jwt` DESLIGADO, como nos outros três drenadores (02/09/2026). O
+ * portão do Supabase recusava a chamada do cron com 401 antes de esta função
+ * correr, porque exigia um JWT no cabeçalho. Desligá-lo não baixa a guarda: a
+ * chave que esse portão aceita é a `anon`, que viaja dentro do pacote do
+ * próprio site e qualquer pessoa lê. Quem gasta dinheiro aqui é a autenticação
+ * DESTA função — chave de serviço ou segredo do worker — e ela corre em todos
+ * os pedidos, antes de tocar na fila.
+ *
  * Dois de dois minutos, e não de cinco: quem acabou de se cadastrar está a
  * OLHAR para o ecrã. O que corre a cada dois minutos é uma contagem na fila; o
  * gasto só acontece quando há linha para processar, e a fila tem `user_id`
