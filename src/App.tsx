@@ -15,6 +15,9 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
  */
 const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+// A area do Marcelo. `lazy` como as outras: quem nao e administrador nunca
+// carrega este pedaco, porque nunca chega a rota.
+const Admin = lazy(() => import('./pages/Admin'));
 const Review = lazy(() => import("./pages/Review"));
 const Feedback = lazy(() => import("./pages/Feedback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -100,6 +103,13 @@ const App = () => (
                   <Profile />
                 </ProtectedRoute>
               } />
+              {/*
+                Sem `ProtectedRoute`: quem nao tem sessao chega, a funcao no
+                banco recusa, e a pagina devolve "nao encontrado" — que e menos
+                informacao do que um redireccionamento para o login, o qual
+                confirmaria que a rota existe.
+              */}
+              <Route path="/admin" element={<Admin />} />
               <Route path="/demo" element={<Demo />} />
               <Route path="/termos" element={<Terms />} />
               <Route path="/privacidade" element={<Privacy />} />
