@@ -4,7 +4,7 @@ import { AlertTriangle, CheckCircle2, ChevronDown, Mail, RefreshCw } from 'lucid
 import { Button } from '@/components/ui/button';
 import NotFound from '@/pages/NotFound';
 import MarcaBinno from '@/components/marketing/MarcaBinno';
-import { EXPLICACAO_DO_USO, EXPLICACAO_DOS_SINAIS, lerSaudeDasContas, rascunhoDeRetencao, type LeituraDaSaude, type SaudeDaConta } from '@/lib/saudeDasContas';
+import { ETIQUETA_DE_QUEM_RESOLVE, EXPLICACAO_DO_USO, EXPLICACAO_DOS_SINAIS, QUEM_RESOLVE, lerSaudeDasContas, rascunhoDeRetencao, type LeituraDaSaude, type SaudeDaConta } from '@/lib/saudeDasContas';
 
 /**
  * A área do Marcelo: quem travou, agora.
@@ -56,8 +56,13 @@ const Faixa = ({ contas }: { contas: SaudeDaConta[] }) => {
   const emRisco = contas.filter((conta) => conta.uso === 'sumido' || conta.uso === 'nunca_entrou').length;
   const esfriando = contas.filter((conta) => conta.uso === 'esfriando').length;
   const ativas = contas.filter((conta) => conta.uso === 'ativo').length;
+  // DE QUEM SAO AS TRAVADAS. Marcelo perguntou "a conta travado eu nao posso
+  // intervir em nada, correto?" — e estava certo: sete dos nove sinais sao
+  // avarias do produto. O numero que lhe interessa nao e "quantas travadas", e
+  // "quantas travadas SAO MINHAS PARA RESOLVER".
+  const comVoce = contas.filter((conta) => conta.sinais.some((sinal) => QUEM_RESOLVE[sinal] === 'voce')).length;
   const cartoes = [
-    { rotulo: 'Travadas', valor: travadas, tom: travadas > 0 ? 'text-red-700' : 'text-slate-950', nota: 'algo partido' },
+    { rotulo: 'Travadas', valor: travadas, tom: travadas > 0 ? 'text-red-700' : 'text-slate-950', nota: travadas > 0 ? `${comVoce} para você resolver` : 'algo partido' },
     { rotulo: 'Em risco', valor: emRisco, tom: emRisco > 0 ? 'text-orange-700' : 'text-slate-950', nota: 'sumidos há 3+ semanas' },
     { rotulo: 'Esfriando', valor: esfriando, tom: esfriando > 0 ? 'text-sky-800' : 'text-slate-950', nota: 'dá para recuperar' },
     { rotulo: 'Usando', valor: ativas, tom: 'text-emerald-700', nota: `de ${contas.length} no total` },
@@ -156,6 +161,7 @@ const LinhaDaConta = ({ conta }: { conta: SaudeDaConta }) => {
                   {conta.sinais.map((sinal) => {
                     const explicacao = EXPLICACAO_DOS_SINAIS[sinal];
                     const informativo = sinal === 'coleta_antiga';
+                    const quem = QUEM_RESOLVE[sinal];
                     return (
                       <li key={sinal} className="flex gap-2.5 text-sm leading-5">
                         <AlertTriangle
@@ -163,8 +169,24 @@ const LinhaDaConta = ({ conta }: { conta: SaudeDaConta }) => {
                           aria-hidden="true"
                         />
                         <span>
-                          <strong className="block text-slate-950">{explicacao.titulo}</strong>
-                          <span className="text-slate-600">{explicacao.passo}</span>
+                          <span className="flex flex-wrap items-center gap-2">
+                            <strong className="text-slate-950">{explicacao.titulo}</strong>
+                            {/*
+                              A etiqueta ao lado do titulo, e nao no fim: quem
+                              varre a lista precisa de saber se aquilo e para
+                              ele ANTES de ler a frase toda.
+                            */}
+                            <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                              quem === 'voce'
+                                ? 'border-orange-300 bg-orange-50 text-orange-900'
+                                : quem === 'binno'
+                                  ? 'border-slate-300 bg-slate-100 text-slate-700'
+                                  : 'border-slate-200 bg-white text-slate-500'
+                            }`}>
+                              {ETIQUETA_DE_QUEM_RESOLVE[quem]}
+                            </span>
+                          </span>
+                          <span className="mt-0.5 block text-slate-600">{explicacao.passo}</span>
                         </span>
                       </li>
                     );
@@ -234,6 +256,8 @@ const Admin = () => {
         <h1 className="text-2xl font-bold tracking-tight text-slate-950">Painel de controle</h1>
         <p className="mt-2 max-w-prose text-sm leading-6 text-slate-600">
           Quem está travado, quem está usando, e quem está prestes a sair sem avisar.
+          Cada sinal diz de quem é: <strong>com você</strong> quando só uma conversa
+          resolve, <strong>com o Binno</strong> quando é avaria do produto.
         </p>
 
         <div className="mt-6"><Faixa contas={leitura.contas} /></div>

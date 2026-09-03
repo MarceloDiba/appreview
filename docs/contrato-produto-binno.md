@@ -1311,6 +1311,21 @@ conta e **não** para a gravidade técnica — se contasse, a página diria "tra
 a um cliente cujo produto está perfeito. E as duas escalas têm cores próprias,
 porque uma conta pode estar tecnicamente perfeita e a caminho de cancelar.
 
+**Cada sinal diz de quem é o problema (03/09/2026).** Marcelo, ao ver a primeira
+versão: *"a conta travado eu não posso intervir em nada, correto?"* — e estava
+certo. A página dizia o que estava quebrado e dava um passo que, na maioria dos
+sinais, ele não consegue executar: ninguém que não mexa no banco desentope uma
+fila presa.
+
+Dois sinais são dele e pedem conversa com o cliente — `sem_canal_de_aviso` (só o
+cliente liga o Telegram) e `dono_sumido`. Os outros sete são avarias do produto.
+Um sinal novo não classificado cai em "com o Binno", porque um problema
+desconhecido é mais provavelmente uma avaria do que um pedido ao cliente.
+
+O número que interessa no topo não é "quantas travadas" — é **quantas travadas
+são dele para resolver**. Um painel que pede ações impossíveis ensina a não ser
+aberto.
+
 **A conversa de retenção não se envia sozinha.** O botão abre o e-mail com o
 texto escrito; Marcelo lê, ajusta e envia. Uma mensagem automática a um cliente
 que paga chega no dia em que ele acabou de falar com a pessoa ao telefone, ou

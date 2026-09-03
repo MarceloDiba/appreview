@@ -148,6 +148,7 @@ $$;
     '20260903120000_area_de_administrador.sql',
     '20260903140000_o_aviso_fala_portugues.sql',
     '20260903160000_painel_de_controle.sql',
+    '20260903180000_de_quem_e_o_problema.sql',
   ]) psql(semExtensoes(ler(nome)));
 
   // ---------------------------------------------------------------- as contas
@@ -386,6 +387,36 @@ $$;
   // nao desaparece. Uma linha feia e melhor do que um aviso que esconde um
   // problema. Sem esta assercao o `else` da funcao era decoracao — descoberto a
   // tentar quebra-lo e ver o guarda continuar verde.
+  // DE QUEM E O PROBLEMA. Marcelo: "a conta travado eu nao posso intervir em
+  // nada, correto?" — e estava certo. Sete dos nove sinais sao avarias do
+  // produto; um painel que lhe pede accoes impossiveis ensina a nao ser aberto.
+  const quemResolve = Object.fromEntries(
+    psql(`select sinal || '=' || public.quem_resolve_o_sinal(sinal)
+            from unnest(array['coleta_parada_na_fila','nunca_coletou','mensagem_falhou',
+                              'fila_presa_no_envio','fila_parada_na_saida','sem_canal_de_aviso',
+                              'resumo_nao_saiu','coleta_antiga','dono_sumido']) as sinal;`)
+      .trim().split('\n').map((linha) => linha.split('=')),
+  );
+  exigir('so os dois sinais que pedem conversa sao do Marcelo',
+    Object.entries(quemResolve).filter(([, quem]) => quem === 'voce').map(([sinal]) => sinal).sort().join(',')
+      === 'dono_sumido,sem_canal_de_aviso');
+  exigir('a coleta antiga continua a ser so informacao', quemResolve.coleta_antiga === 'informacao');
+  // Um sinal novo por classificar cai em `binno`: um problema desconhecido e
+  // mais provavelmente uma avaria do que um pedido ao cliente.
+  exigir('um sinal novo por classificar fica com o Binno, e nao com o Marcelo',
+    psql(`select public.quem_resolve_o_sinal('sinal_que_ainda_nao_existe');`).trim() === 'binno');
+  // As duas listas — SQL e TypeScript — tem de concordar, pela mesma razao dos
+  // rotulos: o Marcelo leria uma coisa na pagina e outra no banco.
+  const quemResolveNaTela = Object.fromEntries(
+    [...readFileSync('src/lib/saudeDasContas.ts', 'utf8')
+      .slice(readFileSync('src/lib/saudeDasContas.ts', 'utf8').indexOf('export const QUEM_RESOLVE'))
+      .matchAll(/^  (\w+): '(voce|binno|informacao)',$/gm)].map((achado) => [achado[1], achado[2]]),
+  );
+  exigir('a tela classifica todos os sinais que o banco classifica',
+    Object.keys(quemResolve).every((sinal) => quemResolveNaTela[sinal] !== undefined));
+  exigir('a tela e o banco concordam sobre de quem e cada problema',
+    Object.entries(quemResolve).every(([sinal, quem]) => quemResolveNaTela[sinal] === quem));
+
   exigir('um sinal ainda sem traducao sai cru, em vez de sumir',
     psql(`select public.rotulo_do_sinal('sinal_que_ainda_nao_existe');`).trim() === 'sinal_que_ainda_nao_existe');
   // SO QUANDO MUDA. Sem isto ele recebe o mesmo aviso todos os dias ate deixar
@@ -477,6 +508,13 @@ exigir('a faixa conta as travadas, as em risco, as a esfriar e as activas',
   && /const esfriando = contas\.filter\(\(conta\) => conta\.uso === 'esfriando'\)\.length;/.test(pagina)
   && /const ativas = contas\.filter\(\(conta\) => conta\.uso === 'ativo'\)\.length;/.test(pagina));
 exigir('a faixa e desenhada na pagina', /<Faixa contas=\{leitura\.contas\} \/>/.test(pagina));
+// O numero que interessa ao Marcelo nao e "quantas travadas", e "quantas sao
+// minhas para resolver".
+exigir('a faixa diz quantas travadas sao dele para resolver',
+  /const comVoce = contas\.filter\(\(conta\) => conta\.sinais\.some\(\(sinal\) => QUEM_RESOLVE\[sinal\] === 'voce'\)\)\.length;/.test(pagina)
+  && /\$\{comVoce\} para você resolver/.test(pagina));
+exigir('cada sinal na lista mostra de quem e',
+  /\{ETIQUETA_DE_QUEM_RESOLVE\[quem\]\}/.test(pagina));
 
 // A RETENCAO NAO SE ENVIA SOZINHA. Uma mensagem automatica a um cliente que
 // paga chega no dia em que o Marcelo acabou de falar com ele ao telefone, ou
