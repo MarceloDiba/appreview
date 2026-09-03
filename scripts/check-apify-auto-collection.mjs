@@ -17,6 +17,14 @@ const manualCollector = read('supabase/functions/sync-experimental-apify/index.t
 const autoDispatcher = read('supabase/functions/apify-auto-collect-on-signup/index.ts');
 const onboarding = read('src/pages/Onboarding.tsx');
 const rolloutDocs = read('docs/apify-experimental-rollout.md');
+// O agendamento, escrito em 02/09/2026. Ate essa data ele nao existia, e o
+// cabecalho do drenador dizia porque: "a primeira execucao real e decisao de
+// Marcelo". A decisao existia desde 30/08; o agendamento e que ficou por fazer,
+// e o preco foi um pedido de coleta parado na fila desde 31/08 sem ninguem
+// saber. Um cliente que se cadastrasse abria o painel e nao via dado nenhum.
+const agendamento = read('supabase/migrations/20260903100000_coleta_do_cadastro_tem_quem_chame.sql');
+const semComentariosSql = (fonte) => fonte.replace(/^\s*--[^\n]*$/gm, '');
+const agendamentoExecutavel = semComentariosSql(agendamento);
 
 // Extrai o corpo de um bloco `if (condição) { ... }` respeitando chaves
 // aninhadas (o objeto passado a `.update({...})` tem as suas próprias `{}`),
@@ -368,6 +376,48 @@ const requirements = [
       && cteBody.indexOf("or (status = 'processing'") < cteBody.indexOf('for update skip locked');
     return [label, orderedInSameQuery];
   })(),
+
+  // ---------------------------------------------------------------------
+  // O AGENDAMENTO (02/09/2026). Sem estas asserções, apagar o cron devolve o
+  // produto ao estado em que um cadastro novo cai num buraco silencioso — com
+  // todas as outras proteções deste ficheiro verdes, porque nenhuma delas
+  // olhava para quem CHAMA o drenador.
+  // ---------------------------------------------------------------------
+  ['a fila do cadastro é drenada pelo agendador',
+    /select cron\.schedule\('binno-coleta-cadastro', '\*\/2 \* \* \* \*', 'select public\.drenar_coleta_do_cadastro\(\);'\);/.test(agendamentoExecutavel)],
+  ['agendar duas vezes não cria dois trabalhos iguais',
+    /perform cron\.unschedule\('binno-coleta-cadastro'\);/.test(agendamentoExecutavel)],
+  ['quem chama aponta para o drenador do cadastro, e não para outra função',
+    /functions\/v1\/apify-auto-collect-on-signup/.test(agendamentoExecutavel)],
+  // Sem isto seriam 720 pedidos HTTP por dia para não fazer nada.
+  ['o agendador só chama quando há alguma coisa na fila',
+    /if v_pendentes = 0 then\s+return;\s+end if;/.test(agendamentoExecutavel)],
+  // `net` e não `extensions.net`: o esquema errado faz o `exception when
+  // others` engolir o erro, com o cron a reportar sucesso e a fila congelada.
+  ['o agendador chama net.http_post, e não extensions.net.http_post',
+    /perform net\.http_post\(/.test(agendamentoExecutavel)
+    && !/extensions\.net\.http_post/.test(agendamentoExecutavel)],
+  // A CHAVE DE SERVIÇO NÃO PODE ENTRAR NO VAULT por causa disto. Ela abre a
+  // base de dados inteira; o segredo do worker vale "podes correr um drenador".
+  ['o agendador usa o segredo do worker, e não uma cópia da chave de serviço',
+    /where name = 'binno_worker_secret'/.test(agendamentoExecutavel)
+    && !/service_role|SERVICE_ROLE/.test(agendamentoExecutavel)],
+  ['o agendador não fica aberto ao navegador',
+    /revoke all on function public\.drenar_coleta_do_cadastro\(\) from public, anon, authenticated;/.test(agendamentoExecutavel)],
+  // O drenador tem de ACEITAR esse segredo, senão o cron leva 401 para sempre
+  // e a fila continua parada — exactamente o estado que isto vem corrigir.
+  ['o drenador aceita o segredo do worker',
+    /const authorizedWorkerCall = \(request: Request\) => \{/.test(autoDispatcher)
+    && /authorizedServiceCall\(request, serviceRoleKey\) \|\| authorizedWorkerCall\(request\)/.test(autoDispatcher)],
+  // E o caminho antigo FICA. Isto é uma porta a mais, não uma troca de
+  // fechadura: quem já chamava com a chave de serviço continua a funcionar.
+  ['o caminho antigo da chave de serviço continua a funcionar',
+    /const authorizedServiceCall = \(request: Request, serviceRoleKey: string\) => \{/.test(autoDispatcher)],
+  // O AGENDAMENTO NÃO GANHA PODER SOBRE O GASTO. Os três interruptores
+  // continuam antes de qualquer reivindicação de linha.
+  ['o interruptor de desligamento continua antes da fila, e o agendamento não lhe passa à frente',
+    autoDispatcher.indexOf('if (!autoOnSignupEnabled || !experimentalEnabled || !apifyToken)')
+      < autoDispatcher.indexOf("rpc('claim_apify_auto_collection'")],
 
   // Não basta o nome da variável de ambiente aparecer nos docs: o texto
   // precisa afirmar o que o interruptor garante (desliga sozinho, mesmo com
