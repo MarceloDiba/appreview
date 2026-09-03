@@ -1071,6 +1071,8 @@
         "empty": "Every imported review already has a Google reply.",
         "anonymous": "Anonymous customer",
         "noComment": "No written comment",
+        "waitingWhatsappTitle": "This draft was already sent to your WhatsApp",
+        "waitingWhatsappInstruction": "Reply 1 on WhatsApp to publish this reply on Google.",
         "draft": "Suggested reply. Review it before publishing.",
         "publish": "Publish reply on Google",
         "publishing": "Confirming with Google…",

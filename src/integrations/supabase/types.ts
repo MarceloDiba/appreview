@@ -508,6 +508,52 @@ export type Database = {
         }
         Relationships: []
       }
+      // Escrito a mao, e nao pela geracao automatica: a migracao
+      // `20260903200000_whatsapp_oficial_e_resposta_por_mensagem.sql` ja
+      // define esta tabela no repositorio, mas so entra em producao (e so ai
+      // a geracao consegue le-la) quando o controlador aplicar a migracao na
+      // Task 4 do plano. Ate la, o painel precisa de compilar contra a forma
+      // que a migracao ja promete. As colunas abaixo espelham-na campo a
+      // campo; regenerar depois de aplicada deve devolver o mesmo formato.
+      respostas_a_confirmar: {
+        Row: {
+          confirmado_em: string | null
+          enviado_em: string
+          erro: string | null
+          expira_em: string
+          id: string
+          publicado_em: string | null
+          rascunho: string
+          recusado_em: string | null
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          confirmado_em?: string | null
+          enviado_em?: string
+          erro?: string | null
+          expira_em?: string
+          id?: string
+          publicado_em?: string | null
+          rascunho: string
+          recusado_em?: string | null
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          confirmado_em?: string | null
+          enviado_em?: string
+          erro?: string | null
+          expira_em?: string
+          id?: string
+          publicado_em?: string | null
+          rascunho?: string
+          recusado_em?: string | null
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           created_at: string | null

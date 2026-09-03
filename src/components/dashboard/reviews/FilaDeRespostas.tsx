@@ -9,6 +9,7 @@ import { useInternalFeedback } from '@/hooks/useInternalFeedback';
 import { useGoogleBusinessReviewQueue } from '@/hooks/useGoogleBusinessReviewQueue';
 import { useGoogleReviews } from '@/hooks/useGoogleReviews';
 import { useGooglePublicReviewsAnswered } from '@/hooks/useGooglePublicReviewsAnswered';
+import { useRespostaAEsperar, type RespostaAEsperar } from '@/hooks/useRespostaAEsperar';
 import { lerNotaDoCaso } from '@/lib/comentarioInterno';
 import { itensJaTratados, montarFilaDeRespostas, type ItemDaFila, type OrigemDaResposta } from '@/lib/filaDeRespostas';
 import { buildReplySuggestions } from '@/lib/replySuggestions';
@@ -142,23 +143,72 @@ const PublicacaoOficial = ({
   rascunhoInicial,
   publicar,
   publicando,
+  aEsperar,
+  revalidarAEsperar,
 }: {
   item: ItemDaFila;
   rascunhoInicial: string;
   publicar: (id: string, texto: string) => Promise<boolean>;
   publicando: boolean;
+  /**
+   * O que este dono mandou para o WhatsApp e ainda espera um "1", se for
+   * sobre ESTA avaliacao. `respostas_a_confirmar.review_id` guarda o id de
+   * `google_business_reviews`, que e o mesmo que `idNaFonte` carrega para a
+   * origem `google-oficial` (ver `daAvaliacaoOficial` em filaDeRespostas.ts) —
+   * por isso a comparacao e com `idNaFonte`, e nao com `item.id`, que leva o
+   * prefixo da fila somada.
+   */
+  aEsperar: RespostaAEsperar | null;
+  /**
+   * Rele `respostas_a_confirmar` depois de uma publicacao pelo painel.
+   *
+   * Publicar por aqui nao muda essa tabela — so o "1" no WhatsApp confirma, e
+   * so o servidor grava isso. Mas sem chamar isto, `aEsperar` continua a ter
+   * o valor lido na primeira busca, e o defeito da ronda de correcao 1 volta:
+   * o aviso mostrado abaixo depende TAMBEM de `item.is_addressed`, que so
+   * fica certo depois de a lista de avaliacoes recarregar; revalidar aqui e
+   * o que faz o aviso desaparecer sozinho, sem o dono ter de recarregar a
+   * pagina.
+   */
+  revalidarAEsperar: () => void;
 }) => {
   const { t } = useOwnerTranslation();
   const [rascunho, setRascunho] = useState(rascunhoInicial);
+  // Nunca mostra o aviso sobre uma avaliacao ja tratada. Achado na ronda de
+  // correcao 1 de 03/09/2026: o dono publicava por aqui (ou respondia direto
+  // no Google, fora do Binno), e o aviso continuava a dizer "responda 1"
+  // sobre uma avaliacao que ja tinha resposta — as "duas verdades" que esta
+  // tarefa existe para eliminar, reintroduzidas neste canto.
+  const respostaAEsperar = item.is_addressed !== true && aEsperar?.reviewId === item.idNaFonte
+    ? aEsperar
+    : null;
 
   const enviar = async () => {
     if (!rascunho.trim()) return;
-    if (await publicar(item.idNaFonte, rascunho.trim())) toast.success(t('reviews.google.official.published'));
-    else toast.error(t('reviews.google.official.publishError'));
+    if (await publicar(item.idNaFonte, rascunho.trim())) {
+      toast.success(t('reviews.google.official.published'));
+      revalidarAEsperar();
+    } else {
+      toast.error(t('reviews.google.official.publishError'));
+    }
   };
 
   return (
     <div className="mt-4">
+      {/*
+        O dono pode ja ter recebido este rascunho no telemovel e estar a
+        espera de responder "1" la. Sem isto ele nao sabe que a mensagem
+        chegou e pode responder duas vezes a mesma avaliacao — uma pelo
+        WhatsApp, outra por aqui. So mostra estas tres coisas, e nada mais: que
+        foi enviado, o texto que foi enviado, e que "1" publica.
+      */}
+      {respostaAEsperar && (
+        <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm leading-6 text-emerald-900">
+          <p className="font-semibold">{t('reviews.google.official.waitingWhatsappTitle')}</p>
+          <p className="mt-1 whitespace-pre-wrap break-words">{respostaAEsperar.rascunho}</p>
+          <p className="mt-2">{t('reviews.google.official.waitingWhatsappInstruction')}</p>
+        </div>
+      )}
       <label className="block text-sm font-semibold text-slate-900" htmlFor={`resposta-${item.id}`}>
         {t('reviews.google.official.draft')}
       </label>
@@ -189,6 +239,8 @@ const ItemDaFilaCard = ({
   publicando,
   marcandoId,
   marcarRespondida,
+  aEsperar,
+  revalidarAEsperar,
 }: {
   item: ItemDaFila;
   businessName: string | null;
@@ -199,6 +251,8 @@ const ItemDaFilaCard = ({
   publicando: boolean;
   marcandoId: string | null;
   marcarRespondida: (reviewId: string, respondida: boolean) => void;
+  aEsperar: RespostaAEsperar | null;
+  revalidarAEsperar: () => void;
 }) => {
   const { t, i18n } = useOwnerTranslation();
   const tratado = item.is_addressed === true;
@@ -279,6 +333,8 @@ const ItemDaFilaCard = ({
             })[0]?.body || ''}
             publicar={publicar}
             publicando={publicando}
+            aEsperar={aEsperar}
+            revalidarAEsperar={revalidarAEsperar}
           />
         )}
 
@@ -366,6 +422,12 @@ const FilaDeRespostas = ({
   const oficiais = useGoogleBusinessReviewQueue(userId);
   const publicas = useGoogleReviews(userId);
   const respondidas = useGooglePublicReviewsAnswered(userId);
+  // So ha uma resposta a espera por dono (o indice unico da migracao garante
+  // isso), por isso um valor so chega ate aqui e desce para o item certo.
+  // `refresh` desce ate `PublicacaoOficial` para reler depois de uma
+  // publicacao pelo painel — sem isso o aviso ficava preso na leitura do
+  // primeiro carregamento (ronda de correcao 1, 03/09/2026).
+  const { aEsperar, refresh: revalidarAEsperar } = useRespostaAEsperar(userId);
   const [falhaAoAtualizar, setFalhaAoAtualizar] = useState(false);
   // O padrão é sem filtro: a fila abre inteira, do mais recente para o mais
   // antigo. O cartão de origens acima dela põe e tira este filtro.
@@ -532,6 +594,8 @@ const FilaDeRespostas = ({
             publicando={oficiais.publishing}
             marcandoId={respondidas.markingId}
             marcarRespondida={(reviewId, respondida) => void respondidas.mark(reviewId, respondida)}
+            aEsperar={aEsperar}
+            revalidarAEsperar={revalidarAEsperar}
           />
         ))}
       </div>
@@ -554,6 +618,8 @@ const FilaDeRespostas = ({
                 publicando={oficiais.publishing}
                 marcandoId={respondidas.markingId}
                 marcarRespondida={(reviewId, respondida) => void respondidas.mark(reviewId, respondida)}
+                aEsperar={aEsperar}
+                revalidarAEsperar={revalidarAEsperar}
               />
             ))}
           </div>
