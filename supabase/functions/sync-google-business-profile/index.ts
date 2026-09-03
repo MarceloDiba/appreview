@@ -186,11 +186,38 @@ serve(async (request) => {
     } while (accountPageToken);
     const locations: Array<Record<string, unknown>> = [];
 
+    /**
+     * OS LOCAIS VEM DA BUSINESS INFORMATION API, E NAO DA v4 (03/09/2026).
+     *
+     * Este bloco chamava `mybusiness.googleapis.com/v4/{conta}/locations` e
+     * recebia um 404 em HTML — nao um erro JSON da API, mas a pagina de erro do
+     * proprio Google, que e o que responde quando o endereco simplesmente nao
+     * existe. O Google desligou os endpoints de LOCAIS da v4 e moveu-os para
+     * `mybusinessbusinessinformation.googleapis.com/v1`.
+     *
+     * AS AVALIACOES CONTINUAM NA v4, mais abaixo, e isso nao e esquecimento: o
+     * Google nunca migrou as avaliacoes para nenhuma API nova. E o unico
+     * endereco que existe para elas. Por isso esta funcao fala com DUAS APIs
+     * diferentes de proposito, e quem mexer aqui nao deve "uniformizar" as duas.
+     *
+     * TRES DIFERENCAS DE FORMA em relacao a v4, e todas mordem em silencio:
+     *
+     *   `readMask` e OBRIGATORIO na v1. Sem ele a resposta e 400, nao uma lista
+     *   vazia.
+     *
+     *   O nome do local vem como `locations/123`, e nao `accounts/1/locations/123`
+     *   como na v4. As avaliacoes precisam do caminho COMPLETO, entao ele e
+     *   recomposto abaixo juntando a conta — sem isso a sincronizacao de
+     *   avaliacoes procuraria um endereco que nao existe.
+     *
+     *   O titulo chama-se `title`, e nao `locationName`.
+     */
     for (const account of accounts) {
       if (!account.name) continue;
       let pageToken = "";
       do {
-        const locationsUrl = new URL(`https://mybusiness.googleapis.com/v4/${account.name}/locations`);
+        const locationsUrl = new URL(`https://mybusinessbusinessinformation.googleapis.com/v1/${account.name}/locations`);
+        locationsUrl.searchParams.set("readMask", "name,title,storeCode,metadata");
         locationsUrl.searchParams.set("pageSize", "100");
         if (pageToken) locationsUrl.searchParams.set("pageToken", pageToken);
         const response = await fetch(locationsUrl, { headers: googleHeaders });
@@ -202,14 +229,22 @@ serve(async (request) => {
     }
 
     const rows = locations.flatMap((location) => {
-      const locationName = typeof location.name === "string" ? location.name : "";
+      const nomeCurto = typeof location.name === "string" ? location.name : "";
       const accountName = typeof location.account_name === "string" ? location.account_name : "";
-      if (!locationName || !accountName) return [];
+      if (!nomeCurto || !accountName) return [];
+      // O CAMINHO COMPLETO, recomposto. A v1 devolve `locations/123`; as
+      // avaliacoes na v4 exigem `accounts/1/locations/123`. Guardar o nome
+      // curto aqui faria a sincronizacao de avaliacoes falhar depois, longe
+      // daqui, com um 404 que ninguem ligaria a este sitio.
+      const locationName = nomeCurto.startsWith("accounts/")
+        ? nomeCurto
+        : `${accountName}/${nomeCurto}`;
       return [{
         user_id: user.id,
         account_name: accountName,
         location_name: locationName,
-        title: typeof location.locationName === "string" ? location.locationName : locationName,
+        // `title` na v1; `locationName` era o nome do campo na v4.
+        title: typeof location.title === "string" ? location.title : locationName,
         store_code: typeof location.storeCode === "string" ? location.storeCode : null,
         place_id: typeof (location.metadata as { placeId?: unknown } | undefined)?.placeId === "string"
           ? (location.metadata as { placeId: string }).placeId
