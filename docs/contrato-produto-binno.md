@@ -1242,6 +1242,56 @@ garante que o canal de vendas sobrevive ao próximo bloqueio do canal de envio.
 
 Guardado por `scripts/check-marca-e-contacto.mjs`.
 
+## A área de administrador (03/09/2026)
+
+**Ela responde a uma pergunta só: o que está travado agora.** Não é painel
+comercial, não é suporte com acesso à conta do cliente, não é gestão de planos.
+Por isso a ordem é por gravidade e não por nome, não há filtro nem procura, e
+não há gráfico — um gráfico responde "como foi ao longo do tempo", que é a
+pergunta do painel comercial, e esse ficou de fora.
+
+**Só números e saúde. Nunca conteúdo de terceiros.** Nem o texto de uma
+avaliação, nem o de um comentário privado, nem o nome ou telefone de quem
+escreveu. Os clientes do nosso cliente são pessoas reais, e Portugal trata isso
+como dado pessoal com regra própria. A fronteira **não é a tela**: é a lista de
+colunas que `saude_das_contas()` devolve, e o guarda compara essa lista com uma
+lista permitida — acrescentar `customer_name` fica vermelho.
+
+**O administrador não passa pelas regras de acesso por linha.** Ele lê por
+agregação, e as 44 políticas de RLS ficam intocadas. Pô-lo numa peça de acesso
+partilhada dar-lhe-ia acesso de linha a todas as contas, e esconder o conteúdo
+na tela é decoração, não fronteira. A peça partilhada continua a ser o caminho
+certo para **vários utilizadores por negócio**, que é outro assunto.
+
+**A recusa devolve "não encontrado", e não "acesso negado".** Uma negação
+confirma que a rota existe, e uma rota que se sabe existir é uma rota que alguém
+tenta. Pela mesma razão a rota não está atrás de `ProtectedRoute`: um
+redireccionamento para o login também confirmaria.
+
+**Uma lista vazia nunca pode ser a resposta a quem não tem permissão.** Seria
+indistinguível de "não há problemas" — a pior mentira que este produto pode
+contar, porque ele existe justamente para acabar com o silêncio.
+
+**O aviso só sai quando muda.** A assinatura é a lista ordenada de pares
+(conta, sinal). Igual à última — não envia. Sem isso o Marcelo recebe o mesmo
+aviso todos os dias até deixar de o ler, e um aviso que se deixa de ler é pior
+do que nenhum. `coleta_antiga` fica **fora** da assinatura, porque muda de valor
+a cada dia que passa e sozinho faria um aviso novo todos os dias.
+
+E a regra não pode virar "só uma vez na vida": um problema resolvido e voltado
+tem de voltar a avisar, **no mesmo dia inclusive**. Foi o guarda que apanhou
+isto — a primeira versão montava a chave de repetição com a assinatura mais a
+data, e engolia o regresso do problema.
+
+**Virar administrador é um acto deliberado com rasto em git**, por migração. A
+tabela `admins` está fechada à escrita do navegador desde 31/07/2026, porque a
+versão original deixava qualquer pessoa autenticada declarar-se administrador.
+
+Guardado por `scripts/check-area-de-administrador.mjs`, que corre a consulta de
+verdade num Postgres descartável com uma conta fabricada por defeito — e três
+contas de fronteira que só existem porque três mutações ficaram verdes: medir a
+presença de um sinal não mede o limiar dele.
+
 O teste não substitui
 revisão de produto: qualquer mudança visual ou de fluxo ainda deve ser
 comparada com este documento antes de ser aceita.
