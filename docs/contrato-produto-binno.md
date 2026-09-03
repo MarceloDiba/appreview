@@ -1242,6 +1242,52 @@ garante que o canal de vendas sobrevive ao próximo bloqueio do canal de envio.
 
 Guardado por `scripts/check-marca-e-contacto.mjs`.
 
+## O Binno fala com quatro APIs do Google (03/09/2026)
+
+Não é uma. São quatro, com versões diferentes, ativadas separadamente no Console
+do Google, e **misturá-las quebra coisas em silêncio**. Esta cláusula existe
+porque três defeitos seguidos, no mesmo dia, vieram exatamente daqui.
+
+| Para quê | Endereço | Onde |
+|---|---|---|
+| Listar contas | `mybusinessaccountmanagement.googleapis.com/v1` | `sync-google-business-profile` |
+| Listar locais | `mybusinessbusinessinformation.googleapis.com/v1` | `sync-google-business-profile` |
+| Ler e responder avaliações do perfil | `mybusiness.googleapis.com/**v4**` | `sync-google-business-profile` |
+| Ler avaliações públicas | `places.googleapis.com/v1` (**nova**) | `fetch-google-reviews` |
+| Buscar prospectos por proximidade | `maps.googleapis.com` (**legada**) | `search-prospects` |
+
+**Locais e avaliações vivem em versões diferentes de propósito.** O Google
+desligou os endpoints de locais da v4 — respondem `404` em HTML — e nunca migrou
+as avaliações para API nenhuma. A v4 é o único endereço que existe para elas.
+"Uniformizar" as duas está proibido: para v4 quebra os locais, para v1 quebra as
+avaliações. Guardado por `scripts/check-duas-apis-do-google.mjs`.
+
+**A Places legada está viva, e não se migra sem prova de morte.** Congelada
+desde 01/03/2025, não pode ser ativada em projeto novo, mas projetos que já a
+tinham continuam servidos — com promessa de 12 meses de aviso e nenhuma data
+anunciada. Migrar o que funciona é criar risco sem ganho.
+
+*Risco de configuração que não é de código:* se a `GOOGLE_PLACES_API_KEY` passar
+a viver em outro projeto do Google, a busca de prospectos para de um dia para o
+outro, porque a legada não se ativa em projeto novo. Nada no código muda.
+
+**Como se distingue "recusou" de "sumiu".** Um endereço que existe mas pede
+credencial responde JSON. Um endereço desligado responde HTML. Por isso todo
+caminho do Google lê o texto **antes** de tentar interpretar JSON, e registra o
+motivo no formato `Google recusou em <onde>: HTTP <código> | status <status> | <mensagem>`.
+Um `502` mudo custou uma ida e volta inteira com o dono do produto.
+
+**Toda saída de falha do callback diz porque falhou.** Eram nove caminhos
+distintos de falha escondidos atrás de cinco retornos, e nenhum se distinguia do
+outro. Guardado por `scripts/check-saidas-de-falha-do-callback.mjs`, que também
+proíbe dois motivos com o mesmo texto — motivo duplicado é tão mudo quanto
+nenhum.
+
+**Uma função no repositório e não no servidor é um defeito invisível.** Foi assim
+que a conexão do Google chegou quebrada ao primeiro uso real: duas funções
+existiam há três semanas e nunca tinham sido implantadas. `scripts/check-funcoes-implantadas.mjs`
+cobra uma lista declarada, com data, que tem de acompanhar a pasta.
+
 ## Entrar com o Google (03/09/2026)
 
 **O botão é um só, partilhado entre entrar e cadastrar.** `signInWithGoogle`
