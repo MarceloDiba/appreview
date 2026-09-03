@@ -81,7 +81,11 @@
     "fillAllFields": "Preencha todos os campos.",
     "wrongCredentials": "E-mail ou senha incorretos.",
     "loginErrorPrefix": "Erro ao fazer login",
-    "unexpectedError": "Ocorreu um erro ao fazer login. Tente de novo."
+    "unexpectedError": "Ocorreu um erro ao fazer login. Tente de novo.",
+    "continueWithGoogle": "Continuar com o Google",
+    "googleRedirecting": "Levando você ao Google…",
+    "googleError": "Não consegui abrir o Google. Tente de novo.",
+    "orDivider": "ou"
   },
   "signup": {
     "title": "Crie sua conta",

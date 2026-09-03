@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import MarcaBinno from '@/components/marketing/MarcaBinno';
+import BotaoDoGoogle from '@/components/auth/BotaoDoGoogle';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -178,6 +179,13 @@ const Signup = () => {
             </p>
           </div>
         </form>
+
+        <div className="mt-4 flex items-center gap-3" aria-hidden="true">
+          <span className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs uppercase tracking-wide text-slate-400">{t('auth.orDivider')}</span>
+          <span className="h-px flex-1 bg-slate-200" />
+        </div>
+        <div className="mt-4"><BotaoDoGoogle /></div>
 
         <div className="mt-4 text-center">
           <p className="text-gray-600 text-sm">

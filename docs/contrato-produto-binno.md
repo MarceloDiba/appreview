@@ -1242,6 +1242,35 @@ garante que o canal de vendas sobrevive ao próximo bloqueio do canal de envio.
 
 Guardado por `scripts/check-marca-e-contacto.mjs`.
 
+## Entrar com o Google (03/09/2026)
+
+**O botão é um só, partilhado entre entrar e cadastrar.** `signInWithGoogle`
+não distingue os dois casos — o Supabase decide isso pelo e-mail que o Google
+devolve. Dois botões escritos à mão divergiam no texto ou no ícone na primeira
+alteração que tocasse só num.
+
+**A decisão de para onde ir depois do login é uma função só**, exportada de
+`Login.tsx` e usada pelos dois caminhos daquela página: o clique manual e o
+`useEffect` que reage à sessão chegar de volta do Google. O cadastro não tem
+uma segunda cópia — um clique em "Continuar com o Google" ali devolve o
+navegador a `/login`, que é quem decide entre o painel e o assistente de
+configuração.
+
+**O Google não manda nome de negócio.** O cadastro por e-mail pede isso no
+próprio formulário; o assistente de configuração já cobria essa falta antes de
+este recurso existir, e é o que evita uma conta do Google aterrar num painel
+vazio para sempre.
+
+**O que este guarda não prova, e só um clique real prova**: se a conta do
+Google fica ligada a uma conta de e-mail e senha existente com o mesmo
+endereço. Essa decisão é do Supabase Auth no servidor, não desta aplicação, e
+não há como correr um fluxo OAuth de verdade num Postgres descartável. Antes de
+anunciar o botão a clientes, vale testar uma vez, à mão: entrar com o Google
+usando o e-mail de uma conta que já existe, e confirmar que cai na MESMA conta
+e não numa vazia.
+
+Guardado por `scripts/check-login-com-google.mjs`.
+
 ## A área de administrador (03/09/2026)
 
 **Ela responde a uma pergunta só: o que está travado agora.** Não é painel
