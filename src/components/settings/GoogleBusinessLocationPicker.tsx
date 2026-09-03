@@ -38,7 +38,18 @@ const GoogleBusinessLocationPicker = () => {
       await load();
     } catch (error) {
       console.error('Could not list Google Business locations:', error);
-      toast.error(t('settings.googleLocation.discoverError'));
+      /**
+       * O MOTIVO REAL, e não um aviso genérico.
+       *
+       * A função devolve a recusa do Google no corpo da resposta — "esta API
+       * não está ativada neste projeto", por exemplo. Até 03/09/2026 esta tela
+       * descartava esse corpo e mostrava sempre a mesma frase, e quem via não
+       * tinha como saber se faltava um clique no Console do Google ou se era
+       * outra coisa. A frase genérica só aparece quando não há nada melhor.
+       */
+      const detalhe = await (error as { context?: { json?: () => Promise<{ error?: string }> } })
+        ?.context?.json?.().catch(() => null);
+      toast.error(detalhe?.error || t('settings.googleLocation.discoverError'));
     } finally {
       setDiscovering(false);
     }
