@@ -37,6 +37,17 @@ interface PlaceResult {
   business_status?: string;
 }
 
+/**
+ * A forma da resposta da Nearby Search legada. O `status` da recusa vem no
+ * CORPO, com HTTP 200 por cima — por isso `res.ok` nao serve para decidir aqui.
+ */
+interface NearbySearchResponse {
+  status?: string;
+  error_message?: string;
+  results?: PlaceResult[];
+  next_page_token?: string;
+}
+
 interface Prospect {
   place_id: string;
   name: string;
@@ -117,6 +128,33 @@ serve(async (req) => {
 
     // Até 3 páginas (60 resultados) — o limite da Nearby Search.
     for (let page = 0; page < 3; page++) {
+      /**
+       * ESTE ENDERECO E DA PLACES LEGADA, E FICA ASSIM DE PROPOSITO.
+       *
+       * Em 03/09/2026, depois de o Google ter desligado os locais da v4, a
+       * suspeita natural foi que esta busca seria a proxima a cair. A sonda diz
+       * que nao: `maps.googleapis.com/maps/api/place/nearbysearch/json`
+       * responde HTTP 200 com JSON (`REQUEST_DENIED`, por falta de chave),
+       * enquanto o endereco que morreu de facto —
+       * `mybusiness.googleapis.com/v4/{conta}/locations` — responde 404 em
+       * HTML. Endereco que roteia esta vivo; endereco desligado nao sabe sequer
+       * quem e.
+       *
+       * A documentacao confirma o mesmo: desde 01/03/2025 a Places legada esta
+       * em estado "Legacy" — congelada, e impossivel de activar em projectos
+       * NOVOS — mas os projectos que ja a tinham activada continuam a ser
+       * servidos, com promessa de 12 meses de aviso antes do desligamento e sem
+       * data anunciada ate hoje.
+       *
+       * Migrar para `places.googleapis.com/v1/places:searchNearby` sem prova de
+       * morte seria trocar o que funciona por risco. O que fica no lugar da
+       * migracao e o registo mais abaixo: no dia em que o Google desligar isto,
+       * o log diz o motivo, em vez de um 502 mudo.
+       *
+       * O risco que sobra nao se conserta com codigo: se a chave passar a viver
+       * noutro projecto do Google, a legada nao se activa la e esta busca para
+       * de um dia para o outro. Isso e decisao do Marcelo, nao do codigo.
+       */
       const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
       if (pageToken) {
         url.searchParams.set('pagetoken', pageToken);
@@ -128,9 +166,38 @@ serve(async (req) => {
       url.searchParams.set('key', googleApiKey);
 
       const res = await fetch(url.toString());
-      const data = await res.json();
+
+      // Ler texto antes de tentar JSON. A resposta que mata este caminho nao e
+      // um erro JSON tratavel: e a pagina 404 em HTML que o Google devolve
+      // quando o endereco deixa de existir. Sobre HTML, `res.json()` rebenta
+      // longe daqui, no catch geral, e o operador ve "Erro interno" sem uma
+      // unica pista de que foi o Google que desapareceu.
+      const corpo = await res.text();
+      let data: NearbySearchResponse;
+      try {
+        data = JSON.parse(corpo) as NearbySearchResponse;
+      } catch {
+        console.error(
+          "Google recusou em %s: HTTP %s | corpo nao e JSON: %s",
+          "buscar prospectos", res.status, corpo.slice(0, 300),
+        );
+        return new Response(
+          JSON.stringify({ error: 'Google Places: resposta não é JSON', detail: corpo.slice(0, 300) }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 502 }
+        );
+      }
 
       if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+        // Mesmo formato de `sync-google-business-profile`, de proposito: um so
+        // formato em todos os pontos do Google e o que faz o diagnostico ser
+        // uma busca por "Google recusou em" e nao uma leitura de tudo.
+        // `status` separa as duas causas mais provaveis — REQUEST_DENIED e "a
+        // API nao esta activada ou a chave nao vale"; OVER_QUERY_LIMIT e "esta
+        // activada e acabou a quota". Consertos completamente diferentes.
+        console.error(
+          "Google recusou em %s: HTTP %s | status %s | %s",
+          "buscar prospectos", res.status, data.status || "?", data.error_message || "sem mensagem",
+        );
         return new Response(
           JSON.stringify({ error: `Google Places: ${data.status}`, detail: data.error_message }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 502 }
