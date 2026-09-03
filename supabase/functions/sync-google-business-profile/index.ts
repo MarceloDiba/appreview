@@ -96,9 +96,35 @@ const summarizeOfficialReviews = (reviews: StoredReview[], now: Date) => {
   };
 };
 
-const googleError = async (response: Response) => {
-  const body = await response.json().catch(() => ({})) as { error?: { message?: string } };
-  return body.error?.message || "Google Business Profile request failed";
+/**
+ * O motivo REAL da recusa do Google, e nao so um 502 mudo.
+ *
+ * Ate 03/09/2026 esta funcao devolvia a mensagem no corpo da resposta e nao a
+ * registava em lado nenhum. Marcelo carregou em "Buscar locais", viu um aviso
+ * generico na tela, e o servidor tinha a resposta exacta do Google — que
+ * ninguem conseguia ler sem a sessao dele. Um `502` sem motivo obriga a
+ * adivinhar, e adivinhar em cima de uma API com cinco servicos separados e
+ * caro.
+ *
+ * `status` e `service` entram no log porque distinguem as duas causas mais
+ * provaveis: 403 com SERVICE_DISABLED e "falta activar a API no Console"; 404
+ * no `mybusiness.googleapis.com/v4` e "este endereco foi desligado pelo
+ * Google". Sao consertos completamente diferentes.
+ */
+const googleError = async (response: Response, onde: string) => {
+  const texto = await response.text().catch(() => "");
+  let mensagem = "Google Business Profile request failed";
+  try {
+    const body = JSON.parse(texto) as { error?: { message?: string; status?: string } };
+    mensagem = body.error?.message || mensagem;
+    console.error(
+      "Google recusou em %s: HTTP %s | status %s | %s",
+      onde, response.status, body.error?.status || "?", mensagem,
+    );
+  } catch {
+    console.error("Google recusou em %s: HTTP %s | corpo nao e JSON: %s", onde, response.status, texto.slice(0, 300));
+  }
+  return mensagem;
 };
 
 serve(async (request) => {
@@ -153,7 +179,7 @@ serve(async (request) => {
       accountsUrl.searchParams.set("pageSize", "20");
       if (accountPageToken) accountsUrl.searchParams.set("pageToken", accountPageToken);
       const accountsResponse = await fetch(accountsUrl, { headers: googleHeaders });
-      if (!accountsResponse.ok) return json({ error: await googleError(accountsResponse) }, 502);
+      if (!accountsResponse.ok) return json({ error: await googleError(accountsResponse, "listar contas") }, 502);
       const accountsPayload = await accountsResponse.json() as { accounts?: Array<{ name?: string }>; nextPageToken?: string };
       accounts.push(...(accountsPayload.accounts || []));
       accountPageToken = accountsPayload.nextPageToken || "";
@@ -168,7 +194,7 @@ serve(async (request) => {
         locationsUrl.searchParams.set("pageSize", "100");
         if (pageToken) locationsUrl.searchParams.set("pageToken", pageToken);
         const response = await fetch(locationsUrl, { headers: googleHeaders });
-        if (!response.ok) return json({ error: await googleError(response) }, 502);
+        if (!response.ok) return json({ error: await googleError(response, "listar locais") }, 502);
         const payload = await response.json() as { locations?: Array<Record<string, unknown>>; nextPageToken?: string };
         locations.push(...(payload.locations || []).map((location) => ({ ...location, account_name: account.name })));
         pageToken = payload.nextPageToken || "";
@@ -225,7 +251,7 @@ serve(async (request) => {
     reviewsUrl.searchParams.set("orderBy", "updateTime desc");
     if (pageToken) reviewsUrl.searchParams.set("pageToken", pageToken);
     const response = await fetch(reviewsUrl, { headers: googleHeaders });
-    if (!response.ok) return json({ error: await googleError(response) }, 502);
+    if (!response.ok) return json({ error: await googleError(response, "buscar avaliacoes") }, 502);
     const payload = await response.json() as {
       reviews?: Array<Record<string, unknown>>;
       nextPageToken?: string;
@@ -336,7 +362,7 @@ serve(async (request) => {
       headers: { ...googleHeaders, "Content-Type": "application/json" },
       body: JSON.stringify({ comment }),
     });
-    if (!replyResponse.ok) return json({ error: await googleError(replyResponse) }, 502);
+    if (!replyResponse.ok) return json({ error: await googleError(replyResponse, "publicar resposta") }, 502);
     const reply = await replyResponse.json() as Record<string, unknown>;
     const confirmResponse = await fetch(`https://mybusiness.googleapis.com/v4/${review.google_review_name}`, { headers: googleHeaders });
     if (!confirmResponse.ok) return json({ error: "Google accepted the reply but confirmation failed" }, 502);
