@@ -9,6 +9,7 @@ import { useInternalFeedback } from '@/hooks/useInternalFeedback';
 import { useGoogleBusinessReviewQueue } from '@/hooks/useGoogleBusinessReviewQueue';
 import { useGoogleReviews } from '@/hooks/useGoogleReviews';
 import { useGooglePublicReviewsAnswered } from '@/hooks/useGooglePublicReviewsAnswered';
+import { useRespostaAEsperar, type RespostaAEsperar } from '@/hooks/useRespostaAEsperar';
 import { lerNotaDoCaso } from '@/lib/comentarioInterno';
 import { itensJaTratados, montarFilaDeRespostas, type ItemDaFila, type OrigemDaResposta } from '@/lib/filaDeRespostas';
 import { buildReplySuggestions } from '@/lib/replySuggestions';
@@ -142,14 +143,25 @@ const PublicacaoOficial = ({
   rascunhoInicial,
   publicar,
   publicando,
+  aEsperar,
 }: {
   item: ItemDaFila;
   rascunhoInicial: string;
   publicar: (id: string, texto: string) => Promise<boolean>;
   publicando: boolean;
+  /**
+   * O que este dono mandou para o WhatsApp e ainda espera um "1", se for
+   * sobre ESTA avaliacao. `respostas_a_confirmar.review_id` guarda o id de
+   * `google_business_reviews`, que e o mesmo que `idNaFonte` carrega para a
+   * origem `google-oficial` (ver `daAvaliacaoOficial` em filaDeRespostas.ts) —
+   * por isso a comparacao e com `idNaFonte`, e nao com `item.id`, que leva o
+   * prefixo da fila somada.
+   */
+  aEsperar: RespostaAEsperar | null;
 }) => {
   const { t } = useOwnerTranslation();
   const [rascunho, setRascunho] = useState(rascunhoInicial);
+  const respostaAEsperar = aEsperar?.reviewId === item.idNaFonte ? aEsperar : null;
 
   const enviar = async () => {
     if (!rascunho.trim()) return;
@@ -159,6 +171,20 @@ const PublicacaoOficial = ({
 
   return (
     <div className="mt-4">
+      {/*
+        O dono pode ja ter recebido este rascunho no telemovel e estar a
+        espera de responder "1" la. Sem isto ele nao sabe que a mensagem
+        chegou e pode responder duas vezes a mesma avaliacao — uma pelo
+        WhatsApp, outra por aqui. So mostra estas tres coisas, e nada mais: que
+        foi enviado, o texto que foi enviado, e que "1" publica.
+      */}
+      {respostaAEsperar && (
+        <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm leading-6 text-emerald-900">
+          <p className="font-semibold">{t('reviews.google.official.waitingWhatsappTitle')}</p>
+          <p className="mt-1 whitespace-pre-wrap break-words">{respostaAEsperar.rascunho}</p>
+          <p className="mt-2">{t('reviews.google.official.waitingWhatsappInstruction')}</p>
+        </div>
+      )}
       <label className="block text-sm font-semibold text-slate-900" htmlFor={`resposta-${item.id}`}>
         {t('reviews.google.official.draft')}
       </label>
@@ -189,6 +215,7 @@ const ItemDaFilaCard = ({
   publicando,
   marcandoId,
   marcarRespondida,
+  aEsperar,
 }: {
   item: ItemDaFila;
   businessName: string | null;
@@ -199,6 +226,7 @@ const ItemDaFilaCard = ({
   publicando: boolean;
   marcandoId: string | null;
   marcarRespondida: (reviewId: string, respondida: boolean) => void;
+  aEsperar: RespostaAEsperar | null;
 }) => {
   const { t, i18n } = useOwnerTranslation();
   const tratado = item.is_addressed === true;
@@ -279,6 +307,7 @@ const ItemDaFilaCard = ({
             })[0]?.body || ''}
             publicar={publicar}
             publicando={publicando}
+            aEsperar={aEsperar}
           />
         )}
 
@@ -366,6 +395,9 @@ const FilaDeRespostas = ({
   const oficiais = useGoogleBusinessReviewQueue(userId);
   const publicas = useGoogleReviews(userId);
   const respondidas = useGooglePublicReviewsAnswered(userId);
+  // So ha uma resposta a espera por dono (o indice unico da migracao garante
+  // isso), por isso um valor so chega ate aqui e desce para o item certo.
+  const aEsperar = useRespostaAEsperar(userId);
   const [falhaAoAtualizar, setFalhaAoAtualizar] = useState(false);
   // O padrão é sem filtro: a fila abre inteira, do mais recente para o mais
   // antigo. O cartão de origens acima dela põe e tira este filtro.
@@ -532,6 +564,7 @@ const FilaDeRespostas = ({
             publicando={oficiais.publishing}
             marcandoId={respondidas.markingId}
             marcarRespondida={(reviewId, respondida) => void respondidas.mark(reviewId, respondida)}
+            aEsperar={aEsperar}
           />
         ))}
       </div>
@@ -554,6 +587,7 @@ const FilaDeRespostas = ({
                 publicando={oficiais.publishing}
                 marcandoId={respondidas.markingId}
                 marcarRespondida={(reviewId, respondida) => void respondidas.mark(reviewId, respondida)}
+                aEsperar={aEsperar}
               />
             ))}
           </div>

@@ -1071,6 +1071,8 @@
         "empty": "Todas as avaliações importadas já têm resposta no Google.",
         "anonymous": "Cliente anônimo",
         "noComment": "Sem comentário escrito",
+        "waitingWhatsappTitle": "Este rascunho já foi enviado para o seu WhatsApp",
+        "waitingWhatsappInstruction": "Responda 1 no WhatsApp para publicar esta resposta no Google.",
         "draft": "Resposta sugerida. Revise antes de publicar.",
         "publish": "Publicar resposta no Google",
         "publishing": "Confirmando no Google…",
