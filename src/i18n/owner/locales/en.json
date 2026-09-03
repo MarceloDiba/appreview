@@ -81,7 +81,11 @@
     "fillAllFields": "Please fill in all fields.",
     "wrongCredentials": "Wrong email or password.",
     "loginErrorPrefix": "Login error",
-    "unexpectedError": "Something went wrong signing in. Please try again."
+    "unexpectedError": "Something went wrong signing in. Please try again.",
+    "continueWithGoogle": "Continue with Google",
+    "googleRedirecting": "Taking you to Google…",
+    "googleError": "Couldn't open Google. Try again.",
+    "orDivider": "or"
   },
   "signup": {
     "title": "Create your account",

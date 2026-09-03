@@ -12,6 +12,22 @@ import { getSetupState } from '@/hooks/useSetupStatus';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import MarcaBinno from '@/components/marketing/MarcaBinno';
+import BotaoDoGoogle from '@/components/auth/BotaoDoGoogle';
+
+/**
+ * A decisão de para onde ir depois de qualquer autenticação bem-sucedida —
+ * e-mail e senha, ou Google.
+ *
+ * Vive aqui, exportada, e não duplicada em `Signup.tsx`, porque um clique em
+ * "Continuar com o Google" no cadastro devolve o navegador a esta página (ver
+ * `redirectTo` em `AuthContext.signInWithGoogle`): é este `useEffect` que
+ * recebe a sessão nova e decide entre o painel e o assistente. Uma segunda
+ * cópia da regra divergiria na primeira vez que alguém mexesse numa.
+ */
+export const navegarDepoisDoLogin = async (userId: string) => {
+  const setup = await getSetupState(userId);
+  return setup && !setup.isComplete ? '/configuracao' : '/dashboard';
+};
 
 const Login = () => {
   const navigate = useNavigate();
@@ -24,9 +40,11 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Redirect if already logged in
+    // Cobre os dois caminhos: alguém que já tinha sessão e abriu /login por
+    // engano, e quem acabou de voltar do Google — os dois chegam aqui só com
+    // `user` a mudar, sem passar por `handleSubmit`.
     if (user) {
-      navigate('/dashboard');
+      void navegarDepoisDoLogin(user.id).then(navigate);
     }
   }, [user, navigate]);
 
@@ -60,8 +78,7 @@ const Login = () => {
         // Quem ainda não tem nome, link do Google e um QR code vai para o passo
         // a passo em vez de aterrar num painel vazio sem saber o que fazer.
         const { data: { user: signedIn } } = await supabase.auth.getUser();
-        const setup = signedIn ? await getSetupState(signedIn.id) : null;
-        navigate(setup && !setup.isComplete ? '/configuracao' : '/dashboard');
+        if (signedIn) navigate(await navegarDepoisDoLogin(signedIn.id));
       }
     } catch (error) {
       console.error('Unexpected error during login:', error);
@@ -124,6 +141,13 @@ const Login = () => {
             </Button>
           </div>
         </form>
+
+        <div className="mt-4 flex items-center gap-3" aria-hidden="true">
+          <span className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs uppercase tracking-wide text-slate-400">{t('auth.orDivider')}</span>
+          <span className="h-px flex-1 bg-slate-200" />
+        </div>
+        <div className="mt-4"><BotaoDoGoogle /></div>
 
         <div className="mt-4 text-center">
           <p className="text-gray-600 text-sm">

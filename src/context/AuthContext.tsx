@@ -24,6 +24,7 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUp: (email: string, password: string, businessName: string, name: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<{ error: AuthError | null }>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -135,8 +136,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  /**
+   * Entrar (ou cadastrar-se) com o Google.
+   *
+   * É a MESMA chamada para os dois casos: o Supabase decide, a partir do
+   * e-mail que o Google devolve, se está a criar uma conta nova ou a entrar
+   * numa que já existe. Nada aqui distingue "login" de "cadastro" — a
+   * distinção que existe nas duas telas é só de onde o botão é mostrado.
+   *
+   * `redirectTo` aponta sempre para `/login`, mesmo quando o clique partiu do
+   * cadastro: é `/login` que sabe, depois de a sessão chegar, decidir entre o
+   * painel e o assistente de configuração — ver `navegarDepoisDoLogin` em
+   * `src/pages/Login.tsx`. Duplicar essa decisão no cadastro seria duas cópias
+   * da mesma regra a divergirem na primeira vez que alguém mexesse numa.
+   */
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/login` },
+      });
+      return { error };
+    } catch (error) {
+      return { error: toAuthError(error) };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut, signInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );
