@@ -31,9 +31,11 @@
 //   6. A chave de idempotencia deixar de nomear a resposta, e com isso o aviso
 //      e o que ele espera passarem a ser duas linhas sem relacao nenhuma.
 //
-// AS ASSERCOES LEEM SO O CORPO DA FUNCAO, e nao o ficheiro. Neste projecto ja
-// houve um guarda verde por procurar uma condicao "em qualquer sitio" e a
-// encontrar noutro bloco que a tinha por outro motivo. E os comentarios sao
+// AS ASSERCOES SOBRE O COMPORTAMENTO LEEM SO O CORPO DA FUNCAO, e nao o
+// ficheiro. Neste projecto ja houve um guarda verde por procurar uma condicao
+// "em qualquer sitio" e a encontrar noutro bloco que a tinha por outro motivo.
+// A excepcao e a assercao 5, sobre as permissoes: o `revoke` vive FORA do
+// `$function$`, portanto essa — e so essa — le o ficheiro inteiro. E os comentarios sao
 // retirados antes de qualquer procura: o texto explicativo aqui em cima cita a
 // instrucao que a assercao 3 exige, e casar com o proprio comentario e a
 // maneira mais silenciosa de um guarda nao provar nada.

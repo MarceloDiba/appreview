@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -111,6 +111,28 @@ const summarizeOfficialReviews = (reviews: StoredReview[], now: Date) => {
  * no `mybusiness.googleapis.com/v4` e "este endereco foi desligado pelo
  * Google". Sao consertos completamente diferentes.
  */
+// Escreve o motivo da recusa onde ele sobrevive ao ecra.
+//
+// POR QUE ISTO EXISTE: ate 03/09/2026 uma recusa do Google devolvia 502 ao
+// navegador e mais nada. O `last_error` da ligacao so era escrito quando a
+// renovacao do token falhava, portanto uma sincronizacao recusada nao deixava
+// rasto nenhum: a ligacao ficava `connected`, `last_synced_at` nulo, `last_error`
+// nulo, e a unica pessoa que via o motivo era quem estivesse a olhar para o ecra
+// naquele segundo. Foi exactamente o estado encontrado na producao nesse dia —
+// perfil ligado, local escolhido, zero avaliacoes e nenhuma explicacao.
+const registarFalha = async (admin: SupabaseClient, userId: string, motivo: string) => {
+  // Nunca derruba a resposta ao utilizador: o objectivo e deixar rasto, e um
+  // rasto que falha nao pode transformar-se num segundo erro por cima do
+  // primeiro, que era o que o utilizador ia ler.
+  try {
+    await admin.from("google_business_connections")
+      .update({ last_error: motivo.slice(0, 300) })
+      .eq("user_id", userId);
+  } catch (erro) {
+    console.error("Nao consegui registar a falha da sincronizacao: %s", erro);
+  }
+};
+
 const googleError = async (response: Response, onde: string) => {
   const texto = await response.text().catch(() => "");
   let mensagem = "Google Business Profile request failed";
@@ -221,7 +243,11 @@ serve(async (request) => {
         locationsUrl.searchParams.set("pageSize", "100");
         if (pageToken) locationsUrl.searchParams.set("pageToken", pageToken);
         const response = await fetch(locationsUrl, { headers: googleHeaders });
-        if (!response.ok) return json({ error: await googleError(response, "listar locais") }, 502);
+        if (!response.ok) {
+          const motivo = await googleError(response, "listar locais");
+          await registarFalha(admin, user.id, `listar locais: ${motivo}`);
+          return json({ error: motivo }, 502);
+        }
         const payload = await response.json() as { locations?: Array<Record<string, unknown>>; nextPageToken?: string };
         locations.push(...(payload.locations || []).map((location) => ({ ...location, account_name: account.name })));
         pageToken = payload.nextPageToken || "";
@@ -286,7 +312,11 @@ serve(async (request) => {
     reviewsUrl.searchParams.set("orderBy", "updateTime desc");
     if (pageToken) reviewsUrl.searchParams.set("pageToken", pageToken);
     const response = await fetch(reviewsUrl, { headers: googleHeaders });
-    if (!response.ok) return json({ error: await googleError(response, "buscar avaliacoes") }, 502);
+    if (!response.ok) {
+      const motivo = await googleError(response, "buscar avaliacoes");
+      await registarFalha(admin, user.id, `buscar avaliacoes: ${motivo}`);
+      return json({ error: motivo }, 502);
+    }
     const payload = await response.json() as {
       reviews?: Array<Record<string, unknown>>;
       nextPageToken?: string;
