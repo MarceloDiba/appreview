@@ -79,31 +79,31 @@ export const EXPLICACAO_DO_USO: Record<UsoDaConta, { rotulo: string; frase: stri
 export const EXPLICACAO_DOS_SINAIS: Record<SinalDaConta, { titulo: string; passo: string }> = {
   coleta_parada_na_fila: {
     titulo: 'Coleta pedida e parada há mais de 30 minutos',
-    passo: 'O cadastro pediu a coleta e ela não saiu. Verifique se a automação está ligada.',
+    passo: 'O cadastro pediu a coleta e ela não saiu. É avaria do Binno — o cliente está com o painel vazio, então isso corre.',
   },
   nunca_coletou: {
     titulo: 'Cadastrou e nunca coletou',
-    passo: 'A conta tem nome e link do Google, mas nenhum dado. É o pior estado possível: o cliente abre o painel vazio.',
+    passo: 'Tem nome e link do Google, e nenhum dado. É o pior estado possível, e é avaria do Binno: o cliente abre o painel vazio.',
   },
   mensagem_falhou: {
     titulo: 'Mensagem falhou nas últimas 72 horas',
-    passo: 'Um aviso não chegou. Veja o canal desta conta antes que ela perca outro.',
+    passo: 'Um aviso não chegou. Começa comigo, no motivo da falha; se for o canal do cliente, aí sim vira conversa sua.',
   },
   fila_presa_no_envio: {
     titulo: 'Mensagem presa no meio do envio',
-    passo: 'Foi reservada para envio e nunca concluiu. O enviador morreu no caminho.',
+    passo: 'Foi reservada para envio e nunca concluiu — o enviador morreu no caminho. Avaria do Binno.'
   },
   fila_parada_na_saida: {
     titulo: 'Mensagem parada na fila há mais de 30 minutos',
-    passo: 'Foi enfileirada e não saiu. Normalmente é um canal sem chave ou um segredo faltando.',
+    passo: 'Foi enfileirada e não saiu. Quase sempre é um canal sem chave, e isso é comigo.',
   },
   sem_canal_de_aviso: {
     titulo: 'Consentiu receber avisos, mas não tem canal',
-    passo: 'Sem Telegram ligado, os avisos dela vão para o WhatsApp — que está bloqueado. Não chegam a lugar nenhum.',
+    passo: 'Sem Telegram ligado, os avisos vão para o WhatsApp bloqueado e não chegam. Só o cliente pode ligar, e quem pede é você.',
   },
   resumo_nao_saiu: {
     titulo: 'Resumo semanal não saiu',
-    passo: 'Passou o dia escolhido e nenhum resumo foi enfileirado nos últimos sete dias.',
+    passo: 'Passou o dia escolhido e nenhum resumo foi enfileirado nos últimos sete dias. Avaria do Binno.',
   },
   coleta_antiga: {
     titulo: 'Última coleta há mais de 30 dias',
@@ -113,6 +113,41 @@ export const EXPLICACAO_DOS_SINAIS: Record<SinalDaConta, { titulo: string; passo
     titulo: 'O dono não aparece há mais de três semanas',
     passo: 'Não é defeito: ninguém tem de consertar nada, alguém tem de falar com a pessoa antes que ela cancele.',
   },
+};
+
+/**
+ * De quem é o problema.
+ *
+ * Marcelo perguntou, ao ver a primeira versão do painel: "a conta travado eu
+ * não posso intervir em nada, correto?" — e estava certo. A página dizia o que
+ * estava partido e dava um passo que, na maioria dos sinais, ele não consegue
+ * executar: ninguém que não mexa no banco desentope uma fila presa.
+ *
+ * Dois sinais são dele e pedem uma conversa com o cliente. Sete são avarias do
+ * produto. Um painel que não separa as duas coisas pede ações impossíveis, e
+ * um painel que pede ações impossíveis ensina a não ser aberto.
+ *
+ * Esta lista existe também em SQL (`public.quem_resolve_o_sinal`), porque o
+ * banco também precisa dela, e um guarda exige que as duas sejam iguais.
+ */
+export type QuemResolve = 'voce' | 'binno' | 'informacao';
+
+export const QUEM_RESOLVE: Record<SinalDaConta, QuemResolve> = {
+  coleta_parada_na_fila: 'binno',
+  nunca_coletou: 'binno',
+  mensagem_falhou: 'binno',
+  fila_presa_no_envio: 'binno',
+  fila_parada_na_saida: 'binno',
+  sem_canal_de_aviso: 'voce',
+  resumo_nao_saiu: 'binno',
+  coleta_antiga: 'informacao',
+  dono_sumido: 'voce',
+};
+
+export const ETIQUETA_DE_QUEM_RESOLVE: Record<QuemResolve, string> = {
+  voce: 'Com você',
+  binno: 'Com o Binno',
+  informacao: 'Só informação',
 };
 
 type LinhaDaFuncao = {
