@@ -9,7 +9,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "check:i18n-owner": "node scripts/check-owner-i18n.mjs",
-    "verify": "tsc --noEmit -p tsconfig.app.json && npm run check:i18n-owner && npm run check:product-contract && npm run check:public-qr-security && npm run check:whatsapp-field && npm run check:shared-case-ordering && npm run check:fila-unica && npm run check:reply-locale-br && npm run check:apify-auto-collection && npm run check:fila-no-banco && npm run check:botao-de-coleta && npm run check:painel-no-celular && npm run check:ordem-por-decisao && npm run check:whatsapp-ligacao && npm run check:persistencia-agregados && npm run check:historico-que-sobrevive && npm run check:nota-honesta && npm run check:resposta-sem-nota && npm run check:gatilho-feedback-sql && npm run check:telegram-na-receita && npm run check:rascunho-que-le && npm run check:canal-do-rascunho && npm run check:temas-que-leem && npm run check:aviso-formatado && npm run check:convite-sem-filtro && npm run check:faixas-sem-buraco && npm run check:idioma-do-cliente && npm run check:relatorio-por-email && npm run check:marca-e-contacto && npm run check:area-de-administrador && npm run check:login-com-google && npm run check:conexao-google-sem-interruptor && npm run build",
+    "verify": "tsc --noEmit -p tsconfig.app.json && npm run check:i18n-owner && npm run check:product-contract && npm run check:public-qr-security && npm run check:whatsapp-field && npm run check:shared-case-ordering && npm run check:fila-unica && npm run check:reply-locale-br && npm run check:apify-auto-collection && npm run check:fila-no-banco && npm run check:botao-de-coleta && npm run check:painel-no-celular && npm run check:ordem-por-decisao && npm run check:whatsapp-ligacao && npm run check:persistencia-agregados && npm run check:historico-que-sobrevive && npm run check:nota-honesta && npm run check:resposta-sem-nota && npm run check:gatilho-feedback-sql && npm run check:telegram-na-receita && npm run check:rascunho-que-le && npm run check:canal-do-rascunho && npm run check:temas-que-leem && npm run check:aviso-formatado && npm run check:convite-sem-filtro && npm run check:faixas-sem-buraco && npm run check:idioma-do-cliente && npm run check:relatorio-por-email && npm run check:marca-e-contacto && npm run check:area-de-administrador && npm run check:login-com-google && npm run check:conexao-google-sem-interruptor && npm run check:duas-apis-do-google && npm run build",
     "check:product-contract": "node scripts/check-binno-product-contract.mjs",
     "check:fila-no-banco": "node scripts/check-fila-no-banco.mjs",
     "check:botao-de-coleta": "node scripts/check-botao-de-coleta.mjs",
@@ -41,7 +41,8 @@
     "check:marca-e-contacto": "node scripts/check-marca-e-contacto.mjs",
     "check:area-de-administrador": "node scripts/check-area-de-administrador.mjs",
     "check:login-com-google": "node scripts/check-login-com-google.mjs",
-    "check:conexao-google-sem-interruptor": "node scripts/check-conexao-google-sem-interruptor.mjs"
+    "check:conexao-google-sem-interruptor": "node scripts/check-conexao-google-sem-interruptor.mjs",
+    "check:duas-apis-do-google": "node scripts/check-duas-apis-do-google.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
