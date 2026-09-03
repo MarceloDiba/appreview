@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Building2, ShieldCheck } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Building2, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 
 /**
@@ -30,7 +31,33 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
  */
 const GoogleBusinessConnection = () => {
   const { t } = useOwnerTranslation();
+  const { user } = useAuth();
   const [connecting, setConnecting] = useState(false);
+  /**
+   * O CARTAO PERGUNTA AO BANCO SE JA ESTA LIGADO (03/09/2026).
+   *
+   * Ate aqui ele nao perguntava nada: mostrava "Conectar Google" para sempre,
+   * mesmo depois de a ligacao ter sido gravada com sucesso. Marcelo ligou a
+   * conta dele, voltou do Google, e a tela continuou a oferecer exactamente o
+   * que ele acabara de fazer — sem forma de saber se tinha funcionado.
+   *
+   * `null` enquanto nao se sabe, e nao `false`: assumir "desligado" antes da
+   * resposta faria o botao piscar em quem JA esta ligado, que e a mesma
+   * mentira, so que mais curta.
+   */
+  const [ligado, setLigado] = useState<boolean | null>(null);
+
+  const lerEstado = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('google_business_connections')
+      .select('status')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    setLigado(data?.status === 'connected');
+  }, [user]);
+
+  useEffect(() => { void lerEstado(); }, [lerEstado]);
 
   const startConnection = async () => {
     setConnecting(true);
@@ -57,6 +84,49 @@ const GoogleBusinessConnection = () => {
       setConnecting(false);
     }
   };
+
+  // Enquanto nao se sabe, nao se afirma nada. O cartao so aparece depois de o
+  // banco responder — meio segundo sem cartao e melhor do que meio segundo a
+  // dizer a coisa errada.
+  if (ligado === null) return null;
+
+  if (ligado) {
+    return (
+      <Card className="mb-6 border-emerald-200 bg-emerald-50/40 shadow-none">
+        <CardHeader className="pb-3">
+          <div className="flex items-start gap-3">
+            <div className="rounded-full bg-emerald-100 p-2 text-emerald-800">
+              <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">{t('settings.googleConnection.connectedTitle')}</CardTitle>
+              <CardDescription className="mt-1 max-w-2xl">
+                {t('settings.googleConnection.connectedDescription')}
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="max-w-xl text-xs leading-5 text-slate-600">
+            {t('settings.googleConnection.connectedHelp')}
+          </p>
+          {/*
+            Reconectar continua possivel, e de proposito: um consentimento pode
+            ser revogado do lado do Google sem o Binno saber, e sem este botao a
+            unica saida seria mexer no banco.
+          */}
+          <Button
+            variant="outline"
+            className="shrink-0"
+            onClick={startConnection}
+            disabled={connecting}
+          >
+            {connecting ? t('settings.googleConnection.connecting') : t('settings.googleConnection.reconnect')}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="mb-6 border-blue-100 shadow-none">

@@ -62,6 +62,28 @@ exigir('a fila oficial devolve vazio sozinha quando nao ha conexao, sem lancar e
   /if \(connection\?\.status !== 'connected'\) \{/.test(filaOficial));
 
 // ---------------------------------------------------------------------
+// 3b. O CARTAO DIZ A VERDADE SOBRE O ESTADO. Marcelo ligou a conta, voltou do
+// Google, e a tela continuou a oferecer "Conectar Google" — exactamente o que
+// ele acabara de fazer, sem forma de saber se tinha funcionado. A ligacao
+// estava gravada; era a tela que nao perguntava.
+// ---------------------------------------------------------------------
+exigir('o cartao pergunta ao banco se ja esta ligado',
+  /\.from\('google_business_connections'\)/.test(conexao)
+  && /status === 'connected'/.test(conexao));
+// `null` enquanto nao se sabe, e nao `false`: assumir "desligado" antes da
+// resposta faz o botao piscar em quem JA esta ligado.
+exigir('enquanto nao se sabe, o cartao nao afirma nada',
+  /useState<boolean \| null>\(null\)/.test(conexao)
+  && /if \(ligado === null\) return null;/.test(conexao));
+exigir('quem ja esta ligado ve que esta ligado, e nao um convite a ligar',
+  /if \(ligado\) \{/.test(conexao)
+  && /googleConnection\.connectedTitle/.test(conexao));
+// Reconectar continua possivel: um consentimento pode ser revogado do lado do
+// Google sem o Binno saber, e sem este botao a unica saida seria o banco.
+exigir('quem ja esta ligado ainda consegue reconectar',
+  /googleConnection\.reconnect/.test(conexao));
+
+// ---------------------------------------------------------------------
 // 4. AS ABAS: "Links externos" e "Google Reviews" viraram uma so, chamada
 // "Google" (pedido de Marcelo, 03/09/2026). As duas falavam da mesma coisa em
 // telas diferentes: o link que alimenta a coleta, e o que essa coleta traz de
