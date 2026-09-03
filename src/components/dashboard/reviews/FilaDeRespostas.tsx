@@ -439,8 +439,13 @@ const FilaDeRespostas = ({
       oficiais: oficiais.reviews,
       publicas: publicas.reviews,
       respondidasNoGoogle: respondidas.answered,
+      // Com a ligacao oficial LIGADA e com retrato COMPLETO, so ela fala pelo
+      // Google. Nao basta estar ligada: a meio da sincronizacao ela ainda nao
+      // sabe tudo, e calar o retrato da Apify ai esconderia avaliacoes reais.
+      oficialCompleta: oficiais.connectionStatus === 'connected' && oficiais.syncComplete,
     }),
-    [privados.cases, oficiais.reviews, publicas.reviews, respondidas.answered],
+    [privados.cases, oficiais.reviews, publicas.reviews, respondidas.answered,
+     oficiais.connectionStatus, oficiais.syncComplete],
   );
   const fila = useMemo(() => montarFilaDeRespostas(fontes), [fontes]);
   const tratados = useMemo(() => itensJaTratados(fontes), [fontes]);

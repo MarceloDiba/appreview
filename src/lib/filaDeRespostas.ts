@@ -196,6 +196,15 @@ export interface FontesDaFila {
    * nada; isto é a palavra do dono sobre o que ele já fez na página dele.
    */
   respondidasNoGoogle?: string[];
+  /**
+   * `true` quando a ligacao oficial ao Google tem retrato COMPLETO — ligada e
+   * com `review_sync_completed_at` preenchido. Ai ela e a unica que fala pelo
+   * Google, e o retrato da Apify nao entra na fila.
+   *
+   * Nao basta estar LIGADA: ligada e ainda a sincronizar, ela nao sabe tudo, e
+   * calar o retrato ai esconderia avaliacoes que existem de verdade.
+   */
+  oficialCompleta?: boolean;
 }
 
 const semAcentos = (valor: string): string =>
@@ -234,6 +243,7 @@ export const montarItensDaFila = ({
   oficiais = [],
   publicas = [],
   respondidasNoGoogle = [],
+  oficialCompleta = false,
 }: FontesDaFila): ItemDaFila[] => {
   const itensOficiais = oficiais.map(daAvaliacaoOficial);
   // Com a ligação oficial ligada, a mesma avaliação chega pelas duas portas do
@@ -243,7 +253,24 @@ export const montarItensDaFila = ({
     oficiais.map((avaliacao) => chaveDaAvaliacaoDoGoogle(avaliacao.reviewer_name, avaliacao.rating, avaliacao.review_updated_at)),
   );
   const respondidas = new Set(respondidasNoGoogle);
-  const itensPublicos = publicas
+
+  /*
+   * COM RETRATO OFICIAL COMPLETO, O DA APIFY SAI INTEIRO.
+   *
+   * A deduplicacao acima resolve quem aparece nas DUAS listas. Nao resolve quem
+   * aparece SO no retrato — e esse era o defeito, medido na producao em
+   * 03/09/2026: Daniel Soares, H5 TEXAS e Luciano Maynard estavam so no retrato
+   * de 01/09 e JA ESTAVAM RESPONDIDOS no Google. A aba oferecia ao dono
+   * responder a quem ele ja respondera, um deles minutos antes.
+   *
+   * Nao ha chave que conserte isso: o retrato nao sabe o que aconteceu depois
+   * de ser tirado. O que decide e a AUTORIDADE da fonte — so a oficial devolve
+   * a resposta publicada, entao so ela pode dizer quem ainda espera.
+   *
+   * Era isto que a migracao de 30/08 ja previa: "ate trocarmos pelo google,
+   * quando o google chegar desativamos". O Google chegou.
+   */
+  const itensPublicos = oficialCompleta ? [] : publicas
     .filter((avaliacao) => !jaVistasNoOficial.has(chaveDaAvaliacaoDoGoogle(avaliacao.author_name, avaliacao.rating, avaliacao.time)))
     .map((avaliacao) => daAvaliacaoPublica(avaliacao, respondidas.has(avaliacao.review_id)));
 
