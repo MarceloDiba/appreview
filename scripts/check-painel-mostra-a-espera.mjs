@@ -105,8 +105,17 @@ for (const caminho of arquivosComATabela) {
 // ---------------------------------------------------------------------------
 exigir('a tela importa o hook',
   /import \{ useRespostaAEsperar, type RespostaAEsperar \} from '@\/hooks\/useRespostaAEsperar';/.test(tela));
-exigir('a tela chama o hook uma vez, para todo o dono',
-  /const aEsperar = useRespostaAEsperar\(userId\);/.test(tela));
+// CONTA as chamadas em vez de casar com a forma da linha. A asserção antiga
+// exigia `const aEsperar = useRespostaAEsperar(userId);` e ficou vermelha
+// quando o hook passou a devolver tambem o `refresh` — vermelha por a mudanca
+// aprovada ter acontecido, que e a maneira mais certa de ensinar alguem a
+// desligar um guarda. O que importa nao e o formato da atribuicao: e que o
+// hook seja chamado UMA vez, com o dono, e nao um por cartao.
+const chamadasDoHook = (tela.match(/useRespostaAEsperar\(/g) || []).length;
+exigir(`a tela chama o hook ${chamadasDoHook} vezes; tem de ser exactamente uma, para todo o dono`,
+  chamadasDoHook === 1);
+exigir('a chamada do hook nao recebe o dono',
+  /useRespostaAEsperar\(userId\)/.test(tela));
 
 const inicioComponente = tela.indexOf('const PublicacaoOficial');
 const fimComponente = tela.indexOf('const ItemDaFilaCard');
@@ -121,6 +130,39 @@ const componente = tela.slice(inicioComponente, fimComponente);
 // bateria com nada.
 exigir('a comparacao usa o id na fonte da avaliacao oficial, nao o id prefixado da fila somada',
   /aEsperar\?\.reviewId === item\.idNaFonte/.test(componente));
+
+// AVALIACAO JA TRATADA NAO MOSTRA O AVISO.
+//
+// Achado na ronda de correcao 1, em 03/09/2026, e ele e o motivo de esta
+// tarefa existir. O dono publicava a resposta pelo proprio painel (o botao
+// esta no mesmo cartao) ou respondia direto no app do Google, fora do Binno —
+// e o aviso continuava a dizer "responda 1 no WhatsApp para publicar" por cima
+// de uma avaliacao que ja tinha resposta publicada.
+//
+// Sao as DUAS VERDADES EM DOIS SITIOS que esta tarefa foi escrita para
+// eliminar, reintroduzidas no unico canto que nenhuma das outras asserções
+// olhava. A condicao tem de olhar para o estado do item, e nao so para o id.
+exigir('o aviso aparece mesmo sobre uma avaliacao ja respondida: falta olhar para item.is_addressed',
+  /item\.is_addressed !== true/.test(componente));
+
+// E O AVISO TEM DE SUMIR SOZINHO.
+//
+// Sem revalidar, `aEsperar` fica preso no valor lido no primeiro carregamento
+// da pagina. O dono publica, o cartao passa para "Ja respondidas", e o aviso
+// so desaparece quando ele recarregar — ou seja, continua a mentir durante
+// todo o tempo em que ele estiver a olhar.
+exigir('publicar pelo painel nao rele a tabela: o aviso ficaria preso ate a pagina recarregar',
+  /revalidarAEsperar\(\)/.test(componente));
+exigir('o hook nao expoe como reler; a tela nao teria como revalidar depois de publicar',
+  /refresh/.test(hook));
+
+// A RELEITURA NAO PODE APLICAR RESULTADO VELHO.
+//
+// Passa a haver duas maneiras de disparar a busca (a montagem e o `refresh`),
+// e elas podem responder fora de ordem. Sem numerar as buscas, a mais lenta
+// sobrescreve a mais nova e o aviso reaparece depois de ja ter sumido.
+exigir('duas buscas podem responder fora de ordem e a mais velha sobrescreve a mais nova',
+  /geracaoRef/.test(hook) && /minhaGeracao !== geracaoRef\.current/.test(hook));
 // O texto mostrado tem de ser o que veio do banco (o que foi mesmo enviado),
 // nunca o rascunho editavel da caixa de texto ao lado, que o dono pode ja ter
 // alterado sem ainda ter respondido "1".

@@ -144,6 +144,7 @@ const PublicacaoOficial = ({
   publicar,
   publicando,
   aEsperar,
+  revalidarAEsperar,
 }: {
   item: ItemDaFila;
   rascunhoInicial: string;
@@ -158,15 +159,38 @@ const PublicacaoOficial = ({
    * prefixo da fila somada.
    */
   aEsperar: RespostaAEsperar | null;
+  /**
+   * Rele `respostas_a_confirmar` depois de uma publicacao pelo painel.
+   *
+   * Publicar por aqui nao muda essa tabela — so o "1" no WhatsApp confirma, e
+   * so o servidor grava isso. Mas sem chamar isto, `aEsperar` continua a ter
+   * o valor lido na primeira busca, e o defeito da ronda de correcao 1 volta:
+   * o aviso mostrado abaixo depende TAMBEM de `item.is_addressed`, que so
+   * fica certo depois de a lista de avaliacoes recarregar; revalidar aqui e
+   * o que faz o aviso desaparecer sozinho, sem o dono ter de recarregar a
+   * pagina.
+   */
+  revalidarAEsperar: () => void;
 }) => {
   const { t } = useOwnerTranslation();
   const [rascunho, setRascunho] = useState(rascunhoInicial);
-  const respostaAEsperar = aEsperar?.reviewId === item.idNaFonte ? aEsperar : null;
+  // Nunca mostra o aviso sobre uma avaliacao ja tratada. Achado na ronda de
+  // correcao 1 de 03/09/2026: o dono publicava por aqui (ou respondia direto
+  // no Google, fora do Binno), e o aviso continuava a dizer "responda 1"
+  // sobre uma avaliacao que ja tinha resposta — as "duas verdades" que esta
+  // tarefa existe para eliminar, reintroduzidas neste canto.
+  const respostaAEsperar = item.is_addressed !== true && aEsperar?.reviewId === item.idNaFonte
+    ? aEsperar
+    : null;
 
   const enviar = async () => {
     if (!rascunho.trim()) return;
-    if (await publicar(item.idNaFonte, rascunho.trim())) toast.success(t('reviews.google.official.published'));
-    else toast.error(t('reviews.google.official.publishError'));
+    if (await publicar(item.idNaFonte, rascunho.trim())) {
+      toast.success(t('reviews.google.official.published'));
+      revalidarAEsperar();
+    } else {
+      toast.error(t('reviews.google.official.publishError'));
+    }
   };
 
   return (
@@ -216,6 +240,7 @@ const ItemDaFilaCard = ({
   marcandoId,
   marcarRespondida,
   aEsperar,
+  revalidarAEsperar,
 }: {
   item: ItemDaFila;
   businessName: string | null;
@@ -227,6 +252,7 @@ const ItemDaFilaCard = ({
   marcandoId: string | null;
   marcarRespondida: (reviewId: string, respondida: boolean) => void;
   aEsperar: RespostaAEsperar | null;
+  revalidarAEsperar: () => void;
 }) => {
   const { t, i18n } = useOwnerTranslation();
   const tratado = item.is_addressed === true;
@@ -308,6 +334,7 @@ const ItemDaFilaCard = ({
             publicar={publicar}
             publicando={publicando}
             aEsperar={aEsperar}
+            revalidarAEsperar={revalidarAEsperar}
           />
         )}
 
@@ -397,7 +424,10 @@ const FilaDeRespostas = ({
   const respondidas = useGooglePublicReviewsAnswered(userId);
   // So ha uma resposta a espera por dono (o indice unico da migracao garante
   // isso), por isso um valor so chega ate aqui e desce para o item certo.
-  const aEsperar = useRespostaAEsperar(userId);
+  // `refresh` desce ate `PublicacaoOficial` para reler depois de uma
+  // publicacao pelo painel — sem isso o aviso ficava preso na leitura do
+  // primeiro carregamento (ronda de correcao 1, 03/09/2026).
+  const { aEsperar, refresh: revalidarAEsperar } = useRespostaAEsperar(userId);
   const [falhaAoAtualizar, setFalhaAoAtualizar] = useState(false);
   // O padrão é sem filtro: a fila abre inteira, do mais recente para o mais
   // antigo. O cartão de origens acima dela põe e tira este filtro.
@@ -565,6 +595,7 @@ const FilaDeRespostas = ({
             marcandoId={respondidas.markingId}
             marcarRespondida={(reviewId, respondida) => void respondidas.mark(reviewId, respondida)}
             aEsperar={aEsperar}
+            revalidarAEsperar={revalidarAEsperar}
           />
         ))}
       </div>
@@ -588,6 +619,7 @@ const FilaDeRespostas = ({
                 marcandoId={respondidas.markingId}
                 marcarRespondida={(reviewId, respondida) => void respondidas.mark(reviewId, respondida)}
                 aEsperar={aEsperar}
+                revalidarAEsperar={revalidarAEsperar}
               />
             ))}
           </div>

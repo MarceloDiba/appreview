@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -16,6 +16,13 @@ import { supabase } from '@/integrations/supabase/client';
  * perfil publico dela. Este ficheiro nao pode ganhar um `.insert(`, um
  * `.update(` nem um `.upsert(` contra esta tabela; `confirmar_resposta_do_dono`
  * so pode ser chamada a partir do webhook da Meta.
+ *
+ * EXPOE `refresh`. Publicar pelo painel nao muda esta tabela (so o servidor
+ * confirma o "1"), mas a tela precisa de reler depois de publicar, senao o
+ * aviso continua a dizer "responda 1" sobre uma avaliacao que o proprio dono
+ * acabou de responder por aqui. Achado na ronda de correcao 1 de 03/09/2026:
+ * o aviso ficava preso na leitura do primeiro carregamento ate a pagina ser
+ * recarregada.
  */
 export type RespostaAEsperar = {
   id: string;
@@ -26,29 +33,43 @@ export type RespostaAEsperar = {
 
 export const useRespostaAEsperar = (userId?: string) => {
   const [aEsperar, setAEsperar] = useState<RespostaAEsperar | null>(null);
+  // Numera cada busca: so o resultado da busca mais recente e aplicado.
+  // Precisa disto porque agora ha duas maneiras de disparar uma busca (o
+  // efeito de montagem e o `refresh` manual), e podem responder fora de
+  // ordem — sem o numero, a busca mais lenta apagaria o resultado da mais
+  // rapida, mesmo sendo mais velha.
+  const geracaoRef = useRef(0);
 
-  useEffect(() => {
-    if (!userId) { setAEsperar(null); return; }
-    let activo = true;
-    void supabase
+  const buscar = useCallback(async () => {
+    const minhaGeracao = ++geracaoRef.current;
+    if (!userId) {
+      setAEsperar(null);
+      return;
+    }
+    const { data } = await supabase
       .from('respostas_a_confirmar')
       .select('id, review_id, rascunho, expira_em')
       .eq('user_id', userId)
       .is('confirmado_em', null)
       .is('recusado_em', null)
       .gt('expira_em', new Date().toISOString())
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!activo) return;
-        setAEsperar(data ? {
-          id: data.id,
-          reviewId: data.review_id,
-          rascunho: data.rascunho,
-          expiraEm: data.expira_em,
-        } : null);
-      });
-    return () => { activo = false; };
+      .maybeSingle();
+    // Uma busca mais nova ja comecou entretanto; esta perdeu a corrida.
+    if (minhaGeracao !== geracaoRef.current) return;
+    setAEsperar(data ? {
+      id: data.id,
+      reviewId: data.review_id,
+      rascunho: data.rascunho,
+      expiraEm: data.expira_em,
+    } : null);
   }, [userId]);
 
-  return aEsperar;
+  useEffect(() => {
+    void buscar();
+    // Invalida qualquer busca ainda a caminho ao desmontar, ou quando o
+    // dono muda (o `buscar` de cima e recriado com o `userId` novo).
+    return () => { geracaoRef.current += 1; };
+  }, [buscar]);
+
+  return { aEsperar, refresh: buscar };
 };
