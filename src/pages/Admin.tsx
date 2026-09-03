@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, ChevronDown, RefreshCw } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronDown, Mail, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import NotFound from '@/pages/NotFound';
 import MarcaBinno from '@/components/marketing/MarcaBinno';
-import { EXPLICACAO_DOS_SINAIS, lerSaudeDasContas, type LeituraDaSaude, type SaudeDaConta } from '@/lib/saudeDasContas';
+import { EXPLICACAO_DO_USO, EXPLICACAO_DOS_SINAIS, lerSaudeDasContas, rascunhoDeRetencao, type LeituraDaSaude, type SaudeDaConta } from '@/lib/saudeDasContas';
 
 /**
  * A área do Marcelo: quem travou, agora.
@@ -29,6 +29,51 @@ const CORES = {
   atencao: { faixa: 'bg-amber-400', etiqueta: 'bg-amber-50 text-amber-900 border-amber-200', rotulo: 'Atenção' },
   ok: { faixa: 'bg-emerald-500', etiqueta: 'bg-emerald-50 text-emerald-800 border-emerald-200', rotulo: 'Tudo certo' },
 } as const;
+
+/**
+ * As cores do uso.
+ *
+ * Deliberadamente DIFERENTES das da gravidade tecnica: uma conta pode estar
+ * tecnicamente perfeita e a caminho de cancelar, e se as duas escalas
+ * partilhassem cor a pagina diria "verde" a um cliente que esta a sair.
+ */
+const CORES_DO_USO = {
+  ativo: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  esfriando: 'bg-sky-50 text-sky-900 border-sky-200',
+  sumido: 'bg-orange-50 text-orange-900 border-orange-200',
+  nunca_entrou: 'bg-slate-100 text-slate-700 border-slate-300',
+} as const;
+
+/**
+ * O topo do painel: quatro números que respondem "como está a carteira".
+ *
+ * A ordem não é decorativa. É a ordem em que se age: primeiro o que está
+ * partido, depois quem está a escapar, depois quem ainda dá para recuperar, e
+ * por fim o total — que é o denominador de tudo o resto.
+ */
+const Faixa = ({ contas }: { contas: SaudeDaConta[] }) => {
+  const travadas = contas.filter((conta) => conta.gravidade === 'travado').length;
+  const emRisco = contas.filter((conta) => conta.uso === 'sumido' || conta.uso === 'nunca_entrou').length;
+  const esfriando = contas.filter((conta) => conta.uso === 'esfriando').length;
+  const ativas = contas.filter((conta) => conta.uso === 'ativo').length;
+  const cartoes = [
+    { rotulo: 'Travadas', valor: travadas, tom: travadas > 0 ? 'text-red-700' : 'text-slate-950', nota: 'algo partido' },
+    { rotulo: 'Em risco', valor: emRisco, tom: emRisco > 0 ? 'text-orange-700' : 'text-slate-950', nota: 'sumidos há 3+ semanas' },
+    { rotulo: 'Esfriando', valor: esfriando, tom: esfriando > 0 ? 'text-sky-800' : 'text-slate-950', nota: 'dá para recuperar' },
+    { rotulo: 'Usando', valor: ativas, tom: 'text-emerald-700', nota: `de ${contas.length} no total` },
+  ];
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {cartoes.map((cartao) => (
+        <div key={cartao.rotulo} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{cartao.rotulo}</p>
+          <p className={`mt-1 text-3xl font-bold tabular-nums ${cartao.tom}`}>{cartao.valor}</p>
+          <p className="mt-1 text-xs leading-4 text-slate-500">{cartao.nota}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const Numero = ({ rotulo, valor }: { rotulo: string; valor: string }) => (
   <div>
@@ -55,16 +100,43 @@ const LinhaDaConta = ({ conta }: { conta: SaudeDaConta }) => {
               <p className="font-semibold text-slate-950">{conta.negocio || 'Sem nome de negócio'}</p>
               <p className="text-xs text-slate-500">{conta.emailDaConta}</p>
             </div>
-            <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${cor.etiqueta}`}>{cor.rotulo}</span>
+            <div className="flex flex-wrap gap-2">
+              <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${CORES_DO_USO[conta.uso]}`}>
+                {EXPLICACAO_DO_USO[conta.uso].rotulo}
+              </span>
+              {conta.gravidade !== 'ok' && (
+                <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${cor.etiqueta}`}>{cor.rotulo}</span>
+              )}
+            </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
+          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             <Numero rotulo="Nota" valor={conta.nota === null ? '—' : conta.nota.toFixed(1).replace('.', ',')} />
             <Numero rotulo="Avaliações" valor={conta.totalDeAvaliacoes === null ? '—' : String(conta.totalDeAvaliacoes)} />
-            <Numero rotulo="Última coleta" valor={conta.diasDesdeAColeta === null ? 'nunca' : `${conta.diasDesdeAColeta} d`} />
-            <Numero rotulo="Comentários" valor={String(conta.comentariosPrivados)} />
+            <Numero rotulo="Sem aparecer" valor={conta.diasSemAtividade === null ? 'nunca' : `${conta.diasSemAtividade} d`} />
+            <Numero rotulo="Leituras do QR" valor={`${conta.visitasAoQr30d} /30d`} />
+            <Numero rotulo="Comentários" valor={`${conta.comentarios30d} /30d`} />
             <Numero rotulo="A responder" valor={String(conta.filaDeRespostas)} />
           </div>
+          <p className="mt-3 text-xs leading-4 text-slate-500">{EXPLICACAO_DO_USO[conta.uso].frase}</p>
+
+          {/*
+            A CONVERSA DE RETENCAO NAO SE ENVIA SOZINHA. Uma mensagem automatica
+            a um cliente que paga chega no dia em que o Marcelo acabou de falar
+            com ele ao telefone, ou chega com o tom errado, e ele descobre pelo
+            lado errado. O botao abre o e-mail com o texto escrito: ele le,
+            ajusta, envia — o mesmo principio do rascunho de resposta que o
+            produto inteiro defende.
+          */}
+          {(conta.uso === 'sumido' || conta.uso === 'nunca_entrou') && conta.emailDaConta && (
+            <a
+              className="mt-4 inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-50 px-3.5 py-2 text-sm font-semibold text-orange-900 transition hover:bg-orange-100"
+              href={`mailto:${encodeURIComponent(conta.emailDaConta)}?subject=${encodeURIComponent(`Como está indo com ${conta.negocio || 'o Binno'}?`)}&body=${encodeURIComponent(rascunhoDeRetencao(conta))}`}
+            >
+              <Mail className="h-4 w-4" aria-hidden="true" />
+              Escrever para este cliente
+            </a>
+          )}
 
           {conta.sinais.length > 0 && (
             <>
@@ -159,17 +231,17 @@ const Admin = () => {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-950">Saúde das contas</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-950">Painel de controle</h1>
         <p className="mt-2 max-w-prose text-sm leading-6 text-slate-600">
-          {travadas === 0 && atencao === 0
-            ? `Nenhuma conta com sinal de problema. ${leitura.contas.length} ${leitura.contas.length === 1 ? 'conta' : 'contas'} no total.`
-            : `${travadas} ${travadas === 1 ? 'conta travada' : 'contas travadas'} e ${atencao} para acompanhar, de ${leitura.contas.length} no total.`}
+          Quem está travado, quem está usando, e quem está prestes a sair sem avisar.
         </p>
+
+        <div className="mt-6"><Faixa contas={leitura.contas} /></div>
 
         {travadas === 0 && atencao === 0 && (
           <p className="mt-5 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
             <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
-            Tudo destravado agora.
+            Nada partido agora.
           </p>
         )}
 
@@ -178,9 +250,12 @@ const Admin = () => {
         </ul>
 
         <p className="mt-8 max-w-prose text-xs leading-5 text-slate-500">
-          Esta página mostra números e sinais de saúde. Não mostra o texto de avaliações
-          nem o nome ou telefone de quem escreveu — decisão de 02/09/2026, e a fronteira
-          está no banco, não nesta tela.
+          Esta página mostra números, datas e sinais. Não mostra o texto de avaliações
+          nem o nome de quem escreveu — decisão de 02/09/2026, e a fronteira está no
+          banco, não nesta tela. “Sem aparecer” conta os dias desde a última coisa que o
+          <strong> dono </strong> fez: entrar, publicar uma resposta ou criar um QR. As
+          leituras do QR e os comentários são o que os clientes <strong> dele </strong>
+          fizeram, e acontecem mesmo com o painel fechado.
         </p>
       </main>
     </div>

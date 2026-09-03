@@ -92,6 +92,12 @@ const COLUNAS_PERMITIDAS = [
   'user_id', 'negocio', 'email_da_conta', 'criada_em', 'nota',
   'total_de_avaliacoes', 'avaliacoes_lidas', 'comentarios_privados',
   'fila_de_respostas', 'ultima_coleta_em', 'dias_desde_a_coleta',
+  // Uso do dono, desde 03/09/2026. Sao datas e contagens: a fronteira de "so
+  // numeros" aguenta, e cada uma teve de ser escrita AQUI, a mao.
+  'ultimo_acesso', 'respostas_publicadas', 'ultima_atividade_do_dono',
+  'dias_sem_atividade', 'uso',
+  // Valor entregue pelos clientes DELE. Contagens, nunca conteudo.
+  'visitas_ao_qr_30d', 'comentarios_30d',
   'sinais', 'gravidade',
 ];
 
@@ -103,7 +109,7 @@ try {
   psql(`
 create role anon; create role authenticated; create role service_role;
 create schema if not exists auth;
-create table if not exists auth.users (id uuid primary key, email text, created_at timestamptz not null default now());
+create table if not exists auth.users (id uuid primary key, email text, created_at timestamptz not null default now(), last_sign_in_at timestamptz);
 create schema if not exists cron;
 create function cron.schedule(text, text, text) returns bigint language sql as $$ select 1::bigint $$;
 create function cron.unschedule(text) returns boolean language sql as $$ select true $$;
@@ -124,6 +130,9 @@ $$;
     [ler('20260815195000_experimental_apify_runs.sql'), 'experimental_apify_runs'],
     [outbox, 'whatsapp_notification_preferences'], [outbox, 'whatsapp_outbox'],
     [ler('20260831010000_fila_de_respostas_no_banco.sql'), 'google_reviews_awaiting_reply'],
+    [esquema, 'qr_codes'],
+    [ler('20260814190000_google_outcome_metrics.sql'), 'review_funnel_events'],
+    [ler('20260830230000_avaliacao_publica_respondida_no_google.sql'), 'google_public_reviews_answered'],
   ]) psql(cortarTabela(sql, tabela));
 
   for (const nome of [
@@ -138,6 +147,7 @@ $$;
     '20260903090000_resumo_por_mensagem_de_novo.sql',
     '20260903120000_area_de_administrador.sql',
     '20260903140000_o_aviso_fala_portugues.sql',
+    '20260903160000_painel_de_controle.sql',
   ]) psql(semExtensoes(ler(nome)));
 
   // ---------------------------------------------------------------- as contas
@@ -233,6 +243,48 @@ $$;
     !sinaisDoLimiar.includes('fila_presa_no_envio'));
   exigir('uma falha de ha dez dias nao conta como recente',
     !sinaisDoLimiar.includes('mensagem_falhou'));
+
+  // ------------------------------------------------------------ o uso
+  //
+  // USO DO DONO E VALOR ENTREGUE SAO COISAS DIFERENTES, e e a distincao que
+  // estrutura o painel: um cliente pode ter o QR a trabalhar sozinho e nunca
+  // abrir o painel — e esse e exactamente o que cancela, porque nao ve o que
+  // esta a ganhar.
+  const usoDe = (id) => psql(`select uso from public.calcular_saude_das_contas() where user_id = '${id}';`).trim();
+
+  // A conta 1 nunca fez login (as contas de teste nascem sem `last_sign_in_at`)
+  // e tambem nao tem QR nem resposta: e o caso `nunca_entrou`.
+  exigir('quem nunca entrou e marcado como tal', usoDe(conta('1')) === 'nunca_entrou');
+  psql(`update auth.users set last_sign_in_at = now() - interval '2 days' where id = '${conta('1')}';`);
+  exigir('quem entrou esta semana esta ativo', usoDe(conta('1')) === 'ativo');
+  psql(`update auth.users set last_sign_in_at = now() - interval '14 days' where id = '${conta('1')}';`);
+  exigir('quem entrou ha duas semanas esta a esfriar', usoDe(conta('1')) === 'esfriando');
+  psql(`update auth.users set last_sign_in_at = now() - interval '40 days' where id = '${conta('1')}';`);
+  exigir('quem nao aparece ha mais de tres semanas esta sumido', usoDe(conta('1')) === 'sumido');
+  exigir('um dono sumido acende o sinal comercial',
+    psql(`select coalesce(array_to_string(sinais, ','), '') from public.calcular_saude_das_contas() where user_id = '${conta('1')}';`).trim().split(',').includes('dono_sumido'));
+  // E O SINAL COMERCIAL NAO E UM DEFEITO: ninguem tem de o consertar, alguem tem
+  // de falar com a pessoa. Se contasse para a gravidade, a pagina passaria a
+  // dizer "travado" a um cliente cujo produto esta perfeito.
+  exigir('um dono sumido nao torna a conta tecnicamente travada',
+    psql(`select gravidade from public.calcular_saude_das_contas() where user_id = '${conta('1')}';`).trim() === 'ok');
+
+  // Publicar uma resposta conta como uso, mesmo sem login novo: entrar e sair
+  // nao e usar, e publicar e um acto com intencao.
+  psql(`insert into public.google_public_reviews_answered (user_id, review_id, answered_at)
+        values ('${conta('1')}', 'r1', now() - interval '1 day');`);
+  exigir('publicar uma resposta conta como uso, mesmo sem login novo', usoDe(conta('1')) === 'ativo');
+  psql(`delete from public.google_public_reviews_answered where user_id = '${conta('1')}';`);
+  psql(`update auth.users set last_sign_in_at = now() - interval '2 days' where id = '${conta('1')}';`);
+
+  // O valor entregue conta-se a parte, e nao entra no uso do dono.
+  psql(`insert into public.qr_codes (id, user_id, name, slug, redirect_url) values ('11111111-2222-3333-4444-555555555555', '${conta('1')}', 'QR de teste', 'qr-de-teste', 'https://binno.pro/review/qr-de-teste');`);
+  psql(`insert into public.review_funnel_events (event_key, qr_code_id, user_id, event_type, created_at)
+        values ('e1', '11111111-2222-3333-4444-555555555555', '${conta('1')}', 'qr_open', now() - interval '3 days');`);
+  psql(`insert into public.review_funnel_events (event_key, qr_code_id, user_id, event_type, created_at)
+        values ('e2', '11111111-2222-3333-4444-555555555555', '${conta('1')}', 'qr_open', now() - interval '60 days');`);
+  exigir('as visitas ao QR contam so os ultimos 30 dias',
+    psql(`select visitas_ao_qr_30d from public.calcular_saude_das_contas() where user_id = '${conta('1')}';`).trim() === '1');
 
   // ------------------------------------------------- 1. a fronteira dos dados
   const colunas = psql(`select string_agg(a.attname, ',' order by a.attnum)
@@ -416,6 +468,34 @@ exigir('a rota nao anuncia a sua existencia com um redireccionamento',
 // nada a ver com conteudo de cliente. Uma assercao que fica vermelha por causa
 // de um nome comum ensina a desliga-la. Ficam os nomes que so podem significar
 // uma coisa.
+// A FAIXA DE TOTAIS. Foi o que Marcelo pediu em 03/09: "quero de fato um painel
+// de controle". Sem estas linhas, alguem simplifica a tela um dia e os quatro
+// numeros desaparecem sem ninguem dar por isso.
+exigir('a faixa conta as travadas, as em risco, as a esfriar e as activas',
+  /const travadas = contas\.filter\(\(conta\) => conta\.gravidade === 'travado'\)\.length;/.test(pagina)
+  && /const emRisco = contas\.filter\(\(conta\) => conta\.uso === 'sumido' \|\| conta\.uso === 'nunca_entrou'\)\.length;/.test(pagina)
+  && /const esfriando = contas\.filter\(\(conta\) => conta\.uso === 'esfriando'\)\.length;/.test(pagina)
+  && /const ativas = contas\.filter\(\(conta\) => conta\.uso === 'ativo'\)\.length;/.test(pagina));
+exigir('a faixa e desenhada na pagina', /<Faixa contas=\{leitura\.contas\} \/>/.test(pagina));
+
+// A RETENCAO NAO SE ENVIA SOZINHA. Uma mensagem automatica a um cliente que
+// paga chega no dia em que o Marcelo acabou de falar com ele ao telefone, ou
+// chega com o tom errado. O botao abre o e-mail com o texto escrito.
+exigir('o rascunho de retencao abre o e-mail, e nao dispara nada',
+  /href=\{`mailto:\$\{encodeURIComponent\(conta\.emailDaConta\)\}/.test(pagina));
+exigir('nada na tela envia mensagem por conta propria',
+  !/supabase\.functions\.invoke|fetch\(|\.rpc\('enviar/.test(pagina));
+// E o rascunho so aparece para quem esta mesmo em risco: oferece-lo a um
+// cliente activo convida a incomodar quem esta bem.
+exigir('o rascunho so aparece para quem sumiu',
+  /\{\(conta\.uso === 'sumido' \|\| conta\.uso === 'nunca_entrou'\) && conta\.emailDaConta && \(/.test(pagina));
+
+// As duas escalas — uso e gravidade — nao podem partilhar cor: uma conta pode
+// estar tecnicamente perfeita e a caminho de cancelar, e a pagina diria "verde"
+// a um cliente que esta a sair.
+exigir('a escala de uso tem cores proprias, separadas da gravidade tecnica',
+  /const CORES_DO_USO = \{/.test(pagina));
+
 exigir('a tela nao desenha campo de conteudo de terceiros',
   !/\.\s*(customerName|customer_name|reviewerName|reviewer_name|comentarioTexto|feedbackText|feedback_text|telefone|phone)\b/i.test(pagina));
 
