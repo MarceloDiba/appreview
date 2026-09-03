@@ -15,16 +15,10 @@
   ],
   "pt|public|1|sem-texto": [
     {
-      "id": "curta",
-      "title": "Curta e directa",
-      "hint": "A escolha segura quando ainda não sabe exactamente o que correu mal.",
-      "body": "Olá, Ana,\n\nObrigado por escrever, e lamento que a sua experiência não tenha correspondido ao que esperava. Não é assim que queremos receber quem nos visita.\n\nGostava de perceber melhor o que aconteceu. Se puder falar connosco directamente, resolvemos isto consigo.\n\nCasa do Forno"
-    },
-    {
-      "id": "com-accao",
-      "title": "Com o que já foi feito",
-      "hint": "Use quando já tomou uma medida concreta. Ajuste a frase do meio ao que realmente fez.",
-      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Foi lido com atenção. Lamento sinceramente o que se passou com a sua experiência.\n\nJá revi o caso com a equipa para perceber onde falhámos.\n\nSe nos der uma segunda oportunidade, faço questão de acompanhar a sua visita pessoalmente.\n\nCasa do Forno"
+      "id": "nota-baixa-sem-texto",
+      "title": "Perguntar o que aconteceu",
+      "hint": "Nota baixa sem comentário: perguntar é a única coisa honesta a fazer.",
+      "body": "Olá, Ana,\n\nVi a sua avaliação e lamento que a experiência não tenha corrido bem. Como não deixou comentário, não sei o que aconteceu, e gostava de saber para o corrigir. Se puder falar comigo, agradeço.\n\nCasa do Forno"
     }
   ],
   "pt|public|2|com-texto": [
@@ -43,16 +37,10 @@
   ],
   "pt|public|2|sem-texto": [
     {
-      "id": "curta",
-      "title": "Curta e directa",
-      "hint": "A escolha segura quando ainda não sabe exactamente o que correu mal.",
-      "body": "Olá, Ana,\n\nObrigado por escrever, e lamento que a sua experiência não tenha correspondido ao que esperava. Não é assim que queremos receber quem nos visita.\n\nGostava de perceber melhor o que aconteceu. Se puder falar connosco directamente, resolvemos isto consigo.\n\nCasa do Forno"
-    },
-    {
-      "id": "com-accao",
-      "title": "Com o que já foi feito",
-      "hint": "Use quando já tomou uma medida concreta. Ajuste a frase do meio ao que realmente fez.",
-      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Foi lido com atenção. Lamento sinceramente o que se passou com a sua experiência.\n\nJá revi o caso com a equipa para perceber onde falhámos.\n\nSe nos der uma segunda oportunidade, faço questão de acompanhar a sua visita pessoalmente.\n\nCasa do Forno"
+      "id": "nota-baixa-sem-texto",
+      "title": "Perguntar o que aconteceu",
+      "hint": "Nota baixa sem comentário: perguntar é a única coisa honesta a fazer.",
+      "body": "Olá, Ana,\n\nVi a sua avaliação e lamento que a experiência não tenha corrido bem. Como não deixou comentário, não sei o que aconteceu, e gostava de saber para o corrigir. Se puder falar comigo, agradeço.\n\nCasa do Forno"
     }
   ],
   "pt|public|3|com-texto": [
@@ -65,10 +53,10 @@
   ],
   "pt|public|3|sem-texto": [
     {
-      "id": "perguntar",
+      "id": "perguntar-o-que-faltou-sem-texto",
       "title": "Perguntar o que faltou",
-      "hint": "Uma nota do meio é a mais fácil de recuperar: normalmente falta uma coisa só.",
-      "body": "Olá, Ana,\n\nObrigado por avaliar. Fico contente por ter havido coisas boas, e quero perceber o que faltou em a sua experiência para que a visita fosse mesmo boa.\n\nSe nos disser, é isso que vamos trabalhar.\n\nCasa do Forno"
+      "hint": "A nota do meio sem comentário é um convite a perguntar, não a agradecer.",
+      "body": "Olá, Ana,\n\nObrigado pela avaliação. Como não deixou comentário, fico sem saber o que podíamos ter feito melhor \u2014 e é isso que queria perceber. Se puder dizer-me, agradeço.\n\nCasa do Forno"
     }
   ],
   "pt|public|4|com-texto": [
@@ -81,10 +69,10 @@
   ],
   "pt|public|4|sem-texto": [
     {
-      "id": "agradecer",
-      "title": "Agradecer com especificidade",
-      "hint": "Responder a quem elogia é o que mais cria clientes habituais \u2014 e quase ninguém faz.",
-      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz por saber que tenha gostado da visita. Vou passar isso à equipa, que é quem faz acontecer.\n\nCá o esperamos da próxima.\n\nCasa do Forno"
+      "id": "obrigado-pela-nota",
+      "title": "Agradecer a nota",
+      "hint": "Não houve comentário. Agradecer a nota é tudo o que se pode dizer sem inventar.",
+      "body": "Olá, Ana,\n\nObrigado pela avaliação. Fico contente por ter deixado uma nota alta, e espero voltar a recebê-lo.\n\nCasa do Forno"
     }
   ],
   "pt|public|5|com-texto": [
@@ -97,10 +85,10 @@
   ],
   "pt|public|5|sem-texto": [
     {
-      "id": "agradecer",
-      "title": "Agradecer com especificidade",
-      "hint": "Responder a quem elogia é o que mais cria clientes habituais \u2014 e quase ninguém faz.",
-      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz por saber que tenha gostado da visita. Vou passar isso à equipa, que é quem faz acontecer.\n\nCá o esperamos da próxima.\n\nCasa do Forno"
+      "id": "obrigado-pela-nota",
+      "title": "Agradecer a nota",
+      "hint": "Não houve comentário. Agradecer a nota é tudo o que se pode dizer sem inventar.",
+      "body": "Olá, Ana,\n\nObrigado pela avaliação. Fico contente por ter deixado uma nota alta, e espero voltar a recebê-lo.\n\nCasa do Forno"
     }
   ],
   "pt|private|1|com-texto": [
@@ -223,16 +211,10 @@
   ],
   "pt-BR|public|1|sem-texto": [
     {
-      "id": "curta",
-      "title": "Curta e direta",
-      "hint": "A escolha segura para quando você ainda não sabe exatamente o que deu errado.",
-      "body": "Olá, Ana,\n\nObrigado por escrever. Sinto muito que sua experiência não tenha sido o que você esperava. Não é assim que a gente quer receber quem vem aqui.\n\nGostaria de entender melhor o que aconteceu. Se puder falar direto com a gente, resolvemos isso com você.\n\nCasa do Forno"
-    },
-    {
-      "id": "com-accao",
-      "title": "Com o que já foi feito",
-      "hint": "Use quando você já tomou uma providência concreta. Ajuste a frase do meio para o que você realmente fez.",
-      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Li com atenção. Sinto muito de verdade pelo que aconteceu com sua experiência.\n\nJá revisei o caso com a equipe para entender onde erramos.\n\nSe você nos der uma segunda chance, faço questão de acompanhar sua visita pessoalmente.\n\nCasa do Forno"
+      "id": "nota-baixa-sem-texto",
+      "title": "Perguntar o que aconteceu",
+      "hint": "Nota baixa sem comentário: perguntar é a única coisa honesta a fazer.",
+      "body": "Olá, Ana,\n\nVi a sua avaliação e lamento que a experiência não tenha sido boa. Como você não deixou comentário, eu não sei o que aconteceu, e gostaria de saber para corrigir. Se puder falar comigo, agradeço.\n\nCasa do Forno"
     }
   ],
   "pt-BR|public|2|com-texto": [
@@ -251,16 +233,10 @@
   ],
   "pt-BR|public|2|sem-texto": [
     {
-      "id": "curta",
-      "title": "Curta e direta",
-      "hint": "A escolha segura para quando você ainda não sabe exatamente o que deu errado.",
-      "body": "Olá, Ana,\n\nObrigado por escrever. Sinto muito que sua experiência não tenha sido o que você esperava. Não é assim que a gente quer receber quem vem aqui.\n\nGostaria de entender melhor o que aconteceu. Se puder falar direto com a gente, resolvemos isso com você.\n\nCasa do Forno"
-    },
-    {
-      "id": "com-accao",
-      "title": "Com o que já foi feito",
-      "hint": "Use quando você já tomou uma providência concreta. Ajuste a frase do meio para o que você realmente fez.",
-      "body": "Olá, Ana,\n\nObrigado pelo seu relato. Li com atenção. Sinto muito de verdade pelo que aconteceu com sua experiência.\n\nJá revisei o caso com a equipe para entender onde erramos.\n\nSe você nos der uma segunda chance, faço questão de acompanhar sua visita pessoalmente.\n\nCasa do Forno"
+      "id": "nota-baixa-sem-texto",
+      "title": "Perguntar o que aconteceu",
+      "hint": "Nota baixa sem comentário: perguntar é a única coisa honesta a fazer.",
+      "body": "Olá, Ana,\n\nVi a sua avaliação e lamento que a experiência não tenha sido boa. Como você não deixou comentário, eu não sei o que aconteceu, e gostaria de saber para corrigir. Se puder falar comigo, agradeço.\n\nCasa do Forno"
     }
   ],
   "pt-BR|public|3|com-texto": [
@@ -273,10 +249,10 @@
   ],
   "pt-BR|public|3|sem-texto": [
     {
-      "id": "perguntar",
+      "id": "perguntar-o-que-faltou-sem-texto",
       "title": "Perguntar o que faltou",
-      "hint": "Uma nota no meio é a mais fácil de recuperar: geralmente falta só uma coisa.",
-      "body": "Olá, Ana,\n\nObrigado por avaliar. Fico feliz que tenha tido coisas boas, e quero entender o que faltou em sua experiência para a visita ter sido realmente boa.\n\nSe você nos contar, é nisso que vamos trabalhar.\n\nCasa do Forno"
+      "hint": "Nota do meio sem comentário é convite para perguntar, não para agradecer.",
+      "body": "Olá, Ana,\n\nObrigado pela avaliação. Como você não deixou comentário, fico sem saber o que poderíamos ter feito melhor, e é isso que eu queria entender. Se puder me contar, agradeço.\n\nCasa do Forno"
     }
   ],
   "pt-BR|public|4|com-texto": [
@@ -289,10 +265,10 @@
   ],
   "pt-BR|public|4|sem-texto": [
     {
-      "id": "agradecer",
-      "title": "Agradecer com especificidade",
-      "hint": "Responder a quem elogia é o que mais fideliza cliente, e quase ninguém faz.",
-      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz em saber que tenha gostado da visita. Vou passar isso para a equipe, que é quem faz isso acontecer.\n\nEsperamos você na próxima.\n\nCasa do Forno"
+      "id": "obrigado-pela-nota",
+      "title": "Agradecer a nota",
+      "hint": "Não houve comentário. Agradecer a nota é tudo o que dá para dizer sem inventar.",
+      "body": "Olá, Ana,\n\nObrigado pela avaliação. Fico contente que tenha deixado uma nota alta, e espero receber você de novo.\n\nCasa do Forno"
     }
   ],
   "pt-BR|public|5|com-texto": [
@@ -305,10 +281,10 @@
   ],
   "pt-BR|public|5|sem-texto": [
     {
-      "id": "agradecer",
-      "title": "Agradecer com especificidade",
-      "hint": "Responder a quem elogia é o que mais fideliza cliente, e quase ninguém faz.",
-      "body": "Olá, Ana,\n\nMuito obrigado pelas suas palavras. Fico feliz em saber que tenha gostado da visita. Vou passar isso para a equipe, que é quem faz isso acontecer.\n\nEsperamos você na próxima.\n\nCasa do Forno"
+      "id": "obrigado-pela-nota",
+      "title": "Agradecer a nota",
+      "hint": "Não houve comentário. Agradecer a nota é tudo o que dá para dizer sem inventar.",
+      "body": "Olá, Ana,\n\nObrigado pela avaliação. Fico contente que tenha deixado uma nota alta, e espero receber você de novo.\n\nCasa do Forno"
     }
   ],
   "pt-BR|private|1|com-texto": [
@@ -431,16 +407,10 @@
   ],
   "es|public|1|sem-texto": [
     {
-      "id": "curta",
-      "title": "Corta y directa",
-      "hint": "La opción segura cuando aún no sabes exactamente qué salió mal.",
-      "body": "Hola, Ana,\n\nGracias por escribir, y lamento que tu experiencia no haya estado a la altura de lo que esperabas. No es así como queremos recibir a quien nos visita.\n\nMe gustaría entender mejor qué pasó. Si puedes hablar con nosotros directamente, lo resolvemos contigo.\n\nCasa do Forno"
-    },
-    {
-      "id": "com-accao",
-      "title": "Con lo que ya se hizo",
-      "hint": "Úsala cuando ya has tomado una medida concreta. Ajusta la frase del medio a lo que hiciste de verdad.",
-      "body": "Hola, Ana,\n\nGracias por tu comentario. Lo hemos leído con atención. Lamento sinceramente lo que ocurrió con tu experiencia.\n\nYa he revisado el caso con el equipo para entender dónde fallamos.\n\nSi nos das una segunda oportunidad, me encargo personalmente de tu visita.\n\nCasa do Forno"
+      "id": "nota-baixa-sem-texto",
+      "title": "Preguntar qué pasó",
+      "hint": "Nota baja sin comentario: preguntar es lo único honesto.",
+      "body": "Hola, Ana,\n\nVi tu valoración y lamento que la experiencia no haya sido buena. Como no dejaste comentario, no sé qué pasó, y me gustaría saberlo para corregirlo. Si puedes hablar conmigo, te lo agradezco.\n\nCasa do Forno"
     }
   ],
   "es|public|2|com-texto": [
@@ -459,16 +429,10 @@
   ],
   "es|public|2|sem-texto": [
     {
-      "id": "curta",
-      "title": "Corta y directa",
-      "hint": "La opción segura cuando aún no sabes exactamente qué salió mal.",
-      "body": "Hola, Ana,\n\nGracias por escribir, y lamento que tu experiencia no haya estado a la altura de lo que esperabas. No es así como queremos recibir a quien nos visita.\n\nMe gustaría entender mejor qué pasó. Si puedes hablar con nosotros directamente, lo resolvemos contigo.\n\nCasa do Forno"
-    },
-    {
-      "id": "com-accao",
-      "title": "Con lo que ya se hizo",
-      "hint": "Úsala cuando ya has tomado una medida concreta. Ajusta la frase del medio a lo que hiciste de verdad.",
-      "body": "Hola, Ana,\n\nGracias por tu comentario. Lo hemos leído con atención. Lamento sinceramente lo que ocurrió con tu experiencia.\n\nYa he revisado el caso con el equipo para entender dónde fallamos.\n\nSi nos das una segunda oportunidad, me encargo personalmente de tu visita.\n\nCasa do Forno"
+      "id": "nota-baixa-sem-texto",
+      "title": "Preguntar qué pasó",
+      "hint": "Nota baja sin comentario: preguntar es lo único honesto.",
+      "body": "Hola, Ana,\n\nVi tu valoración y lamento que la experiencia no haya sido buena. Como no dejaste comentario, no sé qué pasó, y me gustaría saberlo para corregirlo. Si puedes hablar conmigo, te lo agradezco.\n\nCasa do Forno"
     }
   ],
   "es|public|3|com-texto": [
@@ -481,10 +445,10 @@
   ],
   "es|public|3|sem-texto": [
     {
-      "id": "perguntar",
+      "id": "perguntar-o-que-faltou-sem-texto",
       "title": "Preguntar qué faltó",
-      "hint": "Una nota intermedia es la más fácil de recuperar: casi siempre falta una sola cosa.",
-      "body": "Hola, Ana,\n\nGracias por tu valoración. Me alegra que haya habido cosas buenas, y quiero entender qué faltó en tu experiencia para que la visita fuera realmente buena.\n\nSi nos lo cuentas, es en eso en lo que vamos a trabajar.\n\nCasa do Forno"
+      "hint": "Una nota media sin comentario invita a preguntar, no a agradecer.",
+      "body": "Hola, Ana,\n\nGracias por la valoración. Como no dejaste comentario, no sé qué pudimos haber hecho mejor, y es lo que me gustaría entender. Si puedes contármelo, te lo agradezco.\n\nCasa do Forno"
     }
   ],
   "es|public|4|com-texto": [
@@ -497,10 +461,10 @@
   ],
   "es|public|4|sem-texto": [
     {
-      "id": "agradecer",
-      "title": "Agradecer con detalle",
-      "hint": "Responder a quien te elogia es lo que más fideliza \u2014 y casi nadie lo hace.",
-      "body": "Hola, Ana,\n\nMuchas gracias por tus palabras. Me alegra saber que te haya gustado la visita. Se lo paso al equipo, que es quien lo hace posible.\n\nTe esperamos en la próxima.\n\nCasa do Forno"
+      "id": "obrigado-pela-nota",
+      "title": "Agradecer la valoración",
+      "hint": "No hubo comentario. Agradecer la valoración es todo lo que se puede decir sin inventar.",
+      "body": "Hola, Ana,\n\nGracias por la valoración. Me alegra que hayas dejado una nota alta, y espero volver a verte.\n\nCasa do Forno"
     }
   ],
   "es|public|5|com-texto": [
@@ -513,10 +477,10 @@
   ],
   "es|public|5|sem-texto": [
     {
-      "id": "agradecer",
-      "title": "Agradecer con detalle",
-      "hint": "Responder a quien te elogia es lo que más fideliza \u2014 y casi nadie lo hace.",
-      "body": "Hola, Ana,\n\nMuchas gracias por tus palabras. Me alegra saber que te haya gustado la visita. Se lo paso al equipo, que es quien lo hace posible.\n\nTe esperamos en la próxima.\n\nCasa do Forno"
+      "id": "obrigado-pela-nota",
+      "title": "Agradecer la valoración",
+      "hint": "No hubo comentario. Agradecer la valoración es todo lo que se puede decir sin inventar.",
+      "body": "Hola, Ana,\n\nGracias por la valoración. Me alegra que hayas dejado una nota alta, y espero volver a verte.\n\nCasa do Forno"
     }
   ],
   "es|private|1|com-texto": [
@@ -639,16 +603,10 @@
   ],
   "en|public|1|sem-texto": [
     {
-      "id": "curta",
-      "title": "Short and direct",
-      "hint": "The safe choice when you do not yet know exactly what went wrong.",
-      "body": "Hello Ana,\n\nThank you for taking the time to write, and I am sorry your experience was not what you had hoped for. That is not how we want to welcome anyone.\n\nI would like to understand better what happened. If you can get in touch with us directly, we will put it right.\n\nCasa do Forno"
-    },
-    {
-      "id": "com-accao",
-      "title": "With what you already did",
-      "hint": "Use when you have already taken a concrete step. Adjust the middle sentence to what you actually did.",
-      "body": "Hello Ana,\n\nThank you for your review. We read it properly. I am genuinely sorry about your experience.\n\nI have gone through what happened with the team to understand where we fell short.\n\nIf you give us another chance, I will look after your visit myself.\n\nCasa do Forno"
+      "id": "nota-baixa-sem-texto",
+      "title": "Ask what happened",
+      "hint": "A low rating with no comment: asking is the only honest thing to do.",
+      "body": "Hello Ana,\n\nI saw your rating and I am sorry the experience was not good. Since you left no comment, I do not know what happened, and I would like to know so I can fix it. If you can talk to me, I would appreciate it.\n\nCasa do Forno"
     }
   ],
   "en|public|2|com-texto": [
@@ -667,16 +625,10 @@
   ],
   "en|public|2|sem-texto": [
     {
-      "id": "curta",
-      "title": "Short and direct",
-      "hint": "The safe choice when you do not yet know exactly what went wrong.",
-      "body": "Hello Ana,\n\nThank you for taking the time to write, and I am sorry your experience was not what you had hoped for. That is not how we want to welcome anyone.\n\nI would like to understand better what happened. If you can get in touch with us directly, we will put it right.\n\nCasa do Forno"
-    },
-    {
-      "id": "com-accao",
-      "title": "With what you already did",
-      "hint": "Use when you have already taken a concrete step. Adjust the middle sentence to what you actually did.",
-      "body": "Hello Ana,\n\nThank you for your review. We read it properly. I am genuinely sorry about your experience.\n\nI have gone through what happened with the team to understand where we fell short.\n\nIf you give us another chance, I will look after your visit myself.\n\nCasa do Forno"
+      "id": "nota-baixa-sem-texto",
+      "title": "Ask what happened",
+      "hint": "A low rating with no comment: asking is the only honest thing to do.",
+      "body": "Hello Ana,\n\nI saw your rating and I am sorry the experience was not good. Since you left no comment, I do not know what happened, and I would like to know so I can fix it. If you can talk to me, I would appreciate it.\n\nCasa do Forno"
     }
   ],
   "en|public|3|com-texto": [
@@ -689,10 +641,10 @@
   ],
   "en|public|3|sem-texto": [
     {
-      "id": "perguntar",
+      "id": "perguntar-o-que-faltou-sem-texto",
       "title": "Ask what was missing",
-      "hint": "A middling rating is the easiest to win back: there is usually one thing missing.",
-      "body": "Hello Ana,\n\nThank you for the review. I am glad parts of it worked, and I would like to know what was missing in your experience to make the visit a good one.\n\nTell us and that is what we will work on.\n\nCasa do Forno"
+      "hint": "A middling rating with no comment invites a question, not thanks.",
+      "body": "Hello Ana,\n\nThank you for the rating. Since you left no comment, I do not know what we could have done better, and that is what I would like to understand. If you can tell me, I would appreciate it.\n\nCasa do Forno"
     }
   ],
   "en|public|4|com-texto": [
@@ -705,10 +657,10 @@
   ],
   "en|public|4|sem-texto": [
     {
-      "id": "agradecer",
-      "title": "Thank them specifically",
-      "hint": "Replying to praise is what builds regulars \u2014 and almost nobody does it.",
-      "body": "Hello Ana,\n\nThank you for the kind words. I am glad you enjoyed your visit. I will pass it on to the team, who are the ones who make it happen.\n\nWe will be here next time.\n\nCasa do Forno"
+      "id": "obrigado-pela-nota",
+      "title": "Thank them for the rating",
+      "hint": "There was no comment. Thanking them for the rating is all you can say without inventing.",
+      "body": "Hello Ana,\n\nThank you for the rating. I am glad you left a high score, and I hope to see you again.\n\nCasa do Forno"
     }
   ],
   "en|public|5|com-texto": [
@@ -721,10 +673,10 @@
   ],
   "en|public|5|sem-texto": [
     {
-      "id": "agradecer",
-      "title": "Thank them specifically",
-      "hint": "Replying to praise is what builds regulars \u2014 and almost nobody does it.",
-      "body": "Hello Ana,\n\nThank you for the kind words. I am glad you enjoyed your visit. I will pass it on to the team, who are the ones who make it happen.\n\nWe will be here next time.\n\nCasa do Forno"
+      "id": "obrigado-pela-nota",
+      "title": "Thank them for the rating",
+      "hint": "There was no comment. Thanking them for the rating is all you can say without inventing.",
+      "body": "Hello Ana,\n\nThank you for the rating. I am glad you left a high score, and I hope to see you again.\n\nCasa do Forno"
     }
   ],
   "en|private|1|com-texto": [

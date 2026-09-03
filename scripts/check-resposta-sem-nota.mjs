@@ -176,7 +176,13 @@ exigir(
   divergentes.length === 0
 );
 if (divergentes.length) {
-  console.error(`  divergiram: ${divergentes.slice(0, 4).map((d) => d.chave).join(', ')}`);
+  // TODAS, e nao as quatro primeiras. Cortar em quatro escondia o TAMANHO da
+  // divergencia, que e a informacao que decide o que fazer a seguir: quatro
+  // casos de um so tipo e uma mudanca deliberada; quarenta espalhados sao uma
+  // regressao. Em 03/09/2026 o corte fez-me acreditar que so `pt|public` tinha
+  // mudado, e gastei uma volta a medir por fora com entradas adivinhadas.
+  console.error(`  divergiram ${divergentes.length}:`);
+  for (const d of divergentes) console.error(`    - ${d.chave}`);
 }
 
 // ------------------------------------------- 2. a nota ausente não vira nota

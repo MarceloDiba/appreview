@@ -612,6 +612,81 @@ const PRIVATE_UNRATED: Variant[] = [
   },
 ];
 
+/**
+ * QUEM DEU SÓ ESTRELAS NÃO DISSE NADA, e a resposta não pode fingir que disse.
+ *
+ * Em 03/09/2026 o painel sugeriu isto para uma avaliação de 4 estrelas SEM
+ * comentário nenhum:
+ *
+ *     "Muito obrigado pelas suas palavras. Fico feliz em saber que tenha
+ *      gostado da visita."
+ *
+ * Duas invenções numa frase: não houve palavras, e ninguém falou em visita.
+ * Publicado na página do negócio, isso é o dono a agradecer em público por algo
+ * que não aconteceu — e quem escreveu a avaliação é a primeira pessoa a notar.
+ *
+ * A nota sozinha autoriza pouco, e é esse pouco que estes textos dizem: que a
+ * avaliação chegou, e o que a nota significa. Nada sobre o que a pessoa achou,
+ * porque ela não contou.
+ *
+ * Estes textos não têm `c.praise` nem `c.noun`: os dois saem do tema, o tema
+ * sai do texto do cliente, e aqui não há texto. Usá-los seria voltar a inventar
+ * por outro caminho.
+ */
+const SEM_PALAVRAS: Record<Sentiment, Variant[]> = {
+  positive: [{
+    id: 'obrigado-pela-nota',
+    title: { pt: 'Agradecer a nota', 'pt-BR': 'Agradecer a nota', es: 'Agradecer la valoración', en: 'Thank them for the rating' },
+    hint: {
+      pt: 'Não houve comentário. Agradecer a nota é tudo o que se pode dizer sem inventar.',
+      'pt-BR': 'Não houve comentário. Agradecer a nota é tudo o que dá para dizer sem inventar.',
+      es: 'No hubo comentario. Agradecer la valoración es todo lo que se puede decir sin inventar.',
+      en: 'There was no comment. Thanking them for the rating is all you can say without inventing.',
+    },
+    body: {
+      pt: (c) => `${c.greeting}\n\nObrigado pela avaliação. Fico contente por ter deixado uma nota alta, e espero voltar a recebê-lo.\n\n${c.signature}`,
+      'pt-BR': (c) => `${c.greeting}\n\nObrigado pela avaliação. Fico contente que tenha deixado uma nota alta, e espero receber você de novo.\n\n${c.signature}`,
+      es: (c) => `${c.greeting}\n\nGracias por la valoración. Me alegra que hayas dejado una nota alta, y espero volver a verte.\n\n${c.signature}`,
+      en: (c) => `${c.greeting}\n\nThank you for the rating. I am glad you left a high score, and I hope to see you again.\n\n${c.signature}`,
+    },
+  }],
+  neutral: [{
+    id: 'perguntar-o-que-faltou-sem-texto',
+    title: { pt: 'Perguntar o que faltou', 'pt-BR': 'Perguntar o que faltou', es: 'Preguntar qué faltó', en: 'Ask what was missing' },
+    hint: {
+      pt: 'A nota do meio sem comentário é um convite a perguntar, não a agradecer.',
+      'pt-BR': 'Nota do meio sem comentário é convite para perguntar, não para agradecer.',
+      es: 'Una nota media sin comentario invita a preguntar, no a agradecer.',
+      en: 'A middling rating with no comment invites a question, not thanks.',
+    },
+    body: {
+      pt: (c) => `${c.greeting}\n\nObrigado pela avaliação. Como não deixou comentário, fico sem saber o que podíamos ter feito melhor — e é isso que queria perceber. Se puder dizer-me, agradeço.\n\n${c.signature}`,
+      'pt-BR': (c) => `${c.greeting}\n\nObrigado pela avaliação. Como você não deixou comentário, fico sem saber o que poderíamos ter feito melhor, e é isso que eu queria entender. Se puder me contar, agradeço.\n\n${c.signature}`,
+      es: (c) => `${c.greeting}\n\nGracias por la valoración. Como no dejaste comentario, no sé qué pudimos haber hecho mejor, y es lo que me gustaría entender. Si puedes contármelo, te lo agradezco.\n\n${c.signature}`,
+      en: (c) => `${c.greeting}\n\nThank you for the rating. Since you left no comment, I do not know what we could have done better, and that is what I would like to understand. If you can tell me, I would appreciate it.\n\n${c.signature}`,
+    },
+  }],
+  negative: [{
+    id: 'nota-baixa-sem-texto',
+    title: { pt: 'Perguntar o que aconteceu', 'pt-BR': 'Perguntar o que aconteceu', es: 'Preguntar qué pasó', en: 'Ask what happened' },
+    hint: {
+      pt: 'Nota baixa sem comentário: perguntar é a única coisa honesta a fazer.',
+      'pt-BR': 'Nota baixa sem comentário: perguntar é a única coisa honesta a fazer.',
+      es: 'Nota baja sin comentario: preguntar es lo único honesto.',
+      en: 'A low rating with no comment: asking is the only honest thing to do.',
+    },
+    body: {
+      pt: (c) => `${c.greeting}\n\nVi a sua avaliação e lamento que a experiência não tenha corrido bem. Como não deixou comentário, não sei o que aconteceu, e gostava de saber para o corrigir. Se puder falar comigo, agradeço.\n\n${c.signature}`,
+      'pt-BR': (c) => `${c.greeting}\n\nVi a sua avaliação e lamento que a experiência não tenha sido boa. Como você não deixou comentário, eu não sei o que aconteceu, e gostaria de saber para corrigir. Se puder falar comigo, agradeço.\n\n${c.signature}`,
+      es: (c) => `${c.greeting}\n\nVi tu valoración y lamento que la experiencia no haya sido buena. Como no dejaste comentario, no sé qué pasó, y me gustaría saberlo para corregirlo. Si puedes hablar conmigo, te lo agradezco.\n\n${c.signature}`,
+      en: (c) => `${c.greeting}\n\nI saw your rating and I am sorry the experience was not good. Since you left no comment, I do not know what happened, and I would like to know so I can fix it. If you can talk to me, I would appreciate it.\n\n${c.signature}`,
+    },
+  }],
+  // Sem nota E sem texto nao e uma avaliacao: nao ha nada a que responder.
+  // Mantem-se o conjunto de sempre, que ja trata a ausencia de nota.
+  unrated: PUBLIC_UNRATED,
+};
+
 const VARIANTS: Record<ReplyChannel, Record<Sentiment, Variant[]>> = {
   public: { negative: PUBLIC_NEGATIVE, neutral: PUBLIC_NEUTRAL, positive: PUBLIC_POSITIVE, unrated: PUBLIC_UNRATED },
   private: { negative: PRIVATE_NEGATIVE, neutral: PRIVATE_NEUTRAL, positive: PRIVATE_POSITIVE, unrated: PRIVATE_UNRATED },
@@ -645,7 +720,16 @@ export const buildReplySuggestions = (input: ReplySuggestionInput): ReplySuggest
     signature: buildSignature(content, input.businessName),
   };
 
-  return VARIANTS[input.channel][sentiment].map((variant) => ({
+  // SEM TEXTO, OUTRO CONJUNTO. Os textos de sempre agradecem "pelas suas
+  // palavras" e citam o que a pessoa achou — as duas coisas saem do texto dela,
+  // e aqui nao ha texto. O canal privado nao entra: uma mensagem privada sem
+  // texto nao existe, o formulario do QR exige o comentario.
+  const semPalavras = !(input.text && input.text.trim().length > 0);
+  const conjunto = semPalavras && input.channel === 'public'
+    ? SEM_PALAVRAS[sentiment]
+    : VARIANTS[input.channel][sentiment];
+
+  return conjunto.map((variant) => ({
     id: variant.id,
     title: variant.title[content],
     hint: variant.hint[content],
