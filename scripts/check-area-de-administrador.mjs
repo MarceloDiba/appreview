@@ -137,6 +137,7 @@ $$;
     '20260902230000_email_como_canal.sql',
     '20260903090000_resumo_por_mensagem_de_novo.sql',
     '20260903120000_area_de_administrador.sql',
+    '20260903140000_o_aviso_fala_portugues.sql',
   ]) psql(semExtensoes(ler(nome)));
 
   // ---------------------------------------------------------------- as contas
@@ -156,7 +157,11 @@ $$;
   ];
   for (const [n, rotulo] of CASOS) {
     psql(`insert into auth.users (id, email, created_at) values ('${conta(n)}', '${rotulo}@exemplo.com', now() - interval '10 days');`);
-    psql(`insert into public.profiles (id, business_name) values ('${conta(n)}', 'Negocio ${rotulo}');`);
+    // O NOME DO NEGOCIO NAO PODE CONTER O NOME DO SINAL. Ate aqui era
+    // `Negocio ${rotulo}`, e isso envenenava a assercao que exige que o aviso
+    // nao mande nomes de coluna para o telemovel: o nome do negocio de teste
+    // punha `mensagem_falhou` no corpo, e o guarda acusava a si proprio.
+    psql(`insert into public.profiles (id, business_name) values ('${conta(n)}', 'Negocio numero ${n}');`);
     psql(`insert into public.platform_links (user_id, platform, url) values ('${conta(n)}', 'google', 'https://g.page/r/exemplo/review');`);
   }
   // Todas menos a 3 ja coletaram com sucesso.
@@ -293,8 +298,44 @@ $$;
   exigir('o primeiro aviso e enviado', primeiro === 1);
   exigir('o aviso sai pelo canal do administrador',
     psql(`select provider from public.whatsapp_outbox where kind = 'admin-alerta' limit 1;`).trim() === 'telegram');
-  exigir('o aviso nomeia as contas travadas e aponta para a area',
-    /binno\.pro\/admin/.test(psql(`select body from public.whatsapp_outbox where kind = 'admin-alerta' limit 1;`)));
+  const corpoDoAviso = psql(`select body from public.whatsapp_outbox where kind = 'admin-alerta' limit 1;`);
+  exigir('o aviso nomeia as contas travadas e aponta para a area', /binno\.pro\/admin/.test(corpoDoAviso));
+  // O AVISO FALA PORTUGUES. A primeira versao mandava `mensagem_falhou` cru
+  // para o telemovel de alguem que nao e tecnico, as oito da manha.
+  exigir('o aviso nao manda nomes de coluna para o telemovel',
+    !/coleta_parada_na_fila|nunca_coletou|mensagem_falhou|fila_presa_no_envio|fila_parada_na_saida|sem_canal_de_aviso|resumo_nao_saiu/.test(corpoDoAviso));
+  exigir('o aviso descreve o sinal por extenso',
+    /Mensagem parada na fila há mais de 30 minutos|Cadastrou e nunca coletou|Mensagem falhou nas últimas 72 horas/.test(corpoDoAviso));
+
+  // AS DUAS LISTAS DE ROTULOS TEM DE SER IGUAIS. Uma vive no SQL (porque o aviso
+  // e composto no banco) e outra no TypeScript (porque a pagina e desenhada no
+  // navegador). Duas listas da mesma coisa divergem, e a divergencia e
+  // invisivel: o Marcelo leria uma frase no telemovel e outra na pagina para o
+  // mesmo sinal.
+  const rotulosDoBanco = Object.fromEntries(
+    psql(`select sinal || '=' || public.rotulo_do_sinal(sinal)
+            from unnest(array['coleta_parada_na_fila','nunca_coletou','mensagem_falhou',
+                              'fila_presa_no_envio','fila_parada_na_saida','sem_canal_de_aviso',
+                              'resumo_nao_saiu','coleta_antiga']) as sinal;`)
+      .trim().split('\n').map((linha) => {
+        const corte = linha.indexOf('=');
+        return [linha.slice(0, corte), linha.slice(corte + 1)];
+      }),
+  );
+  const fonteDaTela = readFileSync('src/lib/saudeDasContas.ts', 'utf8');
+  const rotulosDaTela = Object.fromEntries(
+    [...fonteDaTela.matchAll(/(\w+): \{\s*titulo: '([^']+)'/g)].map((achado) => [achado[1], achado[2]]),
+  );
+  exigir('a tela tem um rotulo para cada sinal do banco',
+    Object.keys(rotulosDoBanco).every((sinal) => rotulosDaTela[sinal] !== undefined));
+  exigir('os rotulos do banco e da tela sao os mesmos, palavra por palavra',
+    Object.entries(rotulosDoBanco).every(([sinal, texto]) => rotulosDaTela[sinal] === texto));
+  // O RECUO: um sinal novo que ninguem tenha traduzido sai com o nome cru, e
+  // nao desaparece. Uma linha feia e melhor do que um aviso que esconde um
+  // problema. Sem esta assercao o `else` da funcao era decoracao — descoberto a
+  // tentar quebra-lo e ver o guarda continuar verde.
+  exigir('um sinal ainda sem traducao sai cru, em vez de sumir',
+    psql(`select public.rotulo_do_sinal('sinal_que_ainda_nao_existe');`).trim() === 'sinal_que_ainda_nao_existe');
   // SO QUANDO MUDA. Sem isto ele recebe o mesmo aviso todos os dias ate deixar
   // de o ler, e um aviso que se deixa de ler e pior do que nenhum.
   psql(`select public.avisar_administrador();`);
