@@ -75,12 +75,25 @@ const send = async (item) => {
   }
 };
 
-const materialize = () => fetch(`${config.supabaseUrl}/functions/v1/materialize-whatsapp-notifications`, {
-  method: 'POST', headers: { apikey: config.serviceRole, Authorization: `Bearer ${config.serviceRole}`, 'x-binno-worker-secret': config.workerSecret },
-}).catch(() => null);
-
+/*
+ * A CHAMADA A `materialize-whatsapp-notifications` SAIU DAQUI, em 03/09/2026.
+ *
+ * Ela estava dentro do laco de despacho, que corre a cada 10 segundos. Isso da
+ * 8.640 chamadas por dia a uma funcao que enfileira o resumo SEMANAL de cada
+ * dono — um trabalho que nao muda de resultado entre uma volta e a seguinte.
+ *
+ * E era duplicacao pura: o cron `binno-resumo-semanal` ja chama exactamente a
+ * mesma funcao, de 15 em 15 minutos, pelo `chamar_resumo_semanal()`. Sao 96
+ * chamadas por dia a fazer o mesmo trabalho que estas 8.640. Nada se perde ao
+ * tirar daqui; o agendamento continua a existir, no sitio onde se ve.
+ *
+ * Medido: 8.679 chamadas por dia no total, contra as 96 do cron. A conta fecha
+ * com este laco (6 por minuto x 1440) e explica o resto sozinha.
+ *
+ * O laco continua, mas so para o que e MESMO deste processo: reclamar a fila do
+ * OpenWA e enviar. Agendar nao e trabalho de quem envia.
+ */
 const dispatch = async () => {
-  await materialize();
   const items = await claim();
   await Promise.all((items || []).map(send));
 };
