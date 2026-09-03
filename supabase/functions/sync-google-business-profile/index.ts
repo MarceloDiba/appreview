@@ -133,6 +133,53 @@ const registarFalha = async (admin: SupabaseClient, userId: string, motivo: stri
   }
 };
 
+/**
+ * Devolve so o que o cliente escreveu, sem a traducao que o Google cola.
+ *
+ * POR QUE ISTO EXISTE, e custou caro descobrir.
+ *
+ * A API devolve TODA avaliacao com a traducao inglesa colada ao original:
+ *
+ *     Marcelo e um profissional impar. Merece nota 1000.
+ *
+ *     (Translated by Google)
+ *     Marcelo is an exceptional professional...
+ *
+ * O detector de idioma conta palavras. Com o ingles colado, ele conta mais
+ * palavras inglesas do que portuguesas e devolve `en` — e o rascunho sai em
+ * ingles para um cliente que escreveu em portugues. Em 03/09/2026 uma dessas
+ * respostas foi PUBLICADA no perfil publico real da Noa Digital.
+ *
+ * Medido, e nao suposto: `detectReplyLocale` devolve `en` para o texto guardado
+ * e `pt` para o mesmo texto sem o bloco da traducao.
+ *
+ * LIMPA-SE NA ENTRADA, E NAO NA TELA. Quem le esta coluna nao e so o painel: a
+ * funcao SQL `oferecer_rascunho` le-a para montar o rascunho que vai pelo
+ * WhatsApp, e essa nao passa por front nenhum. Um so sitio, uma so verdade.
+ *
+ * A traducao nao se perde por ser util — perde-se por nao ser do cliente. Quem
+ * quiser ve-la abre o Google.
+ */
+const soOqueOClienteEscreveu = (texto: string | null): string | null => {
+  if (!texto) return texto;
+  const MARCA = "(Translated by Google)";
+  const ORIGINAL = "(Original)";
+  if (!texto.includes(MARCA)) return texto;
+
+  // Duas formas conhecidas. Quando o Google poe a traducao PRIMEIRO, ele marca
+  // o original com `(Original)`; quando poe depois, o original e o que vem
+  // antes da marca.
+  const posOriginal = texto.indexOf(ORIGINAL);
+  const limpo = posOriginal !== -1 && posOriginal > texto.indexOf(MARCA)
+    ? texto.slice(posOriginal + ORIGINAL.length)
+    : texto.slice(0, texto.indexOf(MARCA));
+
+  const aparado = limpo.trim();
+  // Se cortar deixasse a avaliacao vazia, e melhor devolver o texto inteiro do
+  // que perder o que o cliente disse.
+  return aparado.length > 0 ? aparado : texto;
+};
+
 const googleError = async (response: Response, onde: string) => {
   const texto = await response.text().catch(() => "");
   let mensagem = "Google Business Profile request failed";
@@ -337,7 +384,7 @@ serve(async (request) => {
         reviewer_photo_url: typeof reviewer.profilePhotoUrl === "string" ? reviewer.profilePhotoUrl : null,
         is_anonymous: reviewer.isAnonymous === true,
         rating: starRating,
-        comment: typeof review.comment === "string" ? review.comment : null,
+        comment: soOqueOClienteEscreveu(typeof review.comment === "string" ? review.comment : null),
         review_created_at: typeof review.createTime === "string" ? review.createTime : null,
         review_updated_at: typeof review.updateTime === "string" ? review.updateTime : null,
         reply_text: typeof reply.comment === "string" ? reply.comment : null,
