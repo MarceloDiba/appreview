@@ -19,14 +19,6 @@ const IMPLANTADAS = {
   'email-dispatch': '2026-09-02',
   'fetch-google-reviews': '2026-07-13',
   'google-business-oauth-callback': '2026-09-03',
-  // Esta funcao nao estava na lista conferida contra o servidor em
-  // 03/09/2026 -- e o exemplo "increment" do scaffold inicial do Supabase,
-  // presente no repositorio desde 05/05/2025 (mais de um ano antes do
-  // incidente que criou este guarda). Sem credenciais de gestao para
-  // confirmar no servidor; a data abaixo e a da criacao no repositorio, nao
-  // uma confirmacao de implantacao. Ver o commit deste guarda para o registo
-  // desta lacuna.
-  'increment': '2025-05-05',
   'materialize-whatsapp-notifications': '2026-09-02',
   'search-prospects': '2026-08-25',
   'start-google-business-oauth': '2026-08-27',
