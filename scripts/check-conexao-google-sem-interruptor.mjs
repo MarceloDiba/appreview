@@ -45,7 +45,13 @@ exigir('nenhum ficheiro do painel decide pela variavel de build removida',
   comAVariavel.length === 0);
 
 // 2. A protecao real continua no lugar: o cartao trata a recusa do servidor.
-const conexao = semComentarios(readFileSync('src/components/settings/GoogleBusinessConnection.tsx', 'utf8'));
+// O convite a ligar continua em `GoogleBusinessConnection`; o encadeado que
+// vem DEPOIS de ligar vive em `usePreparacaoDoGoogle`. As assercoes de estado
+// seguiram o codigo: quem pergunta ao banco se ja esta ligado passou a ser o
+// encadeado, porque e ele que decide o que mostrar.
+const conexao = semComentarios(readFileSync('src/components/settings/GoogleBusinessConnection.tsx', 'utf8'))
+  + semComentarios(readFileSync('src/hooks/usePreparacaoDoGoogle.ts', 'utf8'))
+  + semComentarios(readFileSync('src/components/settings/ConexaoDoGoogle.tsx', 'utf8'));
 exigir('o cartao continua a tratar GOOGLE_OAUTH_NOT_CONFIGURED, vinda do servidor',
   /GOOGLE_OAUTH_NOT_CONFIGURED/.test(conexao));
 exigir('o botao de conectar nao esta atras de condicao nenhuma antes de aparecer',
@@ -97,8 +103,14 @@ exigir('a aba unica chama-se "google", e nao "external-links" nem "google-review
   /<TabsTrigger value="business">/.test(settings) && /<TabsTrigger value="google">/.test(settings)
   && /<TabsContent value="google">/.test(settings)
   && !/<TabsContent value="external-links">|<TabsContent value="google-reviews">/.test(settings));
+// O cartao chama-se `ConexaoDoGoogle` desde 03/09/2026: os quatro cartoes em
+// ordem viraram um so que conta o que esta a acontecer. A REGRA nao mudou — o
+// link continua a vir primeiro, porque e dele que tudo depende — mas o nome do
+// componente sim, e este guarda apanhou a renomeacao. Se ele procurasse so o
+// nome antigo, a ordem podia inverter-se em silencio.
 const posicaoDoLink = settings.indexOf('<ExternalLinksSettings');
-const posicaoDaConexao = settings.indexOf('<GoogleBusinessConnection');
+const posicaoDaConexao = settings.indexOf('<ConexaoDoGoogle');
+exigir('o cartao da conexao existe na pagina', posicaoDaConexao > 0);
 exigir('o link do Google vem antes da conexao oficial, dentro da mesma aba',
   posicaoDoLink > 0 && posicaoDaConexao > posicaoDoLink);
 

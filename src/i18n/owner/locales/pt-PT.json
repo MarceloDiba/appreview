@@ -945,6 +945,22 @@
       "linksSaved": "Links externos atualizados.",
       "saveError": "Não foi possível guardar os links externos. Tente novamente.",
       "noGooglePlaceId": "Não há um Place ID do Google associado para atualizar."
+    },
+    "googlePreparacao": {
+      "aPrepararTitulo": "A preparar o seu Google…",
+      "prontoTitulo": "{{negocio}} está ligado",
+      "passoLigado": "Permissão do Google concedida",
+      "passoNegocio": "A procurar o seu negócio no Google…",
+      "passoNegocioFeito": "Negócio encontrado: {{negocio}}",
+      "passoAvaliacoes": "A trazer as suas avaliações…",
+      "passoAvaliacoesFeito": "{{total}} avaliações trazidas do Google",
+      "nuncaPublica": "O Binno lê as suas avaliações e escreve rascunhos. Nunca publica resposta sem si.",
+      "qualNegocio": "Que negócio deve o Binno acompanhar?",
+      "qualNegocioAjuda": "A sua conta do Google administra mais do que um. Escolha o que alimenta este painel.",
+      "nenhumNegocio": "A conta do Google que autorizou não administra nenhum negócio. Ligue com a conta que administra o seu Perfil da Empresa.",
+      "falhouTitulo": "Não consegui preparar a ligação",
+      "falhouSemMotivo": "O Google recusou e não disse o motivo.",
+      "tentarDeNovo": "Tentar de novo"
     }
   },
   "profile": {
