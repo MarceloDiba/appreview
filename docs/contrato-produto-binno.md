@@ -1287,6 +1287,36 @@ data, e engolia o regresso do problema.
 tabela `admins` está fechada à escrita do navegador desde 31/07/2026, porque a
 versão original deixava qualquer pessoa autenticada declarar-se administrador.
 
+**Uso do dono e valor entregue são coisas diferentes (03/09/2026).** Marcelo
+pediu o painel comercial que a versão anterior tinha deixado de fora: totais de
+contas ativas, de uso frequente e de baixo uso, "pode ser que aqui possamos
+intervir com mensagem pra não perder o cliente".
+
+*Uso do dono* é ele abrir o painel, publicar uma resposta, criar um QR — atos
+dele. *Valor entregue* é o QR ser lido e um comentário chegar — atos dos
+clientes **dele**, que acontecem mesmo com o painel fechado. As duas colunas
+existem separadas porque um cliente com valor alto e uso zero é exatamente o que
+cancela: o QR trabalha sozinho e ele não vê o que está ganhando. As duas
+situações pedem conversas diferentes.
+
+Quatro estados: `ativo` (até 7 dias), `esfriando` (8 a 21), `sumido` (mais de
+21) e `nunca_entrou`. Sete dias porque o Binno é um hábito semanal; vinte e um
+porque três semanas sem tocar num produto que se paga todo mês é quando a
+pergunta "isto me serve?" aparece sozinha. São juízo de produto, não fato, e
+estão numa linha só para poderem mudar.
+
+**`dono_sumido` não é defeito, e não entra no aviso diário.** Ninguém tem que
+consertar nada; alguém tem que falar com a pessoa. Ele conta para os sinais da
+conta e **não** para a gravidade técnica — se contasse, a página diria "travado"
+a um cliente cujo produto está perfeito. E as duas escalas têm cores próprias,
+porque uma conta pode estar tecnicamente perfeita e a caminho de cancelar.
+
+**A conversa de retenção não se envia sozinha.** O botão abre o e-mail com o
+texto escrito; Marcelo lê, ajusta e envia. Uma mensagem automática a um cliente
+que paga chega no dia em que ele acabou de falar com a pessoa ao telefone, ou
+chega com o tom errado — e ele descobre pelo lado errado. É o mesmo princípio do
+rascunho de resposta às avaliações: o Binno escreve, a pessoa decide.
+
 Guardado por `scripts/check-area-de-administrador.mjs`, que corre a consulta de
 verdade num Postgres descartável com uma conta fabricada por defeito — e três
 contas de fronteira que só existem porque três mutações ficaram verdes: medir a

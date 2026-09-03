@@ -26,7 +26,18 @@ export type SinalDaConta =
   | 'fila_parada_na_saida'
   | 'sem_canal_de_aviso'
   | 'resumo_nao_saiu'
-  | 'coleta_antiga';
+  | 'coleta_antiga'
+  | 'dono_sumido';
+
+/**
+ * Como a conta está a ser usada PELO DONO.
+ *
+ * Não confundir com valor entregue — o QR ser lido, um comentário chegar —, que
+ * acontece quer ele abra o painel quer não. Um cliente pode ter o QR a
+ * trabalhar sozinho e nunca entrar, e é exactamente esse que cancela: não vê o
+ * que está a ganhar.
+ */
+export type UsoDaConta = 'ativo' | 'esfriando' | 'sumido' | 'nunca_entrou';
 
 export type SaudeDaConta = {
   userId: string;
@@ -40,8 +51,22 @@ export type SaudeDaConta = {
   filaDeRespostas: number;
   ultimaColetaEm: string | null;
   diasDesdeAColeta: number | null;
+  ultimoAcesso: string | null;
+  respostasPublicadas: number;
+  ultimaAtividadeDoDono: string | null;
+  diasSemAtividade: number | null;
+  uso: UsoDaConta;
+  visitasAoQr30d: number;
+  comentarios30d: number;
   sinais: SinalDaConta[];
   gravidade: 'travado' | 'atencao' | 'ok';
+};
+
+export const EXPLICACAO_DO_USO: Record<UsoDaConta, { rotulo: string; frase: string }> = {
+  ativo: { rotulo: 'Ativo', frase: 'Fez alguma coisa nos últimos 7 dias.' },
+  esfriando: { rotulo: 'Esfriando', frase: 'Entre 8 e 21 dias sem aparecer. É aqui que dá para recuperar.' },
+  sumido: { rotulo: 'Sumido', frase: 'Mais de três semanas sem tocar no produto. Risco real de cancelar.' },
+  nunca_entrou: { rotulo: 'Nunca entrou', frase: 'Criou a conta e nunca voltou. O pior estado de todos.' },
 };
 
 /**
@@ -84,6 +109,10 @@ export const EXPLICACAO_DOS_SINAIS: Record<SinalDaConta, { titulo: string; passo
     titulo: 'Última coleta há mais de 30 dias',
     passo: 'Informação, não problema: hoje só existe a coleta do cadastro, não há coleta recorrente.',
   },
+  dono_sumido: {
+    titulo: 'O dono não aparece há mais de três semanas',
+    passo: 'Não é defeito: ninguém tem de consertar nada, alguém tem de falar com a pessoa antes que ela cancele.',
+  },
 };
 
 type LinhaDaFuncao = {
@@ -98,6 +127,13 @@ type LinhaDaFuncao = {
   fila_de_respostas: number | null;
   ultima_coleta_em: string | null;
   dias_desde_a_coleta: number | null;
+  ultimo_acesso: string | null;
+  respostas_publicadas: number | null;
+  ultima_atividade_do_dono: string | null;
+  dias_sem_atividade: number | null;
+  uso: string | null;
+  visitas_ao_qr_30d: number | null;
+  comentarios_30d: number | null;
   sinais: string[] | null;
   gravidade: string | null;
 };
@@ -106,6 +142,39 @@ export type LeituraDaSaude =
   | { estado: 'ok'; contas: SaudeDaConta[] }
   | { estado: 'sem-permissao' }
   | { estado: 'falhou'; detalhe: string };
+
+/**
+ * O rascunho da conversa de retenção.
+ *
+ * NÃO SE ENVIA SOZINHO, e isso é uma decisão de 03/09/2026. Marcelo escreveu
+ * "pode ser que aqui possamos intervir com mensagem pra não perder o cliente",
+ * e isso lê-se de duas formas: ele fala com a pessoa, ou o sistema fala. Mandar
+ * uma mensagem automática a um cliente que paga, sem ninguém ler antes, é o
+ * tipo de coisa que se descobre pelo lado errado — a mensagem chega no dia em
+ * que ele acabou de falar com o cliente ao telefone, ou chega com o tom errado.
+ *
+ * O botão abre o e-mail com o texto escrito. Ele lê, ajusta, envia. É o mesmo
+ * princípio do rascunho de resposta às avaliações, que o produto inteiro
+ * defende: o Binno escreve, a pessoa decide.
+ */
+export const rascunhoDeRetencao = (conta: SaudeDaConta): string => {
+  const nome = conta.negocio || 'o seu negócio';
+  const valor = conta.visitasAoQr30d > 0
+    ? `Nos últimos 30 dias, ${conta.visitasAoQr30d} ${conta.visitasAoQr30d === 1 ? 'pessoa leu' : 'pessoas leram'} o seu QR`
+    : 'O seu QR ainda não teve leituras no último mês';
+  const espera = conta.filaDeRespostas > 0
+    ? `, e há ${conta.filaDeRespostas} ${conta.filaDeRespostas === 1 ? 'avaliação à espera' : 'avaliações à espera'} de resposta`
+    : '';
+  return [
+    `Oi! Aqui é o Marcelo, do Binno.`,
+    '',
+    `Passei para ver como está indo com ${nome}. ${valor}${espera}.`,
+    '',
+    'Queria entender se o Binno está te ajudando de verdade, ou se tem alguma coisa atrapalhando. Se preferir, a gente marca 15 minutos e eu te mostro o que dá para tirar dele.',
+    '',
+    'Abraço.',
+  ].join('\n');
+};
 
 export const lerSaudeDasContas = async (): Promise<LeituraDaSaude> => {
   // `as never` porque os tipos gerados do Supabase ainda não conhecem esta
@@ -141,6 +210,15 @@ export const lerSaudeDasContas = async (): Promise<LeituraDaSaude> => {
       filaDeRespostas: linha.fila_de_respostas ?? 0,
       ultimaColetaEm: linha.ultima_coleta_em,
       diasDesdeAColeta: linha.dias_desde_a_coleta,
+      ultimoAcesso: linha.ultimo_acesso,
+      respostasPublicadas: linha.respostas_publicadas ?? 0,
+      ultimaAtividadeDoDono: linha.ultima_atividade_do_dono,
+      diasSemAtividade: linha.dias_sem_atividade,
+      uso: (['ativo', 'esfriando', 'sumido', 'nunca_entrou'].includes(linha.uso || '')
+        ? linha.uso
+        : 'nunca_entrou') as UsoDaConta,
+      visitasAoQr30d: linha.visitas_ao_qr_30d ?? 0,
+      comentarios30d: linha.comentarios_30d ?? 0,
       sinais: (linha.sinais || []) as SinalDaConta[],
       gravidade: (linha.gravidade === 'travado' || linha.gravidade === 'atencao') ? linha.gravidade : 'ok',
     })),
