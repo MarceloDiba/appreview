@@ -860,7 +860,11 @@
       "connect": "Conectar Google",
       "connecting": "Abrindo Google…",
       "unavailable": "A conexão oficial com o Perfil da Empresa ainda está sendo configurada neste ambiente.",
-      "startError": "Não foi possível iniciar a conexão com o Google. Tente novamente mais tarde."
+      "startError": "Não foi possível iniciar a conexão com o Google. Tente novamente mais tarde.",
+      "connectedTitle": "Perfil da Empresa conectado",
+      "connectedDescription": "O Binno já tem permissão do Google para ler as avaliações do seu perfil e identificar quais ainda não foram respondidas.",
+      "connectedHelp": "Escolha abaixo qual localização deve alimentar o painel. O Binno nunca publica resposta sem você mandar.",
+      "reconnect": "Reconectar"
     },
     "apify": {
       "title": "Buscar as suas avaliações do Google",

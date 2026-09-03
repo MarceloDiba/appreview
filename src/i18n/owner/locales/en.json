@@ -860,7 +860,11 @@
       "connect": "Connect Google",
       "connecting": "Opening Google…",
       "unavailable": "The official Business Profile connection is still being configured in this environment.",
-      "startError": "Google connection could not be started. Please try again later."
+      "startError": "Google connection could not be started. Please try again later.",
+      "connectedTitle": "Business Profile connected",
+      "connectedDescription": "Binno now has permission from Google to read your profile reviews and spot the ones still waiting for a reply.",
+      "connectedHelp": "Pick below which location should feed the dashboard. Binno never publishes a reply without you.",
+      "reconnect": "Reconnect"
     },
     "apify": {
       "title": "Fetch your Google reviews",
