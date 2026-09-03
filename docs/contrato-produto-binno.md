@@ -1415,3 +1415,68 @@ presença de um sinal não mede o limiar dele.
 O teste não substitui
 revisão de produto: qualquer mudança visual ou de fluxo ainda deve ser
 comparada com este documento antes de ser aceita.
+
+---
+
+## Responder à avaliação pela própria mensagem (03/09/2026)
+
+O dono recebe o rascunho da resposta na mensagem e responde **1**. A resposta é
+publicada no perfil dele no Google sem que ele abra o painel. O que segue são as
+garantias que sustentam isso, e nenhuma delas é opcional.
+
+### O webhook nunca publica
+
+O endereço que a Meta chama é público. Ele faz três coisas e só três: confere a
+assinatura, anota que o dono escreveu, e marca a confirmação. Publicar dali seria
+publicar duas vezes — a Meta espera resposta em milissegundos e repete o evento
+quando demora, e o perfil é público e não se desfaz. Quem publica é um trabalho
+separado, a correr por sua conta.
+
+Pelo mesmo motivo o webhook devolve sempre 200, mesmo quando recusa: um erro faz
+a Meta repetir, e repetir é confirmar duas vezes.
+
+### A assinatura da Meta é conferida, em tempo constante
+
+Sem isso, qualquer pessoa que descubra o endereço envia um "1" em nome de um
+dono e publica no perfil dele. A comparação é em tempo constante porque o tempo
+de uma comparação normal diz quantos caracteres iniciais estão certos.
+
+Enquanto o segredo do app não estiver posto, o webhook **recusa tudo**. Falha
+fechado, e nunca aberto.
+
+### Publica-se uma vez, e só depois de o dono confirmar
+
+Só entram na publicação as respostas com confirmação do dono, sem publicação
+anterior e sem recusa. A marca de publicado é escrita **antes** da chamada ao
+Google, e a reserva só pega quem ainda não tem essa marca: se o processo morrer
+a meio, a linha fica marcada e ninguém a publica de novo.
+
+Há no máximo **uma resposta à espera por dono**, garantido por índice no banco.
+Duas ao mesmo tempo tornariam o "1" ambíguo, e desambiguar seria pedir ao dono
+que escrevesse mais — o contrário exacto de "1 clique".
+
+### A janela de 24 horas
+
+Fora de 24 horas desde a última mensagem do dono, a Meta só aceita modelo
+aprovado; dentro dela, texto livre. A pergunta é feita **na hora de enviar**, e
+não na hora de pôr na fila: entre uma coisa e outra a janela pode ter fechado, e
+uma mensagem recusada é um aviso que não chega.
+
+Uma resposta à espera expira em 24 horas. Depois disso o "1" já não vale, porque
+o dono pode já nem se lembrar de que avaliação se falava.
+
+### O OpenWA saiu
+
+O canal `openwa` deixou de ser o recuo dos avisos. O número foi bloqueado em
+31/08/2026 e o retransmissor não serve ninguém: devolver um canal morto é
+enfileirar avisos que ficam parados com ar de estarem a caminho. A ordem passa a
+ser WhatsApp oficial, depois Telegram.
+
+O WhatsApp oficial liga-se **por dono**, e nasce desligado. Só deve ser ligado
+depois de um envio de teste chegar de verdade: antes disso, ligar é encher a
+fila de mensagens sem quem as envie.
+
+### O que o painel mostra
+
+Quando há uma resposta à espera do "1", o painel diz-lo, com o texto exacto que
+foi enviado. O dono não pode ver duas verdades diferentes em dois sítios.
