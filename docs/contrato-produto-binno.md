@@ -1232,9 +1232,13 @@ com ele ali seria o Binno a roubar do próprio cliente. Fica uma linha para quem
 reparar, que é o caminho pelo qual um dono de negócio descobre o Binno ao ver o
 QR de outro.
 
-**O número vive numa constante só**, em `src/lib/contactoDoBinno.ts`. É hoje o
-número pessoal do Marcelo, o único que o Binno conhece; quando existir um número
-comercial, muda-se ali e mais nada.
+**O número vive numa constante só**, em `src/lib/contactoDoBinno.ts`, e é o de
+**prospectar** — nunca o que envia mensagens aos clientes. Esse está a caminho
+de virar API oficial da Meta, e uma vez aprovado não se conversa a partir dele
+no aplicativo: um interessado que escrevesse para lá cairia num número que não
+foi feito para responder à mão. Além disso ele já foi bloqueado uma vez, em
+31/08/2026, por padrão de envio automatizado — mantê-los separados é o que
+garante que o canal de vendas sobrevive ao próximo bloqueio do canal de envio.
 
 Guardado por `scripts/check-marca-e-contacto.mjs`.
 

@@ -9,11 +9,27 @@
  * uma caça ao `wa.me` pelo repositório, e o que sobra esquecido é sempre o menos
  * visitado. Aqui é uma linha só.
  *
- * O NÚMERO É O DA CONTA DO MARCELO, e isso é uma escolha provisória: é o único
- * que o Binno conhece hoje, lido das preferências de aviso dele. Quando existir
- * um número comercial do Binno, muda-se esta constante e mais nada.
+ * QUAL DOS DOIS NÚMEROS, E POR QUÊ (03/09/2026)
+ *
+ * Marcelo tem dois: o que ENVIA mensagens aos clientes e o de PROSPECTAR. Este
+ * é o de prospectar, e a razão é técnica antes de ser de gosto.
+ *
+ * O número de envio está a caminho de virar API oficial da Meta. Quando for
+ * aprovado, deixa de ser um WhatsApp comum: não se conversa a partir dele no
+ * aplicativo, tudo passa pela API e por uma caixa própria. Um interessado que
+ * escrevesse para lá cairia num número que não foi feito para responder à mão —
+ * seria construir para quebrar na aprovação.
+ *
+ * Somam-se duas razões. Aquele número já foi BLOQUEADO uma vez, em 31/08/2026,
+ * por padrão de envio automatizado; juntar-lhe conversas frias de entrada é
+ * perder as conversas de venda no próximo bloqueio. E separá-los significa que,
+ * se o de envio cair outra vez, o canal de vendas continua vivo.
+ *
+ * Até 03/09/2026 esta constante tinha o número onde o próprio Marcelo RECEBE os
+ * avisos do Binno, lido das preferências dele — o único que o sistema conhecia
+ * quando o botão nasceu, e nenhum dos dois que ele usa para trabalhar.
  */
-export const WHATSAPP_DO_BINNO = '5579991407447';
+export const WHATSAPP_DO_BINNO = '5579981418956';
 
 /**
  * O texto que já vai escrito na conversa.
