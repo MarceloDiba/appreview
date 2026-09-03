@@ -1131,12 +1131,22 @@ o dono escolhe onde o quer, em `weekly_channel`. Trocar um pelo outro — mandar
 avisos para uma caixa de entrada, ou o relatório completo para uma mensagem de
 telemóvel — é a violação que este bloco proíbe.
 
-**O padrão do resumo é o e-mail, e a razão é aritmética e não de gosto.** Até
-02/09/2026 o resumo era enfileirado sem canal nenhum, caía no padrão `openwa`, e
-o número do piloto está bloqueado desde 31/08: o resumo semanal não chegava a
-ninguém, e falhava em silêncio todas as semanas porque uma linha `failed` na
-fila não acorda ninguém. O e-mail é o único canal que serve qualquer cliente
-hoje, sem depender da aprovação da Meta.
+**O padrão do resumo é a mensagem, por decisão de produto de 02/09/2026.**
+Marcelo, depois de ver o relatório por e-mail pronto: *"vou deixar apenas
+whatsapp inicialmente"*. Uma conta nova recebe o resumo pelo canal que
+`canal_do_aviso` decidir — Telegram para quem o ligou, OpenWA para os outros.
+
+O canal de e-mail continua **inteiro**: a coluna, a restrição por canal, o
+drenador, o agendamento, a função `email-dispatch` e o campo "Onde receber o
+relatório" no painel. Ligá-lo é uma escolha no painel mais a chave do Resend, e
+não um ramo para reconstruir. Apagar código que funciona para "limpar" é pagar
+duas vezes pela mesma coisa, e o e-mail é o único canal que serve um cliente
+enquanto o WhatsApp oficial não for aprovado.
+
+*(A cláusula anterior dizia que o padrão era o e-mail, porque o resumo por
+mensagem caía no `openwa` e o número do piloto está bloqueado desde 31/08. O
+raciocínio continua verdadeiro; o que mudou foi a decisão de quem manda no
+produto, e é ela que vale.)*
 
 **O relatório é escrito uma vez e servido em dois formatos.** O compositor vive
 em `supabase/functions/_shared/relatorioSemanal.ts` e devolve o texto curto (para

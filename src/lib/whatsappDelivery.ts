@@ -74,10 +74,11 @@ const toPreferences = (value: WirePreferences | null | undefined): PilotNotifica
   recipient: value.recipient_e164,
   day: value.weekly_day,
   time: value.delivery_time.slice(0, 5),
-  // Uma conta gravada antes de 02/09/2026 não tem a coluna preenchida na
-  // resposta em cache do navegador. Cair em `email` aqui repete o padrão do
-  // banco, em vez de deixar o `select` da tela sem valor nenhum e vazio.
-  weeklyChannel: value.weekly_channel === 'mensagem' ? 'mensagem' : 'email',
+  // Uma resposta antiga em cache do navegador pode não trazer a coluna. Cair em
+  // `mensagem` repete o padrão do banco, em vez de deixar o `select` da tela
+  // sem valor nenhum e vazio — e é o recuo seguro, porque é o canal que
+  // funciona sem configuração nenhuma.
+  weeklyChannel: value.weekly_channel === 'email' ? 'email' : 'mensagem',
   consented: Boolean(value.consented_at),
 } : null;
 

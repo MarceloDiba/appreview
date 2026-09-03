@@ -39,11 +39,11 @@ export const defaultPilotNotificationPreferences: PilotNotificationPreferences =
   recipient: '',
   day: 'monday',
   time: '09:00',
-  // O padrão é o e-mail pela mesma razão escrita na migração
-  // `20260902230000_email_como_canal.sql`: o resumo por mensagem cai hoje no
-  // `openwa`, e o número do piloto está bloqueado desde 31/08. Manter
-  // `mensagem` seria manter toda a gente num canal morto.
-  weeklyChannel: 'email',
+  // O padrão é a mensagem desde 02/09/2026, por decisão de Marcelo: "vou deixar
+  // apenas whatsapp inicialmente". Ver
+  // `20260903090000_resumo_por_mensagem_de_novo.sql`. O e-mail continua
+  // inteiro, a uma escolha no painel e a uma chave do Resend de distância.
+  weeklyChannel: 'mensagem',
   consented: false,
 };
 
