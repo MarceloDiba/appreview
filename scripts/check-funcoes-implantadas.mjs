@@ -20,6 +20,7 @@ const IMPLANTADAS = {
   'fetch-google-reviews': '2026-07-13',
   'google-business-oauth-callback': '2026-09-03',
   'materialize-whatsapp-notifications': '2026-09-02',
+  'publicar-respostas-confirmadas': '2026-09-03',
   'search-prospects': '2026-08-25',
   'start-google-business-oauth': '2026-08-27',
   'stripe-billing-webhook': '2026-08-27',
@@ -28,6 +29,8 @@ const IMPLANTADAS = {
   'sync-google-business-profile': '2026-09-03',
   'telegram-dispatch': '2026-09-01',
   'temas-das-avaliacoes': '2026-09-02',
+  'whatsapp-cloud-dispatch': '2026-09-03',
+  'whatsapp-cloud-webhook': '2026-09-03',
   'whatsapp-notifications': '2026-09-03',
 };
 
