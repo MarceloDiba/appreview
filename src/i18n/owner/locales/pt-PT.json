@@ -1079,7 +1079,8 @@
         "published": "Resposta confirmada no Google.",
         "publishError": "A resposta não foi publicada no Google.",
         "disclaimer": "A publicação acontece somente neste comando e é confirmada novamente no Google.",
-        "startSync": "Sincronize o Google para trazer também o histórico completo do seu perfil."
+        "startSync": "Sincronize o Google para trazer também o histórico completo do seu perfil.",
+        "syncFailed": "A sincronização com o Google falhou. A contagem abaixo não está completa até isto ser resolvido."
       }
     },
     "cases": {
@@ -1185,7 +1186,8 @@
     "emailSubjectGeneric": "Sobre a sua mensagem",
     "textareaLabel": "Texto sugerido: {{title}}",
     "footerPublic": "O Binno não publica respostas por si: a resposta pública tem de sair do seu perfil de empresa no Google. Copie, cole lá e ajuste o que só o dono do negócio sabe.",
-    "footerPrivate": "Esta mensagem vai diretamente para quem lhe escreveu. Nunca ofereça algo em troca de apagar ou mudar uma avaliação pública. Isso é proibido pelo Google e pela lei."
+    "footerPrivate": "Esta mensagem vai diretamente para quem lhe escreveu. Nunca ofereça algo em troca de apagar ou mudar uma avaliação pública. Isso é proibido pelo Google e pela lei.",
+    "sendWhatsapp": "Responder no WhatsApp"
   },
   "language": {
     "switcherLabel": "Idioma",

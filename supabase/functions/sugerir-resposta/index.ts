@@ -307,6 +307,22 @@ Answer with JSON only, no other text:
  * O nome de quem escreveu entra quando existe, para o recado abrir como o molde
  * abre (`greeting`) em vez de comecar num "Ola" sem ninguem.
  */
+/**
+ * UM emoji, e so quando a mensagem e boa.
+ *
+ * Marcelo perguntou em 03/09/2026 se valia a pena. Vale, e com uma condicao: o
+ * canal e o WhatsApp, onde uma mensagem sem nenhum emoji soa a formulario de
+ * empresa — mas um emoji numa mensagem a quem reclamou soa a deboche. Quem esta
+ * insatisfeito le "lamento muito 😊" como se nao estivessem a levar a serio.
+ *
+ * Por isso a regra depende da nota, e nao do gosto: 4 ou 5 (ou sem nota, que e
+ * o caso de quem so deixou um recado) podem levar um; 1 a 3 nunca levam. Um e
+ * o tecto: dois ja lê como marketing, e a voz aqui e a de um dono a escrever.
+ */
+const EMOJI = (nota: number | null) => (nota === null || nota >= 4)
+  ? '\n- You MAY use at most ONE emoji, and only if it fits naturally. Never more than one. Never in the business name line.'
+  : '\n- NEVER use an emoji. This customer is unhappy, and an emoji reads as making light of it.';
+
 const PEDIDO_PRIVADO = (negocio: string, nota: number | null, comentario: string, cliente: string | null, pais: string | null) => `You draft a PRIVATE message from the owner of "${negocio}" to one customer who sent private feedback. It is not published anywhere and nobody else reads it. It is a direct message, like a phone message written down.
 
 ${cliente ? `The customer's name: ${cliente}` : 'The customer left no name.'}
@@ -329,7 +345,11 @@ Rules for the message, all mandatory:
 - Never say or imply you are an AI.
 - No em dash and no en dash.
 - Between 3 and 6 sentences.
-${cliente ? `- Open by greeting ${cliente} by name.` : ''}- End with "${negocio}" on its own line.
+${cliente ? `- Open by greeting ${cliente} by name.` : ''}- SHAPE. This is read on a phone, in WhatsApp. Never send one solid block of text. Use exactly three parts, separated by a blank line (\n\n):
+  1. The greeting, alone on its first line.
+  2. The body: what you understood, and your one question.
+  3. The business name "${negocio}", alone on the last line.
+- Write real line breaks in the JSON string, as \n. Do not describe them in words.${EMOJI(nota)}
 
 Last rule, and it applies ONLY if the language you identified in Step 1 is Portuguese. If it is any other language, this rule does not apply and you must ignore it completely: ${VARIANTE_DO_PORTUGUES(pais)}
 

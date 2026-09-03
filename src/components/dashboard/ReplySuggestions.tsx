@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Check, Copy, ExternalLink, Mail, MessageSquareQuote } from 'lucide-react';
+import { Check, Copy, ExternalLink, Mail, MessageCircle, MessageSquareQuote } from 'lucide-react';
 import {
   buildReplySuggestions,
   detectReplyLocale,
@@ -219,6 +219,34 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
     }
   };
 
+  /*
+   * O CONTATO DECIDE O BOTAO, e nao o nome da coluna.
+   *
+   * A coluna chama-se `customer_email`, mas o formulario do QR aceita o que o
+   * cliente quiser escrever — e em 03/09/2026, na producao, 10 dos 10 contatos
+   * deixados eram TELEFONE e nenhum era e-mail. O botao "Enviar por e-mail"
+   * montava um `mailto:` para um numero, que nao abre nada em lado nenhum.
+   * Marcelo viu isso no ecra e foi por isso que este bloco existe.
+   *
+   * Telefone vai para o WhatsApp, que e onde o cliente ja esta e onde o produto
+   * inteiro vive. E-mail continua a ir para o e-mail.
+   */
+  const contato = (customerEmail || '').trim();
+  // Um contato com `@` e e-mail. O resto, se tiver digitos que cheguem para um
+  // numero de telefone, e telefone. Nem tudo o que sobra e uma coisa ou outra:
+  // quem escreveu "me liga" nao tem botao nenhum, e e melhor assim do que um
+  // botao que nao leva a lado nenhum.
+  const soDigitos = contato.replace(/\D/g, '');
+  const tipoDoContato: 'email' | 'telefone' | 'nenhum' =
+    contato.includes('@') ? 'email'
+    : soDigitos.length >= 10 && soDigitos.length <= 15 ? 'telefone'
+    : 'nenhum';
+
+  // O `wa.me` exige so digitos, com codigo do pais. O numero e guardado como o
+  // cliente escreveu, portanto limpa-se aqui.
+  const whatsappHref = (body: string) =>
+    `https://wa.me/${soDigitos}?text=${encodeURIComponent(body)}`;
+
   const mailtoHref = (body: string) => {
     const subject = businessName?.trim()
       ? t('reply.emailSubject', { business: businessName.trim() })
@@ -339,7 +367,16 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
                   {isCopied ? t('reply.copied') : t('reply.copy')}
                 </Button>
 
-                {channel === 'private' && customerEmail && (
+                {channel === 'private' && tipoDoContato === 'telefone' && (
+                  <Button size="sm" variant="outline" className="w-full sm:w-auto" asChild>
+                    <a href={whatsappHref(body)} target="_blank" rel="noopener noreferrer">
+                      <MessageCircle size={14} className="mr-2" aria-hidden="true" />
+                      {t('reply.sendWhatsapp')}
+                    </a>
+                  </Button>
+                )}
+
+                {channel === 'private' && tipoDoContato === 'email' && (
                   <Button size="sm" variant="outline" className="w-full sm:w-auto" asChild>
                     <a href={mailtoHref(body)}>
                       <Mail size={14} className="mr-2" aria-hidden="true" />

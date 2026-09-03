@@ -510,7 +510,25 @@ const FilaDeRespostas = ({
         a contagem acima é de uma parte do perfil, e apresentá-la como o total
         seria dado incompleto passado por completo.
       */}
-      {oficiais.connectionStatus === 'connected' && !oficiais.syncComplete && (
+      {/*
+        DUAS MENSAGENS DIFERENTES, porque sao duas situacoes diferentes.
+
+        Ate 03/09/2026 havia so uma: "ainda estamos trazendo as paginas". Ela
+        aparecia sempre que a sincronizacao nao tinha terminado — inclusive
+        quando tinha FALHADO e nada estava a correr. O dono ficava a esperar por
+        um trabalho que nao existia, sem nunca saber que havia um erro.
+
+        Agora, quando o Google recusou, diz-se isso e mostra-se o motivo. O
+        motivo vem do proprio Google e costuma trazer o que fazer (por exemplo,
+        que API activar), portanto e util e nao ruido.
+      */}
+      {oficiais.connectionStatus === 'connected' && !oficiais.syncComplete && oficiais.syncError && (
+        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm leading-5 text-red-900">
+          <p className="font-medium">{t('reviews.google.official.syncFailed')}</p>
+          <p className="mt-1 break-words text-red-800">{oficiais.syncError}</p>
+        </div>
+      )}
+      {oficiais.connectionStatus === 'connected' && !oficiais.syncComplete && !oficiais.syncError && (
         <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-5 text-amber-900">
           {t('reviews.google.official.incomplete')}
         </p>

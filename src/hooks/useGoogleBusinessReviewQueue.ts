@@ -16,6 +16,7 @@ export const useGoogleBusinessReviewQueue = (userId?: string) => {
   const [publishing, setPublishing] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<string | null>(null);
   const [locationTitle, setLocationTitle] = useState<string | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
   const [syncComplete, setSyncComplete] = useState(false);
   const [reviews, setReviews] = useState<BusinessReview[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -27,11 +28,16 @@ export const useGoogleBusinessReviewQueue = (userId?: string) => {
     try {
       const { data: connection, error: connectionError } = await supabase
         .from('google_business_connections')
-        .select('status')
+        .select('status, last_error')
         .eq('user_id', userId)
         .maybeSingle();
       if (connectionError) throw connectionError;
       setConnectionStatus(connection?.status || 'disconnected');
+      // O motivo da ultima recusa do Google, quando houve uma. Ate 03/09/2026
+      // isto nao era lido: a tela dizia "ainda estamos trazendo as paginas"
+      // enquanto a sincronizacao tinha FALHADO e nada corria. Prometer trabalho
+      // em andamento a quem esta parado e pior do que dizer que falhou.
+      setSyncError(connection?.last_error || null);
       if (connection?.status !== 'connected') {
         setLocationTitle(null);
         setReviews([]);
@@ -113,5 +119,5 @@ export const useGoogleBusinessReviewQueue = (userId?: string) => {
     }
   };
 
-  return { loading, syncing, publishing, connectionStatus, locationTitle, syncComplete, reviews, error, syncAll, publishReply };
+  return { loading, syncing, publishing, connectionStatus, locationTitle, syncComplete, syncError, reviews, error, syncAll, publishReply };
 };

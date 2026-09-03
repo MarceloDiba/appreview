@@ -1079,7 +1079,8 @@
         "published": "Reply confirmed on Google.",
         "publishError": "The reply was not published on Google.",
         "disclaimer": "Publishing only happens through this command and is confirmed with Google again.",
-        "startSync": "Sync Google to bring in the full history of your profile as well."
+        "startSync": "Sync Google to bring in the full history of your profile as well.",
+        "syncFailed": "The Google sync failed. The count below is incomplete until this is fixed."
       }
     },
     "cases": {
@@ -1185,7 +1186,8 @@
     "emailSubjectGeneric": "About your message",
     "textareaLabel": "Suggested text: {{title}}",
     "footerPublic": "Binno doesn't publish replies on your behalf: the public reply has to go out from your Google business profile. Copy it, paste it there, and adjust what only you know.",
-    "footerPrivate": "This message goes straight to whoever wrote to you. Never offer anything in exchange for removing or changing a public review. That is against Google's rules and the law."
+    "footerPrivate": "This message goes straight to whoever wrote to you. Never offer anything in exchange for removing or changing a public review. That is against Google's rules and the law.",
+    "sendWhatsapp": "Reply on WhatsApp"
   },
   "language": {
     "switcherLabel": "Language",
