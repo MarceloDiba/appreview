@@ -200,7 +200,19 @@ const ENCOLHEM = [
     //
     // `semEvidencia` continua a ser a porta única do ternário: as duas causas
     // entram nela, e nenhuma delas pode desenhar o corpo pesado.
-    calculo: 'const semEvidencia = semLeitura || poucasAvaliacoes;',
+    // REAPONTADA OUTRA VEZ EM 03/09/2026, e a razao importa mais do que a linha.
+    //
+    // `poucasAvaliacoes` saiu do vazio e passou a travar so a COMPARACAO. O
+    // cartao chama-se "Cada nota separada" e escondia exactamente isso abaixo
+    // de 20 avaliacoes, enquanto o cartao ao lado ja mostrava a mesma divisao
+    // com as mesmas 10. Marcelo reclamou cinco vezes. A divisao de hoje e uma
+    // contagem exacta em qualquer numero; o que precisa de volume e comparar
+    // esta janela com a anterior.
+    //
+    // A REGRA PROTEGIDA NAO MUDOU: o vazio continua a sair de uma leitura do
+    // estado, e nao de uma constante. O que mudou foi QUAL estado. Por isso a
+    // ancora foi reapontada, e nao apagada.
+    calculo: 'const semEvidencia = semLeitura;',
     linha: "{semEvidencia ? <p className=\"mt-2 text-sm text-slate-500\">{semLeitura ? t('dashboard.cockpit.approved.distributionEmpty') : t('dashboard.cockpit.approved.distributionTooFew', { count: avaliacoesLidas, minimo: MINIMO_DE_AVALIACOES })}</p> : ",
     pesado: 'divide-y divide-slate-200',
   },

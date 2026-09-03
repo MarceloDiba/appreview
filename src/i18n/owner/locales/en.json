@@ -812,7 +812,8 @@
         "distributionTooFew_other": "With {{count}} reviews fetched, a single review already shifts the chart a lot. From {{minimo}} on, each rating on its own line appears here.",
         "qrEmpty": "QR opens and clicks through to Google appear here as soon as your QR is on the table.",
         "reputationBreakdownEmpty": "The rating breakdown appears after the first review fetch.",
-        "reputationMetricsEmpty": "Reply time and reviews this month appear when the fetch brings the dates."
+        "reputationMetricsEmpty": "Reply time and reviews this month appear when the fetch brings the dates.",
+        "distributionComparisonFrom": "This is today’s split, from {{count}} reviews. The comparison with earlier weeks appears from {{minimo}} on, when one new review stops moving the number so much."
       }
     },
     "advisorPilot": {

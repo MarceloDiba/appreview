@@ -812,7 +812,8 @@
         "distributionTooFew_other": "Com {{count}} avaliações buscadas, uma única avaliação já muda muito o gráfico. A partir de {{minimo}}, cada nota separada aparece aqui.",
         "qrEmpty": "Aqui aparecem as aberturas do QR e os cliques para o Google, assim que o seu QR estiver na mesa.",
         "reputationBreakdownEmpty": "A distribuição por nota aparece depois da primeira busca de avaliações.",
-        "reputationMetricsEmpty": "O tempo de resposta e as avaliações do mês aparecem quando a busca trouxer as datas."
+        "reputationMetricsEmpty": "O tempo de resposta e as avaliações do mês aparecem quando a busca trouxer as datas.",
+        "distributionComparisonFrom": "Isto é a divisão de hoje, com {{count}} avaliações. A comparação com as semanas anteriores aparece a partir de {{minimo}}, quando uma avaliação nova deixa de mexer tanto no número."
       }
     },
     "advisorPilot": {
