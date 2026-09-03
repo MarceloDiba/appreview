@@ -6,8 +6,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import BusinessInfoSettings, { type BusinessInfo } from '@/components/settings/BusinessInfoSettings';
 import ExternalLinksSettings from '@/components/settings/ExternalLinksSettings';
-import GoogleBusinessConnection from '@/components/settings/GoogleBusinessConnection';
-import GoogleBusinessLocationPicker from '@/components/settings/GoogleBusinessLocationPicker';
+import ConexaoDoGoogle from '@/components/settings/ConexaoDoGoogle';
 import ExperimentalApifySnapshot from '@/components/settings/ExperimentalApifySnapshot';
 import { useExternalLinks } from '@/hooks/useExternalLinks';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
@@ -41,6 +40,15 @@ const Settings = () => {
   const userId = user?.id;
 
   const [businessInfo, setBusinessInfo] = useState<BusinessInfo>(EMPTY);
+  /**
+   * Se a ligacao oficial ao Google ja alimenta o painel.
+   *
+   * `false` ate se saber, e nao `null`: enquanto nao se sabe, mostra-se a
+   * coleta do Apify — que e o que serve quem nao tem ligacao, e e a maioria.
+   * Escondê-la durante meio segundo a quem precisa dela seria pior do que
+   * mostrá-la durante meio segundo a quem nao precisa.
+   */
+  const [temLigacaoOficial, setTemLigacaoOficial] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
 
@@ -57,6 +65,16 @@ const Settings = () => {
     refreshLinks,
     error,
   } = useExternalLinks(userId);
+
+  useEffect(() => {
+    if (!userId) return;
+    void supabase
+      .from('google_business_connections')
+      .select('status')
+      .eq('user_id', userId)
+      .maybeSingle()
+      .then(({ data }) => setTemLigacaoOficial(data?.status === 'connected'));
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -198,9 +216,23 @@ const Settings = () => {
                 error={error}
                 refreshLinks={refreshLinks}
               />
-              <div className="mt-6"><GoogleBusinessConnection /></div>
-              <ExperimentalApifySnapshot googleReviewUrl={googleReviewUrl} />
-              <GoogleBusinessLocationPicker />
+              {/*
+                UM CARTAO, E NAO QUATRO (03/09/2026).
+                Conectar, buscar locais, escolher o negocio e buscar avaliacoes
+                eram quatro cartoes em ordem, sem nada dizer que existia uma
+                ordem. Marcelo: "nao e claro para o cliente, ele nao vai saber
+                que e preciso isso". Agora conectar faz o resto sozinho e o
+                cartao conta o que esta a acontecer.
+              */}
+              <div className="mt-6"><ConexaoDoGoogle /></div>
+              {/*
+                A COLETA DO APIFY SO APARECE PARA QUEM NAO TEM A LIGACAO OFICIAL.
+                Dois botoes a prometer "trazer as suas avaliacoes" e a propria
+                confusao — e o do Apify traz menos (50, raspadas) e custa
+                dinheiro. Continua a existir porque e o que serve quem ainda nao
+                ligou o Google, que e todo prospecto numa demonstracao.
+              */}
+              {!temLigacaoOficial && <ExperimentalApifySnapshot googleReviewUrl={googleReviewUrl} />}
               <GoogleReviews userId={userId} businessCountry={businessInfo.country || null} />
             </TabsContent>
           </Tabs>

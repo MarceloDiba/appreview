@@ -945,6 +945,22 @@
       "linksSaved": "External links updated.",
       "saveError": "Couldn't save the external links. Please try again.",
       "noGooglePlaceId": "There's no Google Place ID linked to refresh."
+    },
+    "googlePreparacao": {
+      "aPrepararTitulo": "Setting up your Google…",
+      "prontoTitulo": "{{negocio}} is connected",
+      "passoLigado": "Google permission granted",
+      "passoNegocio": "Finding your business on Google…",
+      "passoNegocioFeito": "Business found: {{negocio}}",
+      "passoAvaliacoes": "Bringing in your reviews…",
+      "passoAvaliacoesFeito": "{{total}} reviews brought from Google",
+      "nuncaPublica": "Binno reads your reviews and drafts replies. It never publishes one without you.",
+      "qualNegocio": "Which business should Binno follow?",
+      "qualNegocioAjuda": "Your Google account manages more than one. Pick the one that feeds this dashboard.",
+      "nenhumNegocio": "The Google account you authorised does not manage any business. Connect with the account that manages your Business Profile.",
+      "falhouTitulo": "Couldn't set up the connection",
+      "falhouSemMotivo": "Google refused and did not say why.",
+      "tentarDeNovo": "Try again"
     }
   },
   "profile": {
