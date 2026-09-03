@@ -13,10 +13,20 @@ import { corsHeaders, json, resolveMonthlyRunLimit, runExperimentalApifyCollecti
  * `platform_links` que o cadastro já precisa fazer), então uma aba fechada
  * pelo dono não perde o pedido.
  *
- * Esta função só lê essa fila e gasta com o Apify. Alguém ainda precisa
- * agendar a sua execução (pg_cron, Supabase Scheduled Function ou um cron
- * externo apontando para esta URL); isso não está incluído aqui de propósito,
- * pois a primeira execução real é decisão de Marcelo, não deste código.
+ * Esta função só lê essa fila e gasta com o Apify.
+ *
+ * QUEM A CHAMA, DESDE 02/09/2026: o `pg_cron`, de dois em dois minutos, por
+ * `public.drenar_coleta_do_cadastro()`. Até essa data ninguém a chamava, e o
+ * cabeçalho dizia porquê — "a primeira execução real é decisão de Marcelo, não
+ * deste código". A decisão existia desde 30/08 ("faça a coleta no apify sempre
+ * que cadastrar um novo negócio"); o agendamento é que ficou por fazer, e o
+ * preço foi um pedido de coleta parado na fila desde 31/08 sem ninguém saber.
+ * Um cliente que se cadastrasse abria o painel e não via dado nenhum.
+ *
+ * Dois de dois minutos, e não de cinco: quem acabou de se cadastrar está a
+ * OLHAR para o ecrã. O que corre a cada dois minutos é uma contagem na fila; o
+ * gasto só acontece quando há linha para processar, e a fila tem `user_id`
+ * como chave primária — uma coleta por negócio, no total, para sempre.
  *
  * INTERRUPTOR DE DESLIGAMENTO
  *
@@ -50,6 +60,29 @@ const authorizedServiceCall = (request: Request, serviceRoleKey: string) => {
   return Boolean(serviceRoleKey) && token === serviceRoleKey;
 };
 
+/**
+ * O SEGUNDO CAMINHO DE ENTRADA: o segredo do worker (02/09/2026).
+ *
+ * Ate esta data a unica forma de chamar esta funcao era apresentar a CHAVE DE
+ * SERVICO no cabecalho. Isso e o que a impedia de ser agendada: o `pg_cron`
+ * corre dentro do banco, e para lhe dar a chave de servico era preciso guardar
+ * uma copia dela no Vault — a chave que abre a base de dados INTEIRA, sem
+ * limite nenhum, ao alcance de qualquer funcao `security definer` que alguem
+ * escreva a seguir.
+ *
+ * O `x-binno-worker-secret` e o que os outros tres drenadores ja usam
+ * (`telegram-dispatch`, `email-dispatch`, `materialize-whatsapp-notifications`)
+ * e vale exactamente uma coisa: "podes correr este drenador". Se vazar, o que
+ * se perde e a capacidade de disparar drenagens — nao a base de dados.
+ *
+ * O caminho antigo FICA. Quem ja chama com a chave de servico continua a
+ * funcionar; isto e uma porta a mais, e nao uma troca de fechadura.
+ */
+const authorizedWorkerCall = (request: Request) => {
+  const expected = Deno.env.get('BINNO_WORKER_SECRET') || '';
+  return Boolean(expected) && request.headers.get('x-binno-worker-secret') === expected;
+};
+
 serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
@@ -60,7 +93,7 @@ serve(async (request) => {
   const experimentalEnabled = Deno.env.get('APIFY_EXPERIMENTAL_ENABLED') === 'true';
   const autoOnSignupEnabled = Deno.env.get('APIFY_AUTO_COLLECT_ON_SIGNUP_ENABLED') === 'true';
 
-  if (!serviceRoleKey || !authorizedServiceCall(request, serviceRoleKey)) {
+  if (!serviceRoleKey || !(authorizedServiceCall(request, serviceRoleKey) || authorizedWorkerCall(request))) {
     return json({ error: 'Authentication required' }, 401);
   }
 
