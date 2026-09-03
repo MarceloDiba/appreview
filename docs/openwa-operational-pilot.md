@@ -1,5 +1,25 @@
 # Piloto operacional OpenWA
 
+> **PARADO EM 03/09/2026.** O container `binno-openwa-relay` foi parado na VPS
+> (`docker stop`), e o canal `openwa` deixou de existir: `canal_do_aviso` nunca
+> mais o devolve, e não há nenhuma linha `queued` nessa fila. O que está escrito
+> abaixo descreve como o piloto funcionava, e continua válido como referência —
+> mas **nada disto está no ar**.
+>
+> Por que parou: o laço de despacho chamava
+> `materialize-whatsapp-notifications` a cada 10 segundos, duplicando o cron
+> `binno-resumo-semanal`. Medido em `pg_stat_statements`: **6,00 chamadas por
+> minuto**, ou 8.640 por dia — mais de metade do teto gratuito de invocações do
+> Supabase gasto sem fazer nada. O contador congelou no instante em que o
+> container parou.
+>
+> Para voltar a ligar: **reimplante antes**, senão o laço volta junto. A
+> correção está em `services/openwa-relay/src/server.mjs` e é guardada por
+> `scripts/check-relay-nao-duplica-o-cron.mjs`.
+>
+> O sucessor é a Cloud API oficial da Meta, em
+> `supabase/functions/whatsapp-cloud-dispatch`.
+
 Este piloto entrega a experiência do Binno por uma arquitetura que não depende
 do navegador do gestor. Ele é uma etapa temporária antes de trocar somente o
 adaptador de transporte por um provedor oficial.
