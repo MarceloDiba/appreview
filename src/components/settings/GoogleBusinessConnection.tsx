@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Building2, Clock3, ShieldCheck } from 'lucide-react';
+import { Building2, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,11 +9,25 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 /**
  * This starts Google OAuth only. Binno never asks for a Google password,
  * and it does not publish a reply as a side effect of this connection.
+ *
+ * O INTERRUPTOR SAIU EM 03/09/2026.
+ *
+ * Até essa data este cartão só aparecia atrás de
+ * `VITE_GOOGLE_BUSINESS_OAUTH_ENABLED`, uma variável de build do Vite — e era
+ * o botão em si que ficava por trás dela, não só um aviso: sem ela, o dono via
+ * um cartão a dizer "quando chegar" para sempre, mesmo com o backend já
+ * configurado. O Google aprovou o projeto `288079352399` para a Business
+ * Profile API nesse dia, e a variável nunca chegou a ser definida no
+ * ambiente de build de produção — não há como este código verificar isso, e
+ * foi assim que o cartão continuou preso ao "quando chegar" depois de já ter
+ * chegado.
+ *
+ * A protecção certa já existia do lado errado: `startConnection`, abaixo, já
+ * trata `GOOGLE_OAUTH_NOT_CONFIGURED` com um aviso claro, porque é o SERVIDOR
+ * quem sabe se as três chaves (client id, client secret, redirect uri) estão
+ * configuradas — não uma variável de build que pode nunca chegar ao pacote
+ * final. O cartão agora confia nessa resposta em vez de tentar adivinhar.
  */
-/** Só libera o consentimento quando OAuth, secrets e funções estiverem ativos. */
-export const isOfficialGoogleConnectionAvailable =
-  import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true';
-
 const GoogleBusinessConnection = () => {
   const { t } = useOwnerTranslation();
   const [connecting, setConnecting] = useState(false);
@@ -43,32 +57,6 @@ const GoogleBusinessConnection = () => {
       setConnecting(false);
     }
   };
-
-  if (!isOfficialGoogleConnectionAvailable) {
-    return (
-      <Card className="mb-6 border-amber-200 bg-amber-50/40 shadow-none">
-        <CardHeader className="pb-3">
-          <div className="flex items-start gap-3">
-            <div className="rounded-full bg-amber-100 p-2 text-amber-800">
-              <Clock3 className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">{t('settings.googleConnection.waitingTitle')}</CardTitle>
-              <CardDescription className="mt-1 max-w-2xl">
-                {t('settings.googleConnection.waitingDescription')}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="flex max-w-2xl items-start gap-2 text-xs leading-5 text-slate-600">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
-            {t('settings.googleConnection.waitingHelp')}
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="mb-6 border-blue-100 shadow-none">

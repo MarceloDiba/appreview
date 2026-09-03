@@ -359,12 +359,11 @@ const FilaDeRespostas = ({
 }) => {
   const { t } = useOwnerTranslation();
   const privados = useInternalFeedback(userId);
-  // Mesma porta que o painel usa: sem a variável de ambiente ligada não existe
-  // ligação oficial possível, e consultar por ela seria gastar viagem ao banco
-  // para receber sempre "desligado".
-  const oficiais = useGoogleBusinessReviewQueue(
-    import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined,
-  );
+  // O interruptor de ambiente saiu em 03/09/2026: o Google aprovou o projeto
+  // para a Business Profile API, e o próprio hook já devolve fila vazia sem
+  // erro quando o dono ainda não ligou a conexão — não há "desligado" que
+  // precise de ser simulado aqui.
+  const oficiais = useGoogleBusinessReviewQueue(userId);
   const publicas = useGoogleReviews(userId);
   const respondidas = useGooglePublicReviewsAnswered(userId);
   const [falhaAoAtualizar, setFalhaAoAtualizar] = useState(false);

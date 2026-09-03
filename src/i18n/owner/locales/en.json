@@ -859,9 +859,6 @@
       "consent": "You authorize access directly with Google. Binno never sees your password and never publishes replies automatically.",
       "connect": "Connect Google",
       "connecting": "Opening Google…",
-      "waitingTitle": "Official Google connection, when it arrives",
-      "waitingDescription": "Your queue already works: Binno fetches your reviews and builds the queue in the block below. The official connection adds your profile history and shows the replies you have already published on Google.",
-      "waitingHelp": "Binno never asks for your password and never pretends the connection works.",
       "unavailable": "The official Business Profile connection is still being configured in this environment.",
       "startError": "Google connection could not be started. Please try again later."
     },
@@ -890,8 +887,7 @@
     "subtitlePrefix": "If you'd rather do this step by step,",
     "guidedLink": "use the guided setup",
     "tabBusiness": "My business",
-    "tabLinks": "External links",
-    "tabGoogle": "Google Reviews",
+    "tabGoogle": "Google",
     "saved": "Saved.",
     "saveError": "Couldn't save. Please try again.",
     "business": {

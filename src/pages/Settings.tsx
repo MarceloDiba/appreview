@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import BusinessInfoSettings, { type BusinessInfo } from '@/components/settings/BusinessInfoSettings';
 import ExternalLinksSettings from '@/components/settings/ExternalLinksSettings';
-import GoogleBusinessConnection, { isOfficialGoogleConnectionAvailable } from '@/components/settings/GoogleBusinessConnection';
+import GoogleBusinessConnection from '@/components/settings/GoogleBusinessConnection';
 import GoogleBusinessLocationPicker from '@/components/settings/GoogleBusinessLocationPicker';
 import ExperimentalApifySnapshot from '@/components/settings/ExperimentalApifySnapshot';
 import { useExternalLinks } from '@/hooks/useExternalLinks';
@@ -154,11 +154,22 @@ const Settings = () => {
             </p>
           </header>
 
+          {/*
+            "Links externos" e "Google Reviews" viraram uma aba só, chamada
+            "Google" (pedido de Marcelo, 03/09/2026). As duas falavam da mesma
+            coisa em telas diferentes: o link que alimenta a coleta, e o que
+            essa coleta traz de volta. Separadas, quem chegava à segunda sem
+            ter passado pela primeira via avisos sobre um link que nunca tinha
+            visto.
+
+            A ORDEM DENTRO DA ABA é a ordem em que a informação nasce: primeiro
+            o link (é dele que tudo depende), depois a conexão oficial, depois
+            as duas formas de leitura que esse link alimenta.
+          */}
           <Tabs defaultValue="business">
             <TabsList className="mb-6">
               <TabsTrigger value="business">{t('settings.tabBusiness')}</TabsTrigger>
-              <TabsTrigger value="external-links">{t('settings.tabLinks')}</TabsTrigger>
-              <TabsTrigger value="google-reviews">{t('settings.tabGoogle')}</TabsTrigger>
+              <TabsTrigger value="google">{t('settings.tabGoogle')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="business">
@@ -173,7 +184,7 @@ const Settings = () => {
               />
             </TabsContent>
 
-            <TabsContent value="external-links">
+            <TabsContent value="google">
               <ExternalLinksSettings
                 externalLinks={externalLinks}
                 onExternalLinkChange={handleExternalLinkChange}
@@ -187,13 +198,10 @@ const Settings = () => {
                 error={error}
                 refreshLinks={refreshLinks}
               />
-            </TabsContent>
-
-            <TabsContent value="google-reviews">
-              <GoogleBusinessConnection />
+              <div className="mt-6"><GoogleBusinessConnection /></div>
               <ExperimentalApifySnapshot googleReviewUrl={googleReviewUrl} />
-              {isOfficialGoogleConnectionAvailable && <GoogleBusinessLocationPicker />}
-              {isOfficialGoogleConnectionAvailable && <GoogleReviews userId={userId} businessCountry={businessInfo.country || null} />}
+              <GoogleBusinessLocationPicker />
+              <GoogleReviews userId={userId} businessCountry={businessInfo.country || null} />
             </TabsContent>
           </Tabs>
         </div>
