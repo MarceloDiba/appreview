@@ -1,11 +1,12 @@
 import ApprovedCockpitDashboard from '@/components/dashboard/ApprovedCockpitDashboard';
 import { ILLUSTRATIVE_DEMO_FUNNEL, ILLUSTRATIVE_DEMO_SNAPSHOT } from '@/lib/illustrativeDemoSnapshot';
 import type { MarketingCopy } from '@/i18n/marketing';
+import MarcaBinno from '@/components/marketing/MarcaBinno';
 
 const CockpitHeader = ({ copy }: { copy: MarketingCopy }) => (
   <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex items-center gap-3"><p className="text-xl font-bold tracking-tight text-[#6D43C0]">Binno</p><span className="hidden h-5 border-l border-slate-200 sm:block" /><p className="text-sm font-medium text-slate-700">{ILLUSTRATIVE_DEMO_SNAPSHOT.business.name}</p></div>
+      <div className="flex items-center gap-3"><MarcaBinno /><span className="hidden h-5 border-l border-slate-200 sm:block" /><p className="text-sm font-medium text-slate-700">{ILLUSTRATIVE_DEMO_SNAPSHOT.business.name}</p></div>
       <span className="rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-violet-800">{copy.demo.label}</span>
     </div>
   </header>

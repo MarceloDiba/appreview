@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { UserRound } from 'lucide-react';
+import MarcaBinno from '@/components/marketing/MarcaBinno';
 
 interface NavbarProps {
   userRole?: 'business' | 'none';
@@ -52,7 +53,7 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0">
-              <span className="text-xl font-bold text-[#6D43C0]">Binno</span>
+              <MarcaBinno />
             </Link>
 
             {userRole === 'business' && businessName && (

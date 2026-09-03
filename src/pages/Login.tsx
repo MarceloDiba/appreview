@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getSetupState } from '@/hooks/useSetupStatus';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
+import MarcaBinno from '@/components/marketing/MarcaBinno';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ const Login = () => {
           <LanguageSwitcher />
         </div>
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-primary">Binno</h1>
+          <MarcaBinno tamanho="lg" />
           <p className="text-gray-600 mt-2">{t('auth.loginSubtitle')}</p>
         </div>
 

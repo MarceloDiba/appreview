@@ -18,9 +18,11 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PublicMarketingNav from '@/components/marketing/PublicMarketingNav';
+import BotaoDeWhatsApp from '@/components/marketing/BotaoDeWhatsApp';
 import BinnoDemoCockpit, { SalesCockpitPreview } from '@/components/marketing/BinnoDemoCockpit';
 import { getMarketingCopy } from '@/i18n/marketing';
 import { useTranslation } from '@/i18n/useTranslation';
+import MarcaBinno from '@/components/marketing/MarcaBinno';
 
 const SectionTitle = ({ eyebrow, title, body, centered = false, inverted = false }: { eyebrow: string; title: string; body: string; centered?: boolean; inverted?: boolean }) => (
   <div className={centered ? 'mx-auto max-w-3xl text-center' : 'max-w-2xl'}>
@@ -107,7 +109,14 @@ const Index = () => {
 
         <section id="pricing" className="scroll-mt-20 px-4 py-20 sm:px-6"><div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-8 rounded-3xl border border-violet-200 bg-violet-50/60 p-8 md:flex-row md:p-10"><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#6D43C0]">{copy.pricing.eyebrow}</p><h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">{copy.pricing.title}</h2><p className="mt-3 max-w-xl text-lg leading-7 text-slate-600">{copy.pricing.body}</p></div><div className="w-full max-w-64 text-center md:text-right"><p className="text-sm font-medium text-slate-600">{copy.pricing.availableLabel}</p><p className="mt-3"><span className="text-5xl font-bold text-slate-950">R$199</span><span className="text-slate-500">{copy.pricing.monthly}</span></p><p className="mt-2 text-xs leading-5 text-slate-500">{copy.pricing.availableHint}</p><Button asChild size="lg" className="mt-5 w-full bg-[#2457D6] hover:bg-[#1d47b0]"><Link to="/signup">{copy.pricing.cta}</Link></Button></div></div></section>
       </main>
-      <footer className="bg-slate-950 px-4 py-10 text-slate-300 sm:px-6"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-5 sm:flex-row"><div><p className="text-lg font-bold text-white">Binno</p><p className="mt-2 text-sm text-slate-400">{copy.footer.body}</p></div><div className="flex flex-wrap gap-5 text-sm"><Link to="/demo">{copy.footer.demo}</Link><Link to="/termos">{copy.footer.terms}</Link><Link to="/privacidade">{copy.footer.privacy}</Link></div></div></footer>
+      <footer className="bg-slate-950 px-4 py-10 text-slate-300 sm:px-6"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-5 sm:flex-row"><div><MarcaBinno tom="claro" /><p className="mt-2 text-sm text-slate-400">{copy.footer.body}</p></div><div className="flex flex-wrap gap-5 text-sm"><Link to="/demo">{copy.footer.demo}</Link><Link to="/termos">{copy.footer.terms}</Link><Link to="/privacidade">{copy.footer.privacy}</Link></div></div></footer>
+      {/*
+        Fora do <footer> e fora do <main>, de proposito: ele acompanha a pagina
+        inteira. A pergunta que trava uma compra aparece a meio da leitura, e
+        nao no fim — obrigar a rolar ate ao rodape para a fazer e perder a
+        pergunta.
+      */}
+      <BotaoDeWhatsApp forma="flutuante" rotulo={copy.contacto.rotulo} mensagem={copy.contacto.mensagemDaVenda} />
     </div>
   );
 };

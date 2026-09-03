@@ -1206,6 +1206,38 @@ tabela com linhas dentro — para provar que nenhuma inserção que hoje funcion
 passa a ser recusada — e lê as permissões resultantes do próprio banco, em vez
 de procurar a palavra `revoke` no ficheiro.
 
+## A marca diz a fase, e o contato tem lugar (02/09/2026)
+
+**"Beta" fica abaixo do nome, e a marca é desenhada num sítio só.** Pedido de
+Marcelo na véspera de começar a prospecção. O selo vive em
+`src/components/marketing/MarcaBinno.tsx` e é usado nas seis telas que mostram a
+marca; escrevê-lo à mão em qualquer uma delas é proibido, porque uma fica sempre
+para trás — e porque o "Beta" vai **sair** um dia, e nessa altura tem de sair de
+uma vez.
+
+O selo é honesto, não decoração: o Binno está a ser vendido antes de o WhatsApp
+oficial estar aprovado e antes de o acesso ao Perfil da Empresa sair da análise
+do Google. Dizer "Beta" na cara do produto é a diferença entre um cliente que
+entende o que compra e um que se sente enganado na primeira coisa que falhar.
+
+**O contato do Binno tem duas formas, e são duas audiências.** Na página de
+vendas, um botão flutuante: quem está ali avalia comprar, e a pergunta que trava
+uma compra aparece a meio da leitura, não no fim.
+
+Na **página do negócio** — a que abre no telemóvel de um cliente do nosso
+cliente, depois do QR — o botão é **discreto e vem depois da escolha**, nunca
+flutuante. A tarefa de quem abre aquela página é avaliar o negócio, e esse
+clique é o que o nosso cliente paga para receber: um botão do Binno a competir
+com ele ali seria o Binno a roubar do próprio cliente. Fica uma linha para quem
+reparar, que é o caminho pelo qual um dono de negócio descobre o Binno ao ver o
+QR de outro.
+
+**O número vive numa constante só**, em `src/lib/contactoDoBinno.ts`. É hoje o
+número pessoal do Marcelo, o único que o Binno conhece; quando existir um número
+comercial, muda-se ali e mais nada.
+
+Guardado por `scripts/check-marca-e-contacto.mjs`.
+
 O teste não substitui
 revisão de produto: qualquer mudança visual ou de fluxo ainda deve ser
 comparada com este documento antes de ser aceita.
