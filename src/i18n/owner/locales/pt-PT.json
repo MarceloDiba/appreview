@@ -859,9 +859,6 @@
       "consent": "Autoriza o acesso diretamente no Google. O Binno não vê a sua palavra-passe nem publica respostas automaticamente.",
       "connect": "Ligar Google",
       "connecting": "A abrir Google…",
-      "waitingTitle": "Ligação oficial do Google, quando chegar",
-      "waitingDescription": "A sua fila já funciona: o Binno procura as suas avaliações e monta a fila no bloco abaixo. A ligação oficial acrescenta o histórico completo do perfil e mostra as respostas que já publicou no Google.",
-      "waitingHelp": "O Binno nunca pede a sua palavra-passe nem finge que a ligação funcionou.",
       "unavailable": "A ligação oficial ao Perfil de Empresa ainda está a ser configurada neste ambiente.",
       "startError": "Não foi possível iniciar a ligação ao Google. Tente novamente mais tarde."
     },
@@ -890,8 +887,7 @@
     "subtitlePrefix": "Se preferir fazer isto passo a passo,",
     "guidedLink": "use a configuração guiada",
     "tabBusiness": "O meu negócio",
-    "tabLinks": "Links externos",
-    "tabGoogle": "Google Reviews",
+    "tabGoogle": "Google",
     "saved": "Informações guardadas.",
     "saveError": "Não foi possível guardar. Tente novamente.",
     "business": {

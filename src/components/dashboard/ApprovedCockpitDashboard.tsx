@@ -208,7 +208,10 @@ const MobileSummary = ({ snapshot, queue, temFila }: { snapshot: ExperimentalApi
 };
 
 const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel, demoBusinessCountry = null }: { snapshot: ExperimentalApifySnapshot; userId?: string; demo?: boolean; demoFunnel?: ReviewFunnelMetrics; demoBusinessCountry?: string | null }) => {
-  const official = useGoogleBusinessReviewQueue(import.meta.env.VITE_GOOGLE_BUSINESS_OAUTH_ENABLED === 'true' ? userId : undefined);
+  // O interruptor de ambiente saiu em 03/09/2026, junto com a aprovação do
+  // Google: o hook já devolve fila vazia, sem erro, para quem ainda não ligou
+  // a conexão oficial.
+  const official = useGoogleBusinessReviewQueue(userId);
   const liveFunnel = useReviewFunnelMetrics(userId);
   const funnel = demoFunnel ? { ...liveFunnel, data: demoFunnel } : liveFunnel;
   // Os comentários internos por tratar, lidos AQUI e não dentro do cartão que
