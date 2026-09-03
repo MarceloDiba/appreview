@@ -52,10 +52,13 @@ const preferenceInput = (body: Record<string, unknown>) => {
     // cafe, e ai o e-mail ganha: as barras por nota, os temas e a comparacao da
     // semana nao cabem numa mensagem de telemovel.
     //
-    // Um valor desconhecido cai em `email` em vez de recusar o formulario
+    // Um valor desconhecido cai em `mensagem` em vez de recusar o formulario
     // inteiro: e uma preferencia de apresentacao, e recusar a gravacao das
-    // outras seis por causa dela seria desproporcionado.
-    weekly_channel: body.weeklyChannel === 'mensagem' ? 'mensagem' : 'email',
+    // outras seis por causa dela seria desproporcionado. O recuo e `mensagem`
+    // desde 02/09/2026 porque e o canal que funciona sem configuracao nenhuma —
+    // cair num canal que precisa de uma chave que pode nao existir poria o
+    // resumo a espera sem ninguem ter pedido isso.
+    weekly_channel: body.weeklyChannel === 'email' ? 'email' : 'mensagem',
     consented_at: body.consented === true ? new Date().toISOString() : null,
   };
 };

@@ -412,6 +412,24 @@ try {
   // nao existe: e a prova de que nenhuma linha viva deixa de passar.
   psql(semExtensoes(readFileSync(join(MIGRACOES, '20260902230000_email_como_canal.sql'), 'utf8')));
 
+  // UMA CONTA QUE JA ESTAVA EM `email`, gravada entre as duas migracoes.
+  //
+  // Sem esta linha, a proxima migracao nao tinha nada para migrar: o guarda so
+  // inseria preferencias DEPOIS dela, e essas nasciam ja com o padrao novo.
+  // Apagar o `update` da migracao deixava o guarda verde — e a unica conta viva
+  // ficava presa num canal sem chave. Apanhado a tentar quebra-lo, em
+  // 02/09/2026.
+  psql("insert into auth.users (id) values ('22222222-2222-2222-2222-222222222222');");
+  psql(`insert into public.whatsapp_notification_preferences (user_id, recipient_e164, consented_at, weekly_channel)
+        values ('22222222-2222-2222-2222-222222222222', '+5511961234567', now(), 'email');`);
+  exigir('antes da decisao, uma conta podia estar em e-mail',
+    psql("select weekly_channel from public.whatsapp_notification_preferences where user_id = '22222222-2222-2222-2222-222222222222';").trim() === 'email');
+
+  psql(semExtensoes(readFileSync(join(MIGRACOES, '20260903090000_resumo_por_mensagem_de_novo.sql'), 'utf8')));
+
+  exigir('a conta que ja existia foi movida para mensagem, e nao so o padrao',
+    psql("select weekly_channel from public.whatsapp_notification_preferences where user_id = '22222222-2222-2222-2222-222222222222';").trim() === 'mensagem');
+
   // 2.3 O QUE JA FUNCIONAVA CONTINUA A FUNCIONAR. Esta e a unica assercao que
   // interessa a Marcelo: nao regredir.
   const depoisOpenwa = inserir(
@@ -462,18 +480,27 @@ try {
   // 2.7 A preferencia do resumo: o padrao e o e-mail, e um valor inventado nao entra.
   psql(`insert into public.whatsapp_notification_preferences (user_id, recipient_e164, consented_at)
         values ('11111111-1111-1111-1111-111111111111', '+5511961234567', now());`);
-  exigir('o padrao do canal do resumo e o e-mail',
-    psql("select weekly_channel from public.whatsapp_notification_preferences limit 1;").trim() === 'email');
+  // O PADRAO VOLTOU A SER `mensagem` EM 02/09/2026, por decisao de Marcelo:
+  // "vou deixar apenas whatsapp inicialmente". O canal de e-mail continua
+  // inteiro e a um passo de distancia; o que mudou foi por onde sai o resumo de
+  // quem nao escolheu nada.
+  exigir('o padrao do canal do resumo e a mensagem',
+    psql("select weekly_channel from public.whatsapp_notification_preferences where user_id = '11111111-1111-1111-1111-111111111111';").trim() === 'mensagem');
   const canalInventado = psql(
-    "update public.whatsapp_notification_preferences set weekly_channel = 'pombo-correio';",
+    "update public.whatsapp_notification_preferences set weekly_channel = 'pombo-correio' where user_id = '11111111-1111-1111-1111-111111111111';",
     { tolerar: true },
   );
   exigir('um canal de resumo inventado e recusado', canalInventado.erro !== undefined);
-  const canalMensagem = psql(
-    "update public.whatsapp_notification_preferences set weekly_channel = 'mensagem';",
+  const canalEmail = psql(
+    "update public.whatsapp_notification_preferences set weekly_channel = 'email' where user_id = '11111111-1111-1111-1111-111111111111';",
     { tolerar: true },
   );
-  exigir('voltar o resumo para mensagem continua a ser possivel', canalMensagem.erro === undefined);
+  exigir('ligar o resumo por e-mail continua a ser possivel', canalEmail.erro === undefined);
+  const canalMensagem = psql(
+    "update public.whatsapp_notification_preferences set weekly_channel = 'mensagem' where user_id = '11111111-1111-1111-1111-111111111111';",
+    { tolerar: true },
+  );
+  exigir('e voltar para mensagem tambem', canalMensagem.erro === undefined);
 
   // 2.8 O corpo em texto continua com tecto, e o HTML nao precisa dele.
   const corpoEnorme = inserir(
