@@ -85,6 +85,14 @@ const Index = () => {
         </section>
 
         <section className="px-4 py-20 sm:px-6">
+          <div className="mx-auto max-w-4xl rounded-3xl border border-emerald-200 bg-emerald-50/50 p-8 text-center sm:p-12">
+            <SectionTitle centered eyebrow={copy.honest.eyebrow} title={copy.honest.title} body={copy.honest.body} />
+            <p className="mx-auto mt-6 flex max-w-2xl items-start gap-2 text-left text-sm leading-6 text-emerald-950"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />{copy.honest.note}</p>
+            <a href="https://support.google.com/business/answer/13762416?hl=en" target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center text-sm font-semibold text-[#2457D6]">{copy.honest.link}<ArrowRight className="ml-1 h-4 w-4" /></a>
+          </div>
+        </section>
+
+        <section className="px-4 py-20 sm:px-6">
           <div className="mx-auto grid max-w-7xl gap-10 rounded-3xl border border-emerald-200 bg-emerald-50/50 p-6 sm:p-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div><SectionTitle eyebrow={copy.whatsapp.eyebrow} title={copy.whatsapp.title} body={copy.whatsapp.body} /><p className="mt-6 text-sm leading-6 text-emerald-950">{copy.whatsapp.note}</p></div>
             <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm"><div className="flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100"><MessageCircle className="h-5 w-5 text-emerald-700" /></span><div><p className="font-semibold text-slate-950">Binno</p><p className="text-sm text-slate-500">{copy.cockpit.weeklySummary}</p></div></div><div className="mt-5 rounded-2xl rounded-tl-sm bg-emerald-50 p-4 text-sm leading-6 text-emerald-950"><p className="font-semibold">{copy.cockpit.weekly}</p><ul className="mt-2 space-y-2">{copy.whatsapp.items.map((item) => <li key={item} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />{item}</li>)}</ul></div></div>
