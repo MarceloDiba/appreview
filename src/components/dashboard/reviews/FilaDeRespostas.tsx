@@ -186,7 +186,11 @@ const PublicacaoOficial = ({
   const enviar = async () => {
     if (!rascunho.trim()) return;
     if (await publicar(item.idNaFonte, rascunho.trim())) {
-      toast.success(t('reviews.google.official.published'));
+      // Nomeia a avaliacao: quando ela sai da lista, a seguinte ocupa o mesmo
+      // lugar e sem o nome nao se distingue "publicou" de "nao aconteceu nada".
+      toast.success(t('reviews.google.official.published', {
+        autor: item.autor || t('dashboard.cockpit.layout.anonymousReviewer'),
+      }));
       revalidarAEsperar();
     } else {
       toast.error(t('reviews.google.official.publishError'));

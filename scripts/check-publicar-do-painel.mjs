@@ -124,6 +124,25 @@ exigir('a aba nao diz quando da para publicar; o link generico ficaria sempre',
 exigir('o link para o Google foi apagado; quem nao tem ligacao oficial fica sem saida',
   /business\.google\.com\/reviews/.test(sugestoes));
 
+// 8. A CONFIRMACAO DIZ DE QUEM ERA A RESPOSTA.
+//
+// Quando a avaliacao respondida sai da lista, a SEGUINTE desliza para o mesmo
+// lugar, com o mesmo botao e o mesmo aspecto. Uma confirmacao sem nome nao
+// distingue "publicou e a lista andou" de "nao aconteceu nada" — Marcelo
+// publicou a resposta da Eletrica em 04/09/2026 e concluiu, com razao, que nao
+// tinha acontecido nada.
+exigir('a confirmacao do Painel nao diz de quem era a resposta',
+  /approved\.published', \{[\s\S]{0,120}?autor:/.test(fila));
+exigir('a confirmacao da aba nao diz de quem era a resposta',
+  /official\.published', \{[\s\S]{0,120}?autor:/.test(aba));
+for (const locale of ['pt-BR', 'pt-PT', 'en']) {
+  const d = JSON.parse(readFileSync(`src/i18n/owner/locales/${locale}.json`, 'utf8'));
+  exigir(`${locale}: a confirmacao do Painel nao usa {{autor}}`,
+    (d?.dashboard?.cockpit?.approved?.published || '').includes('{{autor}}'));
+  exigir(`${locale}: a confirmacao da aba nao usa {{autor}}`,
+    (d?.reviews?.google?.official?.published || '').includes('{{autor}}'));
+}
+
 if (falhas.length) {
   console.error('Publicar do Painel: %d protecao(oes) falharam.\n', falhas.length);
   for (const f of falhas) console.error(' - %s', f);

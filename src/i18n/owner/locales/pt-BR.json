@@ -819,7 +819,7 @@
         "distributionComparisonFrom": "Isto é a divisão de hoje, com {{count}} avaliações. A comparação com as semanas anteriores aparece a partir de {{minimo}}, quando uma avaliação nova deixa de mexer tanto no número.",
         "publishOnGoogle": "Publicar no Google",
         "publishing": "Publicando...",
-        "published": "Resposta publicada no Google.",
+        "published": "Resposta publicada no Google para {{autor}}.",
         "publishError": "Não consegui publicar. Tente de novo."
       }
     },
@@ -1088,7 +1088,7 @@
         "draft": "Resposta sugerida. Revise antes de publicar.",
         "publish": "Publicar resposta no Google",
         "publishing": "Confirmando no Google…",
-        "published": "Resposta confirmada no Google.",
+        "published": "Resposta publicada no Google para {{autor}}.",
         "publishError": "A resposta não foi publicada no Google.",
         "disclaimer": "A publicação acontece somente neste comando e é confirmada novamente no Google.",
         "startSync": "Sincronize o Google para trazer também o histórico completo do seu perfil.",

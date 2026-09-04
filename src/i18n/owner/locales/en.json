@@ -819,7 +819,7 @@
         "distributionComparisonFrom": "This is today’s split, from {{count}} reviews. The comparison with earlier weeks appears from {{minimo}} on, when one new review stops moving the number so much.",
         "publishOnGoogle": "Publish on Google",
         "publishing": "Publishing...",
-        "published": "Reply published on Google.",
+        "published": "Reply published on Google for {{autor}}.",
         "publishError": "Could not publish. Please try again."
       }
     },
@@ -1088,7 +1088,7 @@
         "draft": "Suggested reply. Review it before publishing.",
         "publish": "Publish reply on Google",
         "publishing": "Confirming with Google…",
-        "published": "Reply confirmed on Google.",
+        "published": "Reply published on Google for {{autor}}.",
         "publishError": "The reply was not published on Google.",
         "disclaimer": "Publishing only happens through this command and is confirmed with Google again.",
         "startSync": "Sync Google to bring in the full history of your profile as well.",

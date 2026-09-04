@@ -226,7 +226,21 @@ export const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry
     if (!texto) return;
     const foi = await publicar(selected.idNaFonte, texto);
     if (foi) {
-      toast.success(t('dashboard.cockpit.approved.published'));
+      /*
+       * A CONFIRMACAO DIZ DE QUEM ERA A RESPOSTA.
+       *
+       * Sem o nome, ela e inutil no momento em que mais importa: assim que a
+       * avaliacao respondida sai da lista, a SEGUINTE desliza para o mesmo
+       * lugar, com o mesmo botao e o mesmo aspecto. Marcelo publicou a resposta
+       * da Eletrica em 04/09/2026, viu o Lailson aparecer no lugar dela e
+       * concluiu, com razao, que nada tinha acontecido.
+       *
+       * O nome e a unica coisa que distingue "publicou e a lista andou" de
+       * "nao publicou nada".
+       */
+      toast.success(t('dashboard.cockpit.approved.published', {
+        autor: selected.reviewerName || t('dashboard.cockpit.layout.anonymousReviewer'),
+      }));
       save({ ...(guardado || {}), copied: true });
     } else {
       toast.error(t('dashboard.cockpit.approved.publishError'));
