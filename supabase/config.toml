@@ -31,8 +31,27 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://localhost:3000"]
+# Para onde o dono volta depois de entrar com o Google.
+#
+# Ficou em `http://localhost:3000` — o padrao do `supabase init` — de 10/07/2026
+# ate 04/09/2026, e ninguem reparou porque a entrada por email e senha nao passa
+# por aqui. Na primeira vez que o Marcelo entrou com a conta do Google, em
+# 04/09, o Supabase descartou o `redirectTo` que o codigo manda
+# (`window.location.origin + '/login'`, em AuthContext.tsx) e devolveu-o a
+# `localhost:3000`, uma pagina que nao existe no computador dele. Com o token
+# da sessao no endereco, a vista de toda a gente.
+#
+# O `redirectTo` do codigo so e obedecido se o endereco constar da lista
+# abaixo. Lista vazia significa: cai sempre no `site_url`.
+site_url = "https://binno.pro"
+additional_redirect_urls = [
+  "https://binno.pro/**",
+  "https://www.binno.pro/**",
+  "https://*.vercel.app/**",
+  "http://localhost:5173/**",
+  "http://localhost:4173/**",
+  "http://localhost:8080/**",
+]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
