@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { AuthError, AuthUnknownError, isAuthError, Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { oAparelhoAgoraEDe } from '@/lib/oQueFicaNoAparelho';
 import { toast } from 'sonner';
 
 /**
@@ -57,6 +58,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
      */
     const settle = (currentSession: Session | null) => {
       settled = true;
+      // ANTES DE QUALQUER ECRA MONTAR. Se o dono deste aparelho mudou, o que o
+      // anterior deixou no navegador e apagado aqui — enquanto ainda nao ha
+      // componente nenhum a ler essas chaves. Ver `oQueFicaNoAparelho.ts`:
+      // em 04/09/2026 uma conta nova, sem ligacao ao Google, viu as avaliacoes
+      // da Noa porque o cache do aparelho nao sabia de quem era.
+      oAparelhoAgoraEDe(currentSession?.user?.id ?? null);
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setLoading(false);
