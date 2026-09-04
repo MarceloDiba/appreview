@@ -105,6 +105,21 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
                   <DropdownMenuItem asChild>
                     <Link to="/settings">{t('nav.settings')}</Link>
                   </DropdownMenuItem>
+                  {/*
+                    A ASSINATURA PRECISA DE UMA PORTA VISIVEL.
+                    A aba de cobranca existe desde sempre em `/profile`, mas
+                    nada no painel levava ate la: quem nao soubesse o endereco
+                    nunca descobria se a assinatura estava activa, ate quando
+                    valia, nem por onde cancelar. Achado na primeira compra real
+                    do produto, em 04/09/2026, pelo proprio Marcelo: "dentro do
+                    app nao tem nada relacionado a assinatura".
+                    O endereco leva ja com a aba aberta — ver `abaInicial` em
+                    `Profile.tsx` —, porque cair na pagina certa e ter de
+                    procurar a aba certa e o mesmo problema mais pequeno.
+                  */}
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile?aba=assinatura">{t('nav.subscription')}</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={() => void handleLogout()}>
                     {t('nav.logout')}
@@ -150,6 +165,10 @@ const Navbar = ({ userRole = 'none', businessName }: NavbarProps) => {
                 <Link to="/qrcodes" className={mobLink('/qrcodes', isActive('/qrcodes'))} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.qrcodes')}</Link>
                 <Link to="/settings" className={mobLink('/settings', isActive('/settings'))} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.settings')}</Link>
                 <Link to="/profile" className={mobLink('/profile', isActive('/profile'))} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.account')}</Link>
+                {/* O mesmo item do menu do computador. O dono usa mais o
+                    telemovel do que o computador: deixar a assinatura so num
+                    deles e nao a ter. */}
+                <Link to="/profile?aba=assinatura" className={mobLink('/profile', false)} onClick={() => setIsMobileMenuOpen(false)}>{t('nav.subscription')}</Link>
               </>
             )}
 

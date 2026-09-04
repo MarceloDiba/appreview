@@ -67,7 +67,8 @@
     "login": "Log in",
     "signup": "Get started",
     "profile": "profile",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "subscription": "Subscription"
   },
   "auth": {
     "loginSubtitle": "Sign in to your account",
