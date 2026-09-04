@@ -123,6 +123,31 @@ const foraDaLista = [...usadas].filter(
 exigir(`ha chave(s) 'binno.*' no navegador que ninguem apaga ao mudar de dono: ${foraDaLista.join(', ')}`,
   foraDaLista.length === 0);
 
+// 6b. E O `localStorage` NAO E O UNICO ARMAZEM. A limpeza do `AuthContext` so
+// sabe apagar `localStorage`. Se alguem guardar dados de um negocio noutro
+// sitio, o defeito de 04/09 volta inteiro por uma porta que este guarda nao
+// vigiava — e todas as asserções acima continuariam verdes.
+//
+// O que existe hoje, e por que nao e dado de negocio:
+//   `reviewFunnel.ts`      um id de visita, no navegador do CLIENTE anonimo
+//   `appreview:lang`       o idioma escolhido, de quem usa o computador
+//   `sidebar_state` (cookie) se a barra lateral esta aberta
+const OUTROS_ARMAZENS_CONHECIDOS = new Set([
+  'src/lib/reviewFunnel.ts',
+  'src/i18n/useTranslation.ts',
+  'src/components/ui/sidebar.tsx',
+]);
+const novosArmazens = [];
+for (const ficheiro of ficheiros) {
+  const texto = readFileSync(ficheiro, 'utf8');
+  const usaOutroArmazem = /sessionStorage|indexedDB|document\.cookie|localforage/.test(texto);
+  if (usaOutroArmazem && !OUTROS_ARMAZENS_CONHECIDOS.has(ficheiro)) novosArmazens.push(ficheiro);
+}
+exigir(
+  'ha ficheiro(s) a guardar coisas no navegador fora do `localStorage`, onde a limpeza ao trocar de dono nao chega: '
+  + `${novosArmazens.join(', ')}. Se sao dados de um negocio, a limpeza tem de os cobrir; se nao sao, declare-os em OUTROS_ARMAZENS_CONHECIDOS dizendo porque.`,
+  novosArmazens.length === 0);
+
 // 7. E ALGUEM TEM DE CHAMAR ISTO. Todas as asserções acima ficam verdes com um
 // modulo perfeito que nenhuma tela invoca — foi assim que o defeito viveu ate
 // hoje. A limpeza corre no `settle` do `AuthContext`, ANTES de qualquer ecra
