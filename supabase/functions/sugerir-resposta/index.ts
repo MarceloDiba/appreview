@@ -283,7 +283,7 @@ Rules for the reply, all mandatory:
 Last rule, and it applies ONLY if the language you identified in Step 1 is Portuguese. If it is any other language, this rule does not apply and you must ignore it completely: ${VARIANTE_DO_PORTUGUES(pais)}
 
 Answer with JSON only, no other text:
-{"language":"<the review\'s language, in English>","reply":"<the reply>"}`;
+{"language":"<the review's language, in English>","reply":"<the reply>"}`;
 
 /**
  * O pedido privado. Tres coisas o separam do publico, e cada uma corresponde a
