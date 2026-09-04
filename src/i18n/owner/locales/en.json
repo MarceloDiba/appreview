@@ -1092,7 +1092,15 @@
         "publishError": "The reply was not published on Google.",
         "disclaimer": "Publishing only happens through this command and is confirmed with Google again.",
         "startSync": "Sync Google to bring in the full history of your profile as well.",
-        "syncFailed": "The Google sync failed. The count below is incomplete until this is fixed."
+        "syncFailed": "The Google sync failed. The count below is incomplete until this is fixed.",
+        "publishedTitle": "Replies you have already published on Google",
+        "publishedBody": "If one came out wrong, you can fix it here. Google replaces the previous reply.",
+        "publishedLabel": "Published reply",
+        "correct": "Fix this reply",
+        "correctWarning": "Confirming replaces the reply that is on Google right now. Anyone who read the old one will see the new one.",
+        "correctConfirm": "Replace on Google",
+        "correctCancel": "Leave as it is",
+        "corrected": "Reply fixed on Google for {{autor}}."
       }
     },
     "cases": {

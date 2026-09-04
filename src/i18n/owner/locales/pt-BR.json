@@ -1092,7 +1092,15 @@
         "publishError": "A resposta não foi publicada no Google.",
         "disclaimer": "A publicação acontece somente neste comando e é confirmada novamente no Google.",
         "startSync": "Sincronize o Google para trazer também o histórico completo do seu perfil.",
-        "syncFailed": "A sincronização com o Google falhou. A contagem abaixo não está completa até isto ser resolvido."
+        "syncFailed": "A sincronização com o Google falhou. A contagem abaixo não está completa até isto ser resolvido.",
+        "publishedTitle": "Respostas que você já publicou no Google",
+        "publishedBody": "Se alguma saiu errada, dá para corrigir por aqui. O Google substitui a resposta anterior.",
+        "publishedLabel": "Resposta publicada",
+        "correct": "Corrigir esta resposta",
+        "correctWarning": "Ao confirmar, esta resposta substitui a que está no Google agora. Quem já leu a anterior vai ver a nova.",
+        "correctConfirm": "Substituir no Google",
+        "correctCancel": "Deixar como está",
+        "corrected": "Resposta corrigida no Google para {{autor}}."
       }
     },
     "cases": {

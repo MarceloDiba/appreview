@@ -9,6 +9,7 @@ import { useInternalFeedback } from '@/hooks/useInternalFeedback';
 import { useGoogleBusinessReviewQueue } from '@/hooks/useGoogleBusinessReviewQueue';
 import { useGoogleReviews } from '@/hooks/useGoogleReviews';
 import { useGooglePublicReviewsAnswered } from '@/hooks/useGooglePublicReviewsAnswered';
+import { RespostasPublicadas } from './RespostasPublicadas';
 import { useRespostaAEsperar, type RespostaAEsperar } from '@/hooks/useRespostaAEsperar';
 import { lerNotaDoCaso } from '@/lib/comentarioInterno';
 import { itensJaTratados, montarFilaDeRespostas, type ItemDaFila, type OrigemDaResposta } from '@/lib/filaDeRespostas';
@@ -653,6 +654,17 @@ const FilaDeRespostas = ({
           </div>
         </div>
       )}
+
+      {/*
+        O caminho de volta a uma resposta ja publicada. Fica DEPOIS da fila e
+        fora dela: a fila e o que falta responder, e uma resposta publicada nao
+        falta. Ver o cabecalho de `RespostasPublicadas.tsx`.
+      */}
+      <RespostasPublicadas
+        respondidas={oficiais.respondidas}
+        publicar={oficiais.publishReply}
+        publicando={oficiais.publishing}
+      />
     </section>
   );
 };

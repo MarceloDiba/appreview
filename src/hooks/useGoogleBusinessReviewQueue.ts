@@ -19,6 +19,24 @@ export const useGoogleBusinessReviewQueue = (userId?: string) => {
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncComplete, setSyncComplete] = useState(false);
   const [reviews, setReviews] = useState<BusinessReview[]>([]);
+  /**
+   * As que JA foram publicadas no Google, para o dono poder corrigir uma.
+   *
+   * POR QUE ISTO E UMA SEGUNDA LISTA, E NAO A MESMA SEM O FILTRO
+   *
+   * Ate 04/09/2026 a busca acima trazia so `reply_text IS NULL`, e uma
+   * avaliacao respondida desaparecia de TODAS as telas do produto. Nao havia
+   * como voltar a ela — e foi por isso que a resposta em ingles publicada no
+   * perfil publico do Daniel em 03/09 continuou la um dia inteiro depois de
+   * ser descoberta: o Google aceita sobrescrever (o `publish-reply` ja e um
+   * PUT), o painel e que nao tinha porta.
+   *
+   * Elas ficam separadas porque "N esperando resposta" conta `reviews`. Juntar
+   * as duas listas faria o numero subir a cada resposta publicada, que e o
+   * oposto do que ele significa, e ensinaria o dono a ignorar o numero — o
+   * mesmo estrago que `useGooglePublicReviewsAnswered` existe para evitar.
+   */
+  const [respondidas, setRespondidas] = useState<BusinessReview[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -41,6 +59,7 @@ export const useGoogleBusinessReviewQueue = (userId?: string) => {
       if (connection?.status !== 'connected') {
         setLocationTitle(null);
         setReviews([]);
+        setRespondidas([]);
         return;
       }
 
@@ -55,6 +74,7 @@ export const useGoogleBusinessReviewQueue = (userId?: string) => {
       setSyncComplete(Boolean(location?.review_sync_completed_at));
       if (!location) {
         setReviews([]);
+        setRespondidas([]);
         return;
       }
 
@@ -67,6 +87,20 @@ export const useGoogleBusinessReviewQueue = (userId?: string) => {
         .order('review_updated_at', { ascending: false });
       if (reviewsError) throw reviewsError;
       setReviews(importedReviews || []);
+
+      // As ja respondidas, mais recente primeiro: quem vem corrigir uma
+      // resposta vem quase sempre corrigir a ULTIMA. Limitada a 20 porque
+      // esta lista nao e para navegar um historico, e sim para alcancar o
+      // erro recente antes que o cliente o leia.
+      const { data: jaRespondidas, error: respondidasError } = await supabase
+        .from('google_business_reviews')
+        .select('id, reviewer_name, rating, comment, review_updated_at, reply_text')
+        .eq('location_id', location.id)
+        .not('reply_text', 'is', null)
+        .order('reply_updated_at', { ascending: false, nullsFirst: false })
+        .limit(20);
+      if (respondidasError) throw respondidasError;
+      setRespondidas(jaRespondidas || []);
     } catch (loadError) {
       console.error('Could not load Google Business review queue:', loadError);
       setError(loadError instanceof Error ? loadError.message : 'Could not load Google Business reviews');
@@ -119,5 +153,5 @@ export const useGoogleBusinessReviewQueue = (userId?: string) => {
     }
   };
 
-  return { loading, syncing, publishing, connectionStatus, locationTitle, syncComplete, syncError, reviews, error, syncAll, publishReply };
+  return { loading, syncing, publishing, connectionStatus, locationTitle, syncComplete, syncError, reviews, respondidas, error, syncAll, publishReply };
 };
