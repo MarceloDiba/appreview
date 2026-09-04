@@ -41,7 +41,7 @@ export const LEGAL = {
   leiAplicavel: 'brasileira',
   foro: 'comarca de Aracaju, Sergipe, Brasil',
   /** Data da versão em vigor destes documentos. */
-  versao: '30 de julho de 2026',
+  versao: '4 de setembro de 2026',
 } as const;
 
 /**
@@ -62,6 +62,16 @@ export const SUBCONTRATANTES = [
   {
     nome: 'Google (Places API)',
     funcao: 'Leitura das avaliações públicas do estabelecimento',
+    local: 'Estados Unidos e União Europeia',
+  },
+  {
+    nome: 'Google (Business Profile API)',
+    funcao: 'Leitura das avaliações do perfil do estabelecimento e publicação das respostas que ele aprova',
+    local: 'Estados Unidos e União Europeia',
+  },
+  {
+    nome: 'Meta (WhatsApp Business Cloud API)',
+    funcao: 'Envio ao dono do estabelecimento dos avisos e do rascunho de resposta, e receção da confirmação dele',
     local: 'Estados Unidos e União Europeia',
   },
   {

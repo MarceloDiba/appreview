@@ -89,6 +89,20 @@ const Privacy = () => (
           na nossa base de dados por até 14 dias a contar da primeira vez que os lemos, e só o
           titular daquele perfil os pode consultar. São avaliações que já estão públicas no Google.
         </li>
+        <li>
+          <strong>WhatsApp do dono do estabelecimento:</strong> o número que ele indica para
+          receber avisos, as mensagens que lhe enviamos (o aviso de uma avaliação nova e o rascunho
+          de resposta) e as mensagens que ele nos envia de volta. Guardamos também a data da última
+          mensagem que ele nos escreveu, porque as regras da Meta só permitem texto livre nas 24
+          horas seguintes — fora disso só podemos enviar um modelo aprovado por eles.
+        </li>
+        <li>
+          <strong>Respostas à espera de confirmação:</strong> quando enviamos um rascunho pelo
+          WhatsApp, guardamos esse texto e a avaliação a que ele se refere, à espera de o dono
+          responder. A resposta só é publicada no Google depois de ele confirmar, e o pedido expira
+          ao fim de 24 horas se ele não confirmar. Nunca publicamos nada em nome dele sem essa
+          confirmação.
+        </li>
       </ul>
       <p>
         Não usamos cookies de publicidade nem ferramentas de análise de tráfego. O único
