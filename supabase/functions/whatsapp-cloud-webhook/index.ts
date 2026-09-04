@@ -83,6 +83,76 @@ const ehConfirmacao = (texto: string) => {
   return CONFIRMACOES.includes(limpo);
 };
 
+/**
+ * Regista que houve uma batida, e o que se decidiu sobre ela.
+ *
+ * POR QUE ISTO EXISTE: em 04/09/2026 o dono respondeu no WhatsApp e nada
+ * chegou. Havia duas causas possiveis, com accoes opostas — a Meta nao
+ * entregou, ou entregou e nos recusamos a assinatura — e os registos das
+ * funcoes do Supabase estavam fora do ar. Sem instrumentacao na fronteira, as
+ * duas hipoteses sao indistinguiveis: o sintoma e o mesmo.
+ *
+ * NAO GUARDA O CORPO nem cabecalho nenhum. Guarda que bateram, o que decidimos,
+ * e porque. E o suficiente para separar as causas, e nao mais do que isso.
+ *
+ * Nunca derruba o pedido: um diagnostico que falha nao pode virar o erro que
+ * se esta a diagnosticar.
+ */
+const registarBatida = async (resultado: string, detalhe?: string) => {
+  try {
+    const url = Deno.env.get('SUPABASE_URL') || '';
+    const chave = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    if (!url || !chave) return;
+    await fetch(`${url}/rest/v1/whatsapp_webhook_batidas`, {
+      method: 'POST',
+      headers: {
+        apikey: chave,
+        Authorization: `Bearer ${chave}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({ metodo: 'POST', resultado, detalhe: detalhe || null }),
+    });
+  } catch (erro) {
+    console.error('Nao consegui registar a batida no webhook: %s', erro);
+  }
+};
+
+/**
+ * Diz se dois numeros sao a mesma pessoa, e por que regra.
+ *
+ * O PROBLEMA E BRASILEIRO. Um telemovel no Brasil e `55` + DDD (2 digitos) + 9
+ * digitos, e o primeiro desses nove e um `9` que foi acrescentado a numeracao
+ * antiga. A Meta guarda e devolve muitos numeros brasileiros SEM esse `9`, e
+ * as duas formas sao a mesma linha.
+ *
+ * Isto nao e teoria: em 04/09/2026 o proprio numero do Binno apareceu no painel
+ * da Meta como `+55 79 9198-6091` enquanto o handoff dizia `+55 79 99198-6091`.
+ * O dono nao conseguia mandar mensagem porque estava a marcar um numero que nao
+ * existe, e a resposta dele nao era reconhecida pela mesma razao, do outro lado.
+ *
+ * Compara so digitos, e devolve QUAL regra casou — porque "casou por sorte" e
+ * "casou exactamente" pedem confianca diferente de quem le o diagnostico.
+ */
+const mesmaLinha = (guardado: string, recebido: string): 'exato' | 'nono-digito' | null => {
+  const a = (guardado || '').replace(/\D/g, '');
+  const b = (recebido || '').replace(/\D/g, '');
+  if (!a || !b) return null;
+  if (a === b) return 'exato';
+
+  // Sem o `9`, um numero brasileiro fica com 12 digitos em vez de 13. Tira-se o
+  // nono digito do mais longo e compara-se outra vez. So para o Brasil (`55`):
+  // noutro pais, mexer nos digitos seria inventar uma pessoa.
+  const [longo, curto] = a.length >= b.length ? [a, b] : [b, a];
+  if (longo.length === 13 && curto.length === 12
+    && longo.startsWith('55') && curto.startsWith('55')
+    && longo[4] === '9'
+    && longo.slice(0, 4) + longo.slice(5) === curto) {
+    return 'nono-digito';
+  }
+  return null;
+};
+
 Deno.serve(async (request) => {
   const verifyToken = Deno.env.get('WHATSAPP_WEBHOOK_VERIFY_TOKEN') || '';
   const appSecret = Deno.env.get('WHATSAPP_APP_SECRET') || '';
@@ -112,12 +182,19 @@ Deno.serve(async (request) => {
 
   if (!appSecret) {
     console.error('Webhook do WhatsApp: WHATSAPP_APP_SECRET nao configurado, pedido recusado');
+    await registarBatida('sem-app-secret');
     return json({ error: 'not configured' }, 503);
   }
   if (!await assinaturaConfere(corpo, request.headers.get('x-hub-signature-256'), appSecret)) {
     console.error('Webhook do WhatsApp: assinatura invalida');
+    // Distingue "veio sem assinatura" de "veio com uma que nao bate": a
+    // primeira e alguem a bisbilhotar o endereco publico, a segunda e a Meta a
+    // falar connosco com o segredo de OUTRO app.
+    await registarBatida('assinatura-invalida',
+      request.headers.get('x-hub-signature-256') ? 'assinatura presente mas nao confere' : 'sem cabecalho de assinatura');
     return json({ error: 'invalid signature' }, 401);
   }
+  await registarBatida('aceite');
 
   const admin = createClient(supabaseUrl, serviceRoleKey);
 
@@ -146,13 +223,22 @@ Deno.serve(async (request) => {
     const { data: donos } = await admin
       .from('whatsapp_notification_preferences')
       .select('user_id, recipient_e164');
-    const dono = (donos || []).find((linha) =>
-      (linha.recipient_e164 || '').replace(/\D/g, '') === de);
+    let regra: 'exato' | 'nono-digito' | null = null;
+    const dono = (donos || []).find((linha) => {
+      const r = mesmaLinha(linha.recipient_e164 || '', de);
+      if (r) regra = r;
+      return Boolean(r);
+    });
 
+    // O ULTIMO QUATRO DIGITOS, e nao o numero. Chega para saber de quem se
+    // trata ao depurar, e nao guarda o telefone de ninguem num sitio novo.
+    const fim = de.slice(-4);
     if (!dono) {
       console.error('Webhook do WhatsApp: mensagem de um numero que nao e de nenhum dono');
+      await registarBatida('sem-dono', `de ****${fim} (${de.length} digitos), nenhum dono casa`);
       continue;
     }
+    await registarBatida('dono-encontrado', `****${fim} por ${regra}`);
 
     // A JANELA ABRE AQUI, e abre para qualquer mensagem — nao so para um "1".
     // E o facto de a pessoa ter escrito que a Meta considera, e e isso que
