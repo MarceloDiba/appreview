@@ -20,7 +20,7 @@ assinatura seguir ativa; depois do lote, novos assinantes pagam R$199.
   cancelar sozinho pelo painel — o botão "Gerenciar assinatura" devolve erro.
   Vender antes disso empurra o cancelamento para o atendimento manual.
 - [ ] Abrir e cancelar um Checkout live de teste antes de divulgar o lote.
-- Vagas: 30, escritas em `src/lib/precoBinno.ts`. **Não há contador na
+- Vagas: 50 (Marcelo, 04/09), escritas em `src/lib/precoBinno.ts`. **Não há contador na
   aplicação**: fechar o lote é trocar `STRIPE_BR_PRICE_ID` de volta para o
   preço de R$199.
 

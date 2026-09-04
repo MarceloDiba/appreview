@@ -11,7 +11,7 @@ O Binno vende inicialmente apenas para negócios que operam no Brasil:
 
 ### Lote de fundadores — decidido por Marcelo em 03/09/2026
 
-As primeiras 30 assinaturas entram a R$99 por mês para formar base de usuários
+As primeiras 50 assinaturas entram a R$99 por mês para formar base de usuários
 e validar o produto. Quem entra no lote mantém R$99 enquanto a assinatura
 seguir ativa; quando o lote fechar, novos assinantes pagam R$199.
 

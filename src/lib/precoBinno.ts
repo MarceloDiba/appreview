@@ -20,7 +20,7 @@ export const PRECO_PROMO_BRL = 99;
  * Vagas do lote. Não é imposta por código: o limite é operacional, feito ao
  * trocar `STRIPE_BR_PRICE_ID` de volta para o preço cheio quando o lote encher.
  */
-export const VAGAS_DO_LOTE = 30;
+export const VAGAS_DO_LOTE = 50;
 
 /** Troca `{vagas}` pelo tamanho do lote num texto de copy. */
 export const comVagas = (texto: string) => texto.replace('{vagas}', String(VAGAS_DO_LOTE));
