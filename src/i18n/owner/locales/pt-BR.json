@@ -1010,7 +1010,7 @@
     "businessCountryPlaceholder": "Selecione o país",
     "businessCountryHelp": "Esse dado define a cobrança disponível e é diferente do país do seu telefone.",
     "billingPromoLabel": "Lote de fundadores",
-    "billingPromoNote": "As {vagas} primeiras assinaturas mantêm esse preço enquanto seguirem ativas. Depois, volta a R$199.",
+    "billingPromoNote": "As {vagas} primeiras assinaturas mantêm esse preço enquanto seguirem ativas. Depois, volta a R${regular}.",
     "billingBrazilHint": "O preço é definido pelo país onde seu negócio opera. A Stripe confirma o endereço de cobrança antes de ativar a assinatura.",
     "billingCountryRequired": "Informe o país onde seu negócio opera na aba Perfil antes de continuar.",
     "billingCountryUnavailable": "A cobrança ainda não está disponível para o país onde seu negócio opera. Avisaremos quando esse mercado estiver pronto.",
