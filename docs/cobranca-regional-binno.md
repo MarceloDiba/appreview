@@ -6,8 +6,20 @@ O Binno vende inicialmente apenas para negócios que operam no Brasil:
 
 | País onde o negócio opera | Preço público | Estado |
 | --- | --- | --- |
-| Brasil | R$199 por mês | Aberto após a validação final |
+| Brasil | R$99 por mês no lote de fundadores; R$199 depois | Aberto após a validação final |
 | Outros países | Não exibido | Indisponível nesta fase |
+
+### Lote de fundadores — decidido por Marcelo em 03/09/2026
+
+As primeiras 30 assinaturas entram a R$99 por mês para formar base de usuários
+e validar o produto. Quem entra no lote mantém R$99 enquanto a assinatura
+seguir ativa; quando o lote fechar, novos assinantes pagam R$199.
+
+**O limite é operacional, não é imposto por código.** O `STRIPE_BR_PRICE_ID`
+no cofre do Supabase é um segredo único: enquanto apontar para o preço de R$99,
+todo checkout novo sai a R$99. Fechar o lote é trocar esse segredo de volta
+para o preço de R$199. Não existe contador de vagas na aplicação, e o número de
+vagas aparece na página pública a partir de `src/lib/precoBinno.ts`.
 
 O país de operação é preenchido no onboarding ou no Perfil e salvo em
 `profiles.business_country`. Ele é a fonte comercial. IP, idioma, localização
@@ -34,7 +46,9 @@ webhook na respetiva conta.
 1. A entidade que aparece nos Termos e na Privacidade deve ser a mesma que
    vende e recebe naquela conta Stripe.
 2. Criar, na conta Stripe brasileira, o produto `Binno` e o preço mensal
-   recorrente de R$199.
+   recorrente de R$199, mais o preço de R$99 do lote de fundadores. Os dois
+   preços vivem no mesmo produto; o lote é aberto e fechado trocando qual deles
+   está em `STRIPE_BR_PRICE_ID`.
 3. Configurar o Customer Portal daquela conta, permitindo cancelar e atualizar
    o meio de pagamento conforme a política comercial aprovada.
 4. Criar o endpoint de webhook dessa mesma conta:

@@ -3,6 +3,27 @@
 Backlog vivo. Para contexto, decisões e armadilhas, ler também `HANDOFF.md` e
 `AGENTS.md`.
 
+## Lote de fundadores a R$99 — decidido em 03/09/2026
+
+Marcelo decidiu abrir um lote promocional do Binno Maps a **R$99/mês** para
+formar base de usuários e validar o produto. Quem entra mantém R$99 enquanto a
+assinatura seguir ativa; depois do lote, novos assinantes pagam R$199.
+
+- [x] Página pública, Perfil, i18n (3 idiomas) e `docs/cobranca-regional-binno.md`
+  atualizados. O preço passa a sair de `src/lib/precoBinno.ts`, um lugar só.
+- [ ] **Criar o preço de R$99 na Stripe live (MDR Propaganda)** e apontar
+  `STRIPE_BR_PRICE_ID` para ele no cofre do Supabase. Sem isso a página anuncia
+  R$99 e o checkout continua cobrando R$199.
+- [ ] **Customer Portal ainda não existe para o Binno**
+  (`STRIPE_BR_PORTAL_CONFIGURATION_ID` ausente, a configuração padrão da conta
+  pertence ao Auditoria Pro). Enquanto faltar, quem assinar não consegue
+  cancelar sozinho pelo painel — o botão "Gerenciar assinatura" devolve erro.
+  Vender antes disso empurra o cancelamento para o atendimento manual.
+- [ ] Abrir e cancelar um Checkout live de teste antes de divulgar o lote.
+- Vagas: 30, escritas em `src/lib/precoBinno.ts`. **Não há contador na
+  aplicação**: fechar o lote é trocar `STRIPE_BR_PRICE_ID` de volta para o
+  preço de R$199.
+
 ## Quota do Google verificada em 30/08/2026
 
 Primeira leitura direta da quota desde que a candidatura foi enviada, feita por

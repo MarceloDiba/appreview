@@ -1004,6 +1004,8 @@
     "businessCountryLabel": "Country where your business operates",
     "businessCountryPlaceholder": "Select the country",
     "businessCountryHelp": "This defines available billing and is different from your phone country.",
+    "billingPromoLabel": "Founding batch",
+    "billingPromoNote": "The first {vagas} subscriptions stay at R$99 per month for as long as the subscription remains active. Once the batch closes, the price returns to R$199 for anyone who subscribes later.",
     "billingBrazilHint": "The price is defined by where your business operates. Stripe confirms the billing address before activating the subscription.",
     "billingCountryRequired": "Enter the country where your business operates on the Profile tab before continuing.",
     "billingCountryUnavailable": "Billing is not available yet for the country where your business operates. We will let you know when this market is ready.",

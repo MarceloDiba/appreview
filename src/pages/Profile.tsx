@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { CreditCard, Shield, UserCog } from 'lucide-react';
+import { comVagas, PRECO_PROMO_BRL, PRECO_REGULAR_BRL } from '@/lib/precoBinno';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
@@ -351,7 +352,12 @@ const Profile = () => {
                     <>
                       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                         <p className="font-semibold text-gray-950">{t('profile.billingBrazil')}</p>
-                        <p className="mt-1 text-2xl font-bold text-gray-950">R$199<span className="ml-1 text-sm font-normal text-gray-500">{t('profile.billingMonthly')}</span></p>
+                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-[#6D43C0]">{t('profile.billingPromoLabel')}</p>
+                        <p className="mt-1 text-2xl font-bold text-gray-950">
+                          <span className="mr-2 text-base font-normal text-gray-400 line-through">R${PRECO_REGULAR_BRL}</span>
+                          R${PRECO_PROMO_BRL}<span className="ml-1 text-sm font-normal text-gray-500">{t('profile.billingMonthly')}</span>
+                        </p>
+                        <p className="mt-2 text-xs leading-5 text-gray-600">{comVagas(t('profile.billingPromoNote'))}</p>
                       </div>
                       <p className="text-sm text-gray-500">{t('profile.billingBrazilHint')}</p>
                       <Button onClick={startCheckout} disabled={loadingBilling || !billingAvailable || billingAction !== null}>
