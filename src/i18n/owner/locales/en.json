@@ -43,7 +43,10 @@
     "errSave": "Couldn't save. Please try again.",
     "errLinks": "Couldn't save the links. Please try again.",
     "errQr": "Couldn't create the QR code. Please try again.",
-    "errQrLocal": "To test with a phone, start the preview on the local network before creating the QR code."
+    "errQrLocal": "To test with a phone, start the preview on the local network before creating the QR code.",
+    "googleDepois": "I don't have it yet",
+    "qrDepois": "Skip for now",
+    "qrSemDestino": "Without your business address on Google, the QR would send the customer to a page with nothing to click. Connect your Google account in the panel and Binno finds the address on its own — then the QR is ready."
   },
   "invite": {
     "inviteTitle": "Invite them to review on Google",

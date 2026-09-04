@@ -43,7 +43,10 @@
     "errSave": "Não foi possível guardar. Tente novamente.",
     "errLinks": "Não foi possível guardar os links. Tente novamente.",
     "errQr": "Não foi possível criar o QR code. Tente novamente.",
-    "errQrLocal": "Para testar com o telemóvel, inicie a prévia na rede local antes de criar o QR code."
+    "errQrLocal": "Para testar com o telemóvel, inicie a prévia na rede local antes de criar o QR code.",
+    "googleDepois": "Ainda não tenho, faço depois",
+    "qrDepois": "Saltar por agora",
+    "qrSemDestino": "Sem o endereço do seu negócio no Google, o QR levaria o cliente a uma página sem nada para clicar. Ligue a sua conta do Google no painel e o Binno descobre o endereço sozinho — aí o QR fica pronto."
   },
   "invite": {
     "inviteTitle": "Convidar a avaliar no Google",

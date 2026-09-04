@@ -288,7 +288,27 @@ const Onboarding = () => {
                 />
                 <p className="text-xs text-gray-500">{t('onboarding.googleHelp')}</p>
               </div>
-              <div className="flex justify-end pt-2">
+              {/*
+                O ENDERECO DEIXOU DE TRANCAR A PORTA, em 04/09/2026.
+                
+                Ele era obrigatorio porque era a UNICA forma de o Binno saber
+                para onde mandar o cliente. Desde 03/09 a ligacao oficial ao
+                Google devolve o mesmo identificador vindo do proprio Google, e
+                `get_public_qr_business` ja o usa quando nao ha link colado.
+                
+                Trancar o cadastro num campo que o dono pode nao ter a mao — e
+                que o Binno consegue descobrir sozinho depois — e mandar embora
+                quem ainda nem viu o produto. Quem pular chega ao painel e liga
+                a conta la, com o negocio ja encontrado por nome.
+                
+                Pular NAO escreve nada: `saveLinks` apaga antes de inserir, e
+                correr isso com o campo vazio apagaria um link que o dono ja
+                tivesse de uma passagem anterior.
+              */}
+              <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between">
+                <Button variant="ghost" onClick={() => setStep(2)} disabled={saving}>
+                  {t('onboarding.googleDepois')}
+                </Button>
                 <Button onClick={saveLinks} disabled={saving || !googleUrl.trim()}>
                   {saving ? t('onboarding.saving') : t('onboarding.continue')}
                 </Button>
@@ -364,7 +384,34 @@ const Onboarding = () => {
               <CardDescription>{t('onboarding.step3Desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {!createdQr ? (
+              {/*
+                UM QR SEM DESTINO E PIOR DO QUE NENHUM.
+                
+                Se o dono pulou o endereco do Google no passo 1, a pagina
+                publica do QR nao tem para onde mandar o cliente: ele aponta a
+                camera, chega a uma pagina, e nao ha nada em que clicar. Com a
+                ligacao oficial isso resolve-se sozinho — mas ela ainda nao
+                existe para quem esta a criar a conta agora.
+                
+                Entao, sem endereco, o passo 3 nao oferece criar: diz porque, e
+                manda para o painel, onde ligar a conta do Google e o proximo
+                passo natural.
+              */}
+              {!googleUrl.trim() ? (
+                <div className="space-y-4">
+                  <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-5 text-amber-900">
+                    {t('onboarding.qrSemDestino')}
+                  </p>
+                  <div className="flex items-center justify-between pt-2">
+                    <Button variant="ghost" onClick={() => setStep(1)}>
+                      {t('onboarding.back')}
+                    </Button>
+                    <Button onClick={() => navigate('/dashboard')}>
+                      {t('onboarding.qrDepois')}
+                    </Button>
+                  </div>
+                </div>
+              ) : !createdQr ? (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="qrName">{t('onboarding.qrNameLabel')}</Label>
@@ -395,9 +442,25 @@ const Onboarding = () => {
                       </label>
                     </div>
                   )}
-                  <div className="flex items-center justify-between pt-2">
+                  {/*
+                    PULAR O QR PASSOU A SER POSSIVEL, em 04/09/2026.
+                    
+                    O QR e um canal de aquisicao, e nao a porta do produto: com
+                    a ligacao oficial ao Google o dono ja tem o que responder no
+                    primeiro dia, sem nunca imprimir nada. Obrigar a criar um
+                    codigo para chegar ao painel e cobrar um passo antes de
+                    mostrar o valor.
+                    
+                    Ele continua a ser o caminho recomendado — e por isso o
+                    botao de criar continua a ser o principal.
+                  */}
+                  <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between">
                     <Button variant="ghost" onClick={() => setStep(2)}>
                       {t('onboarding.back')}
+                    </Button>
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
+                    <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+                      {t('onboarding.qrDepois')}
                     </Button>
                     <Button
                       onClick={createQr}
@@ -409,6 +472,7 @@ const Onboarding = () => {
                     >
                       {saving ? t('onboarding.creating') : t('onboarding.createQr')}
                     </Button>
+                    </div>
                   </div>
                 </>
               ) : (
