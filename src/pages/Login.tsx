@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { getSetupState } from '@/hooks/useSetupStatus';
+import { comIntencao, querAssinar, ROTA_ASSINATURA } from '@/lib/intencaoDeAssinar';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import MarcaBinno from '@/components/marketing/MarcaBinno';
@@ -24,13 +25,19 @@ import BotaoDoGoogle from '@/components/auth/BotaoDoGoogle';
  * recebe a sessão nova e decide entre o painel e o assistente. Uma segunda
  * cópia da regra divergiria na primeira vez que alguém mexesse numa.
  */
-export const navegarDepoisDoLogin = async (userId: string) => {
+export const navegarDepoisDoLogin = async (userId: string, quer = false) => {
   const setup = await getSetupState(userId);
-  return setup && !setup.isComplete ? '/configuracao' : '/dashboard';
+  // Quem veio do preço continua a passar pelo passo a passo quando ainda lhe
+  // falta configuração — o checkout exige o país onde o negócio opera —, mas
+  // a intenção viaja com ele e o passo a passo termina na cobrança.
+  if (setup && !setup.isComplete) return comIntencao('/configuracao', quer);
+  return quer ? ROTA_ASSINATURA : '/dashboard';
 };
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const quer = querAssinar(location.search);
   const { t } = useOwnerTranslation();
   const { signIn, user } = useAuth();
   const [formData, setFormData] = useState({
@@ -44,9 +51,9 @@ const Login = () => {
     // engano, e quem acabou de voltar do Google — os dois chegam aqui só com
     // `user` a mudar, sem passar por `handleSubmit`.
     if (user) {
-      void navegarDepoisDoLogin(user.id).then(navigate);
+      void navegarDepoisDoLogin(user.id, quer).then(navigate);
     }
-  }, [user, navigate]);
+  }, [user, navigate, quer]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -78,7 +85,7 @@ const Login = () => {
         // Quem ainda não tem nome, link do Google e um QR code vai para o passo
         // a passo em vez de aterrar num painel vazio sem saber o que fazer.
         const { data: { user: signedIn } } = await supabase.auth.getUser();
-        if (signedIn) navigate(await navegarDepoisDoLogin(signedIn.id));
+        if (signedIn) navigate(await navegarDepoisDoLogin(signedIn.id, quer));
       }
     } catch (error) {
       console.error('Unexpected error during login:', error);
