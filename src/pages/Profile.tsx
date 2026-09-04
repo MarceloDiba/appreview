@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,6 +40,15 @@ type BillingStatus = {
 const Profile = () => {
   const { t, i18n } = useOwnerTranslation();
   const { user, loading: authLoading } = useAuth();
+
+  /**
+   * `?aba=assinatura` abre esta página já na cobrança. É por aqui que termina
+   * quem clicou no preço da página pública: sem isto, a última porta do
+   * caminho de compra ficava escondida atrás de uma aba que ninguém sabia
+   * que tinha de abrir.
+   */
+  const [searchParams] = useSearchParams();
+  const abaInicial = searchParams.get('aba') === 'assinatura' ? 'billing' : 'profile';
 
   const [profileData, setProfileData] = useState({ name: '', phone: '', businessName: '', businessCountry: '' });
   const [loadingProfile, setLoadingProfile] = useState(true);
@@ -207,7 +217,7 @@ const Profile = () => {
             </p>
           </header>
 
-          <Tabs defaultValue="profile">
+          <Tabs defaultValue={abaInicial}>
             <TabsList className="mb-6">
               <TabsTrigger value="profile">
                 <UserCog className="h-4 w-4 mr-2" />

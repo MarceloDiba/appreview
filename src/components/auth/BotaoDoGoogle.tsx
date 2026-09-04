@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { querAssinar } from '@/lib/intencaoDeAssinar';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 import { toast } from 'sonner';
 
@@ -27,11 +29,14 @@ const IconeDoGoogle = () => (
 export const BotaoDoGoogle = () => {
   const { t } = useOwnerTranslation();
   const { signInWithGoogle } = useAuth();
+  const location = useLocation();
   const [entrando, setEntrando] = useState(false);
 
   const clicar = async () => {
     setEntrando(true);
-    const { error } = await signInWithGoogle();
+    // A volta do Google é um carregamento novo da página: a intenção de
+    // assinar só sobrevive se viajar dentro do `redirectTo`.
+    const { error } = await signInWithGoogle(querAssinar(location.search));
     // Só chega aqui se a REDIRECÇÃO em si falhou (bloqueada, sem rede). Um
     // sucesso navega para fora desta página antes de o código voltar aqui.
     if (error) {

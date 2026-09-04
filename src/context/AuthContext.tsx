@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import { AuthError, AuthUnknownError, isAuthError, Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { oAparelhoAgoraEDe } from '@/lib/oQueFicaNoAparelho';
+import { comIntencao } from '@/lib/intencaoDeAssinar';
 import { toast } from 'sonner';
 
 /**
@@ -25,7 +26,7 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUp: (email: string, password: string, businessName: string, name: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
-  signInWithGoogle: () => Promise<{ error: AuthError | null }>;
+  signInWithGoogle: (quer?: boolean) => Promise<{ error: AuthError | null }>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -157,11 +158,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    * `src/pages/Login.tsx`. Duplicar essa decisão no cadastro seria duas cópias
    * da mesma regra a divergirem na primeira vez que alguém mexesse numa.
    */
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (quer = false) => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/login` },
+        options: { redirectTo: `${window.location.origin}${comIntencao('/login', quer)}` },
       });
       return { error };
     } catch (error) {
