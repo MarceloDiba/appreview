@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { comIntencao, querAssinar } from '@/lib/intencaoDeAssinar';
+import { navegarDepoisDoLogin } from '@/pages/Login';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,6 +16,8 @@ import BotaoDoGoogle from '@/components/auth/BotaoDoGoogle';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const quer = querAssinar(location.search);
   const { t } = useOwnerTranslation();
   const { signUp, user } = useAuth();
   const [formData, setFormData] = useState({
@@ -26,11 +30,14 @@ const Signup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Redirect if already logged in
+    // Quem já tem sessão não volta a cadastrar-se. Se chegou aqui a partir do
+    // preço, a intenção de assinar decide o destino em vez do painel: quando o
+    // Supabase confirma a conta sozinho, é este caminho — e não o `/login` do
+    // `handleSubmit` — que leva quem acabou de se cadastrar.
     if (user) {
-      navigate('/dashboard');
+      void navegarDepoisDoLogin(user.id, quer).then(navigate);
     }
-  }, [user, navigate]);
+  }, [user, navigate, quer]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -68,7 +75,7 @@ const Signup = () => {
         toast.info(t('signup.confirmEmailToast'), {
           duration: 5000
         });
-        navigate('/login');
+        navigate(comIntencao('/login', quer));
       }
     } catch (error) {
       console.error('Unexpected error during signup:', error);

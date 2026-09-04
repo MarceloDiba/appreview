@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { querAssinar, ROTA_ASSINATURA } from '@/lib/intencaoDeAssinar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -55,6 +56,13 @@ const STEPS: { n: Step; labelKey: string }[] = [
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  /**
+   * Quem chegou ao passo a passo vindo do preço sai dele na cobrança, não no
+   * painel. É aqui que o país do negócio fica salvo, que é o que o checkout
+   * exige para saber quanto cobrar.
+   */
+  const destinoFinal = () => (querAssinar(location.search) ? ROTA_ASSINATURA : '/dashboard');
   const { t, i18n } = useOwnerTranslation();
   const { user, loading: authLoading } = useAuth();
   const baseUrl = publicAppOrigin();
@@ -406,7 +414,7 @@ const Onboarding = () => {
                     <Button variant="ghost" onClick={() => setStep(1)}>
                       {t('onboarding.back')}
                     </Button>
-                    <Button onClick={() => navigate('/dashboard')}>
+                    <Button onClick={() => navigate(destinoFinal())}>
                       {t('onboarding.qrDepois')}
                     </Button>
                   </div>
@@ -459,7 +467,7 @@ const Onboarding = () => {
                       {t('onboarding.back')}
                     </Button>
                     <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
-                    <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+                    <Button variant="ghost" onClick={() => navigate(destinoFinal())}>
                       {t('onboarding.qrDepois')}
                     </Button>
                     <Button
@@ -524,7 +532,7 @@ const Onboarding = () => {
                     </Button>
                   </div>
                   <div className="pt-2">
-                    <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+                    <Button variant="ghost" onClick={() => navigate(destinoFinal())}>
                       {t('onboarding.goToPanel')}
                     </Button>
                   </div>
