@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { comIntencao, querAssinar } from '@/lib/intencaoDeAssinar';
 import { navegarDepoisDoLogin } from '@/pages/Login';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -72,10 +73,23 @@ const Signup = () => {
         }
       } else {
         toast.success(t('signup.successToast'));
-        toast.info(t('signup.confirmEmailToast'), {
-          duration: 5000
-        });
-        navigate(comIntencao('/login', quer));
+        /**
+         * Quando o projeto confirma a conta sozinho, o cadastro já devolve
+         * sessão: mandar essa pessoa para `/login` seria pedir que entrasse
+         * numa porta que ela acabou de atravessar. Ela via a tela de login
+         * aparecer sem motivo e ser rebatida logo a seguir.
+         *
+         * O aviso de confirmar o e-mail também só faz sentido quando não há
+         * sessão. Ele era mostrado sempre, e mandava procurar na caixa de
+         * entrada um e-mail que não ia chegar.
+         */
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          navigate(await navegarDepoisDoLogin(session.user.id, quer));
+        } else {
+          toast.info(t('signup.confirmEmailToast'), { duration: 5000 });
+          navigate(comIntencao('/login', quer));
+        }
       }
     } catch (error) {
       console.error('Unexpected error during signup:', error);
