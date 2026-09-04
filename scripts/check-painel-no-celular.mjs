@@ -46,6 +46,11 @@ const painel = semComentarios(readFileSync(PAINEL, 'utf8'));
 // tecto de 350 linhas. `MobileSummary` e a faixa do celular ficaram; a linha
 // de "Cada nota separada" foi com eles. Cada assercao le o ficheiro onde a
 // regra dela vive.
+// A FAIXA DO CELULAR tambem saiu, no quarto corte (04/09/2026). Cada assercao
+// le o ficheiro onde a regra dela vive: a linha das notas nos cartoes de
+// leitura, a faixa do celular nos cartoes do dia.
+const CARTOES_DO_DIA = 'src/components/dashboard/hoje/CartoesDoDia.tsx';
+const cartoesDoDia = semComentarios(readFileSync(CARTOES_DO_DIA, 'utf8'));
 const CARTOES = 'src/components/dashboard/reputacao/CartoesDeLeitura.tsx';
 const cartoes = semComentarios(readFileSync(CARTOES, 'utf8'));
 const contrato = readFileSync(CONTRATO, 'utf8');
@@ -53,8 +58,8 @@ const contrato = readFileSync(CONTRATO, 'utf8');
 // 1. A faixa-resumo existe e é exclusiva do celular. Sem `lg:hidden` ela
 // apareceria também no ecrã grande, deslocando a ordem aprovada, que é
 // exatamente o que o contrato proíbe.
-const corpoDaFaixa = corpoDaDeclaracao(painel, 'MobileSummary');
-exigir(corpoDaFaixa !== null, `MobileSummary sumiu de ${PAINEL}.`);
+const corpoDaFaixa = corpoDaDeclaracao(cartoesDoDia, 'MobileSummary');
+exigir(corpoDaFaixa !== null, `MobileSummary sumiu de ${CARTOES_DO_DIA}.`);
 if (corpoDaFaixa) {
   exigir(corpoDaFaixa.includes('lg:hidden'),
     'MobileSummary deixou de ser exclusivo do celular: sem lg:hidden ele aparece no ecrã grande e desloca a ordem aprovada.');
@@ -76,7 +81,7 @@ exigir(!/MobileIndex|MOBILE_SECTIONS/.test(painel),
 // 4. Fila ausente e fila vazia não são a mesma coisa. A faixa precisa
 // distinguir as duas, senão um segundo aparelho mostra "nenhuma esperando"
 // sem ter como saber, que é afirmar o que não se sabe.
-const corpoResumo = corpoDaDeclaracao(painel, 'MobileSummary') || '';
+const corpoResumo = corpoDaDeclaracao(cartoesDoDia, 'MobileSummary') || '';
 exigir(/!\s*temFila/.test(corpoResumo),
   'A faixa-resumo parou de distinguir fila ausente de fila vazia, e passaria a mostrar zero como se fosse "nada a responder".');
 

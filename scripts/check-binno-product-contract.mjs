@@ -133,7 +133,34 @@ const TEXTOS_REMOVIDOS_EM_31_08 = [
 // de que props ela recebe. Casar so o elemento mantem as tres asserções
 // inteiras e para de dar alarme falso a cada prop nova.
 const FILA_DO_PAINEL = /<ResponseQueue\b[^>]*\/>/g;
-const corpoDoRadar = corpoDaDeclaracao(dashboard, 'RadarNow') || '';
+/*
+ * O PAINEL PASSOU A VIVER EM CINCO FICHEIROS em 04/09/2026, cortado por
+ * tamanho. As regras deste contrato sobre POSICAO — que modulo aparece, em que
+ * ordem, quantas vezes — continuam a ler o painel, porque e la que os cartoes
+ * sao colocados. As regras sobre o CONTEUDO de um cartao seguem o cartao.
+ *
+ * `corpoNoPainel` procura a declaracao em todos eles e devolve vazio se nao
+ * estiver em nenhum — e vazio faz cada assercao falhar com nome proprio, tal
+ * como antes.
+ */
+const FICHEIROS_DO_PAINEL = [
+  'src/components/dashboard/ApprovedCockpitDashboard.tsx',
+  'src/components/dashboard/reviews/FilaDoPainel.tsx',
+  'src/components/dashboard/reputacao/CartoesDeLeitura.tsx',
+  'src/components/dashboard/qr/CartoesDeQrETemas.tsx',
+  'src/components/dashboard/hoje/CartoesDoDia.tsx',
+];
+const fontesDoPainel = FICHEIROS_DO_PAINEL.map(read);
+const painelInteiro = fontesDoPainel.join('\n');
+const corpoNoPainel = (nome) => {
+  for (const fonte of fontesDoPainel) {
+    const corpo = corpoDaDeclaracao(fonte, nome);
+    if (corpo) return corpo;
+  }
+  return '';
+};
+
+const corpoDoRadar = corpoNoPainel('RadarNow');
 const filaDoPainel = (fonte) => (fonte.match(FILA_DO_PAINEL) || []);
 const posicaoDaFila = (fonte) => {
   const encontrada = filaDoPainel(fonte)[0];
@@ -220,7 +247,7 @@ const requirements = [
   // o cartão saiu, e uma asserção sobre o corpo de um componente que não existe
   // lê a string vazia e fica verde sem proteger nada. Quem impede o cartão de
   // voltar é a proibição acima.
-  ['a faixa-resumo do celular linka para a âncora da fila', /href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/.test(corpoDaDeclaracao(dashboard, 'MobileSummary') || '')],
+  ['a faixa-resumo do celular linka para a âncora da fila', /href=\{`#\$\{QUEUE_ANCHOR_ID\}`\}/.test(corpoNoPainel('MobileSummary'))],
   // A faixa-resumo do celular acrescentou um segundo link para a fila, por isso
   // a contagem acima deixou de ser exata. O que a contagem media de verdade era
   // "ninguém troca de aba": isso agora é medido diretamente, e todo link de
@@ -231,7 +258,7 @@ const requirements = [
   // achado no round de correcao de 30/08/2026). Boas praticas agora escolhe
   // o alvo por variante: as tres que falam de avaliacao ou fila apontam para
   // a fila, a que fala de foto/QR aponta para o QR.
-  ['Boas práticas linka para a âncora que o próprio texto do CTA promete (fila ou QR)', dashboard.includes('href={`#${practice.target}`}') && (dashboard.match(/target: QUEUE_ANCHOR_ID/g) || []).length === 3 && dashboard.includes('target: QR_ANCHOR_ID')],
+  ['Boas práticas linka para a âncora que o próprio texto do CTA promete (fila ou QR)', painelInteiro.includes('href={`#${practice.target}`}') && (painelInteiro.match(/target: QUEUE_ANCHOR_ID/g) || []).length === 3 && painelInteiro.includes('target: QR_ANCHOR_ID')],
   // Decisão de 31/08/2026: o WhatsApp deixa de aparecer em todas as telas e
   // vira destino do menu principal. As três linhas abaixo medem a mudança
   // inteira, e não só metade dela: sai do painel, existe como rota protegida, e

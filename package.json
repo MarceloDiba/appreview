@@ -60,7 +60,7 @@
     "check:cada-nota-separada-aparece": "node scripts/check-cada-nota-separada-aparece.mjs",
     "check:uma-fonte-para-o-google": "node scripts/check-uma-fonte-para-o-google.mjs",
     "check:publicar-do-painel": "node scripts/check-publicar-do-painel.mjs",
-    "lint:portao": "eslint . --max-warnings 70"
+    "lint:portao": "eslint . --max-warnings 69"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
