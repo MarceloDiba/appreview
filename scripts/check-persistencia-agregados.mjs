@@ -255,6 +255,7 @@ const leituraDoAgregado = lerCodigo('src/lib/reputationSnapshotReading.ts');
 const cockpitRenderizado = [
   'src/components/dashboard/ApprovedCockpitDashboard.tsx',
   'src/components/dashboard/reputacao/CartoesDeLeitura.tsx',
+  'src/components/dashboard/qr/CartoesDeQrETemas.tsx',
   'src/components/dashboard/NotaDaAmostra.tsx',
 ].map(lerCodigo).join('\n');
 const cockpitIntermediario = lerCodigo('src/components/dashboard/ExperimentalCockpitDashboard.tsx');

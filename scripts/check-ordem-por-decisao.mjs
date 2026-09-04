@@ -71,7 +71,16 @@ const painel = semComentarios(painelBruto);
  */
 const CARTOES_DE_LEITURA = 'src/components/dashboard/reputacao/CartoesDeLeitura.tsx';
 const cartoesDeLeitura = semComentarios(readFileSync(CARTOES_DE_LEITURA, 'utf8'));
-const ondeVive = (nome) => corpoDaDeclaracao(painel, nome) || corpoDaDeclaracao(cartoesDeLeitura, nome) || '';
+// O QR e os temas sairam no terceiro corte, em 04/09/2026. `ondeVive` procura
+// a declaracao em todos os ficheiros onde os cartoes do painel podem morar, e
+// devolve vazio — que falha — se ela nao estiver em nenhum.
+const CARTOES_DE_QR = 'src/components/dashboard/qr/CartoesDeQrETemas.tsx';
+const cartoesDeQr = semComentarios(readFileSync(CARTOES_DE_QR, 'utf8'));
+const ondeVive = (nome) =>
+  corpoDaDeclaracao(painel, nome)
+  || corpoDaDeclaracao(cartoesDeLeitura, nome)
+  || corpoDaDeclaracao(cartoesDeQr, nome)
+  || '';
 const contrato = readFileSync(CONTRATO, 'utf8');
 const catalogos = CATALOGOS.map((caminho) => readFileSync(caminho, 'utf8'));
 

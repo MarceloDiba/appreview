@@ -25,7 +25,10 @@ import { pathToFileURL } from 'node:url';
 const POLITICA = 'src/lib/temasDoModelo.ts';
 const TRANSPORTE = 'src/lib/temasDasAvaliacoes.ts';
 const FUNCAO = 'supabase/functions/temas-das-avaliacoes/index.ts';
-const PAINEL = 'src/components/dashboard/ApprovedCockpitDashboard.tsx';
+// O CARTAO DOS TEMAS saiu do painel em 04/09/2026, no terceiro corte por
+// tamanho. Este guarda e inteiro sobre esse cartao — "o cartao decide", "o
+// cartao pede" —, entao seguiu-o.
+const PAINEL = 'src/components/dashboard/qr/CartoesDeQrETemas.tsx';
 
 const raiz = process.cwd();
 const {
