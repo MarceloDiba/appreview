@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// A politica de privacidade tem de ser legivel por um robo.
+// As paginas legais tem de ser legiveis por um robo.
 //
 // POR QUE ESTE GUARDA EXISTE
 //
@@ -12,6 +12,11 @@
 // O sintoma era o pior tipo: "esta la, eu estou a ver" para um humano, e
 // "nao existe" para quem decide.
 //
+// NESSE MESMO DIA, ao preparar a verificacao do Google, os TERMOS mostraram o
+// defeito identico — `binno.pro/termos` devolvia 200 com zero palavras. Tinha-se
+// consertado a politica e deixado o vizinho igual, porque o guarda so olhava
+// para um dos dois. Agora olha para os dois.
+//
 // A PAGINA ESTATICA E GERADA A PARTIR DO COMPONENTE, e nao escrita a parte.
 // Duas politicas divergiriam sem ninguem ver, e a que o robo le — a que vale
 // como compromisso legal perante a Meta e perante a lei — seria a errada.
@@ -23,13 +28,15 @@ const exigir = (rotulo, condicao) => { verificadas += 1; if (!condicao) falhas.p
 
 // 1. A GERACAO CORRE NA BUILD. Sem isto, a pagina estatica nao chega ao ar.
 const pacote = JSON.parse(readFileSync('package.json', 'utf8'));
-exigir('a build deixou de gerar a politica estatica; o robo voltaria a ler a casca vazia',
-  /gerar-politica-estatica\.mjs/.test(pacote.scripts.build || ''));
+exigir('a build deixou de gerar as paginas legais estaticas; o robo voltaria a ler a casca vazia',
+  /gerar-paginas-legais\.mjs/.test(pacote.scripts.build || ''));
 
 // 2. E O SCRIPT GERA A PARTIR DO COMPONENTE, e nao de um texto proprio.
-const gerador = readFileSync('scripts/prerender/politica.tsx', 'utf8');
+const gerador = readFileSync('scripts/prerender/legais.tsx', 'utf8');
 exigir('a pagina estatica deixou de sair do componente da politica; sao duas politicas a divergir',
   /from '@\/pages\/Privacy'/.test(gerador) && /renderToStaticMarkup/.test(gerador));
+exigir('a pagina estatica dos termos deixou de sair do componente dos termos',
+  /from '@\/pages\/Terms'/.test(gerador));
 
 // 3. O FICHEIRO GERADO TEM POLITICA DENTRO. Se a build correu, ele existe — e
 //    se existir vazio e pior do que nao existir, porque parece resolvido.
@@ -48,6 +55,35 @@ if (existsSync(destino)) {
   // Nao falha: `dist/` so existe depois da build, e este guarda corre antes
   // dela na cadeia. Mas diz, para ninguem ler o verde como prova.
   console.error('  (nota: dist/privacidade.html ainda nao existe; as asserções sobre o conteudo correm depois da build)');
+}
+
+// 3b. E OS TERMOS TAMBEM. O Google exige os dois enderecos na verificacao do
+//     app, e um deles vazio recusa o pedido inteiro.
+const termos = 'dist/termos.html';
+// A AUSENCIA TEM DE FALAR. Se a politica gerada existe, a build correu — e uns
+// termos em falta nesse ponto sao um defeito, nao "ainda nao chegou a vez".
+// Sem esta linha, apagar os termos do gerador deixava o guarda VERDE, so com
+// menos asserções a correr: exactamente o vazio que ele existe para apanhar.
+if (existsSync(destino)) {
+  exigir('a politica foi gerada e os termos nao; o Google recebe um dos dois enderecos vazio',
+    existsSync(termos));
+}
+if (existsSync(termos)) {
+  const html = readFileSync(termos, 'utf8');
+  exigir(`os termos gerados tem so ${html.length} caracteres; nao sao uns termos`,
+    html.length > 4000);
+  exigir('o texto dos termos nao esta no HTML entregue; e isso que o robo nao consegue ler',
+    /Termos de Servi[çc]o<\/h1>|<h1[^>]*>\s*Termos/i.test(html));
+  // A CLAUSULA QUE NAO PODE DESAPARECER. `Terms.tsx` diz no cabecalho que a
+  // proibicao de filtrar avaliacoes e a linha que o codigo tambem defende. Uns
+  // termos sem ela, servidos ao Google, descreveriam outro produto.
+  exigir('os termos gerados nao proibem filtrar avaliacoes',
+    /filtrar avalia/i.test(html));
+  // E NAO PODE SER A POLITICA DENTRO DO FICHEIRO ERRADO. Um molde que recebesse
+  // o corpo trocado passaria em tamanho e deixaria o Google a ler a politica
+  // como se fossem os termos.
+  exigir('o ficheiro dos termos contem a politica de privacidade; os corpos foram trocados',
+    !/Pol[íi]tica de Privacidade<\/h1>/i.test(html));
 }
 
 // 4. A POLITICA DESCREVE O QUE O PRODUTO FAZ HOJE. Uma politica que nao fala do
@@ -71,8 +107,8 @@ exigir('a lista de subcontratantes nao inclui a API do Google que PUBLICA a resp
   /Business Profile API/.test(legal));
 
 if (falhas.length) {
-  console.error('Politica que o robo le: %d protecao(oes) falharam.\n', falhas.length);
+  console.error('Paginas legais que o robo le: %d protecao(oes) falharam.\n', falhas.length);
   for (const f of falhas) console.error(' - %s', f);
   process.exit(1);
 }
-console.log(`Politica que o robo le: ${verificadas} protecoes verdes.`);
+console.log(`Paginas legais que o robo le: ${verificadas} protecoes verdes.`);
