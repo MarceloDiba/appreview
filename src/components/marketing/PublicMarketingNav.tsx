@@ -4,6 +4,12 @@ import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MarketingCopy } from '@/i18n/marketing';
 import MarcaBinno from '@/components/marketing/MarcaBinno';
+/**
+ * Todos os "Começar" da página pública levam a intenção de assinar. Só existe
+ * um produto e um preço: quem cria conta é comprador em potencial, e mandá-lo
+ * para um painel sem caminho até a cobrança era o vazamento que sobrava.
+ */
+import { comIntencao } from '@/lib/intencaoDeAssinar';
 
 type PublicMarketingNavProps = {
   copy: MarketingCopy;
@@ -33,7 +39,7 @@ const PublicMarketingNav = ({ copy }: PublicMarketingNavProps) => {
 
         <div className="hidden items-center gap-2 md:flex">
           <Button variant="outline" asChild><Link to="/login">{copy.nav.login}</Link></Button>
-          <Button asChild className="bg-[#2457D6] hover:bg-[#1d47b0]"><Link to="/signup">{copy.nav.start}</Link></Button>
+          <Button asChild className="bg-[#2457D6] hover:bg-[#1d47b0]"><Link to={comIntencao('/signup', true)}>{copy.nav.start}</Link></Button>
         </div>
 
         <Button type="button" variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Menu">
@@ -51,7 +57,7 @@ const PublicMarketingNav = ({ copy }: PublicMarketingNavProps) => {
             ))}
             <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
               <Button variant="outline" asChild><Link to="/login">{copy.nav.login}</Link></Button>
-              <Button asChild className="bg-[#2457D6] hover:bg-[#1d47b0]"><Link to="/signup">{copy.nav.start}</Link></Button>
+              <Button asChild className="bg-[#2457D6] hover:bg-[#1d47b0]"><Link to={comIntencao('/signup', true)}>{copy.nav.start}</Link></Button>
             </div>
           </div>
         </nav>
