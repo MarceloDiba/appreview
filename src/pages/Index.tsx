@@ -49,7 +49,7 @@ const Index = () => {
               <h1 className="mt-4 text-4xl font-bold leading-[1.04] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">{copy.hero.title}</h1>
               <p className="mt-6 text-lg leading-8 text-slate-600">{copy.hero.body}</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="lg" className="bg-[#2457D6] hover:bg-[#1d47b0]"><Link to="/signup">{copy.hero.primary}<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+                <Button asChild size="lg" className="bg-[#2457D6] hover:bg-[#1d47b0]"><Link to={comIntencao('/signup', true)}>{copy.hero.primary}<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
                 <Button asChild size="lg" variant="outline"><Link to="/demo">{copy.hero.secondary}</Link></Button>
               </div>
               <p className="mt-6 flex gap-2 text-sm leading-6 text-slate-600"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />{copy.hero.trust}</p>
