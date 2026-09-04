@@ -81,7 +81,7 @@ const sqlPonte = readFileSync(join(migracoes, '20260831030000_telegram_como_pont
 const sqlGoogle = readFileSync(join(migracoes, '20260814193000_google_business_profile_connection.sql'), 'utf8');
 const sqlFundacao = readFileSync(join(migracoes, '20260903200000_whatsapp_oficial_e_resposta_por_mensagem.sql'), 'utf8');
 const sqlCanal = readFileSync(join(migracoes, '20260903220000_canal_prefere_whatsapp_oficial.sql'), 'utf8');
-const sqlModelo = readFileSync(join(migracoes, '20260903230000_rascunho_leva_modelo.sql'), 'utf8');
+const sqlModelo = readFileSync(join(migracoes, '20260904150000_o_aviso_mostra_o_que_o_cliente_disse.sql'), 'utf8');
 
 const BOOTSTRAP = `
 create schema if not exists auth;
@@ -114,8 +114,9 @@ begin
     values (l, u, 'accounts/1', 'accounts/1/locations/2', 'Noa Agencia Digital', true);
   insert into public.whatsapp_notification_preferences (user_id, recipient_e164, consented_at)
     values (u, '+5579991986091', now());
-  insert into public.google_business_reviews (id, user_id, location_id, google_review_name, reviewer_name, rating)
-    values (r, u, l, 'accounts/1/locations/2/reviews/3', 'Ana *Maria*', 5);
+  insert into public.google_business_reviews (id, user_id, location_id, google_review_name, reviewer_name, rating, comment)
+    values (r, u, l, 'accounts/1/locations/2/reviews/3', 'Ana *Maria*', 5,
+            'Atendimento excelente' || chr(10) || 'e muito rapido.');
   v := public.oferecer_rascunho(u, r, ${JSON.stringify(RASCUNHO).replace(/"/g, "'").replace(/\\n/g, "' || chr(10) || '").replace(/\\t/g, "' || chr(9) || '")});
   return query
     select o.template_name, o.template_variables, o.body, c.rascunho
@@ -124,9 +125,28 @@ begin
      where o.idempotency_key = 'rascunho:' || v::text;
 end;
 $fn$;
+
+-- QUEM SO DEIXOU ESTRELAS. Este caso existe porque sem ele a assercao do texto
+-- de recuo nao provava nada: a avaliacao de teste acima TEM comentario, entao o
+-- ramo do vazio nunca corria, e apaga-lo deixava tudo verde.
+create or replace function teste_so_estrelas() returns text language plpgsql as $fn$
+declare u uuid := gen_random_uuid(); r uuid := gen_random_uuid(); l uuid := gen_random_uuid(); v uuid;
+begin
+  insert into auth.users (id) values (u);
+  insert into public.google_business_locations (id, user_id, account_name, location_name, title, is_selected)
+    values (l, u, 'accounts/9', 'accounts/9/locations/9', 'Outro Negocio', true);
+  insert into public.whatsapp_notification_preferences (user_id, recipient_e164, consented_at)
+    values (u, '+5579991986092', now());
+  insert into public.google_business_reviews (id, user_id, location_id, google_review_name, reviewer_name, rating, comment)
+    values (r, u, l, 'accounts/9/locations/9/reviews/9', 'So Estrelas', 4, null);
+  v := public.oferecer_rascunho(u, r, 'Obrigado pela avaliacao.');
+  return (select o.body from public.whatsapp_outbox o
+           where o.idempotency_key = 'rascunho:' || v::text);
+end;
+$fn$;
 `;
 
-const MEDIR = 'select modelo, vars::text, corpo, guardado from teste();';
+const MEDIR = 'select t.modelo, t.vars::text, t.corpo, t.guardado, teste_so_estrelas() as so_estrelas from teste() t;';
 
 const dir = mkdtempSync(join(tmpdir(), 'binno-modelo-'));
 const dados = join(dir, 'pg');
@@ -162,11 +182,11 @@ try {
   // A propria leitura tem de ser conferida. Se a saida deixar de ter quatro
   // campos, tudo o que vem abaixo passa a medir outra coisa — e foi assim que
   // este guarda ja mentiu uma vez.
-  if (campos.length !== 4 || /CREATE|ALTER|INSERT/.test(campos[0])) {
+  if (campos.length !== 5 || /CREATE|ALTER|INSERT/.test(campos[0])) {
     console.error(`A saida do Postgres nao tem a forma esperada (${campos.length} campos): ${JSON.stringify(linha).slice(0, 200)}`);
     process.exit(1);
   }
-  const [modelo, vars, corpo, guardado] = campos;
+  const [modelo, vars, corpo, guardado, soEstrelas] = campos;
 
   const falhas = [];
   const exigir = (rotulo, condicao) => { if (!condicao) falhas.push(rotulo); };
@@ -180,8 +200,14 @@ try {
   let lista = null;
   try { lista = JSON.parse(vars); } catch { /* fica nulo */ }
   exigir(`template_variables nao e uma lista JSON (veio '${vars}')`, Array.isArray(lista));
-  exigir(`esperava 3 variaveis (nota, autor, rascunho), vieram ${Array.isArray(lista) ? lista.length : '?'}`,
-    Array.isArray(lista) && lista.length === 3);
+  exigir(`esperava 4 variaveis (nota, autor, comentario, rascunho), vieram ${Array.isArray(lista) ? lista.length : '?'}`,
+    Array.isArray(lista) && lista.length === 4);
+  // O QUE O CLIENTE ESCREVEU tem de ir na mensagem. Sem isso pede-se ao dono
+  // que publique no perfil publico dele uma resposta aquilo que ele nao viu.
+  exigir('a mensagem nao mostra o que o cliente escreveu',
+    /O que o cliente escreveu/.test(corpo));
+  exigir('o comentario do cliente nao vai nas variaveis do modelo',
+    Array.isArray(lista) && /Atendimento excelente/.test(String(lista[2])));
 
   // 3. NENHUMA VARIAVEL LEVA QUEBRA DE LINHA, TABULACAO OU 5+ ESPACOS. E a
   //    regra da Meta que recusa o envio inteiro. O rascunho de entrada TEM
@@ -209,6 +235,12 @@ try {
   // 6. O TEXTO LIVRE CONTINUA A EXISTIR, para dentro da janela.
   exigir('a linha ficou sem corpo de texto livre — dentro da janela nao haveria o que enviar',
     !!corpo && corpo.includes('Responda'));
+
+  // QUEM SO DEIXOU ESTRELAS tem direito a que isso seja dito, e nao a um bloco
+  // em branco — um vazio le-se como falha do produto, e nao como facto sobre a
+  // avaliacao.
+  exigir(`a avaliacao sem comentario ficou com um bloco vazio na mensagem: ${JSON.stringify(soEstrelas).slice(0, 120)}`,
+    /Sem coment[aá]rio escrito/.test(soEstrelas));
 
   if (falhas.length) {
     console.error('check-rascunho-leva-modelo: VERMELHO\n' + falhas.map((f) => `  - ${f}`).join('\n'));
