@@ -42,6 +42,12 @@ let verificadas = 0;
 const exigir = (condicao, mensagem) => { verificadas += 1; if (!condicao) falhas.push(mensagem); };
 
 const painel = semComentarios(readFileSync(PAINEL, 'utf8'));
+// OS CARTOES DE LEITURA sairam do painel em 04/09/2026, quando ele passou o
+// tecto de 350 linhas. `MobileSummary` e a faixa do celular ficaram; a linha
+// de "Cada nota separada" foi com eles. Cada assercao le o ficheiro onde a
+// regra dela vive.
+const CARTOES = 'src/components/dashboard/reputacao/CartoesDeLeitura.tsx';
+const cartoes = semComentarios(readFileSync(CARTOES, 'utf8'));
 const contrato = readFileSync(CONTRATO, 'utf8');
 
 // 1. A faixa-resumo existe e é exclusiva do celular. Sem `lg:hidden` ela
@@ -106,7 +112,7 @@ if (calculo) {
 // A asserção foi reapontada e não apagada: a regra que ela protege (a linha
 // cabe na largura do cartão no telemóvel) continua viva, e é a construção que
 // a cumpre que mudou.
-const linhaDasNotas = painel.match(/grid-cols-\[32px_minmax\(0,1fr\)_104px\][\s\S]{0,1400}?approved\.ratingsAttention/);
+const linhaDasNotas = cartoes.match(/grid-cols-\[32px_minmax\(0,1fr\)_104px\][\s\S]{0,1400}?approved\.ratingsAttention/);
 exigir(linhaDasNotas !== null,
   'A linha de "Cada nota separada" perdeu a grade estreita do celular, ou perdeu o rótulo de atenção que ela precisa caber, que é o que a impede de estourar a largura do cartão.');
 if (linhaDasNotas) {

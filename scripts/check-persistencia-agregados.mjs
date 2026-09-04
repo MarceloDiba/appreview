@@ -154,7 +154,7 @@ const fimDaInstrucao = (fonte, inicio) => {
 // Expressao atribuída a `const <nome> = ...;`. E o que permite seguir o valor
 // que uma prop realmente recebe, em vez de confiar no nome da prop.
 const expressaoAtribuida = (fonte, nome) => {
-  const marcador = new RegExp(`const ${nome}(?:[^=\\n]*)?=`);
+  const marcador = new RegExp(`(?:export )?const ${nome}(?:[^=\\n]*)?=`);
   const achado = fonte.match(marcador);
   if (!achado) return null;
   const inicio = achado.index + achado[0].length;
@@ -241,7 +241,22 @@ const coletorManual = lerCodigo('supabase/functions/sync-experimental-apify/inde
 const drenadorAutomatico = lerCodigo('supabase/functions/apify-auto-collect-on-signup/index.ts');
 const paginaDoPainel = lerCodigo('src/pages/Dashboard.tsx');
 const leituraDoAgregado = lerCodigo('src/lib/reputationSnapshotReading.ts');
-const cockpitRenderizado = lerCodigo('src/components/dashboard/ApprovedCockpitDashboard.tsx');
+/*
+ * O COCKPIT PASSOU A VIVER EM TRES FICHEIROS em 04/09/2026, quando o painel
+ * passou o tecto de 350 linhas: o painel, os cartoes de leitura e a nota de
+ * amostra. As regras deste guarda sao sobre CADA CARTAO que desenha uma medida
+ * derivada da amostra — "a regra e a medida que o cartao le, nao uma lista de
+ * nomes" — e por isso tem de ver os tres.
+ *
+ * Juntar os ficheiros e seguro AQUI porque nenhuma assercao deste guarda e
+ * sobre posicao entre cartoes: sao todas sobre o que cada cartao carrega
+ * DENTRO do proprio return, e nenhum corpo ficou dividido entre ficheiros.
+ */
+const cockpitRenderizado = [
+  'src/components/dashboard/ApprovedCockpitDashboard.tsx',
+  'src/components/dashboard/reputacao/CartoesDeLeitura.tsx',
+  'src/components/dashboard/NotaDaAmostra.tsx',
+].map(lerCodigo).join('\n');
 const cockpitIntermediario = lerCodigo('src/components/dashboard/ExperimentalCockpitDashboard.tsx');
 
 // Recorta a consulta inteira a partir do `.from('<tabela>')` até o `;` que a
@@ -520,7 +535,11 @@ const requisitos = [
     // etiqueta passava. Aqui o conjunto é descoberto pela leitura que cada
     // componente faz, então um cartão novo entra na regra sozinho.
     const MEDIDAS_DA_AMOSTRA = ['.sample.ratingBreakdown', 'averageResponseHours', 'reviewsLast30Days', '.insights?.topics'];
-    const componentes = [...cockpitRenderizado.matchAll(/^const ([A-Z][\w]*) = /gm)]
+    // `export const` tambem: ao sairem para ficheiro proprio em 04/09/2026, os
+    // cartoes de leitura passaram a ser exportados. Sem isto a varredura nao
+    // via nenhum deles, o conjunto esvaziava e a contagem minima abaixo era a
+    // unica coisa entre este guarda e um verde que nao conferia cartao nenhum.
+    const componentes = [...cockpitRenderizado.matchAll(/^(?:export )?const ([A-Z][\w]*) = /gm)]
       .map((achado) => achado[1])
       .filter((nome) => nome !== 'SampleSourceNote');
     const comMedidaDeAmostra = [];

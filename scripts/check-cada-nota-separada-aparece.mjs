@@ -24,7 +24,10 @@
 // mostrar o que este escondia.
 import { readFileSync } from 'node:fs';
 
-const CAMINHO = 'src/components/dashboard/ApprovedCockpitDashboard.tsx';
+// O CARTAO SAIU DO PAINEL em 04/09/2026, quando o painel passou o tecto de 350
+// linhas e foi cortado pela segunda costura: os cartoes de leitura. Este guarda
+// e inteiramente sobre o cartao, entao seguiu-o.
+const CAMINHO = 'src/components/dashboard/reputacao/CartoesDeLeitura.tsx';
 const bruto = readFileSync(CAMINHO, 'utf8');
 const fonte = bruto
   .replace(/\/\*[\s\S]*?\*\//g, ' ')

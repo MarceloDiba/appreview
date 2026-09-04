@@ -43,6 +43,10 @@ const leitura = readFileSync(LEITURA, 'utf8');
 const hook = readFileSync(HOOK, 'utf8');
 const tipos = readFileSync(TIPOS, 'utf8');
 const painel = readFileSync(PAINEL, 'utf8');
+// O CARTAO DO VOLUME saiu do painel em 04/09/2026 (tecto de 350 linhas). A
+// unica assercao deste guarda que le o codigo do cartao passou a ler onde ele
+// mora; o resto continua a olhar para o banco e para o hook.
+const cartoesDeLeitura = readFileSync('src/components/dashboard/reputacao/CartoesDeLeitura.tsx', 'utf8');
 
 const falhas = [];
 let verificadas = 0;
@@ -136,7 +140,7 @@ for (const idioma of ['pt-PT', 'pt-BR', 'en']) {
 // E o cartao continua a mostrar a frase so quando nao ha semanas nenhumas.
 exigir(
   'o cartao do volume decide o vazio pela ausencia de semanas, e nao por outra coisa',
-  /const semEvidencia = weeks\.length === 0;/.test(painel),
+  /const semEvidencia = weeks\.length === 0;/.test(cartoesDeLeitura),
 );
 
 if (falhas.length) {

@@ -55,6 +55,23 @@ const exigir = (condicao, mensagem) => { verificadas += 1; if (!condicao) falhas
 
 const painelBruto = readFileSync(PAINEL, 'utf8');
 const painel = semComentarios(painelBruto);
+/*
+ * OS CARTOES DE LEITURA SAIRAM DO PAINEL em 04/09/2026 (ele passou o tecto de
+ * 350 linhas). Este guarda faz DUAS perguntas diferentes, e so uma delas mudou
+ * de ficheiro:
+ *
+ *   A ORDEM das faixas continua a ler o painel, porque e la que os cartoes sao
+ *   COLOCADOS, e ordem e sobre posicao no ecra.
+ *
+ *   O CORPO de cada cartao — o que ele desenha, o que ele encolhe, o que ele
+ *   nao inventa — foi com o codigo.
+ *
+ * `ondeVive` procura a declaracao onde ela estiver. Nao afrouxa: se um cartao
+ * desaparecer dos DOIS ficheiros, continua a falhar com nome proprio.
+ */
+const CARTOES_DE_LEITURA = 'src/components/dashboard/reputacao/CartoesDeLeitura.tsx';
+const cartoesDeLeitura = semComentarios(readFileSync(CARTOES_DE_LEITURA, 'utf8'));
+const ondeVive = (nome) => corpoDaDeclaracao(painel, nome) || corpoDaDeclaracao(cartoesDeLeitura, nome) || '';
 const contrato = readFileSync(CONTRATO, 'utf8');
 const catalogos = CATALOGOS.map((caminho) => readFileSync(caminho, 'utf8'));
 
@@ -236,7 +253,7 @@ const ENCOLHEM = [
 ];
 
 for (const { nome, componente, calculo, chave, linha, pesado } of ENCOLHEM) {
-  const corpo = corpoDaDeclaracao(painel, componente) || '';
+  const corpo = ondeVive(componente);
   exigir(corpo !== '', `${componente} sumiu de ${PAINEL}.`);
   if (corpo === '') continue;
   exigir(corpo.includes(calculo),
@@ -264,11 +281,12 @@ for (const { nome, componente, calculo, chave, linha, pesado } of ENCOLHEM) {
 // a que corresponde ao motivo. Sem estas, alguém podia deixar `semEvidencia`
 // no sítio e pôr o limiar a zero, e o cartão voltava a desenhar 100/0/0/0/0
 // com o guarda verde.
-const corpoDasNotas = corpoDaDeclaracao(painel, 'RatingTrends') || '';
-const declaracaoDoMinimo = painel.match(/const MINIMO_DE_AVALIACOES = (\d+);/);
+const corpoDasNotas = ondeVive('RatingTrends');
+// O limiar foi com os cartoes: so eles o consultam.
+const declaracaoDoMinimo = cartoesDeLeitura.match(/const MINIMO_DE_AVALIACOES = (\d+);/);
 
 exigir(declaracaoDoMinimo !== null,
-  `O limiar de "Cada nota separada" deixou de existir em ${PAINEL}. Sem ele o cartão volta a desenhar cinco linhas rectas a partir de dez avaliações, que foi o que Marcelo viu na conta dele em 01/09/2026.`);
+  `O limiar de "Cada nota separada" deixou de existir em ${CARTOES_DE_LEITURA}. Sem ele o cartão volta a desenhar cinco linhas rectas a partir de dez avaliações, que foi o que Marcelo viu na conta dele em 01/09/2026.`);
 // O número é 20 e a conta está no contrato: com menos, o degrau de uma única
 // avaliação passa de 5 pontos percentuais, e o cartão chama "atenção" a
 // qualquer movimento. Um limiar de 1 ou de 0 é o mesmo que não ter limiar, e
@@ -306,7 +324,7 @@ for (const catalogo of CATALOGOS.map((caminho) => JSON.parse(readFileSync(caminh
 // diferentes: a distribuição vem da amostra e as duas medidas vêm das datas que
 // a busca trouxer. A nota e o total nunca faltam, e por isso o cartão inteiro
 // nunca encolhe.
-const corpoDaReputacao = corpoDaDeclaracao(painel, 'ReputationCard') || '';
+const corpoDaReputacao = ondeVive('ReputationCard');
 exigir(corpoDaReputacao.includes("<p className=\"mt-2 text-sm text-slate-500\">{t('dashboard.cockpit.approved.reputationBreakdownEmpty')}</p>")
   && !corpoDaReputacao.includes(`<p className="mt-5 text-sm text-slate-500">${TRACO}</p>`),
   'A "Reputação no Google" voltou a desenhar um traço solto no lugar da distribuição por nota. Um traço não diz por que está vazio.');
@@ -323,7 +341,7 @@ exigir(posicaoDasMedidas !== -1 && corpoDaReputacao.indexOf('<Metric label=') > 
 // existe para que a generalização não deixe o caso original desprotegido: se
 // alguém "arrumar" este cartão de volta ao formato antigo, o padrão inteiro
 // perde a referência de onde veio.
-const corpoDosTemas = corpoDaDeclaracao(painel, 'TopicsCard') || '';
+const corpoDosTemas = ondeVive('TopicsCard');
 exigir(corpoDosTemas.includes("<p className=\"mt-2 text-sm text-slate-500\">{t('dashboard.cockpit.approved.topicsEmpty')}</p>"),
   'Os "Temas mais citados" perderam a linha honesta de 31/08/2026, que é o padrão que a ordem por decisão generalizou para os outros cartões.');
 
