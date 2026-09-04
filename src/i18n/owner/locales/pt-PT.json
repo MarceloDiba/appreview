@@ -949,7 +949,9 @@
       "notAuthenticated": "A sua sessão terminou. Entre novamente para guardar os links.",
       "linksSaved": "Links externos atualizados.",
       "saveError": "Não foi possível guardar os links externos. Tente novamente.",
-      "noGooglePlaceId": "Não há um Place ID do Google associado para atualizar."
+      "noGooglePlaceId": "Não há um Place ID do Google associado para atualizar.",
+      "vemDaLigacao": "Este link já vem da sua conta do Google ligada ({{negocio}}). O Binno sabe para onde enviar o cliente.",
+      "colarEOpcional": "Colar um endereço aqui é opcional, e só se preferir um link curto."
     },
     "googlePreparacao": {
       "aPrepararTitulo": "A preparar o seu Google…",

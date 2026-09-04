@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import BusinessInfoSettings, { type BusinessInfo } from '@/components/settings/BusinessInfoSettings';
 import ExternalLinksSettings from '@/components/settings/ExternalLinksSettings';
 import ConexaoDoGoogle from '@/components/settings/ConexaoDoGoogle';
+import { useNegocioOficial } from '@/hooks/useNegocioOficial';
 import ExperimentalApifySnapshot from '@/components/settings/ExperimentalApifySnapshot';
 import { useExternalLinks } from '@/hooks/useExternalLinks';
 import GoogleReviews from '@/components/dashboard/GoogleReviews';
@@ -65,6 +66,9 @@ const Settings = () => {
     refreshLinks,
     error,
   } = useExternalLinks(userId);
+  // O negocio que a ligacao oficial escolheu. Com ele, o campo do Google deixa
+  // de pedir o que o Binno ja sabe.
+  const { negocio: negocioOficial } = useNegocioOficial(userId);
 
   useEffect(() => {
     if (!userId) return;
@@ -204,6 +208,7 @@ const Settings = () => {
 
             <TabsContent value="google">
               <ExternalLinksSettings
+                negocioOficial={negocioOficial}
                 externalLinks={externalLinks}
                 onExternalLinkChange={handleExternalLinkChange}
                 onExternalLinkCommit={handleExternalLinkCommit}

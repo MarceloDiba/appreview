@@ -949,7 +949,9 @@
       "notAuthenticated": "Your session has ended. Sign in again to save the links.",
       "linksSaved": "External links updated.",
       "saveError": "Couldn't save the external links. Please try again.",
-      "noGooglePlaceId": "There's no Google Place ID linked to refresh."
+      "noGooglePlaceId": "There's no Google Place ID linked to refresh.",
+      "vemDaLigacao": "This link already comes from your connected Google account ({{negocio}}). Binno knows where to send the customer.",
+      "colarEOpcional": "Pasting an address here is optional, only if you prefer a short link."
     },
     "googlePreparacao": {
       "aPrepararTitulo": "Setting up your Google…",

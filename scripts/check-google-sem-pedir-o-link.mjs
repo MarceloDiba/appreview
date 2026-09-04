@@ -141,11 +141,39 @@ try {
   exigir(`com dois negocios na conta, usou a ficha errada: devolveu '${doisNegocios}'`,
     doisNegocios === 'https://search.google.com/local/writereview?placeid=ChIJaEscolhida');
 
+  // 5. E A TELA TEM DE PARAR DE PEDIR. O banco resolve o QR; isto e para o dono
+  //    nao ver um campo obrigatorio a pedir o que o Binno ja sabe.
+  const semComentarios = (t) => t
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
+  const cartao = semComentarios(readFileSync('src/components/settings/ExternalLinksSettings.tsx', 'utf8'));
+  const pagina = semComentarios(readFileSync('src/pages/Settings.tsx', 'utf8'));
+
+  exigir('a tela nao diz que o link vem da ligacao; o dono continua a achar que precisa de colar',
+    /settings\.links\.vemDaLigacao/.test(cartao));
+  // A dica de "cole o link" so pode aparecer a quem NAO ligou. Aparecer nos dois
+  // casos e o defeito original visto de outro angulo.
+  exigir('a dica de colar o link continua a aparecer a quem ja ligou a conta',
+    /link\.platform === 'Google Reviews' && !negocioOficial &&/.test(cartao));
+  exigir('a pagina de configuracoes nao passa o negocio oficial ao cartao',
+    /negocioOficial=\{negocioOficial\}/.test(pagina));
+  // Sem isto, o cartao recebe sempre nulo e as duas asserções acima ficam
+  // verdes com a tela a pedir na mesma.
+  exigir('a pagina nao le o negocio oficial',
+    /useNegocioOficial\(userId\)/.test(pagina));
+
+  for (const locale of ['pt-BR', 'pt-PT', 'en']) {
+    const d = JSON.parse(readFileSync(`src/i18n/owner/locales/${locale}.json`, 'utf8'));
+    const texto = d?.settings?.links?.vemDaLigacao;
+    exigir(`${locale}: falta a chave settings.links.vemDaLigacao`,
+      typeof texto === 'string' && texto.includes('{{negocio}}'));
+  }
+
   if (falhas.length) {
     console.error('Google sem pedir o link: VERMELHO\n' + falhas.map((f) => `  - ${f}`).join('\n'));
     process.exit(1);
   }
-  console.log('Google sem pedir o link: 5 asserções, 5 estados de dono corridos num Postgres real.');
+  console.log('Google sem pedir o link: 12 asserções, 5 estados de dono corridos num Postgres real.');
 } finally {
   if (ligado) { try { execFileSync(PG_CTL, ['-D', dados, '-m', 'immediate', 'stop'], { stdio: 'ignore' }); } catch { /* ja caiu */ } }
   rmSync(dir, { recursive: true, force: true });

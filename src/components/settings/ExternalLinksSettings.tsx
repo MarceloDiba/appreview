@@ -13,6 +13,16 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 interface ExternalLinksSettingsProps {
   externalLinks: ExternalLinkWithMeta[];
   onExternalLinkChange: (index: number, key: string, value: string) => void;
+  /**
+   * O negócio que a ligação oficial ao Google escolheu, quando existe.
+   *
+   * Com ele, o campo do Google deixa de ser um pedido e passa a ser uma
+   * confirmação: o Binno já sabe para onde mandar o cliente, porque o
+   * `place_id` veio do próprio Google. Colar continua possível para quem
+   * prefere um endereço curto, e o que estiver colado continua a mandar —
+   * é `get_public_qr_business` que decide, e ela prefere o colado.
+   */
+  negocioOficial?: { titulo: string; placeId: string } | null;
   /** Chamado quando o campo perde o foco — é aí que se lê o Place ID. */
   onExternalLinkCommit?: (index: number) => void;
   onDeleteExternalLink: (index: number) => void;
@@ -28,6 +38,7 @@ interface ExternalLinksSettingsProps {
 const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
   externalLinks,
   onExternalLinkChange,
+  negocioOficial = null,
   onExternalLinkCommit,
   onDeleteExternalLink,
   onAddExternalLink,
@@ -141,8 +152,21 @@ const ExternalLinksSettings: React.FC<ExternalLinksSettingsProps> = ({
                 
                 {renderValidationStatus(link)}
 
-                {link.platform === 'Google Reviews' && (
+                {/*
+                  DUAS FRASES, porque sao duas situacoes. Sem ligacao oficial, o
+                  link colado e a UNICA forma de o Binno saber para onde mandar
+                  o cliente, e a dica explica como o encontrar. Com ligacao, o
+                  Binno ja sabe: pedir outra vez e pedir o que se tem.
+                */}
+                {link.platform === 'Google Reviews' && !negocioOficial && (
                   <div className="text-xs text-gray-500 mt-1">{t('settings.links.googleHint')}</div>
+                )}
+
+                {link.platform === 'Google Reviews' && negocioOficial && (
+                  <div className="mt-1 text-xs leading-5 text-emerald-800">
+                    {t('settings.links.vemDaLigacao', { negocio: negocioOficial.titulo })}
+                    {!link.url?.trim() && ` ${t('settings.links.colarEOpcional')}`}
+                  </div>
                 )}
 
                 {link.platform === 'Google Reviews' && link.place_id && (
