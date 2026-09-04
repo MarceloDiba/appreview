@@ -118,6 +118,50 @@ export const createSubscriptionCheckout = async (
   return stripeRequest(config, '/v1/checkout/sessions', params);
 };
 
+/**
+ * O checkout de quem AINDA NAO TEM CONTA.
+ *
+ * Irmao de `createSubscriptionCheckout`, e nao um parametro dele: as duas
+ * versoes divergem em cinco campos, e um booleano no meio da funcao original
+ * esconderia que sao dois fluxos com riscos diferentes.
+ *
+ * O que muda, e porque:
+ *   - SEM `client_reference_id` e sem `metadata[user_id]`: nao ha utilizador
+ *     ainda. E a ausencia desse campo que o webhook usa para saber que esta
+ *     compra vai para `compras_a_reclamar` em vez de `subscriptions`.
+ *   - SEM `customer_email`: quem pede o email e o Stripe, na propria tela de
+ *     pagamento. Pedi-lo antes seria o formulario que este caminho existe para
+ *     eliminar.
+ *   - `metadata[sem_conta] = 1`: a marca explicita. Deduzir pela ausencia de
+ *     `user_id` funcionaria, mas um dia alguem esquece de a por no outro fluxo
+ *     e todas as compras viram orfas em silencio.
+ *   - `success_url` leva o BILHETE (`{CHECKOUT_SESSION_ID}`) para `/bem-vindo`.
+ *     E o bilhete que liga o pagamento a conta que a pessoa criar a seguir,
+ *     mesmo que ela use um email diferente do que deu ao Stripe.
+ *   - `cancel_url` volta ao preco, e nao ao painel: quem desistiu nao tem
+ *     painel nenhum para onde voltar.
+ */
+export const createCheckoutSemConta = async (
+  config: BillingConfig,
+  input: { appUrl: string },
+) => {
+  const suffix = crypto.randomUUID().replace(/[^a-z]/gi, '').slice(0, 8).padEnd(8, 'a');
+  const params = new URLSearchParams({
+    mode: 'subscription',
+    'line_items[0][price]': config.priceId,
+    'line_items[0][quantity]': '1',
+    success_url: `${input.appUrl}/bem-vindo?compra={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${input.appUrl}/#pricing`,
+    billing_address_collection: 'required',
+    'metadata[market]': config.market,
+    'metadata[sem_conta]': '1',
+    'subscription_data[metadata][market]': config.market,
+    'subscription_data[metadata][sem_conta]': '1',
+    integration_identifier: `binno_sem_conta_${suffix}`,
+  });
+  return stripeRequest(config, '/v1/checkout/sessions', params);
+};
+
 export const createCustomerPortal = async (
   config: BillingConfig,
   customerId: string,
