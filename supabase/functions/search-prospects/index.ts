@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 /**
  * Ferramenta INTERNA da NOÁ para prospecção — não é feature do produto.
@@ -19,6 +20,22 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
  * ativa e commitado para que isso não se repita. Na mesma data ela passou a
  * exigir sessão de usuário (verify_jwt), porque estava aberta a qualquer
  * pessoa na internet e gasta a chave paga do Google Places a cada chamada.
+ *
+ * ESSE CONSERTO NÃO CONSERTOU NADA, e ficou assim de 29/08 a 04/09/2026.
+ *
+ * `verify_jwt = true` não exige sessão: exige uma credencial válida — e a
+ * chave publicável do site é uma, impressa dentro do JavaScript que qualquer
+ * pessoa baixa. Provado em 04/09 chamando este endereço com essa chave e sem
+ * login nenhum: devolveu 24 prospects qualificados de Aracaju, tendo varrido
+ * 60 estabelecimentos na conta paga do Google.
+ *
+ * Ninguém tinha testado. Escreveu-se o comentário, acreditou-se nele, e a
+ * porta continuou aberta seis dias.
+ *
+ * AGORA É SÓ ADMINISTRADOR, e não "qualquer pessoa autenticada". Isto não é
+ * funcionalidade do produto: é a ferramenta com que a Noá escolhe a quem
+ * vender. Um cliente com conta paga não tem mais direito a ela do que um
+ * estranho — e cada chamada continua a custar dinheiro.
  */
 
 const corsHeaders = {
@@ -99,11 +116,36 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const recusar = (mensagem: string, status: number) => new Response(
+    JSON.stringify({ error: mensagem }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status },
+  );
+
+  /**
+   * A PORTA. Vem ANTES de qualquer coisa que gaste dinheiro — inclusive antes
+   * de olhar para a chave do Google, para que um estranho não descubra sequer
+   * se ela está configurada.
+   */
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  if (!supabaseUrl || !anonKey || !serviceRoleKey) return recusar('Server configuration missing', 500);
+
+  const authorization = req.headers.get('Authorization');
+  if (!authorization) return recusar('Authentication required', 401);
+  const chamador = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } } });
+  const { data: { user }, error: erroDeSessao } = await chamador.auth.getUser();
+  // A chave publicável passa por `verify_jwt` mas NÃO tem utilizador: é aqui
+  // que ela cai, e era exactamente por aqui que a porta estava aberta.
+  if (erroDeSessao || !user) return recusar('Invalid session', 401);
+
+  const admin = createClient(supabaseUrl, serviceRoleKey);
+  const { data: administrador } = await admin
+    .from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
+  if (!administrador) return recusar('Invalid session', 401);
+
   if (!googleApiKey) {
-    return new Response(
-      JSON.stringify({ error: 'GOOGLE_PLACES_API_KEY não configurada' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-    );
+    return recusar('GOOGLE_PLACES_API_KEY não configurada', 500);
   }
 
   try {
