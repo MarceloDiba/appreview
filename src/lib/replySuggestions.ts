@@ -348,8 +348,29 @@ const GENERIC = {
     es: 'Ya he revisado el caso con el equipo para entender dónde fallamos.',
     en: 'I have gone through what happened with the team to understand where we fell short.',
   },
+  /*
+   * O ELOGIO GENERICO NAO PODE INVENTAR UMA VISITA.
+   *
+   * Ate 04/09/2026 esta frase era "tenha gostado da visita", fixa, para
+   * QUALQUER negocio. Marcelo recebeu no WhatsApp o rascunho para a Mesquita,
+   * que escreveu "Agência Top de serviços de Sergipe, profissionais muito
+   * capacitados" — e o Binno respondia agradecendo por ela ter gostado da
+   * VISITA. Ela nao falou em visita nenhuma, e a Noá e uma agencia digital:
+   * muitos clientes nunca puseram os pes la.
+   *
+   * Isto e o generico: entra quando NENHUM tema foi reconhecido no texto, ou
+   * seja, precisamente quando se sabe menos sobre o que a pessoa disse. E o
+   * pior sitio possivel para arriscar um detalhe.
+   *
+   * A frase nova so afirma o que a propria avaliacao ja prova: houve uma
+   * experiencia, e ela foi boa. Serve a um restaurante, a uma clinica e a uma
+   * agencia sem mentir a nenhum deles.
+   */
   praise: {
-    pt: 'tenha gostado da visita', 'pt-BR': 'tenha gostado da visita', es: 'te haya gustado la visita', en: 'you enjoyed your visit',
+    pt: 'tenha tido uma boa experiência connosco',
+    'pt-BR': 'tenha tido uma boa experiência com a gente',
+    es: 'hayas tenido una buena experiencia con nosotros',
+    en: 'you had a good experience with us',
   },
 } as const;
 

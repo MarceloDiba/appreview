@@ -31,6 +31,17 @@ const INVENCOES = {
   en: [/the kind words/i, /what you wrote/i, /enjoyed your visit/i],
 };
 
+// A VISITA INVENTADA, e agora tambem para quem ESCREVEU.
+//
+// O elogio generico dizia "tenha gostado da visita" para qualquer negocio. Em
+// 04/09/2026 Marcelo recebeu isso no WhatsApp para a Mesquita, que escreveu
+// sobre os profissionais da agencia e nao falou em visita nenhuma — e a Noá e
+// uma agencia digital, onde muitos clientes nunca la puseram os pes.
+//
+// O generico entra quando NENHUM tema foi reconhecido, ou seja precisamente
+// quando se sabe menos. E o pior sitio para arriscar um detalhe.
+const VISITA_INVENTADA = [/da visita/i, /la visita/i, /your visit/i];
+
 const semTexto = (rating, businessCountry = 'BR') => buildReplySuggestions({
   rating, text: null, customerName: 'LailsonSantos jose',
   businessName: 'Noá Digital', channel: 'public', businessCountry,
@@ -62,6 +73,32 @@ for (const nota of [1, 3, 5]) {
     /avalia/i.test(corpo));
   exigir(`nota ${nota} sem texto perdeu a assinatura do negocio`,
     corpo.includes('Noá Digital'));
+}
+
+// 2b. E QUEM ESCREVEU SEM FALAR DE VISITA NAO OUVE FALAR DE VISITA.
+//     O texto da Mesquita, que causou o defeito, corrido de verdade.
+for (const nota of [4, 5]) {
+  const variantes = buildReplySuggestions({
+    rating: nota,
+    text: 'Agência Top de serviços de Sergipe, profissionais muito capacitados.',
+    customerName: 'Mesquita', businessName: 'Noá Digital',
+    channel: 'public', businessCountry: 'BR',
+  });
+  for (const v of variantes) {
+    for (const padrao of VISITA_INVENTADA) {
+      exigir(`nota ${nota}, variante "${v.title}": inventa uma visita (${padrao}) que o cliente nao mencionou`,
+        !padrao.test(v.body));
+    }
+  }
+}
+// E o generico tambem nao a inventa nos outros idiomas.
+for (const [pais, idioma] of [['BR', 'pt-BR'], [null, 'pt']]) {
+  const corpo = buildReplySuggestions({
+    rating: 5, text: 'Profissionais muito capacitados, recomendo.',
+    customerName: 'Ana', businessName: 'Casa', channel: 'public', businessCountry: pais,
+  })[0].body;
+  exigir(`o elogio generico em ${idioma} ainda inventa uma visita`,
+    !VISITA_INVENTADA.some((p) => p.test(corpo)));
 }
 
 // 3. QUEM ESCREVEU CONTINUA A SER TRATADO COMO ANTES. Se o conjunto novo
