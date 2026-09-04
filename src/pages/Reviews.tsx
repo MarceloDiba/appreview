@@ -27,7 +27,26 @@ const Reviews = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      setUserId(user.id);
+      /*
+       * O PAÍS CHEGA ANTES DA FILA, e a ordem destas linhas é o conserto.
+       *
+       * `userId` é o que faz a fila montar. Enquanto ele era definido ANTES da
+       * leitura do perfil, `FilaDeRespostas` montava com `businessCountry`
+       * vazio — e `PublicacaoOficial` congela o rascunho inicial num `useState`
+       * no primeiro render, sem voltar atrás quando o país chega.
+       *
+       * O resultado era um rascunho em português de Portugal na tela de um dono
+       * brasileiro, publicável com um clique no perfil público dele. É a mesma
+       * família do inglês que foi publicado no perfil do Daniel em 03/09/2026:
+       * o texto sai gramatical, ninguém vê erro, e só quem conhece o cliente
+       * repara.
+       *
+       * Apontado na revisão da Task 3 em 03/09 e deixado em aberto até 04/09.
+       *
+       * Se a leitura do perfil falhar, `data` vem nulo e o `userId` é definido
+       * na mesma: a fila carrega com o país por omissão, que é melhor do que
+       * uma tela vazia.
+       */
       const { data: profile } = await supabase
         .from('profiles')
         .select('business_name, business_country')
@@ -35,6 +54,7 @@ const Reviews = () => {
         .maybeSingle();
       if (profile?.business_name) setBusinessName(profile.business_name);
       if (profile?.business_country) setBusinessCountry(profile.business_country);
+      setUserId(user.id);
     };
 
     void fetchUser();
