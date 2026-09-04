@@ -99,6 +99,23 @@ serve(async (request) => {
       const eligibilityStatus = eventType === 'checkout.session.completed'
         ? (config && countryIsEligible(config, billingCountry) && billingCountry === businessCountry ? 'verified' : 'mismatch')
         : existing?.eligibility_status || 'pending';
+      /**
+       * O FIM DO PERIODO MUDOU DE SITIO.
+       *
+       * O Stripe passou a devolver `current_period_start`/`end` DENTRO de cada
+       * item da assinatura, e nao no topo do objeto. Ler so o topo devolve
+       * nulo — e foi o que aconteceu na primeira compra real do produto, em
+       * 04/09/2026: assinatura activa, e nenhuma data de renovacao em lado
+       * nenhum. O dono nao tinha como saber ate quando pagou.
+       *
+       * Le-se o topo primeiro, para nao partir contas antigas que ainda o
+       * tenham, e cai-se para o item.
+       */
+      const itens = (object.items as Record<string, unknown> | undefined)?.data as Array<Record<string, unknown>> | undefined;
+      const primeiroItem = itens?.[0];
+      const inicioDoPeriodo = object.current_period_start ?? primeiroItem?.current_period_start;
+      const fimDoPeriodo = object.current_period_end ?? primeiroItem?.current_period_end;
+
       const record: Record<string, unknown> = {
         user_id: userId,
         stripe_customer_id: customerId,
@@ -112,15 +129,45 @@ serve(async (request) => {
         status,
         currency,
         price_per_month: unitAmount,
-        current_period_start: unixToIso(object.current_period_start),
-        current_period_end: unixToIso(object.current_period_end),
+        current_period_start: unixToIso(inicioDoPeriodo),
+        current_period_end: unixToIso(fimDoPeriodo),
         cancel_at: unixToIso(object.cancel_at),
       };
+
+      /**
+       * A ELEGIBILIDADE NAO PODE SER REBAIXADA POR UMA CORRIDA.
+       *
+       * O Stripe entrega `customer.subscription.created` e
+       * `checkout.session.completed` ao mesmo tempo, e as duas chamadas correm
+       * em paralelo. Na primeira compra real, as duas foram recebidas no mesmo
+       * microssegundo: a do checkout calculou `verified`, e a da subscricao —
+       * que leu `existing` ANTES de a outra gravar — escreveu `pending` por
+       * cima.
+       *
+       * `pending` nao e um detalhe de registo: o portal do Stripe so abre para
+       * `verified` (ver `billing-checkout`, accao `portal`). Ou seja, a corrida
+       * deixou o dono SEM CONSEGUIR CANCELAR — a promessa "cancele quando
+       * quiser" partida por uma ordem de chegada.
+       *
+       * So o evento do checkout sabe o pais de cobranca. Os outros deixam esta
+       * coluna em paz: quem nao sabe nao escreve.
+       */
+      if (eventType !== 'checkout.session.completed') delete record.eligibility_status;
       // The Checkout receipt belongs to the subscription too. Do not erase it
       // when Stripe later sends a subscription.updated event.
       if (eventType === 'checkout.session.completed') record.checkout_session_id = string(object.id);
       const { error } = await admin.from('subscriptions').upsert(record, { onConflict: 'stripe_subscription_id' });
       if (error) throw error;
+
+      // E se a subscricao chegou primeiro, a linha nasceu sem elegibilidade
+      // nenhuma. Preenche-la aqui, e SO quando esta vazia, fecha o outro lado
+      // da corrida sem nunca rebaixar o que o checkout ja tenha decidido.
+      if (eventType !== 'checkout.session.completed') {
+        await admin.from('subscriptions')
+          .update({ eligibility_status: 'pending' })
+          .eq('stripe_subscription_id', subscriptionId)
+          .is('eligibility_status', null);
+      }
       if (eligibilityStatus === 'verified') {
         await admin.from('profiles').update({
           subscription_plan: 'Binno',

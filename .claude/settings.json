@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-do-ficheiro-tocado.mjs\"",
+            "timeout": 30,
+            "statusMessage": "A passar o portao de qualidade no ficheiro tocado"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/portao-antes-do-push.mjs\"",
+            "if": "Bash(git push*)",
+            "timeout": 120,
+            "statusMessage": "A conferir o teto de avisos antes do push"
+          }
+        ]
+      }
+    ]
+  }
+}

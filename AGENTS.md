@@ -47,16 +47,75 @@ Precisa de aprovação:
 - qualquer mudança pública, financeira ou difícil de reverter fora do escopo
   já aprovado.
 
+## Comandos canônicos
+
+Usar exatamente estes. Não adivinhar, não inventar variação.
+
+| Para quê | Comando |
+| --- | --- |
+| Instalar | `npm install` |
+| Lint | `npm run lint` |
+| Portão do lint (teto congelado) | `npm run lint:portao` |
+| Tipos | `npx tsc --noEmit -p tsconfig.app.json` |
+| **Portão completo, antes do PR** | `npm run verify` |
+| Build | `npm run build` |
+| Rodar | `npm run dev` |
+| Auto-teste das regras de ESLint | `node eslint-rules/verify.mjs ./eslint-rules/index.cjs` |
+
 ## Verificação obrigatória
 
-Antes de propor um PR:
+Antes de propor um PR, o comando é **um**:
 
 ```bash
-npx tsc --noEmit -p tsconfig.app.json
-npm run check:i18n-owner
+npm run verify
 ```
 
-Depois de subir a branch, aguardar o CI. O build do Vite não verifica tipos.
+Ele encadeia os tipos, o portão do lint e os **63 guardas** `check:*` — cada um
+guardando uma decisão de produto que já foi quebrada uma vez. Rodar só o `tsc`
+passa por cima de todos eles. Depois de subir a branch, aguardar o CI. O build
+do Vite não verifica tipos.
+
+### O teto de avisos, e por que não se mexe nele
+
+`lint:portao` é `eslint . --max-warnings 69`. Esse **69 não é uma meta — é a
+contagem real** do dia em que as regras de qualidade entraram. A regra é: regra
+nova nasce em `warn`, anota-se a contagem, corrige-se até zero, e só então se
+promove a `error`. Enquanto não chega a zero, o que protege é ninguém deixar o
+número crescer.
+
+**Subir o teto no `package.json` é a saída errada:** apaga exatamente a medida
+que o portão existe para guardar. Se um aviso novo aparecer, corrige-se o aviso.
+
+## Dois hooks vigiam isto sozinhos
+
+Vivem em `.claude/hooks/`, ligados por `.claude/settings.json`:
+
+- **`lint-do-ficheiro-tocado.mjs`** — depois de cada escrita, passa o ESLint só
+  no ficheiro tocado e devolve o resultado. **Avisa, não bloqueia.** Existe
+  porque o `verify` é lento demais para rodar a cada edição, e sem ele o aviso
+  novo só apareceria no fim, quando já custa caro desfazer.
+- **`portao-antes-do-push.mjs`** — antes de um `git push`, confere o teto de
+  avisos. **Bloqueia.** Aqui o código está prestes a sair da máquina.
+
+Se algum deles ficar em silêncio quando devia falar, trata-se de portão
+avariado, não de código limpo — os dois foram escritos para denunciar a própria
+avaria em vez de falharem para o lado do silêncio.
+
+## Trabalho em paralelo com subagentes
+
+Quando um plano tiver tarefas genuinamente independentes, seguir
+`.claude/rules/parallel-subagent-driven-development.md`. Em uma linha: só entram
+na mesma onda tarefas cujos conjuntos de arquivos sejam **disjuntos**, e
+**implementador nenhum faz commit** — quem comita é o orquestrador, uma tarefa
+de cada vez, depois da onda. Sem essas duas condições, é serial.
+
+| Especialista | Quando usar |
+| --- | --- |
+| `code-reviewer` | Depois de editar qualquer fonte. Bugs, tratamento de erro, cobertura. |
+| `security-reviewer` | Antes de qualquer merge que toque autenticação, entrada de dados, segredos, RLS ou funções `public` do Postgres. **Obrigatório no caminho de pagamento.** |
+| `test-engineer` | Depois de implementar lógica nova. |
+| `backend-specialist` | `supabase/functions/`, migrations, filas. |
+| `frontend-specialist` | `src/`, painel, telas do QR. |
 
 ## i18n
 

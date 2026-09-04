@@ -1,7 +1,12 @@
 # AppReview — regras para o assistente
 
 > Compatibilidade com Claude. As regras canônicas e atualizadas do projeto
-> ficam em `AGENTS.md`.
+> ficam em `AGENTS.md`, importado abaixo — os comandos canônicos, o portão de
+> verificação, os hooks e a tabela de especialistas vivem lá, e só lá. O que
+> sobra neste arquivo é o que ainda não foi movido; em conflito, `AGENTS.md`
+> vence.
+
+@AGENTS.md
 
 Ferramenta de gestão de reputação para donos de negócio que não sabem de
 tecnologia. QR na mesa → cliente avalia → nota baixa vira caso interno para o
@@ -32,8 +37,12 @@ nota** (esconder isso é *review gating*, proibido — nunca reintroduzir).
 ## Verificação (rodar antes de propor PR)
 
 ```
-npx tsc --noEmit -p tsconfig.app.json   # obrigatório; o build do Vite NÃO checa tipos
+npm run verify   # tipos + portão do lint + os 63 guardas + build
 ```
+
+Rodar só o `tsc` passa por cima dos 63 guardas `check:*`, e cada um deles
+guarda uma decisão de produto que já foi quebrada uma vez. A tabela completa de
+comandos canônicos está em `AGENTS.md`.
 
 Para i18n do painel, checar chaves batendo e resolução: ver o script em
 `HANDOFF.md` (secção "Verificação do i18n").
