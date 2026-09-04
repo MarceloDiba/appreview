@@ -23,7 +23,24 @@
 // chaves diferentes.
 import { readFileSync } from 'node:fs';
 
+/*
+ * DOIS FICHEIROS DESDE 04/09/2026, e a divisao nao e arbitraria.
+ *
+ * A fila saiu do painel para ficheiro proprio quando o painel passou o tecto de
+ * 350 linhas. A LIGACAO ao publicador continua no painel — e la que a fila e
+ * colocada e alimentada. O COMPORTAMENTO de publicar (que id vai, quando o
+ * botao aparece, o clique) foi com o codigo.
+ *
+ * Cada assercao aponta para o ficheiro onde a regra dela vive. Ler os dois nao
+ * afrouxa nada; ler so um deixaria metade das regras sem dono, verde por o
+ * codigo ter mudado de sitio.
+ */
 const CAMINHO = 'src/components/dashboard/ApprovedCockpitDashboard.tsx';
+const CAMINHO_DA_FILA = 'src/components/dashboard/reviews/FilaDoPainel.tsx';
+const semComentarios = (texto) => texto
+  .replace(/\/\*[\s\S]*?\*\//g, ' ')
+  .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
+const fila = semComentarios(readFileSync(CAMINHO_DA_FILA, 'utf8'));
 const bruto = readFileSync(CAMINHO, 'utf8');
 const fonte = bruto
   .replace(/\/\*[\s\S]*?\*\//g, ' ')
@@ -48,26 +65,26 @@ exigir('a fila do Painel nao esta ligada ao publicador oficial; o dono continua 
 
 // 2. COM O ID CRU, e nunca o prefixado. Este e o defeito que se paga caro.
 exigir('a fila do Painel nao carrega o id cru da avaliacao; publicar mandaria o id prefixado',
-  /idNaFonte/.test(fonte));
+  /idNaFonte/.test(fonte) && /idNaFonte/.test(fila));
 exigir('o publicador e chamado sem o id cru da avaliacao',
-  /publicar\(selected\.idNaFonte,/.test(fonte));
+  /publicar\(selected\.idNaFonte,/.test(fila));
 // O prefixado nunca pode chegar la. `selected.id` leva `google-oficial:` a
 // frente e o Google recusaria, com o dono a ver apenas "nao deu".
 exigir('o id prefixado (`selected.id`) esta a ser passado ao publicador',
-  !/publicar\(selected\.id\s*,/.test(fonte));
+  !/publicar\(selected\.id\s*,/.test(fila));
 // E publicar so quando ha o que publicar, e nunca em demonstracao.
 exigir('publicar nao exige o id cru nem exclui a demonstracao',
-  /const podePublicar = !demo && Boolean\(publicar\) && Boolean\(selected\?\.idNaFonte\)/.test(fonte));
+  /const podePublicar = !demo && Boolean\(publicar\) && Boolean\(selected\?\.idNaFonte\)/.test(fila));
 
 // 3. SO PUBLICA QUANDO O DONO MANDA. Nunca automatico: e perfil publico e nao
 //    se desfaz.
 exigir('publicar nao esta preso a um clique do dono',
-  /onClick=\{[^}]*publicarNoGoogle/.test(fonte) || /onClick=\{\(\) => void publicarNoGoogle/.test(fonte));
+  /onClick=\{[^}]*publicarNoGoogle/.test(fila) || /onClick=\{\(\) => void publicarNoGoogle/.test(fila));
 
 // 4. O LINK GENERICO SAI quando da para publicar. Mandar o dono a uma pagina
 //    geral de avaliacoes, com o rascunho na mao, e pior do que nao mandar.
 exigir('o link generico para business.google.com continua no cartao do Painel',
-  !/business\.google\.com\/reviews/.test(fonte));
+  !/business\.google\.com\/reviews/.test(fonte) && !/business\.google\.com\/reviews/.test(fila));
 
 // 5. COPIAR CONTINUA A EXISTIR, como recuo. Um guarda que so exigisse publicar
 //    passaria com o botao de copiar apagado, e quem quer colar noutro sitio
@@ -76,8 +93,8 @@ exigir('o link generico para business.google.com continua no cartao do Painel',
 // verde quando so a declaracao era renomeada — a chamada sobrava e casava. O
 // que o dono perde se isto sumir e o BOTAO, entao e o botao que se mede.
 exigir('o botao de copiar desapareceu; ele e o recuo de quem quer colar noutro sitio',
-  /onClick=\{\(\) => void copyReply\(\)\}/.test(fonte)
-  && /dashboard\.cockpit\.assisted\.copy/.test(fonte));
+  /onClick=\{\(\) => void copyReply\(\)\}/.test(fila)
+  && /dashboard\.cockpit\.assisted\.copy/.test(fila));
 
 // 6. AS CHAVES DE TEXTO EXISTEM NOS TRES IDIOMAS.
 for (const locale of ['pt-BR', 'pt-PT', 'en']) {

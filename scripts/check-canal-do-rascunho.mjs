@@ -300,7 +300,11 @@ exigir('a entrada do rascunho carrega o pais do negocio', /businessCountry: stri
 // prova-la vermelha em 01/09/2026.
 for (const [tela, arquivo] of [
   ['/reviews', 'src/components/dashboard/ReplySuggestions.tsx'],
-  ['o cockpit', 'src/components/dashboard/ApprovedCockpitDashboard.tsx'],
+  // "o cockpit" continua a ser o rotulo, mas a fila dele saiu para ficheiro
+  // proprio em 04/09/2026 (o painel passou o tecto de 350 linhas). Tudo o que
+  // este guarda exige — pedir o rascunho, esperar pelo pais, reexecutar quando
+  // ele chega — e comportamento DA FILA, e foi com ela.
+  ['o cockpit', 'src/components/dashboard/reviews/FilaDoPainel.tsx'],
 ]) {
   const entrada = readFileSync(arquivo, 'utf8').match(/pedirRascunho\([\s\S]*?\{([\s\S]*?)\},/);
   exigir(`${tela}: a entrada do pedido continua legivel`, entrada !== null);
@@ -346,7 +350,7 @@ exigir(
 // E o cockpit, que nao desenha o painel mas paga a chamada por conta propria.
 exigir(
   'o cockpit pede em publico, porque a fila dele e so de avaliacoes do Google',
-  /channel: 'public',/.test(readFileSync('src/components/dashboard/ApprovedCockpitDashboard.tsx', 'utf8')),
+  /channel: 'public',/.test(readFileSync('src/components/dashboard/reviews/FilaDoPainel.tsx', 'utf8')),
 );
 
 // ---------------------------------------------------------------------------
@@ -383,20 +387,27 @@ exigir(
 // sessao e nao se corrige quando o perfil chega. Um dono brasileiro ficava com
 // a primeira avaliacao respondida em portugues de Portugal ao lado de um molde
 // em pt-BR, na mesma tela.
+// A LEITURA DO PAIS ficou no painel: e ele que fala com o perfil e passa o
+// resultado a fila. As asserções abaixo sao sobre essa leitura, entao leem o
+// painel; as de cima, sobre pedir o rascunho, leem a fila.
 const cockpit = readFileSync('src/components/dashboard/ApprovedCockpitDashboard.tsx', 'utf8');
+// E o PEDIDO do rascunho ficou na fila, que saiu para ficheiro proprio. As
+// duas coisas conversam por uma prop (`paisLido`), e por isso as asserções
+// abaixo se dividem: quem LE o pais e o painel, quem ESPERA por ele e a fila.
+const cockpitFila = readFileSync('src/components/dashboard/reviews/FilaDoPainel.tsx', 'utf8');
 exigir(
   'o cockpit distingue "ja se leu o pais" de "o pais e nulo"',
   /const \[paisLido, setPaisLido\] = useState\(false\);/.test(cockpit),
 );
 exigir(
   'o cockpit espera pelo pais antes de pagar a chamada',
-  /if \(!paisLido\) return;/.test(cockpit),
+  /if \(!paisLido\) return;/.test(cockpitFila),
 );
 // Sem isto o efeito nao reexecuta quando o perfil chega, e o rascunho nunca e
 // pedido: a espera passa a ser permanente, que e pior do que o defeito.
 exigir(
   'o efeito reexecuta quando o pais chega',
-  /\}, \[selected\?\.id, demo, paisLido\]\);/.test(cockpit),
+  /\}, \[selected\?\.id, demo, paisLido\]\);/.test(cockpitFila),
 );
 // E a leitura tem de terminar mesmo quando falha, senao uma rede em baixo
 // deixa o painel a espera para sempre.

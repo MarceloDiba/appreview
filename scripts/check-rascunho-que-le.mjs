@@ -121,7 +121,14 @@ const semComentarios = (fonte) => fonte
 
 const POLITICA = 'src/lib/rascunhoDoModelo.ts';
 const TRANSPORTE = 'src/lib/sugerirResposta.ts';
-const PAINEL = 'src/components/dashboard/ApprovedCockpitDashboard.tsx';
+// A FILA MUDOU DE FICHEIRO em 04/09/2026, e este guarda seguiu-a.
+//
+// Ela vivia dentro de `ApprovedCockpitDashboard.tsx`, que passou o tecto de 350
+// linhas e foi cortado pela costura mais coesa que tinha: escolher a avaliacao,
+// ver o rascunho, editar, publicar, copiar, saltar. Todas as regras deste
+// ficheiro sao sobre ESSA fila — o rotulo que elas usam ja dizia "a fila do
+// painel" —, entao o que muda e onde ela mora, e nao o que se exige dela.
+const PAINEL = 'src/components/dashboard/reviews/FilaDoPainel.tsx';
 const SUGESTOES = 'src/components/dashboard/ReplySuggestions.tsx';
 const FILA = 'src/components/dashboard/reviews/FilaDeRespostas.tsx';
 const CARTAO_PUBLICO = 'src/components/dashboard/reviews/ReviewCard.tsx';
@@ -130,6 +137,12 @@ const TEMPLATE = 'src/lib/replySuggestions.ts';
 const FUNCAO = 'supabase/functions/sugerir-resposta/index.ts';
 
 const painel = semComentarios(ler(PAINEL));
+// QUEM ALIMENTA A FILA continua no painel, mesmo depois de a fila sair para
+// ficheiro proprio: e la que as avaliacoes oficiais e as do piloto entram no
+// espaco de identificadores partilhado. Duas asserções abaixo sao sobre esse
+// ponto, e por isso leem este ficheiro e nao o da fila.
+const QUEM_ALIMENTA = 'src/components/dashboard/ApprovedCockpitDashboard.tsx';
+const quemAlimenta = semComentarios(ler(QUEM_ALIMENTA));
 const sugestoes = semComentarios(ler(SUGESTOES));
 const fila = semComentarios(ler(FILA));
 const cartaoPublico = semComentarios(ler(CARTAO_PUBLICO));
@@ -739,11 +752,11 @@ exigir(
 
 exigir(
   'a fila do painel poe as avaliaçoes oficiais no espaco de identificadores partilhado',
-  /idDaFila\('google-oficial', review\.id\)/.test(painel),
+  /idDaFila\('google-oficial', review\.id\)/.test(quemAlimenta),
 );
 exigir(
   'a fila do painel poe o piloto Apify no espaco partilhado, com fonte propria',
-  /idDaFila\('piloto-apify', review\.id\)/.test(painel),
+  /idDaFila\('piloto-apify', review\.id\)/.test(quemAlimenta),
 );
 // A rede que apanha o proximo: ninguem volta a escrever este id a mao, em
 // arquivo nenhum. `idDaFila` monta `${fonte}:${idNaFonte}`, que nao casa aqui.

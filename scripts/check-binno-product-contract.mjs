@@ -23,6 +23,17 @@ const semComentarios = (fonte) => fonte
 const readRaw = (path) => readFileSync(resolve(root, path), 'utf8');
 const read = (path) => semComentarios(readRaw(path));
 const dashboard = read('src/components/dashboard/ApprovedCockpitDashboard.tsx');
+/*
+ * A FILA SAIU DO PAINEL PARA FICHEIRO PROPRIO em 04/09/2026, quando o
+ * `ApprovedCockpitDashboard` passou o tecto de 350 linhas. As regras deste
+ * contrato sobre o CONTEUDO da fila (o que ela oferece, o que ela nao inventa)
+ * seguiram o codigo; as regras sobre a POSICAO dela continuam a ler o painel,
+ * porque e la que ela e colocada.
+ *
+ * Ler os dois nao afrouxa nada: cada assercao continua a apontar para o
+ * ficheiro onde a regra dela vive.
+ */
+const filaDoPainelFonte = read('src/components/dashboard/reviews/FilaDoPainel.tsx');
 const pendingCommentsBanner = read('src/components/dashboard/PendingCommentsBanner.tsx');
 const dashboardPage = read('src/pages/Dashboard.tsx');
 const collector = read('supabase/functions/sync-experimental-apify/index.ts');
@@ -193,8 +204,8 @@ const requirements = [
   // de chegar à caixa, e chega como o último argumento de `rascunhoNaTela`, que
   // é a posição do chão. Quem prova a precedência inteira, com o módulo a
   // correr, é `scripts/check-rascunho-que-le.mjs`.
-  ['a fila do painel usa o país do negócio na chamada que monta o texto padrão da resposta', /buildReplySuggestions\(\{[^}]*businessCountry[^}]*\}\)/.test(dashboard)],
-  ['o texto padrão da fila do painel continua alcançável: ele chega à caixa do dono como o chão do rascunho do modelo', /rascunhoNaTela\([\s\S]{0,300}?\n\s*suggestion,\n\s*\);/.test(dashboard) && /<Textarea value=\{naTela\.texto\}/.test(dashboard)],
+  ['a fila do painel usa o país do negócio na chamada que monta o texto padrão da resposta', /buildReplySuggestions\(\{[^}]*businessCountry[^}]*\}\)/.test(filaDoPainelFonte)],
+  ['o texto padrão da fila do painel continua alcançável: ele chega à caixa do dono como o chão do rascunho do modelo', /rascunhoNaTela\([\s\S]{0,300}?\n\s*suggestion,\n\s*\);/.test(filaDoPainelFonte) && /<Textarea value=\{naTela\.texto\}/.test(filaDoPainelFonte)],
   // A âncora do WhatsApp saiu desta linha em vez de ser reapontada: ela deixou
   // de existir com a tela, e uma asserção sobre um id que ninguém desenha fica
   // verde sem proteger nada.
@@ -250,8 +261,8 @@ const requirements = [
   // WhatsApp junto com ela, então a asserção mudou de arquivo, não de exigência:
   // ela pede a cadeia inteira, do `select` à prop.
   ['telefone do onboarding é reutilizado no WhatsApp', /select\('business_name, phone'\)/.test(telaDoWhatsApp) && /setOnboardingPhone\(profile\?\.phone \|\| ''\)/.test(telaDoWhatsApp) && telaDoWhatsApp.includes('onboardingPhone={onboardingPhone}')],
-  ['fila oferece copiar e abrir somente com permalink individual', dashboard.includes("selected.reviewUrl ? <Button asChild") && dashboard.includes("copyAndOpenReview")],
-  ['fila não inventa nome quando a fonte não o devolve', dashboard.includes("t('dashboard.cockpit.layout.anonymousReviewer')")],
+  ['fila oferece copiar e abrir somente com permalink individual', filaDoPainelFonte.includes("selected.reviewUrl ? <Button asChild") && filaDoPainelFonte.includes("copyAndOpenReview")],
+  ['fila não inventa nome quando a fonte não o devolve', filaDoPainelFonte.includes("t('dashboard.cockpit.layout.anonymousReviewer')")],
   // O comentario privado com nota baixa expira: o cliente ainda esta no
   // restaurante, ou acabou de sair. Por isso o contrato abre uma unica
   // excecao a primeira dobra fixada: um bloco de comentarios pendentes acima
