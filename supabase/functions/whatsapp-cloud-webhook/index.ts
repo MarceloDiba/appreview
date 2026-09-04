@@ -76,7 +76,29 @@ const assinaturaConfere = async (corpo: string, cabecalho: string | null, segred
  *
  * A lista e curta e literal de proposito. Nada de "parece um sim".
  */
-const CONFIRMACOES = ['1', 'sim', 'ok', 'okay', 'publicar', 'pode', 'publica', 'yes', 'y'];
+/*
+ * O QUE CONTA COMO "SIM".
+ *
+ * Duas formas chegam aqui, porque duas formas saem daqui:
+ *
+ *   DENTRO da janela de 24 horas sai texto livre, e o dono escreve "1". Sao
+ *   dois toques — digitar e enviar.
+ *
+ *   FORA da janela sai o modelo aprovado, que leva um BOTAO de resposta rapida.
+ *   Um toque. Marcelo apanhou isto em 04/09/2026, a ler o proprio produto: "o
+ *   botao e 1 toque, digitar 1 e enviar sao 2". Para um produto que promete um
+ *   clique, o botao E a promessa.
+ *
+ * O botao devolve o TEXTO DELE, e nao "1" — por isso "Publicar no Google" tem
+ * de estar nesta lista, e tem de bater com o que esta escrito no modelo da
+ * Meta. Se alguem renomear o botao la e nao aqui, o dono carrega e nao acontece
+ * nada: o pior sintoma possivel, porque parece que o produto ignorou.
+ */
+const CONFIRMACOES = [
+  '1', 'sim', 'ok', 'okay', 'publicar', 'pode', 'publica', 'yes', 'y',
+  // O texto exacto do botao do modelo `binno_rascunho_de_resposta`.
+  'publicar no google',
+];
 
 const ehConfirmacao = (texto: string) => {
   const limpo = texto.trim().toLowerCase().replace(/[.!]+$/, '');
@@ -210,7 +232,12 @@ Deno.serve(async (request) => {
     return json({ recebido: true });
   }
 
-  const mensagens: Array<{ from?: string; text?: { body?: string }; type?: string }> = [];
+  const mensagens: Array<{
+    from?: string;
+    text?: { body?: string };
+    button?: { text?: string; payload?: string };
+    type?: string;
+  }> = [];
   for (const entrada of ((evento.entry || []) as Array<Record<string, unknown>>)) {
     for (const mudanca of ((entrada.changes || []) as Array<Record<string, unknown>>)) {
       const valor = (mudanca.value || {}) as Record<string, unknown>;
@@ -251,8 +278,21 @@ Deno.serve(async (request) => {
       .update({ ultima_mensagem_recebida_em: new Date().toISOString() })
       .eq('user_id', dono.user_id);
 
-    const texto = mensagem.text?.body || '';
-    if (mensagem.type !== 'text' || !ehConfirmacao(texto)) continue;
+    /*
+     * O QUE O DONO DISSE, venha por onde vier.
+     *
+     * `text` quando ele escreveu. `button` quando carregou no botao de resposta
+     * rapida do modelo — e ai a Meta manda `type: 'button'` com o texto do
+     * botao, e nao um `text.body`. Ler so o primeiro fazia o toque no botao
+     * nao ser lido por ninguem.
+     *
+     * O `payload` vem antes do `text` porque e o que NAO muda quando alguem
+     * traduz o rotulo do botao.
+     */
+    const dito = mensagem.type === 'button'
+      ? (mensagem.button?.payload || mensagem.button?.text || '')
+      : (mensagem.text?.body || '');
+    if (!['text', 'button'].includes(mensagem.type || '') || !ehConfirmacao(dito)) continue;
 
     const { data: confirmada, error } = await admin
       .rpc('confirmar_resposta_do_dono', { p_user_id: dono.user_id });
