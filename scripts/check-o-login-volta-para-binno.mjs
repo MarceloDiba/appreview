@@ -47,8 +47,12 @@ exigir('a lista de retornos permitidos ficou vazia',
 // E O CODIGO CONTINUA A PEDIR O RETORNO. Se ele parar de mandar `redirectTo`,
 // toda a lista acima deixa de ser usada e o dono cai sempre no `site_url`,
 // perdendo a pagina de destino.
+// Desde 04/09 o retorno pode levar `?assinar=1` colado a `/login`, para que a
+// intencao de comprar sobreviva a volta do Google. O que se fixa e o retorno
+// continuar a ser pedido e a ser construido a partir da origem; o que ele leva
+// atras nao pode mudar isso.
 exigir('o login deixou de pedir para voltar a origem de onde partiu',
-  /redirectTo:\s*`\$\{window\.location\.origin\}\/login`/.test(CONTEXTO));
+  /redirectTo:\s*`\$\{window\.location\.origin\}(?:\$\{comIntencao\('\/login', \w+\)\}|\/login)`/.test(CONTEXTO));
 
 if (falhas.length) {
   console.error('O login volta para o Binno: %d protecao(oes) falharam.\n', falhas.length);

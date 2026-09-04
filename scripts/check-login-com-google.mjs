@@ -60,14 +60,18 @@ const onboarding = ler(ONBOARDING);
 
 // 1. A chamada existe, e usa o provedor certo.
 exigir('o contexto expoe signInWithGoogle',
-  /signInWithGoogle: \(\) => Promise<\{ error: AuthError \| null \}>;/.test(contexto));
+  /signInWithGoogle: \([^)]*\) => Promise<\{ error: AuthError \| null \}>;/.test(contexto));
 exigir('a chamada usa o provedor google',
   /supabase\.auth\.signInWithOAuth\(\{\s*provider: 'google',/.test(contexto));
 // Sem `redirectTo` explicito, o Supabase manda para a pagina em que o clique
 // aconteceu — que no cadastro seria `/signup`, e essa pagina nao decide para
-// onde ir depois. O redirecionamento tem de ser fixo em `/login`.
+// onde ir depois. O destino tem de comecar sempre em `/login`.
+//
+// Desde 04/09 o caminho pode levar `?assinar=1` colado a `/login`, para que a
+// intencao de comprar sobreviva a volta do Google. O que se fixa e o destino
+// ser `/login`; o que ele leva atras nao pode mudar isso.
 exigir('o redirecionamento aponta sempre para /login, mesmo a partir do cadastro',
-  /redirectTo: `\$\{window\.location\.origin\}\/login`/.test(contexto));
+  /redirectTo: `\$\{window\.location\.origin\}(?:\$\{comIntencao\('\/login', \w+\)\}|\/login)`/.test(contexto));
 
 // 2. O BOTAO E UM SO, e as duas telas usam o MESMO ficheiro. Dois botoes
 // escritos a mao divergiam no texto ou no icone na primeira alteracao.
@@ -84,15 +88,18 @@ exigir('o botao so mostra erro quando a propria redireccao falha',
 // 3. A DECISAO POS-LOGIN E UMA SO, exportada de Login.tsx e usada pelos DOIS
 // caminhos daquela pagina — o clique manual e o `useEffect` que reage a
 // sessao chegar do Google.
+// A assinatura pode crescer — em 04/09 ganhou a intencao de assinar — mas a
+// funcao continua a ser uma so, exportada, e o primeiro parametro continua a
+// ser o utilizador. E isso que se fixa, nao o numero de parametros.
 exigir('a decisao pos-login e uma funcao exportada, e nao duplicada',
-  /export const navegarDepoisDoLogin = async \(userId: string\) => \{/.test(login));
+  /export const navegarDepoisDoLogin = async \(userId: string(?:, [^)]*)?\) => \{/.test(login));
 // `navegarDepoisDoLogin(` so aparece nas CHAMADAS: a definicao usa
 // `navegarDepoisDoLogin = async`, sem parenteses logo a seguir ao nome.
 const usosDaDecisao = (login.match(/navegarDepoisDoLogin\(/g) || []).length;
 exigir('a funcao e usada pelos dois caminhos da pagina de login, e nao definida e ignorada',
   usosDaDecisao >= 2);
 exigir('quem ja tinha sessao (ou acabou de voltar do Google) tambem passa pela decisao',
-  /if \(user\) \{[\s\S]{0,120}navegarDepoisDoLogin\(user\.id\)/.test(login));
+  /if \(user\) \{[\s\S]{0,200}navegarDepoisDoLogin\(user\.id[,)]/.test(login));
 
 // 4. O CADASTRO NAO TEM UMA SEGUNDA COPIA da decisao. Se ele a reescrever, as
 // duas vao divergir na primeira alteracao que toque so numa.
