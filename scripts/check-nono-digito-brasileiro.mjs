@@ -27,13 +27,14 @@ const fonte = readFileSync(CAMINHO, 'utf8');
 
 // Recorta a funcao e corre-a. Procurar o nome dela provaria que a linha existe;
 // correr prova que ela junta as duas formas e nao junta o que nao deve.
-const inicio = fonte.indexOf('const mesmaLinha');
+const inicio = fonte.indexOf('const semONonoDigito');
 const fim = fonte.indexOf('Deno.serve');
 if (inicio === -1 || fim <= inicio) {
-  console.error('Nao achei `mesmaLinha` no webhook. Sem ela, nada abaixo mede o que diz medir.');
+  console.error('Nao achei o comparador no webhook. Sem ele, nada abaixo mede o que diz medir.');
   process.exit(1);
 }
 const corpo = fonte.slice(inicio, fim)
+  .replace("const semONonoDigito = (numero: string): string | null =>", 'const semONonoDigito = (numero) =>')
   .replace("const mesmaLinha = (guardado: string, recebido: string): 'exato' | 'nono-digito' | null =>",
            'const mesmaLinha = (guardado, recebido) =>')
   .replace(/: 'exato' \| 'nono-digito' \| null/g, '');

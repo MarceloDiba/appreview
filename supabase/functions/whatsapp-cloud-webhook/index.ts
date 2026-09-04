@@ -134,22 +134,26 @@ const registarBatida = async (resultado: string, detalhe?: string) => {
  * Compara so digitos, e devolve QUAL regra casou — porque "casou por sorte" e
  * "casou exactamente" pedem confianca diferente de quem le o diagnostico.
  */
+/**
+ * A forma antiga de um numero brasileiro: a mesma linha, sem o nono digito.
+ *
+ * Devolve `null` para tudo o que nao seja um telemovel brasileiro com os 13
+ * digitos completos. Fora do Brasil, tirar um digito nao devolve outra forma do
+ * mesmo numero — devolve o numero de outra pessoa.
+ */
+const semONonoDigito = (numero: string): string | null =>
+  numero.length === 13 && numero.startsWith('55') && numero[4] === '9'
+    ? numero.slice(0, 4) + numero.slice(5)
+    : null;
+
 const mesmaLinha = (guardado: string, recebido: string): 'exato' | 'nono-digito' | null => {
   const a = (guardado || '').replace(/\D/g, '');
   const b = (recebido || '').replace(/\D/g, '');
   if (!a || !b) return null;
   if (a === b) return 'exato';
-
-  // Sem o `9`, um numero brasileiro fica com 12 digitos em vez de 13. Tira-se o
-  // nono digito do mais longo e compara-se outra vez. So para o Brasil (`55`):
-  // noutro pais, mexer nos digitos seria inventar uma pessoa.
-  const [longo, curto] = a.length >= b.length ? [a, b] : [b, a];
-  if (longo.length === 13 && curto.length === 12
-    && longo.startsWith('55') && curto.startsWith('55')
-    && longo[4] === '9'
-    && longo.slice(0, 4) + longo.slice(5) === curto) {
-    return 'nono-digito';
-  }
+  // Nos dois sentidos: tanto faz de que lado veio a forma longa.
+  if (semONonoDigito(a) === b) return 'nono-digito';
+  if (semONonoDigito(b) === a) return 'nono-digito';
   return null;
 };
 
