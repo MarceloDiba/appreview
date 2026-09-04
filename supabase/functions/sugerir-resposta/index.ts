@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { temAcesso } from '../_shared/acesso.ts';
 
 /**
  * Rascunha o texto a enviar a quem escreveu, lendo o que a pessoa escreveu.
@@ -390,6 +391,23 @@ Deno.serve(async (request) => {
     const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } } });
     const { data: { user }, error: erroDeSessao } = await caller.auth.getUser();
     if (erroDeSessao || !user) return json({ error: 'Invalid session' }, 401);
+
+    /**
+     * SO USA QUEM PAGA — e SO nesta porta, a do dono.
+     *
+     * A porta do servidor nao verifica aqui de proposito: quem a usa e o cron
+     * que oferece rascunhos, e ELE ja escolhe a quem oferecer. Verificar duas
+     * vezes a mesma coisa em sitios diferentes e como as duas ordenacoes que
+     * este projeto ja pagou tres vezes.
+     *
+     * O que esta funcao DEVOLVE continua a nao depender de quem pediu. Isto e
+     * um portao, e nao uma entrada do texto: o rascunho de uma avaliacao e o
+     * mesmo, venha do painel ou do WhatsApp.
+     */
+    const admin = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    if (!await temAcesso(admin, user.id)) {
+      return json({ code: 'SEM_ASSINATURA', error: 'Sua assinatura nao esta ativa.' }, 402);
+    }
   }
 
   if (!chave) {

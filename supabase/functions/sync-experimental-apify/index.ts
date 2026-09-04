@@ -8,6 +8,7 @@ import {
   resolveMonthlyRunLimit,
   runExperimentalApifyCollection,
 } from '../_shared/experimentalApifyCollection.ts';
+import { temAcesso } from '../_shared/acesso.ts';
 
 /**
  * Piloto assistido, manual: o dono aperta o botão, esta função devolve uma
@@ -47,11 +48,25 @@ serve(async (request) => {
   const { data: { user }, error: userError } = await caller.auth.getUser();
   if (userError || !user) return json({ error: 'Invalid session' }, 401);
 
+  const admin = createClient(supabaseUrl, serviceRoleKey);
+
+  /**
+   * SO USA QUEM PAGA, e ANTES de olhar para o corpo do pedido.
+   *
+   * Ficou depois da validacao na primeira tentativa, e o teste em producao
+   * apanhou: quem nao paga recebia "informe um link valido" em vez de "sua
+   * assinatura nao esta ativa". Nao gastava dinheiro, mas dizia a um estranho
+   * o que o produto espera receber — e escondia do dono a razao real da
+   * recusa. A porta vem antes da tranca.
+   */
+  if (!await temAcesso(admin, user.id)) {
+    return json({ code: 'SEM_ASSINATURA', error: 'Sua assinatura nao esta ativa.' }, 402);
+  }
+
   const body = await request.json().catch(() => ({})) as Record<string, unknown>;
   const googleReviewUrl = parseGoogleUrl(body.google_review_url);
   if (!googleReviewUrl) return json({ error: 'Informe um link público válido do Google.' }, 422);
 
-  const admin = createClient(supabaseUrl, serviceRoleKey);
   const now = new Date();
 
   const outcome = await runExperimentalApifyCollection({

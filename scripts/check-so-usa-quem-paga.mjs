@@ -140,11 +140,48 @@ try {
     ['-A', '-t']).trim();
   exigir(`a conta da casa nao ficou concedida: '${casa}'`, casa === 'passa');
 
+  // ------------------------------------------------------------------
+  // AS SETE PORTAS PERGUNTAM. A parte de cima mede a REGRA; esta mede quem a
+  // usa. Uma regra perfeita que nenhuma porta invoca deixa o produto aberto,
+  // e foi exactamente assim que ele esteve ate hoje.
+  // ------------------------------------------------------------------
+  const AS_SETE = [
+    'fetch-google-reviews',
+    'sugerir-resposta',
+    'temas-das-avaliacoes',
+    'sync-experimental-apify',
+    'whatsapp-notifications',
+    'sync-google-business-profile',
+    'start-google-business-oauth',
+  ];
+  for (const porta of AS_SETE) {
+    const fonte = readFileSync(`supabase/functions/${porta}/index.ts`, 'utf8');
+    exigir(`'${porta}' nao pergunta se o dono paga`,
+      /import \{ temAcesso \} from '\.\.\/_shared\/acesso\.ts'/.test(fonte)
+      && /await temAcesso\(/.test(fonte));
+    exigir(`'${porta}' nao recusa com 402 quem nao paga`,
+      /'SEM_ASSINATURA'[\s\S]{0,160}402/.test(fonte));
+  }
+
+  // E `billing-checkout` NUNCA pergunta. Exigir pagamento para poder pagar
+  // tranca a porta pelo lado de dentro, e nenhuma assercao acima apanharia
+  // isso — todas mediriam o zelo excessivo como se fosse rigor.
+  const cobranca = readFileSync('supabase/functions/billing-checkout/index.ts', 'utf8');
+  exigir('billing-checkout passou a exigir assinatura; ninguem consegue assinar',
+    !/temAcesso/.test(cobranca));
+
+  // O AJUDANTE FALHA ABERTO. Se a pergunta nao chega ao banco, deixa passar:
+  // o pior caso deste lado e uma chamada paga a mais; do outro lado e um
+  // cliente que PAGOU ficar sem produto por um solucco.
+  const ajudante = readFileSync('supabase/functions/_shared/acesso.ts', 'utf8');
+  exigir('o ajudante passou a falhar fechado; um solucco de rede tranca quem paga',
+    /if \(error\)[\s\S]{0,600}return true;/.test(ajudante));
+
   if (falhas.length) {
     console.error('So usa quem paga: VERMELHO\n' + falhas.map((f) => `  - ${f}`).join('\n'));
     process.exit(1);
   }
-  console.log('So usa quem paga: 8 asserções, 7 cenarios corridos num Postgres real.');
+  console.log(`So usa quem paga: ${8 + AS_SETE.length * 2 + 2} asserções, 7 cenarios num Postgres real e 8 portas lidas.`);
 } finally {
   if (ligado) { try { execFileSync(PG_CTL, ['-D', dados, '-m', 'immediate', 'stop'], { stdio: 'ignore' }); } catch { /* ja caiu */ } }
   rmSync(dir, { recursive: true, force: true });

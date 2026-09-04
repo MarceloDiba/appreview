@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { temAcesso } from '../_shared/acesso.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -134,6 +135,14 @@ serve(async (req) => {
 
     if (authError || !user) {
       return jsonResponse({ error: 'Invalid session' }, 401);
+    }
+
+    // SO USA QUEM PAGA. Vem antes de tudo o que gasta: esta funcao chama a API
+    // paga do Google Places, e foi ela que uma conta sem pagamento correu em
+    // 04/09/2026, devolvendo os dados de um negocio real.
+    const admin = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+    if (!await temAcesso(admin, user.id)) {
+      return jsonResponse({ code: 'SEM_ASSINATURA', error: 'Sua assinatura nao esta ativa.' }, 402);
     }
 
     let payload: Record<string, unknown>;

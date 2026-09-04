@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { temAcesso } from '../_shared/acesso.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -218,6 +219,11 @@ serve(async (request) => {
   const body = await request.json().catch(() => ({})) as Record<string, unknown>;
   const action = typeof body.action === "string" ? body.action : "";
   const admin = createClient(supabaseUrl, serviceRoleKey);
+
+  // SO USA QUEM PAGA. Vem antes de qualquer gasto — ver `_shared/acesso.ts`.
+  if (!await temAcesso(admin, user.id)) {
+    return json({ code: 'SEM_ASSINATURA', error: 'Sua assinatura nao esta ativa.' }, 402);
+  }
   const { data: refreshToken, error: tokenError } = await admin.rpc("read_google_business_refresh_token", { p_user_id: user.id });
   if (tokenError || !refreshToken) return json({ code: "GOOGLE_CONNECTION_REQUIRED", error: "Connect Google Business Profile first" }, 409);
 

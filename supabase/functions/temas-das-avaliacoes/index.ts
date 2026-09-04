@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { temAcesso } from '../_shared/acesso.ts';
 
 /**
  * Agrupa as avaliacoes do dono nos temas que se repetem nelas.
@@ -106,6 +107,12 @@ Deno.serve(async (request) => {
   const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } } });
   const { data: { user }, error: erroDeSessao } = await caller.auth.getUser();
   if (erroDeSessao || !user) return json({ error: 'Invalid session' }, 401);
+
+  // SO USA QUEM PAGA. Antes da chamada a OpenAI, que e o que custa aqui.
+  const admin = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+  if (!await temAcesso(admin, user.id)) {
+    return json({ code: 'SEM_ASSINATURA', error: 'Sua assinatura nao esta ativa.' }, 402);
+  }
   if (!chave) return json({ code: 'SEM_CHAVE', error: 'O agrupamento automatico ainda nao esta configurado.' }, 503);
 
   const corpo = await request.json().catch(() => ({})) as Record<string, unknown>;

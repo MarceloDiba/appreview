@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { temAcesso } from '../_shared/acesso.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -77,6 +78,11 @@ serve(async (request) => {
   const { data: { user }, error: userError } = await caller.auth.getUser();
   if (userError || !user) return json({ error: 'Invalid session' }, 401);
   const admin = createClient(supabaseUrl, serviceRoleKey);
+
+  // SO USA QUEM PAGA. Vem antes de qualquer gasto — ver `_shared/acesso.ts`.
+  if (!await temAcesso(admin, user.id)) {
+    return json({ code: 'SEM_ASSINATURA', error: 'Sua assinatura nao esta ativa.' }, 402);
+  }
   const body = await request.json().catch(() => ({})) as Record<string, unknown>;
 
   // `recipient_email` entra em 02/09/2026: uma linha de e-mail nao tem telefone,
