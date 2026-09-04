@@ -132,3 +132,8 @@ verify_jwt = false
 
 [functions.materialize-whatsapp-notifications]
 verify_jwt = false
+
+# Aberta de proposito: e o botao de comprar de quem ainda nao tem conta. Nao le
+# nem escreve dados de ninguem, e o corpo do pedido e ignorado por inteiro.
+[functions.comprar]
+verify_jwt = false

@@ -14,6 +14,12 @@ import { readdirSync, readFileSync } from 'node:fs';
 
 // Actualizar SEMPRE que implantar uma funcao nova, com a data.
 const IMPLANTADAS = {
+  // O botao de comprar de quem esta deslogado. Nao pede sessao de proposito:
+  // ver o cabecalho da funcao, e a frase do Marcelo em 04/09/2026 — "o botao
+  // deve levar para a pagina de compra quem estiver deslogado".
+  'comprar': '2026-09-04',
+  // Liga um pagamento ja feito a conta que a pessoa cria a seguir.
+  'reclamar-compra': '2026-09-04',
   'apify-auto-collect-on-signup': '2026-09-03',
   'billing-checkout': '2026-08-27',
   'email-dispatch': '2026-09-02',

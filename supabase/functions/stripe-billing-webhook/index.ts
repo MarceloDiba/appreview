@@ -46,6 +46,43 @@ serve(async (request) => {
       ? string(object.id)
       : string(object.subscription);
     const customerId = string(object.customer);
+    /**
+     * A COMPRA DE QUEM AINDA NAO TEM CONTA.
+     *
+     * `subscriptions.user_id` e `not null`, e de proposito: e a tabela que
+     * decide quem tem acesso, e uma linha sem dono ali seria acesso de
+     * ninguem. Um pagamento sem conta vai para `compras_a_reclamar`, onde e
+     * uma LINHA QUE SE VE — dinheiro recebido de alguem que ainda nao entrou.
+     *
+     * Vem ANTES do ramo normal porque a marca e a ausencia de `user_id`: sem
+     * este bloco, o `if` abaixo nao entra e o evento seria descartado em
+     * silencio. Alguem teria pago e nada teria acontecido.
+     */
+    if (!userId && eventType === 'checkout.session.completed' && string(metadata?.sem_conta) === '1') {
+      const detalhes = object.customer_details as Record<string, unknown> | undefined;
+      const email = string(detalhes?.email) || string(object.customer_email);
+      if (!email) {
+        // Sem email nao ha segunda via para reclamar. O bilhete ainda serve,
+        // entao a linha e gravada na mesma — o registo perde uma via, nao o
+        // dinheiro.
+        console.error('checkout sem conta e sem email: %s', string(object.id));
+      }
+      const endereco = detalhes?.address as Record<string, unknown> | undefined;
+      const { error: erroDaCompra } = await admin.from('compras_a_reclamar').upsert({
+        stripe_session_id: string(object.id),
+        stripe_customer_id: customerId,
+        stripe_subscription_id: subscriptionId,
+        email: (email || '').toLowerCase() || 'sem-email',
+        market: merchant,
+        merchant,
+        billing_country: countryFrom(endereco?.country),
+        currency: string(object.currency),
+        price_per_month: typeof object.amount_total === 'number' ? object.amount_total / 100 : null,
+      }, { onConflict: 'stripe_session_id' });
+      if (erroDaCompra) throw erroDaCompra;
+      return json({ received: true, sem_conta: true });
+    }
+
     if (userId && subscriptionId && (eventType.startsWith('customer.subscription.') || eventType === 'checkout.session.completed')) {
       const { data: existing } = await admin.from('subscriptions').select('eligibility_status').eq('stripe_subscription_id', subscriptionId).maybeSingle();
       const status = eventType === 'checkout.session.completed' ? 'pending' : string(object.status);

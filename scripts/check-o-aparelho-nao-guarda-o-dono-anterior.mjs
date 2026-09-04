@@ -136,6 +136,10 @@ const OUTROS_ARMAZENS_CONHECIDOS = new Set([
   'src/lib/reviewFunnel.ts',
   'src/i18n/useTranslation.ts',
   'src/components/ui/sidebar.tsx',
+  // O bilhete de uma compra em curso, para sobreviver a ida ao Google. Nao e
+  // dado de negocio: e um identificador de sessao do Stripe, que dura uma
+  // visita e e apagado assim que a compra e ligada a conta.
+  'src/pages/BemVindo.tsx',
 ]);
 const novosArmazens = [];
 for (const ficheiro of ficheiros) {

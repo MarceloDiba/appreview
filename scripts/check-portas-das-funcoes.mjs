@@ -40,6 +40,16 @@ const PORTAS = {
   'sugerir-resposta': 'sessao',
   // Sessao E pertencer a `admins`. Ferramenta interna da Noa, nao do produto.
   'search-prospects': 'administrador',
+  // Liga um pagamento ja feito a conta que a pessoa acabou de criar. Confere a
+  // sessao por dentro; o bilhete do Stripe NAO decide de quem e a compra,
+  // porque viaja num endereco que qualquer um pode ver por cima do ombro.
+  'reclamar-compra': 'sessao',
+  // ABERTA DE PROPOSITO, e a unica assim. E o botao de comprar de quem esta
+  // deslogado: exigir sessao aqui seria repor o defeito que ela existe para
+  // eliminar. Nao le nem escreve dados de ninguem, ignora o corpo do pedido
+  // por inteiro, e o preco vem do segredo do servidor — nao ha superficie
+  // para abusar. Ver o cabecalho da funcao.
+  'comprar': 'sem-porta',
   // So o servidor: segredo de trabalhador no cabecalho.
   'apify-auto-collect-on-signup': 'trabalhador',
   'email-dispatch': 'trabalhador',
@@ -103,11 +113,21 @@ for (const nome of existentes) {
     exigir(`'${nome}' devia validar o 'state' que so o Binno emitiu`,
       /oauth_states|state/.test(fonte));
   }
+  // A UNICA SEM PORTA TEM DE PROVAR QUE NAO PRECISA DE UMA. Se `comprar` um dia
+  // passar a ler ou escrever dados de alguem, deixa de ser inofensiva — e esta
+  // assercao e o que obriga essa mudanca a ser decidida em vez de acontecer.
+  if (porta === 'sem-porta') {
+    exigir(`'${nome}' esta sem porta mas passou a falar com a base de dados`,
+      !/from\(['"]|\.rpc\(/.test(fonte));
+    exigir(`'${nome}' esta sem porta mas passou a ler o corpo do pedido`,
+      !/\.json\(\)/.test(fonte) || !/pedido\.json\(\)|req\.json\(\)/.test(fonte));
+  }
+
   // E QUEM ESTA ABERTA NO PORTAO TEM DE SE DEFENDER SOZINHA. Uma funcao com
   // `verify_jwt = false` e sem defesa propria e um endereco publico.
   if (abertaNoPortao) {
     exigir(`'${nome}' esta com verify_jwt = false e nao declara defesa propria`,
-      ['trabalhador', 'assinatura', 'state'].includes(porta));
+      ['trabalhador', 'assinatura', 'state', 'sem-porta'].includes(porta));
   }
 }
 

@@ -24,6 +24,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
+const BemVindo = lazy(() => import('./pages/BemVindo'));
 const Reviews = lazy(() => import("./pages/Reviews"));
 const WhatsApp = lazy(() => import("./pages/WhatsApp"));
 const QRCodes = lazy(() => import("./pages/QRCodes"));
@@ -67,6 +68,13 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/thank-you" element={<ThankYou />} />
+              {/*
+                Sem `ProtectedRoute`: e para onde o Stripe devolve quem acabou
+                de pagar e AINDA NAO TEM CONTA. Proteger esta rota mandaria essa
+                pessoa para o login — que e exactamente o que este caminho
+                existe para nao fazer.
+              */}
+              <Route path="/bem-vindo" element={<BemVindo />} />
               <Route path="/reviews" element={
                 <ProtectedRoute>
                   <Reviews />
