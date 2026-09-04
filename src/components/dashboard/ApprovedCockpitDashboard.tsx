@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ChevronLeft, ChevronRight, Copy, ExternalLink, Star } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, Copy, ExternalLink, Send, Star } from 'lucide-react';
+import { toast } from 'sonner';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,6 +41,17 @@ import { pedirTemasAoBinno } from '@/lib/temasDasAvaliacoes';
 
 type QueueReview = {
   id: string;
+  /**
+   * O id CRU da avaliacao, sem o prefixo da fila somada.
+   *
+   * `id` leva `google-oficial:` a frente, porque e a chave por que se paga o
+   * rascunho e ela tem de ser unica entre as tres origens. Publicar no Google
+   * precisa do outro: o id da linha em `google_business_reviews`. Mandar o
+   * prefixado faz o Google recusar, e o dono ve so "nao deu".
+   *
+   * Vazio para a fila do piloto Apify, que nao tem publicacao oficial.
+   */
+  idNaFonte?: string;
   rating: number;
   comment: string;
   publishedAt: string | null;
@@ -322,7 +334,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel, 
     // `useGoogleBusinessReviewQueue` que a fila de `/reviews` mostra, e enquanto
     // esta tela passava o `review.id` cru a mesma avaliacao era paga duas vezes
     // e rendia dois textos diferentes nas duas telas. Ver `idDaFila`.
-    ? official.reviews.map((review) => ({ id: idDaFila('google-oficial', review.id), rating: review.rating, comment: review.comment || '', publishedAt: review.review_updated_at, reviewerName: review.reviewer_name || undefined, responseObserved: Boolean(review.reply_text) }))
+    ? official.reviews.map((review) => ({ id: idDaFila('google-oficial', review.id), idNaFonte: review.id, rating: review.rating, comment: review.comment || '', publishedAt: review.review_updated_at, reviewerName: review.reviewer_name || undefined, responseObserved: Boolean(review.reply_text) }))
     : observed;
   const history = useMemo(() => snapshot.sample.insights?.history?.weeks || [], [snapshot.sample.insights?.history?.weeks]);
 
@@ -441,7 +453,7 @@ const ApprovedCockpitDashboard = ({ snapshot, userId, demo = false, demoFunnel, 
 
           No telemóvel isto empilha na ordem da decisão: o que expira primeiro,
           depois o que ele abriu o painel para fazer, e a leitura por último. */}
-      <div id={QUEUE_ANCHOR_ID} className="min-w-0 scroll-mt-16 lg:col-span-2 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} paisLido={paisLido} /></div>
+      <div id={QUEUE_ANCHOR_ID} className="min-w-0 scroll-mt-16 lg:col-span-2 lg:scroll-mt-4"><ResponseQueue reviews={queue} snapshot={snapshot} demo={demo} businessCountry={businessCountry} paisLido={paisLido} publicar={official.publishReply} publicando={official.publishing} /></div>
       <div className="min-w-0"><ReputationCard snapshot={snapshot} /></div>
     </section>
 
@@ -545,7 +557,7 @@ const RadarNow = ({ snapshot }: { snapshot: ExperimentalApifySnapshot }) => {
  * pedido do rascunho parte no primeiro quadro com o país ainda a `null`, e o
  * cache prende esse resultado à sessão. Ver `paisLido` no painel.
  */
-const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry, paisLido }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean; businessCountry: string | null; paisLido: boolean }) => {
+const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry, paisLido, publicar, publicando = false }: { reviews: QueueReview[]; snapshot: ExperimentalApifySnapshot; demo?: boolean; businessCountry: string | null; paisLido: boolean; publicar?: (reviewId: string, comment: string) => Promise<boolean>; publicando?: boolean }) => {
   const { t, i18n } = useOwnerTranslation();
   const [selectedId, setSelectedId] = useState<string | null>(reviews[0]?.id || null);
   const [editing, setEditing] = useState(false);
@@ -642,6 +654,34 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry, paisL
       setEditing(false);
     }
   };
+  /*
+   * PUBLICAR NO GOOGLE, daqui mesmo.
+   *
+   * Ate 04/09/2026 este cartao so sabia COPIAR: o dono via o rascunho pronto e
+   * tinha de sair do produto para colar. O botao que existia para o levar la
+   * apontava para a pagina GERAL de avaliacoes, e nao para aquela — a API v4
+   * nao devolve URL por avaliacao, entao esse link nunca poderia acertar.
+   *
+   * `idNaFonte`, e nunca `id`. O `id` leva o prefixo `google-oficial:` da fila
+   * somada; o publicador precisa do id da linha em `google_business_reviews`.
+   *
+   * SO PARA AVALIACAO OFICIAL, e nunca em demonstracao: isto escreve no perfil
+   * publico de alguem e nao se desfaz.
+   */
+  const podePublicar = !demo && Boolean(publicar) && Boolean(selected?.idNaFonte) && !selected?.responseObserved;
+  const publicarNoGoogle = async () => {
+    if (!publicar || !selected?.idNaFonte) return;
+    const texto = naTela.texto.trim();
+    if (!texto) return;
+    const foi = await publicar(selected.idNaFonte, texto);
+    if (foi) {
+      toast.success(t('dashboard.cockpit.approved.published'));
+      save({ ...(guardado || {}), copied: true });
+    } else {
+      toast.error(t('dashboard.cockpit.approved.publishError'));
+    }
+  };
+
   const copyReply = async () => {
     try { await navigator.clipboard.writeText(naTela.texto); } catch { /* Keep the editable draft available. */ }
     // Copiar marca que ele copiou, e mais nada. Gravar aqui o texto que estava
@@ -680,7 +720,7 @@ const ResponseQueue = ({ reviews, snapshot, demo = false, businessCountry, paisL
               explicava ao possivel cliente o nosso plano B, no lugar onde ele
               devia estar a ver o produto.
             */}
-            {!demo && <OrigemDoRascunho origem={naTela.origem} />}</div>{editing ? <Textarea value={naTela.texto} onChange={(event) => save({ ...(guardado || {}), draft: event.target.value })} className="mt-3 min-h-28 resize-y text-sm leading-6" /> : <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-700">{naTela.texto}</p>}<div className="mt-4 flex flex-wrap gap-2">{selected.reviewUrl ? <Button asChild className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><a href={selected.reviewUrl} target="_blank" rel="noreferrer" onClick={() => void copyReply()}><Copy className="mr-2 h-4 w-4" />{t('dashboard.cockpit.assisted.copyAndOpenReview')}<ExternalLink className="ml-2 h-4 w-4" /></a></Button> : <Button onClick={() => void copyReply()} className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><Copy className="mr-2 h-4 w-4" />{guardado?.copied ? t('dashboard.advisor.copiedButton') : t('dashboard.cockpit.assisted.copy')}</Button>}<Button variant="outline" onClick={() => setEditing((value) => !value)}>{editing ? t('dashboard.cockpit.approved.doneEditing') : t('dashboard.cockpit.approved.edit')}</Button><Button variant="outline" onClick={() => select(Math.min(index + 1, reviews.length - 1))}>{t('dashboard.cockpit.approved.skip')}</Button></div></div>
+            {!demo && <OrigemDoRascunho origem={naTela.origem} />}</div>{editing ? <Textarea value={naTela.texto} onChange={(event) => save({ ...(guardado || {}), draft: event.target.value })} className="mt-3 min-h-28 resize-y text-sm leading-6" /> : <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-700">{naTela.texto}</p>}<div className="mt-4 flex flex-wrap gap-2">{podePublicar && <Button onClick={() => void publicarNoGoogle()} disabled={publicando} className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><Send className="mr-2 h-4 w-4" />{publicando ? t('dashboard.cockpit.approved.publishing') : t('dashboard.cockpit.approved.publishOnGoogle')}</Button>}{selected.reviewUrl ? <Button asChild className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><a href={selected.reviewUrl} target="_blank" rel="noreferrer" onClick={() => void copyReply()}><Copy className="mr-2 h-4 w-4" />{t('dashboard.cockpit.assisted.copyAndOpenReview')}<ExternalLink className="ml-2 h-4 w-4" /></a></Button> : <Button onClick={() => void copyReply()} className="rounded-full bg-[#2457D6] hover:bg-[#1d47b0]"><Copy className="mr-2 h-4 w-4" />{guardado?.copied ? t('dashboard.advisor.copiedButton') : t('dashboard.cockpit.assisted.copy')}</Button>}<Button variant="outline" onClick={() => setEditing((value) => !value)}>{editing ? t('dashboard.cockpit.approved.doneEditing') : t('dashboard.cockpit.approved.edit')}</Button><Button variant="outline" onClick={() => select(Math.min(index + 1, reviews.length - 1))}>{t('dashboard.cockpit.approved.skip')}</Button></div></div>
       <div className="mt-4 flex flex-wrap gap-2">{reviews.slice(0, 8).map((review) => <button key={review.id} type="button" onClick={() => { setSelectedId(review.id); setEditing(false); }} className={`rounded-xl border px-3 py-2 text-left text-xs ${review.id === selected.id ? 'border-[#2457D6] bg-blue-50 text-[#2457D6]' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}><span className="block max-w-32 truncate font-semibold">{review.reviewerName || t('dashboard.cockpit.layout.anonymousReviewer')}</span><Stars rating={review.rating} /></button>)}</div>
     </div>
   </CardContent></Card>;

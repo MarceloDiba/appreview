@@ -34,6 +34,19 @@ interface ReplySuggestionsProps {
   text?: string | null;
   customerName?: string | null;
   customerEmail?: string | null;
+  /**
+   * `true` quando esta avaliacao pode ser publicada daqui mesmo, pela ligacao
+   * oficial ao Google.
+   *
+   * Nesse caso o link "Abrir o Google para responder" sai. Ele aponta para a
+   * pagina GERAL de avaliacoes — a API v4 nao devolve URL por avaliacao, entao
+   * ele nunca poderia levar aquela — e mandar o dono procurar o comentario a
+   * mao, com um botao de publicar ao lado, e oferecer o caminho pior.
+   *
+   * Continua a aparecer para quem NAO tem a ligacao oficial: para esses ele e
+   * a unica saida que existe.
+   */
+  podePublicarAqui?: boolean;
   businessName?: string | null;
   /**
    * `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão.
@@ -100,6 +113,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
   text,
   customerName,
   customerEmail,
+  podePublicarAqui = false,
   businessName,
   businessCountry,
   channel,
@@ -385,7 +399,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
                   </Button>
                 )}
 
-                {channel === 'public' && (
+                {channel === 'public' && !podePublicarAqui && (
                   <Button size="sm" variant="ghost" className="w-full sm:w-auto" asChild>
                     <a
                       href="https://business.google.com/reviews"

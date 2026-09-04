@@ -316,6 +316,7 @@ const ItemDaFilaCard = ({
           text={item.texto}
           customerName={item.autor}
           customerEmail={item.origem === 'comentario-privado' ? item.customer_email : null}
+          podePublicarAqui={item.origem === 'google-oficial'}
           businessName={businessName}
           businessCountry={businessCountry}
         />

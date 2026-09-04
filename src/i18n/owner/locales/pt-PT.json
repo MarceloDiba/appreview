@@ -813,7 +813,11 @@
         "qrEmpty": "Aqui aparecem as aberturas do QR e os cliques para o Google, assim que o seu QR estiver na mesa.",
         "reputationBreakdownEmpty": "A distribuição por nota aparece depois da primeira procura de avaliações.",
         "reputationMetricsEmpty": "O tempo de resposta e as avaliações do mês aparecem quando a procura trouxer as datas.",
-        "distributionComparisonFrom": "Isto é a divisão de hoje, com {{count}} avaliações. A comparação com as semanas anteriores aparece a partir de {{minimo}}, quando uma avaliação nova deixa de mexer tanto no número."
+        "distributionComparisonFrom": "Isto é a divisão de hoje, com {{count}} avaliações. A comparação com as semanas anteriores aparece a partir de {{minimo}}, quando uma avaliação nova deixa de mexer tanto no número.",
+        "publishOnGoogle": "Publicar no Google",
+        "publishing": "A publicar...",
+        "published": "Resposta publicada no Google.",
+        "publishError": "Não consegui publicar. Tente outra vez."
       }
     },
     "advisorPilot": {

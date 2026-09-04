@@ -112,7 +112,16 @@ const TEXTOS_REMOVIDOS_EM_31_08 = [
 // cockpit passou a esperar pela leitura do perfil antes de pagar a chamada ao
 // modelo, porque `null` significava ao mesmo tempo "ainda não li" e "não tem
 // país". A cadeia exigida abaixo é a mesma, elo a elo; só ganhou um elo.
-const FILA_DO_PAINEL = /<ResponseQueue reviews=\{queue\} snapshot=\{snapshot\} demo=\{demo\} businessCountry=\{businessCountry\} paisLido=\{paisLido\} \/>/g;
+// AGNOSTICO AS PROPS, de proposito. Ate 04/09/2026 este padrao fixava a lista
+// INTEIRA de props do `<ResponseQueue>`, e ficou vermelho quando a fila ganhou
+// a capacidade de publicar no Google — vermelho por duas props novas, sem que
+// nada de posicao tivesse mudado.
+//
+// A regra protegida e de POSICAO: a fila vem antes das metricas, aparece uma
+// so vez, e o bloco de comentarios pendentes vem antes dela. Nada disso depende
+// de que props ela recebe. Casar so o elemento mantem as tres asserções
+// inteiras e para de dar alarme falso a cada prop nova.
+const FILA_DO_PAINEL = /<ResponseQueue\b[^>]*\/>/g;
 const corpoDoRadar = corpoDaDeclaracao(dashboard, 'RadarNow') || '';
 const filaDoPainel = (fonte) => (fonte.match(FILA_DO_PAINEL) || []);
 const posicaoDaFila = (fonte) => {
