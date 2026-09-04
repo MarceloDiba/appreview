@@ -65,6 +65,22 @@ client_id = ""
 secret = ""
 redirect_uri = ""
 
+# AS FUNCOES QUE NAO RECEBEM JWT DO SUPABASE.
+#
+# Tres tipos, e nenhum deles tem um utilizador ligado:
+#
+#   O que a Meta e o Stripe chamam de fora, assinando com o segredo DELES.
+#   O que o Google chama de volta no fim do OAuth.
+#   O que o `pg_cron` chama de dentro, provando-se com `x-binno-worker-secret`.
+#
+# Ate 04/09/2026 so duas estavam aqui, e as outras funcionavam por um ajuste
+# feito na plataforma que este ficheiro nao registava. Uma implantacao sem a
+# bandeira reactivaria o JWT e elas passariam a devolver 401 — em silencio, com
+# o sintoma "os avisos pararam" e nenhuma causa a vista. Foi exactamente o que
+# aconteceu com a `oferecer-rascunhos` no primeiro disparo dela.
+#
+# Nenhuma destas fica aberta: cada uma confere o proprio segredo antes de agir.
+
 [functions.google-business-oauth-callback]
 verify_jwt = false
 
@@ -79,3 +95,21 @@ backend = "postgres"
 
 [experimental]
 events_per_second = 1000
+
+[functions.whatsapp-cloud-webhook]
+verify_jwt = false
+
+[functions.oferecer-rascunhos]
+verify_jwt = false
+
+[functions.whatsapp-cloud-dispatch]
+verify_jwt = false
+
+[functions.publicar-respostas-confirmadas]
+verify_jwt = false
+
+[functions.telegram-dispatch]
+verify_jwt = false
+
+[functions.materialize-whatsapp-notifications]
+verify_jwt = false

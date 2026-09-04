@@ -21,6 +21,10 @@ const IMPLANTADAS = {
   'google-business-oauth-callback': '2026-09-03',
   'materialize-whatsapp-notifications': '2026-09-02',
   'publicar-respostas-confirmadas': '2026-09-03',
+  // Quem COMECA o ciclo do WhatsApp: oferece ao dono o rascunho da proxima
+  // avaliacao por responder. Implantada com --no-verify-jwt, porque quem a
+  // chama e o pg_cron e nao um utilizador.
+  'oferecer-rascunhos': '2026-09-04',
   'search-prospects': '2026-08-25',
   'start-google-business-oauth': '2026-08-27',
   'stripe-billing-webhook': '2026-08-27',

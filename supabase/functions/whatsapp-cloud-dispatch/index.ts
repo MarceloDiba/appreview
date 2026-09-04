@@ -145,6 +145,19 @@ Deno.serve(async (request) => {
       await admin.from('whatsapp_outbox').update({
         status: ESTADO_MAXIMO,
         provider_message_id: idDaMensagem,
+        /*
+         * O QUE CUSTOU, marcado por quem sabe.
+         *
+         * A Meta nao cobra mensagem de servico — texto livre dentro da janela
+         * de 24 horas. Cobra o modelo aprovado, que e o unico que passa fora
+         * dela. Quem decide a forma e este envio, na hora, porque so aqui se
+         * sabe se a janela ainda estava aberta.
+         *
+         * `cabe_mais_um_aviso` le esta coluna para travar o que custa sem
+         * travar o que e gratuito. Sem ela, o teto diario ou nao existe ou cala
+         * o produto de graca.
+         */
+        cobravel: mensagem.type === 'template',
         updated_at: new Date().toISOString(),
       }).eq('id', linha.id as string);
       resultados.push({ id: linha.id, estado: ESTADO_MAXIMO, forma: mensagem.type });

@@ -57,7 +57,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-binno-worker-secret',
 };
 
 const json = (body: unknown, status = 200) =>
@@ -364,11 +364,33 @@ Deno.serve(async (request) => {
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
   const chave = Deno.env.get('OPENAI_API_KEY') || '';
 
-  const authorization = request.headers.get('Authorization');
-  if (!authorization) return json({ error: 'Authentication required' }, 401);
-  const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } } });
-  const { data: { user }, error: erroDeSessao } = await caller.auth.getUser();
-  if (erroDeSessao || !user) return json({ error: 'Invalid session' }, 401);
+  /*
+   * DUAS PORTAS, e nenhuma delas aberta.
+   *
+   * A do dono: uma sessao valida, como sempre. E a que o painel usa.
+   *
+   * A do servidor: o segredo de trabalhador, que vive no Vault e nunca sai
+   * dele. Foi aberta em 04/09/2026 para o cron que oferece os rascunhos pelo
+   * WhatsApp poder pedir o mesmo texto que o painel pede — um segundo gerador
+   * daria dois textos diferentes para a mesma avaliacao, conforme o caminho, e
+   * o dono veria um no telemovel e outro na tela.
+   *
+   * ISTO SO E SEGURO porque a sessao aqui serve APENAS para autenticar: nada no
+   * que esta funcao devolve depende de QUEM pediu. Se um dia passar a depender,
+   * esta porta tem de fechar — e o guarda ao lado exige que o `user` continue a
+   * nao ser usado para mais nada.
+   */
+  const segredoDeTrabalhador = Deno.env.get('BINNO_WORKER_SECRET');
+  const eDoServidor = Boolean(segredoDeTrabalhador)
+    && request.headers.get('x-binno-worker-secret') === segredoDeTrabalhador;
+
+  if (!eDoServidor) {
+    const authorization = request.headers.get('Authorization');
+    if (!authorization) return json({ error: 'Authentication required' }, 401);
+    const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } } });
+    const { data: { user }, error: erroDeSessao } = await caller.auth.getUser();
+    if (erroDeSessao || !user) return json({ error: 'Invalid session' }, 401);
+  }
 
   if (!chave) {
     // Desligado e um estado legivel. Quem chamou fica com o texto antigo.
