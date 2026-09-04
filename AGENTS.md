@@ -17,8 +17,13 @@ nota baixa vira caso interno para o dono resolver.
   decisões técnicas e alterações locais reversíveis podem seguir sem nova
   aprovação.
 - Trabalhar localmente em blocos completos antes de publicar.
-- Verificar por TypeScript e CI. Não abrir navegador, preview ou dev server,
-  salvo se Marcelo pedir explicitamente para ver algo.
+- Verificar por TypeScript e CI. **O navegador pode ser aberto quando for
+  necessário** (decidido por Marcelo em 04/09/2026, revogando o "nunca abrir").
+  Necessário quer dizer: provar um caminho que um humano percorre clicando —
+  compra, cadastro, ligar a conta do Google — onde ler o código não prova nada.
+  Não quer dizer conferir aparência, nem repetir a cada ajuste o que o `tsc` já
+  responde: o dev server aberto à toa foi o maior sorvedouro de tokens do
+  projeto, e essa parte da razão continua de pé. Uma passada, com um objetivo.
 - Fazer PRs grandes por tema, em branch. Não fragmentar um tema em vários PRs.
 - Não fazer merge nem deploy. Marcelo faz ambos.
 - Antes de subir uma branch, concluir e verificar o pacote local.

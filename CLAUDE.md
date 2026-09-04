@@ -15,9 +15,13 @@ nota** (esconder isso é *review gating*, proibido — nunca reintroduzir).
 
 ## Método de trabalho (economia de tokens — obrigatório)
 
-- **Verificar por `tsc` + CI, nunca por navegador/dev server.** O dev
-  server/preview foi o maior sorvedouro de tokens. Só abrir navegador se o
-  Marcelo pedir para *ver* algo, e numa passada só.
+- **Verificar por `tsc` + CI.** O navegador **pode** ser aberto quando for
+  necessário — decidido em 04/09/2026. Necessário é provar um caminho que um
+  humano percorre clicando (compra, cadastro, ligar o Google). Não é conferir
+  aparência nem repetir o que o `tsc` já responde: o dev server aberto à toa foi
+  o maior sorvedouro de tokens. O Playwright já é dependência de
+  desenvolvimento; um teste que fica no repositório vale mais que uma passada
+  que ninguém repete. Ver `AGENTS.md`.
 - **PRs grandes por tema**, não um por ajuste. Trabalhar em branch, propor PR.
   **Não fazer merge** (o Marcelo faz; sempre mandar o link do PR).
 - **Decisões em lote**: juntar tudo que precisa de decisão dele, perguntar de
