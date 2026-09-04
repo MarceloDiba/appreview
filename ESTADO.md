@@ -11,15 +11,23 @@ assinatura seguir ativa; depois do lote, novos assinantes pagam R$199.
 
 - [x] Página pública, Perfil, i18n (3 idiomas) e `docs/cobranca-regional-binno.md`
   atualizados. O preço passa a sair de `src/lib/precoBinno.ts`, um lugar só.
-- [ ] **Criar o preço de R$99 na Stripe live (MDR Propaganda)** e apontar
-  `STRIPE_BR_PRICE_ID` para ele no cofre do Supabase. Sem isso a página anuncia
-  R$99 e o checkout continua cobrando R$199.
-- [ ] **Customer Portal ainda não existe para o Binno**
-  (`STRIPE_BR_PORTAL_CONFIGURATION_ID` ausente, a configuração padrão da conta
-  pertence ao Auditoria Pro). Enquanto faltar, quem assinar não consegue
-  cancelar sozinho pelo painel — o botão "Gerenciar assinatura" devolve erro.
-  Vender antes disso empurra o cancelamento para o atendimento manual.
+- [x] **Preço de R$99 criado na Stripe live** em 04/09, na conta MDR Propaganda
+  (`acct_1TwzSe8uAISU0uyc`), produto `Binno` (`prod_V9MJXbNhcOIeMk`):
+  `price_1UBzil8uAISU0uycXybWLdme`, BRL 99,00, mensal, apelido "Lote de
+  fundadores". Espelha a configuração do preço de R$199
+  (`price_1U93b28uAISU0uycpRFXGwOO`), que continua ativo para depois do lote.
+- [x] **`STRIPE_BR_PRICE_ID` apontado para o preço de R$99** em 04/09. Entre o
+  deploy da página (04/09, 14h40) e essa troca, o site anunciou R$99 enquanto o
+  checkout cobraria R$199. Ninguém foi cobrado nessa janela: `/v1/subscriptions`
+  da conta live está vazio, e as únicas sessões de checkout existentes são
+  pagamentos avulsos de R$249 de julho, em `mode: payment`, que são do Auditoria
+  Pro e não do Binno.
+- [x] **Customer Portal existe e é do Binno.** Correção de um item que este
+  arquivo dava como pendente: `bpc_1U9SEp8uAISU0uycCrZTgv9t`, ativo, com
+  headline do Binno e links para `binno.pro/termos` e `binno.pro/privacidade`.
+  O segredo `STRIPE_BR_PORTAL_CONFIGURATION_ID` está no cofre desde 28/08.
 - [ ] Abrir e cancelar um Checkout live de teste antes de divulgar o lote.
+  É o único passo que ainda exige cartão real e uma pessoa.
 - Vagas: 50 (Marcelo, 04/09), escritas em `src/lib/precoBinno.ts`. **Não há contador na
   aplicação**: fechar o lote é trocar `STRIPE_BR_PRICE_ID` de volta para o
   preço de R$199.
