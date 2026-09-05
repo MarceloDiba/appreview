@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ExternalLink, Star } from 'lucide-react';
+import { Check, ExternalLink, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { GoogleReview } from '@/hooks/useGoogleReviews';
 import ReplySuggestions from '@/components/dashboard/ReplySuggestions';
@@ -19,13 +19,22 @@ interface ReviewCardProps {
    * duas vezes a mesma pessoa.
    */
   podeSugerirResposta?: boolean;
+  /**
+   * Se esta avaliação já tem resposta publicada no Google.
+   *
+   * O retrato não sabe: ele foi tirado num instante. Quem sabe é a ligação
+   * oficial, e a comparação vive em `useAvaliacoesJaRespondidas`. Marcelo pediu
+   * a marca depois de o produto ter parado de OFERECER resposta a quem já fora
+   * respondido — evitar o dano não lhe devolvia a informação.
+   */
+  jaRespondida?: boolean;
   /** Usado para assinar a resposta sugerida. */
   businessName?: string | null;
   /** `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão. */
   businessCountry: string | null;
 }
 
-const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessName, businessCountry, podeSugerirResposta = true }) => {
+const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessName, businessCountry, podeSugerirResposta = true, jaRespondida = false }) => {
   const { t } = useOwnerTranslation();
   const renderStars = (rating: number) => {
     return (
@@ -76,7 +85,13 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessNam
         ) : (
           <div className="flex items-center">{author}</div>
         )}
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          {jaRespondida && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800">
+              <Check className="h-3 w-3" aria-hidden="true" />
+              {t('reviews.google.jaRespondida')}
+            </span>
+          )}
           {renderStars(review.rating)}
           <Badge className="ml-2" variant="secondary">{review.rating}/5</Badge>
         </div>

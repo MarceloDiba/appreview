@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { useGoogleReviews } from '@/hooks/useGoogleReviews';
+import { useAvaliacoesJaRespondidas } from '@/hooks/useAvaliacoesJaRespondidas';
 import LoadingState from './reviews/LoadingState';
 import ErrorState from './reviews/ErrorState';
 import ReviewsHeader from './reviews/ReviewsHeader';
@@ -33,6 +34,7 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId, businessCountry, 
     handleRefresh,
     formatDate
   } = useGoogleReviews(userId);
+  const jaRespondidas = useAvaliacoesJaRespondidas(userId);
   
   if (loading) {
     return (
@@ -63,6 +65,7 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId, businessCountry, 
             {t('reviews.google.relevanceNotice')} · {t('reviews.google.attribution')}
           </div>
           <ReviewsList
+            jaRespondidas={jaRespondidas}
             podeSugerirResposta={podeSugerirResposta}
             reviews={reviews}
             formatDate={formatDate}

@@ -3,6 +3,7 @@ import React from 'react';
 import ReviewCard from './ReviewCard';
 import { GoogleReview } from '@/hooks/useGoogleReviews';
 import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
+import { chaveDaAvaliacaoDoGoogle } from '@/lib/filaDeRespostas';
 
 interface ReviewsListProps {
   reviews: GoogleReview[];
@@ -13,9 +14,11 @@ interface ReviewsListProps {
   businessCountry: string | null;
   /** Falso quando a ligação oficial manda: ver `GoogleReviews`. */
   podeSugerirResposta?: boolean;
+  /** Chaves das avaliações que já têm resposta publicada no Google. */
+  jaRespondidas?: Set<string>;
 }
 
-const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate, businessName, businessCountry, podeSugerirResposta = true }) => {
+const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate, businessName, businessCountry, podeSugerirResposta = true, jaRespondidas }) => {
   const { t } = useOwnerTranslation();
   if (reviews.length === 0) {
     return (
@@ -35,6 +38,9 @@ const ReviewsList: React.FC<ReviewsListProps> = ({ reviews, formatDate, business
           businessName={businessName}
           businessCountry={businessCountry}
           podeSugerirResposta={podeSugerirResposta}
+          jaRespondida={Boolean(jaRespondidas?.has(
+            chaveDaAvaliacaoDoGoogle(review.author_name, review.rating, review.time),
+          ))}
         />
       ))}
     </div>

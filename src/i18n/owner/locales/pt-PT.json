@@ -1117,7 +1117,8 @@
         "refuseError": "Não consegui recusar agora. Tente de novo.",
         "edit": "Editar resposta",
         "doneEditing": "Pronto"
-      }
+      },
+      "jaRespondida": "Respondida"
     },
     "cases": {
       "loading": "A carregar casos...",

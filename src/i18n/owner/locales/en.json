@@ -1117,7 +1117,8 @@
         "refuseError": "I couldn't dismiss it right now. Try again.",
         "edit": "Edit reply",
         "doneEditing": "Done"
-      }
+      },
+      "jaRespondida": "Replied"
     },
     "cases": {
       "loading": "Loading cases...",
