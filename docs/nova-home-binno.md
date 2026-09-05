@@ -65,7 +65,15 @@ de claim de ranking ou de nota, nada de prova social inventada.
 > **Lote fundador:** R$ 99/mês para as 50 primeiras assinaturas. Depois, R$ 129/mês.
 
 ### 1. Hero
-- eyebrow: `Binno para negócios locais`
+- eyebrow: `Binno · seu assessor de reputação no Google`
+  - Era `Binno para negócios locais` até 05/09/2026. Um amigo do Marcelo leu a
+    primeira dobra e disse: *"não entendi o que era o produto"*. A sobrancelha
+    dizia PARA QUEM e o título dizia O QUE ACONTECE — nenhuma das duas dizia o
+    que o produto É, e quem já não soubesse que responder avaliação importa lia
+    uma funcionalidade solta.
+  - `reputação` e não `avaliações`, por decisão do Marcelo: *"avaliação limita
+    muito pra o que pretendemos com esse produto"*. A sobrancelha carrega a
+    ambição da categoria; o título continua a carregar a prova concreta.
 - title: `Sua avaliação no Google chega no WhatsApp.` mais, em destaque, `Você responde com um toque.`
 - body: `Você recebe a sugestão de resposta, lê e aprova com um toque. Pronto, já está no Google. Sem perder tempo.`
 - primary: `Garantir R$ 99/mês` · secondary: `Ver funcionando`
