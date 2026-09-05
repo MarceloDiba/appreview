@@ -9,9 +9,23 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
  *
  * O QUE ESTA FUNCAO FAZ, E O QUE ELA DELIBERADAMENTE NAO FAZ
  *
- * Ela faz duas coisas e mais nenhuma: anota que o dono escreveu (que e o que
- * abre a janela de 24 horas para texto livre) e marca a confirmacao quando o
- * que ele escreveu e um "1".
+ * Ela faz tres coisas: anota que o dono escreveu (que e o que abre a janela de
+ * 24 horas para texto livre), marca a confirmacao quando o que ele escreveu e
+ * um "1", e ANOTA OS RECIBOS DE ENTREGA que a Meta manda em `value.statuses`.
+ *
+ * O TERCEIRO CHEGOU TARDE, e a falta dele era uma regressao. Ate 05/09/2026
+ * esta funcao lia apenas `value.messages`. Consequencia medida pela sessao de
+ * QA: no canal oficial o `whatsapp_outbox` nunca passava de `accepted` —
+ * 3 aceites, 0 entregues, 0 lidos — enquanto o OpenWA, ja morto, registava
+ * `delivered`. O produto nao sabia distinguir "a Meta aceitou a mensagem" de
+ * "a mensagem chegou ao telemovel do dono".
+ *
+ * Isso corroia uma promessa do contrato. `ESTADOS_QUE_PROVAM_ENTREGA` diz que
+ * a tela so afirma ligacao ativa com `accepted`, `delivered` ou `read`; sem
+ * recibos, `accepted` era o unico estado alcancavel, e `accepted` prova apenas
+ * que a Meta recebeu o pedido. O contrato ja registava isto como risco
+ * residual — sem os recibos deixava de ser residual e passava a ser o unico
+ * estado possivel.
  *
  * Ela NAO publica no Google. A Meta espera resposta em milissegundos e volta a
  * tentar se demorar — e uma chamada ao Google demora mais do que isso. Um
@@ -238,11 +252,82 @@ Deno.serve(async (request) => {
     button?: { text?: string; payload?: string };
     type?: string;
   }> = [];
+  // OS RECIBOS VEM NO MESMO CORPO, num campo irmao de `messages`. A Meta manda
+  // `statuses` numa chamada separada da mensagem, e por isso e facil nao dar
+  // por eles: quem so testa "o dono respondeu" nunca ve um.
+  const recibos: Array<{
+    id?: string;
+    status?: string;
+    errors?: Array<{ code?: number; title?: string }>;
+  }> = [];
   for (const entrada of ((evento.entry || []) as Array<Record<string, unknown>>)) {
     for (const mudanca of ((entrada.changes || []) as Array<Record<string, unknown>>)) {
       const valor = (mudanca.value || {}) as Record<string, unknown>;
       mensagens.push(...((valor.messages || []) as typeof mensagens));
+      recibos.push(...((valor.statuses || []) as typeof recibos));
     }
+  }
+
+  // O RECIBO NUNCA ANDA PARA TRAS. A Meta nao garante ordem: um `delivered`
+  // atrasado pode chegar depois do `read`, e grava-lo por cima apagaria a
+  // informacao melhor. Por isso compara-se a posicao antes de escrever.
+  //
+  // `sent` da Meta e o nosso `accepted` — o despacho ja o escreveu ao receber
+  // o 200, entao o recibo `sent` nao acrescenta nada e serve so de registo.
+  const ESCADA = ['queued', 'sending', 'accepted', 'delivered', 'read'];
+  const DA_META: Record<string, string> = {
+    sent: 'accepted', delivered: 'delivered', read: 'read', failed: 'failed',
+  };
+
+  for (const recibo of recibos) {
+    const idDaMeta = recibo.id;
+    const estado = DA_META[recibo.status || ''];
+    if (!idDaMeta || !estado) continue;
+
+    const { data: linha } = await admin
+      .from('whatsapp_outbox')
+      .select('id, status')
+      .eq('provider_message_id', idDaMeta)
+      .maybeSingle();
+
+    // UM RECIBO SEM DONO NAO E ERRO. Pode ser de uma mensagem enviada por outra
+    // ferramenta no mesmo numero, ou de uma linha ja apagada. Anota-se a batida
+    // e segue-se, em vez de fazer barulho por algo que nao e nosso.
+    if (!linha) {
+      await registarBatida('recibo-sem-linha', `${estado} para um id que nao esta no outbox`);
+      continue;
+    }
+
+    await admin.from('whatsapp_delivery_events').insert({
+      outbox_id: linha.id,
+      provider: 'meta-cloud',
+      event_type: estado === 'failed' ? 'failed' : estado,
+      provider_message_id: idDaMeta,
+      detail: recibo.errors?.length ? { errors: recibo.errors } : null,
+    });
+
+    const agora = ESCADA.indexOf(linha.status as string);
+    const novoPasso = ESCADA.indexOf(estado);
+    const avanca = estado === 'failed'
+      // O `failed` da Meta e terminal e vale mais do que qualquer degrau, MAS
+      // nao apaga uma entrega ja confirmada: se chegou ao telemovel, chegou.
+      ? agora < ESCADA.indexOf('delivered')
+      : novoPasso > agora;
+
+    if (!avanca) {
+      await registarBatida('recibo-para-tras', `${linha.status} nao recua para ${estado}`);
+      continue;
+    }
+
+    await admin.from('whatsapp_outbox').update({
+      status: estado,
+      last_error_code: estado === 'failed'
+        ? `Meta ${recibo.errors?.[0]?.code ?? 'sem codigo'}`
+        : null,
+      updated_at: new Date().toISOString(),
+    }).eq('id', linha.id);
+
+    await registarBatida('recibo-anotado', `${linha.status} -> ${estado}`);
   }
 
   for (const mensagem of mensagens) {
@@ -301,7 +386,12 @@ Deno.serve(async (request) => {
       continue;
     }
     if (!confirmada) {
-      console.error('Webhook do WhatsApp: "%s" recebido sem nada a espera de confirmacao', texto.slice(0, 20));
+      // `dito`, e nao `texto`: `texto` nunca existiu neste ficheiro. Era um
+      // ReferenceError a espera do dia em que o dono confirmasse sem haver
+      // nada pendente — o pedido inteiro rebentava, a Meta recebia 500 e
+      // voltava a tentar o mesmo evento. Nao foi apanhado porque o `tsc` do
+      // projeto nao olha para as funcoes do Supabase, que correm em Deno.
+      console.error('Webhook do WhatsApp: "%s" recebido sem nada a espera de confirmacao', dito.slice(0, 20));
       continue;
     }
     console.error('Webhook do WhatsApp: resposta %s confirmada pelo dono', confirmada);
