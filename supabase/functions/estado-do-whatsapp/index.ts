@@ -45,6 +45,24 @@ Deno.serve(async (request) => {
   // ele. Foi o que aconteceu na primeira tentativa. Por isso o campo vai a
   // parte, num pedido proprio, onde um erro aparece como erro.
   const url = new URL(request.url);
+
+  // FORCAR A META A RELER UMA PAGINA. O preview de um link fica guardado do
+  // lado da Meta, e o WhatsApp bebe do mesmo poco que o Facebook: uma pagina
+  // partilhada antes de ter `og:image` continua a aparecer vazia mesmo depois
+  // de a etiqueta existir. Este pedido e o que apaga essa memoria.
+  //
+  // Sem isto, a unica saida seria pedir ao Marcelo para partilhar um endereco
+  // diferente do que ele quer partilhar.
+  const relerPagina = url.searchParams.get('reler');
+  if (relerPagina) {
+    const pedido = await fetch(
+      `https://graph.facebook.com/${VERSAO_DA_API}/?id=${encodeURIComponent(relerPagina)}&scrape=true`,
+      { method: 'POST', headers: { Authorization: `Bearer ${token}` } },
+    );
+    const resultado = await pedido.json().catch(() => ({}));
+    return json({ releu: pedido.ok, resposta: resultado }, pedido.ok ? 200 : 502);
+  }
+
   const campos = url.searchParams.get('campos')
     || 'display_phone_number,verified_name,quality_rating,name_status,status';
   const resposta = await fetch(
