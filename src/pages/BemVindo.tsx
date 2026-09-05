@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, HelpCircle } from 'lucide-react';
+import { HelpCircle, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -143,11 +143,29 @@ const BemVindo = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="mx-auto w-full max-w-md p-6 shadow-lg">
+        {/*
+          NAO AFIRMA O QUE AINDA NAO SABE. Ate 05/09/2026 esta tela dizia
+          "Pagamento confirmado" assim que houvesse um bilhete no endereco — e
+          "existe um bilhete" nao e "houve pagamento". A sessao de QA provou-o
+          inventando um: `?compra=cs_live_naoexisteqa1234567890` bastava para o
+          produto afirmar um facto do Stripe a partir de uma string na barra do
+          navegador.
+
+          Verificar o bilhete aqui nao da: neste instante ainda nao ha sessao, e
+          abrir uma porta anonima que diga se uma sessao do Stripe foi paga seria
+          pior do que o defeito.
+
+          O que da e nao afirmar. Quem vem do Stripe ja viu a confirmacao DELE;
+          o trabalho desta tela e criar o acesso, e e isso que ela anuncia. A
+          confirmacao chega quando o `reclamar-compra` responde — o aviso "Tudo
+          certo. Sua assinatura esta ativa." e dito depois de o servidor o
+          confirmar, e ai e verdade.
+        */}
         <div className="flex items-center gap-3">
-          <CheckCircle2 className="h-8 w-8 text-emerald-600" aria-hidden="true" />
+          <KeyRound className="h-8 w-8 text-[#2457D6]" aria-hidden="true" />
           <div>
-            <h1 className="text-xl font-bold text-slate-950">Pagamento confirmado</h1>
-            <p className="text-sm text-slate-600">Falta só criar o seu acesso.</p>
+            <h1 className="text-xl font-bold text-slate-950">Falta criar o seu acesso</h1>
+            <p className="text-sm text-slate-600">Vamos ligar o seu pagamento a esta conta.</p>
           </div>
         </div>
 
@@ -162,15 +180,15 @@ const BemVindo = () => {
             <form onSubmit={criarConta} className="space-y-4">
               <div>
                 <Label htmlFor="email">E-mail</Label>
-                <Input id="email" type="email" autoComplete="email" value={email}
+                <Input id="email" type="email" autoComplete="email" className="min-h-11" value={email}
                   onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <div>
                 <Label htmlFor="senha">Senha</Label>
-                <Input id="senha" type="password" autoComplete="new-password" value={senha}
+                <Input id="senha" type="password" autoComplete="new-password" className="min-h-11" value={senha}
                   onChange={(e) => setSenha(e.target.value)} required minLength={6} />
               </div>
-              <Button type="submit" className="w-full bg-[#2457D6] hover:bg-[#1d47b0]" disabled={aCriar}>
+              <Button type="submit" className="min-h-11 w-full bg-[#2457D6] hover:bg-[#1d47b0]" disabled={aCriar}>
                 {aCriar ? 'Criando…' : 'Criar meu acesso'}
               </Button>
             </form>

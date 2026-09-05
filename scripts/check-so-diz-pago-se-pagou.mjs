@@ -29,24 +29,40 @@ const pagina = readFileSync(resolve(raiz, 'src/pages/BemVindo.tsx'), 'utf8');
 // O portao tem de vir ANTES da afirmacao no ficheiro. Se a afirmacao vier
 // primeiro, ela e o `return` que corre — e o portao nunca chega a ser lido.
 const portao = pagina.indexOf('if (!bilhete && !user)');
-// A ETIQUETA, E NAO A FRASE. A primeira versao procurava `Pagamento
+// A ETIQUETA, E NAO A FRASE. Uma versao anterior procurava `Pagamento
 // confirmado` em qualquer sitio do ficheiro e encontrava-a no COMENTARIO que
-// explica o defeito, logo no topo — o guarda dava vermelho a acusar o texto que
-// documenta o conserto. Medir `>Pagamento confirmado<` acerta na etiqueta que
-// o cliente le, que e a unica que afirma alguma coisa.
+// explica o defeito — o guarda dava vermelho a acusar o texto que documenta o
+// conserto. So `>...<` acerta no que o cliente le.
+//
+// HOJE A FRASE NAO EXISTE EM ETIQUETA NENHUMA, e e essa a regra: a tela nunca
+// afirma pagamento, com bilhete ou sem ele. A sessao de QA mostrou que o
+// portao sozinho nao chegava — `?compra=cs_live_inventado` bastava para o
+// produto afirmar um facto do Stripe a partir de uma string no endereco.
 const afirmacao = pagina.indexOf('>Pagamento confirmado<');
-const semBilhete = portao === -1 ? '' : pagina.slice(portao, afirmacao > portao ? afirmacao : undefined);
+// O TRECHO DO CAMINHO SEM BILHETE vai do portao ate ao `return` principal, que
+// e onde esse ramo acaba. Uma versao anterior cortava na frase "Pagamento
+// confirmado"; quando essa frase deixou de existir, o corte passou a apanhar o
+// ficheiro inteiro — incluindo o formulario de cadastro — e o guarda acusou um
+// defeito que nao existia. A fronteira tem de ser estrutural, nao textual.
+const fimDoPortao = portao === -1 ? -1 : pagina.indexOf('\n  return (', portao);
+const semBilhete = portao === -1 || fimDoPortao === -1
+  ? '' : pagina.slice(portao, fimDoPortao);
 
 const requisitos = [
   ['existe um portao que depende do bilhete', portao !== -1],
 
-  // MEDE A ORDEM, e nao a existencia. Um portao escrito depois do `return` que
-  // afirma o pagamento e codigo morto, e o guarda tem de saber a diferenca.
-  ['o portao vem antes da afirmacao de pagamento',
-    portao !== -1 && afirmacao !== -1 && portao < afirmacao],
+  // SE O TRECHO SAIR VAZIO, O GUARDA MENTE: todas as regras abaixo passariam
+  // sem medir nada. Exigir tamanho e o que impede um verde vazio.
+  ['o trecho sem bilhete foi mesmo recortado', semBilhete.length > 400],
 
-  ['quem chega sem bilhete nao le que o pagamento foi confirmado',
-    !semBilhete.includes('>Pagamento confirmado<')],
+  // NENHUMA ETIQUETA AFIRMA PAGAMENTO, em caminho nenhum. Um bilhete no
+  // endereco prova que alguem escreveu um bilhete no endereco.
+  ['a tela nunca afirma que o pagamento foi confirmado', afirmacao === -1],
+
+  // E A CONFIRMACAO, QUANDO CHEGA, VEM DO SERVIDOR. `reclamar-compra` responder
+  // com sucesso e a unica coisa nesta pagina que sabe se houve pagamento.
+  ['a confirmacao so e dita depois de o servidor responder',
+    /data\?\.reclamada[\s\S]{0,600}toast\.success\(/.test(pagina)],
 
   // A SAIDA DE QUEM NUNCA PAGOU.
   ['quem nunca pagou tem por onde comprar', /#plano/.test(semBilhete)],
