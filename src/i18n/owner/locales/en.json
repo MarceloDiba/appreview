@@ -1094,7 +1094,7 @@
         "anonymous": "Anonymous customer",
         "noComment": "No written comment",
         "waitingWhatsappTitle": "This draft was already sent to your WhatsApp",
-        "waitingWhatsappInstruction": "Reply 1 on WhatsApp to publish this reply on Google.",
+        "waitingWhatsappInstruction": "Tap “Publish to Google” in the WhatsApp message to publish this reply.",
         "draft": "Suggested reply. Review it before publishing.",
         "publish": "Publish reply on Google",
         "publishing": "Confirming with Google…",
@@ -1110,7 +1110,11 @@
         "correctWarning": "Confirming replaces the reply that is on Google right now. Anyone who read the old one will see the new one.",
         "correctConfirm": "Replace on Google",
         "correctCancel": "Leave as it is",
-        "corrected": "Reply fixed on Google for {{autor}}."
+        "corrected": "Reply fixed on Google for {{autor}}.",
+        "refuse": "Dismiss this draft",
+        "refusing": "Dismissing…",
+        "refused": "Draft dismissed. The next one is on its way.",
+        "refuseError": "I couldn't dismiss it right now. Try again."
       }
     },
     "cases": {

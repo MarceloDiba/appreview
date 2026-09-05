@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { ExternalLink, RefreshCw, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -174,7 +175,6 @@ const PublicacaoOficial = ({
   revalidarAEsperar: () => void;
 }) => {
   const { t } = useOwnerTranslation();
-  const [rascunho, setRascunho] = useState(rascunhoInicial);
   // Nunca mostra o aviso sobre uma avaliacao ja tratada. Achado na ronda de
   // correcao 1 de 03/09/2026: o dono publicava por aqui (ou respondia direto
   // no Google, fora do Binno), e o aviso continuava a dizer "responda 1"
@@ -183,6 +183,43 @@ const PublicacaoOficial = ({
   const respostaAEsperar = item.is_addressed !== true && aEsperar?.reviewId === item.idNaFonte
     ? aEsperar
     : null;
+
+  /*
+   * UMA AVALIACAO, UMA RESPOSTA.
+   *
+   * A caixa comecava sempre com `rascunhoInicial` — uma sugestao gerada aqui —
+   * mesmo quando ja havia OUTRO rascunho enviado para o WhatsApp. O dono via os
+   * dois textos, diferentes, na mesma tela, e um botao azul grande por baixo do
+   * segundo. Marcelo apanhou-o assim.
+   *
+   * E o cartao existia justamente para impedir isso: o comentario acima diz
+   * "sem isto ele nao sabe que a mensagem chegou e pode responder duas vezes".
+   * Mostrar o aviso e depois oferecer uma resposta DIFERENTE derrotava a
+   * propria razao do aviso.
+   *
+   * Havendo rascunho a espera, e ele que abre a caixa. Continua editavel: quem
+   * quiser mudar o texto antes de publicar muda, e ai publica o que leu.
+   */
+  const [rascunho, setRascunho] = useState(respostaAEsperar?.rascunho ?? rascunhoInicial);
+  const [aRecusar, setARecusar] = useState(false);
+
+  /*
+   * RECUSAR EXISTE PORQUE O PRODUTO SO OFERECE UM DE CADA VEZ. Um rascunho que
+   * o dono nao queira publicar trancava a fila inteira ate expirar — e ate
+   * 05/09/2026 a unica saida daqui era publicar. Marcelo ficou preso nesse
+   * estado: "nao tem como recusar em review, apenas no painel".
+   */
+  const recusar = async () => {
+    setARecusar(true);
+    const { data, error } = await supabase.rpc('recusar_rascunho', { p_review_id: item.idNaFonte });
+    setARecusar(false);
+    if (error || !data) {
+      toast.error(t('reviews.google.official.refuseError'));
+      return;
+    }
+    toast.success(t('reviews.google.official.refused'));
+    revalidarAEsperar();
+  };
 
   const enviar = async () => {
     if (!rascunho.trim()) return;
@@ -211,6 +248,12 @@ const PublicacaoOficial = ({
         <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm leading-6 text-emerald-900">
           <p className="font-semibold">{t('reviews.google.official.waitingWhatsappTitle')}</p>
           <p className="mt-1 whitespace-pre-wrap break-words">{respostaAEsperar.rascunho}</p>
+          {/*
+            A INSTRUCAO DEIXOU DE MANDAR DIGITAR. Dizia "Responda 1 no
+            WhatsApp", e desde 05/09/2026 o rascunho vai com um botao — mandar
+            digitar contradiz a promessa que a home vende. Marcelo: "vendemos a
+            ideia de um clique, nao adianta querer mudar isso a essa altura".
+          */}
           <p className="mt-2">{t('reviews.google.official.waitingWhatsappInstruction')}</p>
         </div>
       )}
@@ -230,6 +273,16 @@ const PublicacaoOficial = ({
       >
         {publicando ? t('reviews.google.official.publishing') : t('reviews.google.official.publish')}
       </Button>
+      {respostaAEsperar && (
+        <Button
+          variant="outline"
+          className="mt-3 min-h-11 w-full rounded-full sm:ml-2 sm:w-auto"
+          disabled={aRecusar || publicando}
+          onClick={() => void recusar()}
+        >
+          {aRecusar ? t('reviews.google.official.refusing') : t('reviews.google.official.refuse')}
+        </Button>
+      )}
     </div>
   );
 };

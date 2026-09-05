@@ -759,6 +759,24 @@ export type Database = {
           user_id: string
         }[]
       }
+      /**
+       * O dono recusa um rascunho sem publicar nada.
+       *
+       * Nao recebe `p_user_id`: o dono vem de `auth.uid()`, que o Postgres le
+       * do token. Uma versao anterior desta funcao aceitava o id por parametro
+       * e qualquer sessao podia recusar o rascunho de outra conta.
+       *
+       * Este ficheiro e uma versao ENXUTA dos tipos gerados — 881 linhas contra
+       * 2070 do `gen types` completo. Por isso a funcao entra a mao: regenerar
+       * tudo por causa de uma assinatura trocaria um risco pequeno por um
+       * grande, e nada aqui e gerado automaticamente hoje.
+       */
+      recusar_rascunho: {
+        Args: {
+          p_review_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

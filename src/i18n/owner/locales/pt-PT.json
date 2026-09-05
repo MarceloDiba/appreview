@@ -1094,7 +1094,7 @@
         "anonymous": "Cliente anónimo",
         "noComment": "Sem comentário escrito",
         "waitingWhatsappTitle": "Este rascunho já foi enviado para o seu WhatsApp",
-        "waitingWhatsappInstruction": "Responda 1 no WhatsApp para publicar esta resposta no Google.",
+        "waitingWhatsappInstruction": "Toque em “Publicar no Google” na mensagem do WhatsApp para publicar esta resposta.",
         "draft": "Resposta sugerida. Reveja antes de publicar.",
         "publish": "Publicar resposta no Google",
         "publishing": "A confirmar no Google…",
@@ -1110,7 +1110,11 @@
         "correctWarning": "Ao confirmar, esta resposta substitui a que está no Google agora. Quem já leu a anterior vai ver a nova.",
         "correctConfirm": "Substituir no Google",
         "correctCancel": "Deixar como está",
-        "corrected": "Resposta corrigida no Google para {{autor}}."
+        "corrected": "Resposta corrigida no Google para {{autor}}.",
+        "refuse": "Recusar este rascunho",
+        "refusing": "A recusar…",
+        "refused": "Rascunho recusado. O próximo da fila chega já.",
+        "refuseError": "Não consegui recusar agora. Tente de novo."
       }
     },
     "cases": {
