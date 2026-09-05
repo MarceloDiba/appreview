@@ -26,6 +26,18 @@ const IconeDoGoogle = () => (
   </svg>
 );
 
+/*
+ * `min-h-11` PORQUE ESTE BOTAO VIVE EM TRES TELAS.
+ *
+ * Em 05/09/2026 a passagem de alvos de toque subiu para 44px o formulario de
+ * `BemVindo.tsx`, e este botao ficou a 38 — no meio dos outros tres, ja
+ * corrigidos. Nao foi esquecimento de uma tela: e um componente partilhado por
+ * `Login`, `Signup` e `BemVindo`, e em cada uma delas parece pertencer as
+ * outras duas. Uma linha aqui sobe as tres de uma vez.
+ *
+ * 44px e o minimo abaixo do qual um dedo falha o alvo no telemovel, e este e o
+ * botao de entrar de quem acabou de pagar.
+ */
 export const BotaoDoGoogle = () => {
   const { t } = useOwnerTranslation();
   const { signInWithGoogle } = useAuth();
@@ -50,7 +62,7 @@ export const BotaoDoGoogle = () => {
       type="button"
       onClick={() => void clicar()}
       disabled={entrando}
-      className="flex w-full items-center justify-center gap-2.5 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+      className="flex min-h-11 w-full items-center justify-center gap-2.5 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
     >
       <IconeDoGoogle />
       {entrando ? t('auth.googleRedirecting') : t('auth.continueWithGoogle')}
