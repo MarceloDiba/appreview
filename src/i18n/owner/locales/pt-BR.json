@@ -978,7 +978,9 @@
       "desligarConfirmar": "Sim, desligar",
       "desligarCancelar": "Cancelar",
       "desligado": "Google desligado. Suas avaliações e respostas já publicadas continuam aqui.",
-      "desligarFalhou": "Não consegui desligar agora. Tente de novo em instantes."
+      "desligarFalhou": "Não consegui desligar agora. Tente de novo em instantes.",
+      "ligadoAoGoogle": "Conectado ao Google",
+      "negocioSemNome": "Seu negócio"
     }
   },
   "profile": {

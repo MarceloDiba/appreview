@@ -12,9 +12,17 @@ interface GoogleReviewsProps {
   userId: string;
   /** `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão. */
   businessCountry: string | null;
+  /**
+   * Falso quando a ligação oficial ao Google manda.
+   *
+   * Esta lista é o retrato da Apify: tirado num instante, e cego para tudo o
+   * que aconteceu depois — inclusive para quem já foi respondido. Oferecer
+   * "sugerir resposta" a partir dele convida o dono a responder duas vezes.
+   */
+  podeSugerirResposta?: boolean;
 }
 
-const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId, businessCountry }) => {
+const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId, businessCountry, podeSugerirResposta = true }) => {
   const { t } = useOwnerTranslation();
   const {
     loading,
@@ -55,6 +63,7 @@ const GoogleReviews: React.FC<GoogleReviewsProps> = ({ userId, businessCountry }
             {t('reviews.google.relevanceNotice')} · {t('reviews.google.attribution')}
           </div>
           <ReviewsList
+            podeSugerirResposta={podeSugerirResposta}
             reviews={reviews}
             formatDate={formatDate}
             businessName={placeInfo?.place_name}

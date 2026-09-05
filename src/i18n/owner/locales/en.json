@@ -978,7 +978,9 @@
       "desligarConfirmar": "Yes, disconnect",
       "desligarCancelar": "Cancel",
       "desligado": "Google disconnected. Your reviews and published replies are still here.",
-      "desligarFalhou": "I couldn't disconnect right now. Try again in a moment."
+      "desligarFalhou": "I couldn't disconnect right now. Try again in a moment.",
+      "ligadoAoGoogle": "Connected to Google",
+      "negocioSemNome": "Your business"
     }
   },
   "profile": {

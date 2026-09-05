@@ -131,11 +131,32 @@ const ConexaoDoGoogle = () => {
               : <Building2 className="h-5 w-5" aria-hidden="true" />}
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="font-semibold text-slate-950">
-              {pronto
-                ? t('settings.googlePreparacao.prontoTitulo', { negocio: preparacao.negocio || '' })
-                : t('settings.googlePreparacao.aPrepararTitulo')}
-            </h2>
+            {/*
+              O NOME DO NEGOCIO E O QUE O DONO PROCURA NESTA TELA. Ele nao vem
+              aqui saber "se esta ligado" no abstracto: vem confirmar que esta
+              ligado AO NEGOCIO CERTO — e a mesma conta Google pode alcancar
+              varios perfis. Marcelo, 05/09/2026: "daria mais visibilidade ao
+              nome da empresa".
+
+              Estava numa frase corrida, do mesmo tamanho e peso do resto.
+              Agora e a linha grande, com o estado por baixo em letra pequena:
+              a coisa que se procura em primeiro lugar visualmente, e nao
+              escondida no meio de uma frase.
+            */}
+            {pronto ? (
+              <>
+                <h2 className="text-lg font-bold leading-tight text-slate-950">
+                  {preparacao.negocio || t('settings.googlePreparacao.negocioSemNome')}
+                </h2>
+                <p className="mt-0.5 text-sm font-medium text-emerald-700">
+                  {t('settings.googlePreparacao.ligadoAoGoogle')}
+                </p>
+              </>
+            ) : (
+              <h2 className="font-semibold text-slate-950">
+                {t('settings.googlePreparacao.aPrepararTitulo')}
+              </h2>
+            )}
 
             <div className="mt-3 space-y-1.5">
               <Linha estado="feito" texto={t('settings.googlePreparacao.passoLigado')} />

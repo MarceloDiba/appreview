@@ -281,7 +281,24 @@ const Settings = () => {
                 ligou o Google, que e todo prospecto numa demonstracao.
               */}
               {!temLigacaoOficial && <ExperimentalApifySnapshot googleReviewUrl={googleReviewUrl} />}
-              <GoogleReviews userId={userId} businessCountry={businessInfo.country || null} />
+              {/*
+                O RETRATO NAO PODE OFERECER RESPOSTA QUANDO A LIGACAO OFICIAL
+                MANDA. Esta lista vem do retrato da Apify, tirado num instante;
+                ele nao sabe o que aconteceu depois de ser tirado — inclusive
+                quem ja foi respondido. Marcelo apanhou-o: "avaliacoes ja
+                respondidas tem os mesmos botoes das nao respondidas".
+
+                A decisao ja existia, tomada em 03/09 na fila de `/reviews`:
+                "so a oficial devolve a resposta publicada, entao so ela pode
+                dizer quem ainda espera". La o retrato sai inteiro da fila. Aqui
+                ele fica — e util para VER o que o Google mostra — mas deixa de
+                convidar a responder.
+              */}
+              <GoogleReviews
+                userId={userId}
+                businessCountry={businessInfo.country || null}
+                podeSugerirResposta={!temLigacaoOficial}
+              />
             </TabsContent>
           </Tabs>
         </div>

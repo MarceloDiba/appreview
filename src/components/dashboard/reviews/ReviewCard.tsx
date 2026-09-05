@@ -10,13 +10,22 @@ import { useOwnerTranslation } from '@/i18n/owner/useOwnerTranslation';
 interface ReviewCardProps {
   review: GoogleReview;
   formatDate: (dateString: string) => string;
+  /**
+   * Falso quando a ligação oficial ao Google manda.
+   *
+   * Este cartão vem do retrato da Apify, tirado num instante e cego para o que
+   * aconteceu depois — inclusive para quem já foi respondido. Com a ligação
+   * oficial viva, oferecer resposta a partir daqui convida o dono a responder
+   * duas vezes a mesma pessoa.
+   */
+  podeSugerirResposta?: boolean;
   /** Usado para assinar a resposta sugerida. */
   businessName?: string | null;
   /** `profiles.business_country`, para escolher pt-BR vs. pt-PT na sugestão. */
   businessCountry: string | null;
 }
 
-const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessName, businessCountry }) => {
+const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessName, businessCountry, podeSugerirResposta = true }) => {
   const { t } = useOwnerTranslation();
   const renderStars = (rating: number) => {
     return (
@@ -92,6 +101,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessNam
         id cru. A mesma avaliação vista aqui e vista na fila de `/reviews` é a
         mesma avaliação: partilhando a chave, ela é lida uma vez e não duas.
       */}
+      {podeSugerirResposta && (
       <ReplySuggestions
         reviewId={idDaFila('google-publico', review.review_id)}
         channel="public"
@@ -101,6 +111,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, formatDate, businessNam
         businessName={businessName}
         businessCountry={businessCountry}
       />
+      )}
     </div>
   );
 };
