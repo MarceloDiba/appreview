@@ -13,14 +13,9 @@ import WhatsAppField from '@/components/forms/WhatsAppField';
 import {
   type Rating,
   comentarioParaGravar,
+  ehIdentificadorDeDono,
   notaDoRating,
 } from '@/lib/comentarioInterno';
-
-// Função para validar UUID
-function isUUID(value: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(value);
-}
 
 interface FeedbackFormProps {
   businessName: string;
@@ -93,7 +88,7 @@ const FeedbackForm = ({
     try {
       const idUsuario = userId;
 
-      if (!idUsuario || !isUUID(idUsuario)) {
+      if (!idUsuario || !ehIdentificadorDeDono(idUsuario)) {
         toast.error('Não foi possível identificar o estabelecimento. Tente novamente pelo QR Code.');
         setEnviando(false);
         return;
@@ -244,6 +239,21 @@ const FeedbackForm = ({
                 errorMessage={t('whatsappInvalid')}
               />
             </div>
+            {/*
+              O CAMPO DIZ PARA QUE SERVE. Ate 05/09/2026 dizia so "WhatsApp
+              (opcional)", e um campo opcional sem razao declarada nao se
+              preenche — quem nao sabe para que e, salta.
+
+              Dos doze comentarios privados recebidos ate hoje, dois chegaram
+              sem contacto nenhum, e sobre esses o dono nao pode fazer nada: sabe
+              que alguem saiu insatisfeito e nao tem como falar com a pessoa.
+
+              A frase nao obriga a nada. Da motivo a quem estava indeciso, que e
+              a mesma razao da linha das estrelas acrescentada nesta manha.
+            */}
+            <p className="mt-1.5 text-xs leading-relaxed text-gray-500">
+              {t('formContactHint', { business: businessName })}
+            </p>
           </div>
 
           {/*

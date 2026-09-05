@@ -96,3 +96,18 @@ export function lerNotaDoCaso(rating: number | null | undefined): LeituraDaNota 
   }
   return { tipo: 'nota', valor: rating };
 }
+
+/**
+ * O dono a quem o comentário pertence, quando vem do endereço público.
+ *
+ * A página do QR aceita o identificador do dono pela URL, e o que chega pela
+ * URL é texto de quem a escreveu. Sem esta conferência, um `user_id` inválido
+ * seguiria para a gravação e o banco recusaria a linha inteira — o cliente
+ * veria um erro por um endereço que outra pessoa montou mal.
+ *
+ * Mora aqui, e não no formulário, porque é o mesmo módulo que monta a linha
+ * que este identificador vai preencher.
+ */
+export function ehIdentificadorDeDono(valor: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(valor);
+}

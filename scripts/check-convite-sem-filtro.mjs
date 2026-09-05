@@ -9,7 +9,7 @@
 // Duas analises independentes de concorrentes apontaram o nao-filtrar como a
 // melhor vantagem de venda do Binno. Nao se vende isso enquanto o produto
 // sugere o contrario.
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import ts from 'typescript';
@@ -21,7 +21,33 @@ const { mensagemDoConvite, linkDeWhatsApp, idiomaDoConvite } = await import(
   pathToFileURL(resolve(process.cwd(), 'src/lib/convite.ts')).href
 );
 
-const MIGRACAO = 'supabase/migrations/20260902120000_convite_sem_filtro.sql';
+// A DEFINICAO QUE CORRE, E NAO UMA CONGELADA.
+//
+// Ate 05/09/2026 esta constante apontava para
+// `20260902120000_convite_sem_filtro.sql`, o ficheiro que fez o conserto
+// daquele dia. So que uma funcao e redefinida por cada migracao nova, e o
+// guarda continuava a ler a primeira: media um facto historico e dava verde
+// sobre codigo que ja nao corria. Quando o aviso mudou hoje, ele nao viu, e
+// teria continuado a nao ver se alguem repusesse o filtro por nota.
+//
+// Passa a procurar a migracao MAIS RECENTE que redefine a funcao. E se nao
+// encontrar nenhuma, recusa em vez de passar: um guarda sem o que medir devolve
+// verdadeiro, e essa foi a armadilha mais frequente deste projecto.
+const PASTA_DAS_MIGRACOES = 'supabase/migrations';
+const MIGRACAO = (() => {
+  const candidatas = readdirSync(PASTA_DAS_MIGRACOES)
+    .filter((nome) => nome.endsWith('.sql'))
+    .sort()
+    .reverse()
+    .filter((nome) => readFileSync(`${PASTA_DAS_MIGRACOES}/${nome}`, 'utf8')
+      .includes('function public.notify_internal_feedback_whatsapp'));
+  if (!candidatas.length) {
+    console.error('Convite sem filtro: nao achei migracao nenhuma que defina o aviso.');
+    console.error('Sem ela este guarda nao mede nada — recusa em vez de passar.');
+    process.exit(1);
+  }
+  return `${PASTA_DAS_MIGRACOES}/${candidatas[0]}`;
+})();
 
 const falhas = [];
 let verificadas = 0;
@@ -37,13 +63,42 @@ exigir(
   'o convite deixou de estar dentro de um if sobre a especie do aviso',
   inicio === -1,
 );
+// O CONVITE SAIU DO AVISO EM 05/09/2026, e a regra mudou de forma sem mudar de
+// intencao. Marcelo pediu para o tirar das mensagens negativas; tirar so de
+// umas seria solicitacao selectiva, que e o que este guarda existe para impedir.
+// Tirou-se de TODAS.
+//
+// A regra passa de "o convite existe para toda a gente" para "o aviso nao
+// aconselha convite nenhum". As duas dizem a mesma coisa sobre o que importa:
+// o aviso nao trata nota alta e nota baixa de maneira diferente.
+//
+// O convite ao Google continua a existir onde e honesto — na pagina do QR, que
+// mostra o caminho a qualquer nota. Isso e medido pelas assercoes sobre
+// `convite.ts`, mais abaixo, e nao aqui.
 exigir(
-  'o convite ao Google continua a existir, para toda a gente',
-  /convide a publicar no Google/.test(migracao),
+  'o aviso nao aconselha convite ao Google a ninguem',
+  !/convide a publicar no Google/.test(migracao),
 );
 exigir(
-  'a regra de quando avisar nao mudou: nota ausente continua a nao avisar',
-  /if new\.rating is null then\s+return new;/.test(migracao),
+  // A REGRA MUDOU EM 05/09/2026, E ESTA ASSERCAO SO O DESCOBRIU HOJE.
+  //
+  // Ela exigia `if new.rating is null then return new;` — nota ausente nao
+  // avisa. Isso foi verdade ate esta manha, quando o Marcelo escolheu avisar
+  // quem escreve sem dar nota, em cor neutra. A assercao continuou verde
+  // durante o dia inteiro porque lia a migracao de 02/09, congelada.
+  //
+  // Foi so ao apontar o guarda para a definicao que CORRE que ela apareceu.
+  // Duas regras minhas, escritas com um dia de diferenca, a contradizer-se — e
+  // nenhuma das duas errada no dia em que nasceu.
+  //
+  // A regra passa a ser a de hoje: sem nota E SEM TEXTO nao avisa; sem nota mas
+  // com texto avisa, sem cor de julgamento.
+  'sem nota e sem texto continua a nao avisar ninguem',
+  /if new\.rating is null then\s+if comentario is null then\s+return new;/.test(migracao),
+);
+exigir(
+  'sem nota mas com texto avisa, na especie neutra',
+  /especie := 'feedback-sem-nota';/.test(migracao),
 );
 
 // ---------------------------------------------------------------------------

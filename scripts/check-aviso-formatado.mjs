@@ -132,8 +132,23 @@ exigir('a formatacao so e pedida ao Telegram quando ha o que formatar',
 // sitio errado, ou desliga a formatacao da mensagem inteira.
 exigir('o comentario do cliente entra sem asteriscos',
   /comentario := nullif\(btrim\(replace\(coalesce\(new\.feedback_text, ''\), '\*', ''\)\), ''\);/.test(migracao));
-exigir('o nome e o email do cliente tambem entram sem asteriscos',
-  (migracao.match(/replace\(coalesce\(new\.customer_(name|email), ''\), '\*', ''\)/g) || []).length === 2);
+// O CONTACTO MUDOU DE FORMA EM 05/09/2026, E A PROPRIEDADE NAO.
+// Ate hoje as duas colunas do contacto entravam pelo mesmo caminho, e contar
+// duas ocorrencias de `replace(..., '*', '')` media as duas de uma vez.
+// Agora `customer_email` — que guarda um numero de WhatsApp — deixou de entrar
+// como texto: ou vira digitos para o link `wa.me`, ou nao entra de todo. Contar
+// dois `replace` passou a medir uma coisa que nao existe.
+// As duas assercoes abaixo medem cada ponta do que sobrou: o nome continua
+// domado, e o numero so entra reduzido a digitos.
+exigir('o nome do cliente entra sem asteriscos',
+  /contato := nullif\(btrim\(replace\(coalesce\(new\.customer_name, ''\), '\*', ''\)\), ''\);/.test(migracao));
+exigir('o numero so entra no aviso reduzido a digitos, nunca como texto do cliente',
+  /telefone := regexp_replace\(telefone, '\\D', '', 'g'\);/.test(migracao)
+  // UMA UNICA LEITURA DA COLUNA, e ela e a que atribui `telefone`. Se alguem
+  // acrescentar uma segunda — imprimir o contacto em bruto numa linha do aviso,
+  // por exemplo — passam a ser duas, e esta assercao fica vermelha.
+  && (migracao.match(/new\.customer_email/g) || []).length === 1
+  && /telefone := nullif\(btrim\(coalesce\(new\.customer_email, ''\)\), ''\);/.test(migracao));
 // O nome do negocio vem do Google e um asterisco dele emparelha com os nossos.
 // A `opportunity.phrase` que esta assercao media ate 02/09/2026 deixou de vir no
 // retrato da coleta, e o que sobrou a proteger e o nome — que e o unico texto do
@@ -156,8 +171,16 @@ exigir('o aviso do comentario privado tem negrito', /\*Comentário privado agora
 // cenario nomeado na revisao final do ramo, em 02/09/2026.
 exigir('o aviso traz a citacao do cliente, com o emoji que a marca',
   /array_append\(linhas, format\('💬 "%s"', comentario\)\);/.test(migracao));
+// O CONTACTO DEIXOU DE SER UMA LINHA SO, em 05/09/2026: o Marcelo pediu que o
+// numero fosse clicavel. `📱 Contato deixado: +55...` nao e reconhecido como
+// endereco pelo WhatsApp — virou um nome numa linha e um `wa.me` sozinho na
+// seguinte, porque um link colado a outro texto deixa de ser clicavel.
+// O que continua a ser medido e o mesmo: o contacto tem marca propria, e o
+// link ocupa a sua propria linha.
 exigir('o contacto deixado continua marcado com o proprio emoji',
-  /array_append\(linhas, format\('📱 Contato deixado: %s', contato\)\);/.test(migracao));
+  /array_append\(linhas, format\('👤 %s', contato\)\);/.test(migracao));
+exigir('o link de conversa fica sozinho na linha, para o WhatsApp o reconhecer',
+  /array_append\(linhas, format\('https:\/\/wa\.me\/%s', telefone\)\);/.test(migracao));
 exigir('o aviso do comentario privado acaba no link do painel',
   /array_append\(linhas, '👉 https:\/\/binno\.pro\/reviews'\);/.test(migracao));
 // O RESUMO ACABA NUM PASSO, e nao apenas num link. Mudou em 02/09/2026, na
