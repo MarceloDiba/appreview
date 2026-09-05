@@ -264,6 +264,19 @@ Deno.serve(async (request) => {
     errors?: Array<{ code?: number; title?: string }>;
   }> = [];
   for (const entrada of ((evento.entry || []) as Array<Record<string, unknown>>)) {
+    // O ID DA CONTA VEM DE GRACA AQUI, E NAO HA OUTRO SITIO ONDE VENHA.
+    //
+    // Submeter um modelo a Meta exige o id da conta de WhatsApp Business, e em
+    // 05/09/2026 nao havia forma de o descobrir: nem o `debug_token`, nem
+    // `assigned_whatsapp_business_accounts`, nem o proprio numero o dizem —
+    // provei os tres, e os tres respondem vazio ou "campo inexistente". Este
+    // `entry[].id` E a conta, e chega a cada recibo que a Meta manda.
+    //
+    // Sem ele, o produto so pode escrever dentro da janela de 24 horas: fora
+    // dela a Meta exige modelo aprovado, e aprovar exige este id.
+    if (typeof entrada.id === 'string' && entrada.id) {
+      await registarBatida('conta-do-whatsapp', entrada.id);
+    }
     for (const mudanca of ((entrada.changes || []) as Array<Record<string, unknown>>)) {
       const valor = (mudanca.value || {}) as Record<string, unknown>;
       mensagens.push(...((valor.messages || []) as typeof mensagens));
