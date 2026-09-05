@@ -140,6 +140,122 @@ const Origem = ({ origem }: { origem: OrigemDaResposta }) => {
  * ficou lá. Nas outras o dono copia e cola na própria página, que é o que o
  * contrato de produto descreve ("o Binno não publica respostas por você").
  */
+/**
+ * O aviso de que este rascunho ja foi para o WhatsApp.
+ *
+ * Sai do cartao principal por duas razoes. A primeira e legibilidade: aquele
+ * componente ja passa dos 700 linhas. A segunda e que o `lint:portao` mede
+ * complexidade, e acrescentar-lhe o botao de recusar e o modo de leitura
+ * empurrou-o acima do limite — extrair isto foi a forma honesta de voltar a
+ * caber, em vez de subir o tecto de avisos e esconder o crescimento.
+ *
+ * A INSTRUCAO NAO MANDA DIGITAR. Dizia "Responda 1 no WhatsApp"; desde
+ * 05/09/2026 o rascunho vai com botao, e mandar digitar contradiz a promessa
+ * que a home vende — "voce responde com um toque".
+ */
+/**
+ * O rascunho: para ler, ou para editar quando o dono pede.
+ *
+ * A caixa de texto vinha sempre aberta com o texto cru dentro. Marcelo: "na aba
+ * review deveria ter o clique para editar". Uma caixa de edicao permanente nao
+ * mostra bem o texto — paragrafos colados, barra de rolagem a cortar — e diz que
+ * ha trabalho a fazer quando na maior parte das vezes o rascunho esta bom e so
+ * falta publicar.
+ *
+ * `whitespace-pre-line` porque o rascunho traz paragrafos; sem isto colapsam
+ * num bloco unico, que era metade do que estava feio de ler.
+ */
+/**
+ * Os tres caminhos que o dono tem a partir de um rascunho: publicar, mudar o
+ * texto, ou recusar.
+ *
+ * Sai do cartao principal porque o `lint:portao` mede complexidade e cada
+ * rotulo condicional aqui contava para a do cartao inteiro. Extrair foi a forma
+ * honesta de voltar a caber, em vez de subir o tecto de avisos e esconder o
+ * crescimento — o tecto e o que impede a proxima adicao de passar sem ninguem
+ * dar por ela.
+ *
+ * RECUSAR SO APARECE COM RASCUNHO A ESPERA, e nao sempre: onde nao ha nada
+ * pendente, um botao de recusar nao teria o que recusar.
+ */
+const AccoesDoRascunho = ({
+  podePublicar, publicando, aEditar, aRecusar, temRascunhoAEsperar,
+  aoPublicar, aoAlternarEdicao, aoRecusar,
+}: {
+  podePublicar: boolean;
+  publicando: boolean;
+  aEditar: boolean;
+  aRecusar: boolean;
+  temRascunhoAEsperar: boolean;
+  aoPublicar: () => void;
+  aoAlternarEdicao: () => void;
+  aoRecusar: () => void;
+}) => {
+  const { t } = useOwnerTranslation();
+  return (
+    <>
+      <Button
+        className="mt-3 min-h-11 w-full rounded-full bg-[#2457D6] hover:bg-[#1d47b0] sm:w-auto"
+        disabled={!podePublicar}
+        onClick={aoPublicar}
+      >
+        {publicando ? t('reviews.google.official.publishing') : t('reviews.google.official.publish')}
+      </Button>
+      <Button
+        variant="outline"
+        className="mt-3 min-h-11 w-full rounded-full sm:ml-2 sm:w-auto"
+        disabled={publicando}
+        onClick={aoAlternarEdicao}
+      >
+        {aEditar ? t('reviews.google.official.doneEditing') : t('reviews.google.official.edit')}
+      </Button>
+      {temRascunhoAEsperar && (
+        <Button
+          variant="outline"
+          className="mt-3 min-h-11 w-full rounded-full sm:ml-2 sm:w-auto"
+          disabled={aRecusar || publicando}
+          onClick={aoRecusar}
+        >
+          {aRecusar ? t('reviews.google.official.refusing') : t('reviews.google.official.refuse')}
+        </Button>
+      )}
+    </>
+  );
+};
+
+const Rascunho = ({ id, texto, aEditar, aoMudar }: {
+  id: string;
+  texto: string;
+  aEditar: boolean;
+  aoMudar: (valor: string) => void;
+}) => (aEditar ? (
+  <Textarea
+    id={id}
+    className="mt-2 min-h-28 resize-y text-sm leading-6"
+    value={texto}
+    onChange={(evento) => aoMudar(evento.target.value)}
+    autoFocus
+  />
+) : (
+  <p
+    id={id}
+    className="mt-2 whitespace-pre-line rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm leading-6 text-slate-800"
+  >
+    {texto}
+  </p>
+));
+
+const JaFoiParaOWhatsApp = ({ rascunho }: { rascunho: string }) => {
+  const { t } = useOwnerTranslation();
+  return (
+    <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm leading-6 text-emerald-900">
+      <p className="font-semibold">{t('reviews.google.official.waitingWhatsappTitle')}</p>
+      <p className="mt-1 whitespace-pre-line break-words">{rascunho}</p>
+      <p className="mt-2">{t('reviews.google.official.waitingWhatsappInstruction')}</p>
+    </div>
+  );
+};
+
 const PublicacaoOficial = ({
   item,
   rascunhoInicial,
@@ -202,6 +318,19 @@ const PublicacaoOficial = ({
    */
   const [rascunho, setRascunho] = useState(respostaAEsperar?.rascunho ?? rascunhoInicial);
   const [aRecusar, setARecusar] = useState(false);
+  /*
+   * O RASCUNHO E PARA LER, NAO PARA EDITAR — a nao ser que o dono peca.
+   *
+   * A caixa de texto vinha sempre aberta, com o rascunho cru dentro. Marcelo:
+   * "na aba review deveria ter o clique para editar". Uma caixa de edicao
+   * aberta a toda a hora nao mostra bem o texto (sem espaco entre paragrafos,
+   * com barra de rolagem a cortar) e, pior, diz que ha trabalho a fazer quando
+   * na maior parte das vezes o rascunho esta bom e so falta publicar.
+   *
+   * Fechado: le-se o texto formatado e publica-se. Aberto: edita-se. O clique
+   * de editar e a excepcao, e nao o estado natural da tela.
+   */
+  const [aEditar, setAEditar] = useState(false);
 
   /*
    * RECUSAR EXISTE PORQUE O PRODUTO SO OFERECE UM DE CADA VEZ. Um rascunho que
@@ -244,45 +373,26 @@ const PublicacaoOficial = ({
         WhatsApp, outra por aqui. So mostra estas tres coisas, e nada mais: que
         foi enviado, o texto que foi enviado, e que "1" publica.
       */}
-      {respostaAEsperar && (
-        <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm leading-6 text-emerald-900">
-          <p className="font-semibold">{t('reviews.google.official.waitingWhatsappTitle')}</p>
-          <p className="mt-1 whitespace-pre-wrap break-words">{respostaAEsperar.rascunho}</p>
-          {/*
-            A INSTRUCAO DEIXOU DE MANDAR DIGITAR. Dizia "Responda 1 no
-            WhatsApp", e desde 05/09/2026 o rascunho vai com um botao — mandar
-            digitar contradiz a promessa que a home vende. Marcelo: "vendemos a
-            ideia de um clique, nao adianta querer mudar isso a essa altura".
-          */}
-          <p className="mt-2">{t('reviews.google.official.waitingWhatsappInstruction')}</p>
-        </div>
-      )}
+      {respostaAEsperar && <JaFoiParaOWhatsApp rascunho={respostaAEsperar.rascunho} />}
       <label className="block text-sm font-semibold text-slate-900" htmlFor={`resposta-${item.id}`}>
         {t('reviews.google.official.draft')}
       </label>
-      <Textarea
+      <Rascunho
         id={`resposta-${item.id}`}
-        className="mt-2 min-h-28 resize-y text-sm"
-        value={rascunho}
-        onChange={(evento) => setRascunho(evento.target.value)}
+        texto={rascunho}
+        aEditar={aEditar}
+        aoMudar={setRascunho}
       />
-      <Button
-        className="mt-3 w-full rounded-full bg-[#2457D6] hover:bg-[#1d47b0] sm:w-auto"
-        disabled={publicando || !rascunho.trim()}
-        onClick={() => void enviar()}
-      >
-        {publicando ? t('reviews.google.official.publishing') : t('reviews.google.official.publish')}
-      </Button>
-      {respostaAEsperar && (
-        <Button
-          variant="outline"
-          className="mt-3 min-h-11 w-full rounded-full sm:ml-2 sm:w-auto"
-          disabled={aRecusar || publicando}
-          onClick={() => void recusar()}
-        >
-          {aRecusar ? t('reviews.google.official.refusing') : t('reviews.google.official.refuse')}
-        </Button>
-      )}
+      <AccoesDoRascunho
+        podePublicar={!publicando && Boolean(rascunho.trim())}
+        publicando={publicando}
+        aEditar={aEditar}
+        aRecusar={aRecusar}
+        temRascunhoAEsperar={Boolean(respostaAEsperar)}
+        aoPublicar={() => void enviar()}
+        aoAlternarEdicao={() => setAEditar((valor) => !valor)}
+        aoRecusar={() => void recusar()}
+      />
     </div>
   );
 };

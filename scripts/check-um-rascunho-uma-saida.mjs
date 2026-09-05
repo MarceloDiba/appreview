@@ -35,8 +35,15 @@ const requisitos = [
 
   // O BOTAO SO APARECE COM RASCUNHO A ESPERA. Oferecer "recusar" onde nao ha
   // nada a recusar e um botao que nao pode fazer nada.
+  //
+  // MEDE AS DUAS PONTAS, e nao um bloco unico. Os botoes foram extraidos para
+  // `AccoesDoRascunho` no mesmo dia — o cartao tinha passado o limite de
+  // complexidade do `lint:portao`. A primeira versao desta regra casava o JSX
+  // inteiro num sitio so e deu vermelho a uma extracao que melhora o codigo.
+  // A condicao continua a existir: e calculada no cartao e obedecida no filho.
   ['recusar so aparece quando ha rascunho a espera',
-    /\{respostaAEsperar && \([\s\S]{0,400}recusar\(\)/.test(tela)],
+    /temRascunhoAEsperar=\{Boolean\(respostaAEsperar\)\}/.test(tela)
+    && /\{temRascunhoAEsperar && \([\s\S]{0,400}aoRecusar/.test(tela)],
 
   // E A RECUSA NAO ACEITA O DONO POR PARAMETRO. A primeira versao da funcao
   // recebia `p_user_id` e era `security definer` com execucao para

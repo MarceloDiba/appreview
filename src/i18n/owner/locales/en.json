@@ -1114,7 +1114,9 @@
         "refuse": "Dismiss this draft",
         "refusing": "Dismissing…",
         "refused": "Draft dismissed. The next one is on its way.",
-        "refuseError": "I couldn't dismiss it right now. Try again."
+        "refuseError": "I couldn't dismiss it right now. Try again.",
+        "edit": "Edit reply",
+        "doneEditing": "Done"
       }
     },
     "cases": {

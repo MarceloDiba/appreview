@@ -272,13 +272,21 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
 
   if (!open) {
     return (
+      /*
+        ISTO ERA UM BOTAO FANTASMA DE 32px EM CINZA, e desaparecia no meio do
+        texto da avaliacao. Marcelo: "o sugerir resposta deveria ser um botao
+        mais visivel, nao algo que se perde no texto".
+        E o unico caminho para responder uma avaliacao a partir desta lista —
+        um controlo que abre a accao principal do cartao nao pode parecer
+        legenda. Passa a ter contorno, a cor da casa e os 44px que um dedo
+        acerta.
+      */
       <Button
-        variant="ghost"
-        size="sm"
-        className="mt-3 h-8 px-2 text-gray-600 hover:text-gray-900"
+        variant="outline"
+        className="mt-3 min-h-11 border-[#2457D6]/30 font-medium text-[#2457D6] hover:border-[#2457D6] hover:bg-[#2457D6]/5 hover:text-[#2457D6]"
         onClick={() => setOpen(true)}
       >
-        <MessageSquareQuote size={15} className="mr-2" aria-hidden="true" />
+        <MessageSquareQuote size={16} className="mr-2" aria-hidden="true" />
         {t('reply.cta')}
       </Button>
     );

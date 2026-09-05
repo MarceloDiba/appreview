@@ -1114,7 +1114,9 @@
         "refuse": "Recusar este rascunho",
         "refusing": "Recusando…",
         "refused": "Rascunho recusado. O próximo da fila vem em instantes.",
-        "refuseError": "Não consegui recusar agora. Tente de novo."
+        "refuseError": "Não consegui recusar agora. Tente de novo.",
+        "edit": "Editar resposta",
+        "doneEditing": "Pronto"
       }
     },
     "cases": {

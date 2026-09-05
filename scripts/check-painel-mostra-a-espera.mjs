@@ -165,19 +165,41 @@ exigir('duas buscas podem responder fora de ordem e a mais velha sobrescreve a m
   /geracaoRef/.test(hook) && /minhaGeracao !== geracaoRef\.current/.test(hook));
 // O texto mostrado tem de ser o que veio do banco (o que foi mesmo enviado),
 // nunca o rascunho editavel da caixa de texto ao lado, que o dono pode ja ter
-// alterado sem ainda ter respondido "1".
+// alterado sem ainda ter publicado.
 exigir('o aviso mostra o texto que foi mesmo enviado ao WhatsApp, e nao o rascunho editavel',
   /respostaAEsperar\.rascunho/.test(componente));
+
+// O AVISO MUDOU DE SITIO EM 05/09/2026, E A REGRA PASSA A MEDIR O QUE IMPORTA.
+//
+// Ele vivia dentro de `PublicacaoOficial`, e estas assercoes exigiam que as
+// chaves estivessem la — a co-localizacao era o proxy para "o aviso esta preso
+// a avaliacao certa". Ao acrescentar o botao de recusar e o modo de leitura, o
+// componente passou o limite de complexidade do `lint:portao`, e o aviso foi
+// extraido para `JaFoiParaOWhatsApp`.
+//
+// O intento nao mudou: o aviso continua preso a uma avaliacao, porque so e
+// desenhado sob `respostaAEsperar &&` e recebe o texto por parametro. O que
+// mudou foi o mecanismo. Medir a co-localizacao aqui daria vermelho a uma
+// extracao que melhora o codigo, e verde a um vazamento que passasse a chave
+// por outro caminho.
+exigir('o aviso e desenhado so quando ha rascunho a espera desta avaliacao',
+  /\{respostaAEsperar && <JaFoiParaOWhatsApp rascunho=\{respostaAEsperar\.rascunho\} \/>\}/
+    .test(componente));
 exigir('o aviso diz que o rascunho foi enviado ao WhatsApp',
-  /waitingWhatsappTitle/.test(componente));
-exigir('o aviso diz que responder "1" publica',
-  /waitingWhatsappInstruction/.test(componente));
-// As duas chaves tem de estar SO dentro deste componente: se aparecerem
-// noutro sitio da tela, o aviso deixou de estar preso a avaliacao a que ele
-// se refere e pode vazar para itens que nao tem nada a espera.
-const foraDoComponente = tela.slice(0, inicioComponente) + tela.slice(fimComponente);
-exigir('as chaves do aviso nao aparecem fora do componente da publicacao oficial',
-  !/waitingWhatsapp(Title|Instruction)/.test(foraDoComponente));
+  /waitingWhatsappTitle/.test(tela));
+exigir('o aviso diz o que fazer para publicar',
+  /waitingWhatsappInstruction/.test(tela));
+// E AS CHAVES CONTINUAM A VIVER NUM SITIO SO. Agora esse sitio e o componente
+// extraido: se aparecerem noutro lado, o aviso deixou de estar preso a
+// avaliacao a que se refere e pode vazar para itens sem nada a espera.
+const inicioDoAviso = tela.indexOf('const JaFoiParaOWhatsApp');
+const fimDoAviso = tela.indexOf('\n};', inicioDoAviso);
+if (inicioDoAviso === -1 || fimDoAviso === -1) {
+  exigir('o componente do aviso existe e foi encontrado para ser medido', false);
+}
+const foraDoAviso = tela.slice(0, inicioDoAviso) + tela.slice(fimDoAviso);
+exigir('as chaves do aviso nao aparecem fora do componente do aviso',
+  !/waitingWhatsapp(Title|Instruction)/.test(foraDoAviso));
 
 // As tres traducoes: cada chave usada pela tela tem de existir, com texto,
 // nos tres idiomas do painel — check-owner-i18n.mjs ja prova isto de forma
