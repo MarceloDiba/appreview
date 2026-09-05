@@ -131,15 +131,45 @@ Deno.serve(async (request) => {
      * um rascunho a espera de um aviso qualquer.
      */
     const ehRascunho = modelo === 'binno_rascunho_de_resposta';
-    const cabeNoInteractivo = corpo.length <= 1024;
+
+    /*
+     * O BOTAO NAO E OPCIONAL NUM RASCUNHO. Marcelo, 05/09/2026: "vendemos a
+     * ideia de um clique, nao adianta querer mudar isso a essa altura".
+     *
+     * A primeira versao disto caia para texto simples — sem botao — quando o
+     * corpo passava dos 1024 caracteres que a forma interactiva aceita. Estava a
+     * escolher a pergunta errada: "o texto cabe?" em vez de "o clique
+     * sobrevive?".
+     *
+     * E A PERGUNTA CERTA TEM RESPOSTA BARATA, porque este texto e PREVIA e nao
+     * carga. O que vai para o Google e lido do banco por
+     * `publicar-respostas-confirmadas` (`{ comment: pedido.rascunho }`), nunca
+     * desta mensagem. Encurtar a previa nao encurta a resposta publicada.
+     *
+     * Duas poupancas, por esta ordem:
+     *
+     *   1. A LINHA QUE MANDA DIGITAR "1" SAI. Com um botao no ecra ela e
+     *      redundante — e pior, contradiz a promessa. Ela CONTINUA a existir no
+     *      corpo que o Telegram recebe, porque la nao ha botao nenhum: quem a
+     *      constroi e o gatilho em SQL, e ele serve os dois canais.
+     *   2. So se ainda assim nao couber, corta-se o fim da previa. Corpos reais
+     *      medidos em producao: 476, 484 e 387 caracteres. Isto e um cinto, nao
+     *      um caminho.
+     */
+    const semPedirParaDigitar = corpo
+      .replace(/\n*👉 Responda \*1\* para publicar no Google\./u, '')
+      .trimEnd();
+    const previa = semPedirParaDigitar.length <= 1024
+      ? semPedirParaDigitar
+      : `${semPedirParaDigitar.slice(0, 1023)}…`;
 
     let mensagem: Record<string, unknown>;
-    if (janelaAberta && ehRascunho && cabeNoInteractivo) {
+    if (janelaAberta && ehRascunho) {
       mensagem = {
         type: 'interactive',
         interactive: {
           type: 'button',
-          body: { text: corpo },
+          body: { text: previa },
           action: {
             buttons: [{
               type: 'reply',

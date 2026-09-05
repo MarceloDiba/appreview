@@ -68,6 +68,30 @@ exigir('o webhook aceita o toque em botao na porta de entrada',
   /\.includes\(mensagem\.type/.test(fonte)
   && /\['text', 'button', 'interactive'\]/.test(fonte));
 
+// UM RASCUNHO NUNCA SAI SEM BOTAO, e esta e a regra que o produto vende.
+// Marcelo, 05/09/2026: "vendemos a ideia de um clique, nao adianta querer mudar
+// isso a essa altura".
+//
+// A primeira versao do envio interactivo caia para texto simples — sem botao —
+// quando o corpo passava dos 1024 caracteres. Perguntava "o texto cabe?" em vez
+// de "o clique sobrevive?". Como a mensagem e PREVIA e nao carga (o que vai
+// para o Google e lido do banco), encurtar a previa e barato e perder o botao
+// nao e. O guarda recusa qualquer condicao de tamanho a decidir a forma.
+const despacho = readFileSync('supabase/functions/whatsapp-cloud-dispatch/index.ts', 'utf8');
+exigir('o rascunho dentro da janela vai sempre em forma interactiva',
+  /if \(janelaAberta && ehRascunho\) \{/.test(despacho));
+exigir('nenhuma condicao de tamanho decide se o rascunho leva botao',
+  !/cabeNoInteractivo/.test(despacho)
+  && !/length <= 1024 [\s\S]{0,80}\? \{ type: 'text'/.test(despacho));
+// E A PREVIA ENCURTA-SE EM VEZ DE PERDER O CLIQUE.
+exigir('a previa e encurtada quando nao cabe, em vez de cair para texto',
+  /slice\(0, 1023\)/.test(despacho));
+// A LINHA QUE MANDA DIGITAR "1" SAI QUANDO HA BOTAO. Com o botao no ecra ela
+// contradiz a promessa. Continua no corpo que o Telegram recebe, porque la nao
+// ha botao — o gatilho em SQL serve os dois canais.
+exigir('a instrucao de digitar 1 e removida da mensagem com botao',
+  /Responda \\\*1\\\* para publicar no Google/.test(despacho));
+
 // A TERCEIRA FORMA. Dentro da janela de 24h o rascunho vai como mensagem
 // `interactive`, que leva o corpo inteiro E o botao — antes ia texto simples,
 // completo e SEM nada para tocar. Marcelo recebeu um assim com a janela aberta
