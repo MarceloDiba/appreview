@@ -180,9 +180,22 @@ exigir('a mensagem acumulada de elogios tambem foi acentuada',
   !/elogios escritos desde o ultimo aviso/.test(migracaoExecutavel)
   && /elogios escritos\* desde o último aviso/.test(migracaoExecutavel));
 
-// 9. E a REGRA de quando avisar nao pode mudar com o texto. Estas quatro linhas
-// sao a razao de a demonstracao poder falhar em silencio se alguem mexer nelas.
-exigir('nota ausente continua a nao avisar', /if new\.rating is null then\s+return new;/.test(migracao));
+// 9. E a REGRA de quando avisar nao pode mudar com o texto. Estas linhas sao a
+// razao de a demonstracao poder falhar em silencio se alguem mexer nelas.
+//
+// A PRIMEIRA REGRA MUDOU EM 05/09/2026, por decisao do Marcelo, e a assercao
+// mudou com ela. Ate esse dia era "nota ausente nao avisa", e estava certa:
+// nota ausente nao existia na pratica, porque a tela do QR injectava 3 antes de
+// o cliente tocar em nada. Corrigida a tela, a nota ausente passou a ser o caso
+// COMUM — o cliente que so escreve —, e manter a regra antiga trocaria "avisa a
+// mais" por "nao avisa".
+//
+// A decisao dele: avisar, sem cor de reclamacao. Diz-se o que se sabe (houve
+// comentario) e nao se inventa o que nao se sabe (a opiniao).
+exigir('comentario sem nota avisa, e nao se cala',
+  /if new\.rating is null then[\s\S]{0,220}especie := 'feedback-sem-nota';/.test(migracao));
+exigir('sem nota e sem texto continua a nao avisar ninguem',
+  /if new\.rating is null then\s+if comentario is null then\s+return new;/.test(migracao));
 exigir('a queixa continua a calar-se 5 minutos', /especie := 'feedback';\s+janela := interval '5 minutes';/.test(migracao));
 exigir('o elogio com texto continua a calar-se 15 minutos', /especie := 'feedback-praise';\s+janela := interval '15 minutes';/.test(migracao));
 exigir('o elogio sem texto continua a nao avisar', /else\s+return new;\s+end if;/.test(migracao));

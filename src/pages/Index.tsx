@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Circle, MessageCircle, ShieldCheck, TrendingDown, XCircle, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Circle, Clock, FileText, MessageCircle, MessageSquareWarning, ShieldCheck, Star, TrendingDown, TrendingUp, XCircle, Zap } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { comVagas } from '@/lib/precoBinno';
@@ -35,6 +35,45 @@ const Pilar = ({ item, index }: { item: MarketingCopy['alerts']['items'][number]
       <h3 className="mt-5 text-xl font-bold text-slate-950">{item.title}</h3>
       <p className="mt-3 leading-6 text-slate-600">{item.body}</p>
     </article>
+  );
+};
+
+/**
+ * Seção 3b, "Você não precisa vigiar o Google". Cada ícone corresponde, na
+ * mesma ordem de `copy.avisos.itens`, a um `kind` real de `whatsapp_outbox`:
+ * avaliação nova (aviso com rascunho), notas baixas concentradas (`alert`),
+ * reclamação ou elogio pelo QR Code (`feedback` e `feedback-praise`),
+ * avaliação esperando resposta (`reply-reminder`) e o resumo da semana
+ * (`weekly`). Não inventar uma sexta linha: se o aviso não existe na fila,
+ * ele não entra aqui.
+ */
+const AVISOS_ICONES = [Star, TrendingDown, MessageSquareWarning, Clock, FileText];
+const AvisoItem = ({ item, index }: { item: MarketingCopy['avisos']['itens'][number]; index: number }) => {
+  const Icone = AVISOS_ICONES[index];
+  return (
+    <div className="flex gap-3.5 rounded-2xl border border-slate-200 bg-white p-5">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-[#6D43C0]"><Icone className="h-4 w-4" /></span>
+      <div className="min-w-0"><p className="font-semibold text-slate-950">{item.title}</p><p className="mt-1 leading-6 text-slate-600">{item.body}</p></div>
+    </div>
+  );
+};
+
+/**
+ * Os cartões "está derrubando" e "está te ajudando" usam o cenário
+ * ilustrativo do Bistrô Horizonte (o mesmo de `BinnoDemoCockpit`), por isso
+ * levam a mesma etiqueta de exemplo que a demonstração já usa
+ * (`copy.demo.label`), passada pelo componente pai.
+ */
+const TemaCard = ({ tema, tom }: { tema: MarketingCopy['avisos']['derrubando']; tom: 'baixa' | 'alta' }) => {
+  const Icone = tom === 'baixa' ? TrendingDown : TrendingUp;
+  const cor = tom === 'baixa' ? 'text-red-700 bg-red-50' : 'text-emerald-700 bg-emerald-50';
+  return (
+    <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5">
+      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${cor}`}><Icone className="h-3.5 w-3.5" />{tema.rotulo}</span>
+      <p className="mt-3 font-bold text-slate-950">{tema.tema}</p>
+      <p className="mt-1 text-sm leading-6 text-slate-600">{tema.body}</p>
+      <p className="mt-2 text-sm italic leading-6 text-[#655F7C]">{tema.frase}</p>
+    </div>
   );
 };
 
@@ -105,6 +144,37 @@ const Index = () => {
             <Kicker centered eyebrow={copy.alerts.eyebrow} title={copy.alerts.title} />
             <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
               {copy.alerts.items.map((item, index) => <Pilar key={item.title} item={item} index={index} />)}
+            </div>
+          </div>
+        </section>
+
+        {/*
+          3b. Você não precisa vigiar o Google (chave `avisos`, nova em
+          05/09/2026). Coluna 1 são os avisos reais do WhatsApp, coluna 2 é o
+          que o painel lê. Ver o comentário de `AvisoItem` para a
+          correspondência com `whatsapp_outbox.kind`.
+        */}
+        <section className="scroll-mt-24 border-y border-slate-100 bg-[#F7F5FC] px-4 py-20 sm:px-6" id="avisos">
+          <div className="mx-auto max-w-7xl">
+            <Kicker centered eyebrow={copy.avisos.eyebrow} title={copy.avisos.title} />
+            <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <div className="min-w-0">
+                <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-[#6D43C0]">{copy.avisos.entregaTitle}</h3>
+                <div className="mt-5 grid gap-3">
+                  {copy.avisos.itens.map((item, index) => <AvisoItem key={item.title} item={item} index={index} />)}
+                </div>
+                <p className="mt-5 text-sm leading-6 text-[#655F7C]">{copy.avisos.entregaNote}</p>
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-[#6D43C0]">{copy.avisos.temasTitle}</h3>
+                <p className="mt-3 leading-6 text-slate-600">{copy.avisos.temasBody}</p>
+                <span className="mt-4 inline-block rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-violet-800">{copy.demo.label}</span>
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1">
+                  <TemaCard tema={copy.avisos.derrubando} tom="baixa" />
+                  <TemaCard tema={copy.avisos.ajudando} tom="alta" />
+                </div>
+                <p className="mt-5 text-sm leading-6 text-[#655F7C]">{copy.avisos.temasNote}</p>
+              </div>
             </div>
           </div>
         </section>

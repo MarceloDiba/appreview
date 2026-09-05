@@ -115,6 +115,47 @@ const requisitos = [
   ['FeedbackForm.tsx nao converte a nota com parseInt (parseInt de vazio e NaN)', !/parseInt\s*\(/.test(formulario)],
 ];
 
+// ---------------------------------------------------------------------------
+// A TELA QUE LEVA AO FORMULARIO. Ate 05/09/2026 este guarda media
+// `comentarioInterno.ts`, `FeedbackForm.tsx` e `Feedback.tsx`, e NAO media
+// `ReviewChooser.tsx` — a unica tela por onde um cliente real chega ao
+// formulario.
+//
+// O modulo recusava-se a assumir 3. O chamador entregava-lhe 3 pronto:
+// `state: { rating: 'neutral' }`, escrito a mao, sem o cliente tocar em nada.
+// Resultado medido na tela pela sessao de QA: tres estrelas acesas, nota 3
+// gravada, e um aviso VERMELHO de reclamacao com o elogio do cliente citado
+// por baixo.
+//
+// A regra vivia num sitio e o chamador que importa nao passava por la.
+// ---------------------------------------------------------------------------
+const escolha = readFileSync(resolve(raiz, 'src/components/review-funnel/ReviewChooser.tsx'), 'utf8')
+  .replace(/\/\*[\s\S]*?\*\//g, ' ');
+
+requisitos.push(
+  ['a tela do QR nao assume nota nenhuma ao abrir o comentario privado',
+    /rating: null/.test(escolha) && !/rating: 'neutral'/.test(escolha)],
+  ['a tela do QR nao assume nota por outro nome',
+    !/rating: '(negative|positive)'/.test(escolha)],
+);
+
+// E O AVISO TEM DE EXISTIR PARA QUEM ESCREVE SEM NOTA. Sem isto, tirar o 3
+// trocaria "avisa a mais" por "nao avisa" — um cliente escreveria um problema
+// e o dono nunca saberia. Marcelo escolheu avisar, sem cor de reclamacao.
+const gatilho = readFileSync(
+  resolve(raiz, 'supabase/migrations/20260905100000_comentario_sem_nota_avisa_sem_cor_de_reclamacao.sql'), 'utf8');
+requisitos.push(
+  // MEDE O ENCAMINHAMENTO, e nao a palavra. A primeira versao desta assercao
+  // procurava `feedback-sem-nota` em qualquer sitio do ficheiro, e a palavra
+  // aparece em tres — trocar o encaminhamento por `return new` deixava-a verde.
+  // Aqui exige-se a sequencia: rating nulo, com texto, leva a esta especie.
+  ['o rating nulo com texto encaminha para o aviso sem nota',
+    /if new\.rating is null then[\s\S]{0,220}especie := 'feedback-sem-nota';/.test(gatilho)],
+  ['o comentario sem nota nao sai com cor de reclamacao',
+    !/🔴[^\n]*sem-nota/.test(gatilho) && /💬 \*Comentário privado agora\*/.test(gatilho)],
+  ['sem nota e sem texto nao avisa ninguem', /if comentario is null then\s*\n\s*return new;/.test(gatilho)],
+);
+
 const falhas = requisitos.filter(([, ok]) => !ok).map(([rotulo]) => rotulo);
 if (falhas.length) {
   console.error(`Nota honesta com regra quebrada:\n- ${falhas.join('\n- ')}`);

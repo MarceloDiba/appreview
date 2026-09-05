@@ -55,7 +55,23 @@ const ReviewChooser = ({
   const openPrivateFeedback = () => {
     navigate(`/feedback/${businessId}`, {
       state: {
-        rating: 'neutral',
+        /**
+         * NENHUMA NOTA E ASSUMIDA AQUI.
+         *
+         * Ate 05/09/2026 esta linha dizia `rating: 'neutral'`, que vale 3, e o
+         * formulario abria com tres estrelas acesas sem o cliente ter tocado em
+         * nada. Quem escrevia so um elogio ficava gravado com nota 3, e o dono
+         * recebia um aviso VERMELHO de reclamacao com o elogio citado por baixo.
+         *
+         * O modulo `comentarioInterno.ts` ja se recusava a assumir 3 — o
+         * comentario dele diz isso com todas as letras. Era este chamador que
+         * lhe entregava o 3 pronto, e o guarda media o modulo e nunca esta tela,
+         * que e a unica que navega para la.
+         *
+         * Achado pela sessao de QA em 05/09, medindo o preenchimento das
+         * estrelas na tela real do cliente.
+         */
+        rating: null,
         businessName,
         userId,
         googleReviewUrl,
