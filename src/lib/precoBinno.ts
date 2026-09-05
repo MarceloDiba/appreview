@@ -30,13 +30,26 @@ export const PRECO_PROMO_BRL = 99;
 export const VAGAS_DO_LOTE = 50;
 
 /**
- * Troca `{vagas}` e `{regular}` num texto de copy.
+ * Troca `{vagas}`, `{regular}` e `{promo}` num texto de copy.
  *
  * `{regular}` existe porque o preço cheio estava ESCRITO À MÃO nos três idiomas
  * de `marketing.ts` — exactamente a duplicação que o cabeçalho deste ficheiro
  * avisa. Ao mudar de 199 para 129, a constante mudava e as três frases ficavam
  * a dizer 199. Um preço, um sítio.
+ *
+ * `{promo}` entrou em 04/09/2026 junto com a home nova: a copy da prévia cita o
+ * preço promocional onze vezes (banner de lote, CTAs, plano, FAQ), e cada uma
+ * dessas citações escrita à mão seria outra cópia para o mesmo guarda apanhar.
+ *
+ * Substituição GLOBAL, e não da primeira ocorrência: a FAQ cita `{promo}` uma
+ * vez no título e outra no corpo, e o banner de lote cita `{regular}` sozinho
+ * enquanto o corpo da mesma frase já tinha `{promo}`. Com `String.replace`
+ * simples a segunda ocorrência de cada marcador ficava literal na tela — o
+ * mesmo defeito que este ficheiro existe para evitar, só que dentro da própria
+ * função que evita. `replaceAll` faria o mesmo, mas pede lib ES2021+; o alvo
+ * deste projeto é ES2020, e regex com `/g` cobre o mesmo caso sem mudar isso.
  */
 export const comVagas = (texto: string) => texto
-  .replace('{vagas}', String(VAGAS_DO_LOTE))
-  .replace('{regular}', String(PRECO_REGULAR_BRL));
+  .replace(/\{vagas\}/g, String(VAGAS_DO_LOTE))
+  .replace(/\{regular\}/g, String(PRECO_REGULAR_BRL))
+  .replace(/\{promo\}/g, String(PRECO_PROMO_BRL));

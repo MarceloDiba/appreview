@@ -74,7 +74,7 @@
     "check:o-aparelho-nao-guarda-o-dono-anterior": "node --experimental-strip-types scripts/check-o-aparelho-nao-guarda-o-dono-anterior.mjs",
     "check:so-o-servidor-chama": "node scripts/check-so-o-servidor-chama-o-que-e-do-servidor.mjs",
     "check:portas-das-funcoes": "node scripts/check-portas-das-funcoes.mjs",
-    "check:um-preco-um-sitio": "node scripts/check-um-preco-um-sitio.mjs",
+    "check:um-preco-um-sitio": "node --experimental-strip-types scripts/check-um-preco-um-sitio.mjs",
     "check:a-assinatura-tem-porta": "node scripts/check-a-assinatura-tem-porta.mjs",
     "check:so-usa-quem-paga": "node scripts/check-so-usa-quem-paga.mjs"
   },
