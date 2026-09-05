@@ -20,6 +20,18 @@
 //
 // O SINTOMA E MUDO NOS DOIS CASOS. Ninguem ve um erro: uma mensagem apenas nao
 // chega, e a janela de 24 horas nunca abre.
+//
+// ISTO NAO E HISTORIA. A data acima e de quando doeu, nao de quando deixou de
+// ser verdade. Em 05/09/2026 a sessao de QA conferiu a conta de producao e as
+// duas formas do MESMO numero continuam a coexistir, cada uma no seu sitio:
+//
+//   painel da Meta        +55 79 9198-6091     <- forma curta, 12 digitos
+//   whatsapp_outbox       5579991986091        <- forma longa, 13 digitos
+//
+// Quem ler este cabecalho daqui a um mes vai pensar que descreve um episodio
+// resolvido e que o guarda protege contra o passado. Nao protege: protege
+// contra uma condicao que e verdadeira agora, na conta que esta a servir
+// clientes. Apagar o comparador voltaria a partir o produto hoje.
 import { readFileSync } from 'node:fs';
 
 const CAMINHO = 'supabase/functions/whatsapp-cloud-webhook/index.ts';
