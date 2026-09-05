@@ -121,10 +121,18 @@ const Index = () => {
                 nao pode ter o estilo de uma que se salta: maiusculas atrasam a
                 leitura de uma frase, e 12px dizem "isto nao importa".
 
-                A caixa da-lhe corpo de objecto em vez de sussurro. Fica
-                translucida e nao solida de proposito: o botao branco de comprar
-                e o unico elemento cheio desta dobra, e um segundo bloco solido
-                competiria com ele exactamente onde nao se quer competir.
+                A caixa da-lhe corpo de objecto em vez de sussurro.
+
+                E E SOLIDA, depois de uma versao translucida que o Marcelo achou
+                fraca. Eu tinha-a deixado translucida com medo de ela competir
+                com o botao branco de comprar — e o medo estava mal medido: o
+                botao fica quase 400px abaixo, no fim da dobra. Nao sao vizinhos
+                a disputar o mesmo olhar; sao dois momentos da mesma leitura, um
+                a dizer o que isto e e outro a dizer o que fazer.
+
+                A regra de oficio diz que meia-medida le como ruido, e a versao
+                translucida era exactamente isso: destaque suficiente para se
+                notar que alguem tentou, insuficiente para resolver.
 
                 O AMARELO NAO E COR NOVA. Marcelo pediu "uma cor que quebre, um
                 texto em amarelo"; a dobra JA tem amarelo, no `#FFF5C4` da tarja
@@ -137,7 +145,7 @@ const Index = () => {
                 contraste nao vem de gritar mais alto, vem de ser a unica coisa
                 fora da familia de cor da pagina.
               */}
-              <p className="inline-flex rounded-full border border-[#FFD166]/45 bg-[#FFF5C4]/10 px-4 py-1.5 text-sm font-semibold text-[#FFE9A6] sm:text-base">
+              <p className="inline-flex rounded-full bg-[#FFD166] px-4 py-2 text-sm font-bold text-[#2A1A00] sm:text-base">
                 {copy.hero.eyebrow}
               </p>
               <h1 className="mt-4 text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">{copy.hero.title} <span className="text-[#C9B6F5]">{copy.hero.titleEmphasis}</span></h1>
