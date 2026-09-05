@@ -250,6 +250,9 @@ Deno.serve(async (request) => {
     from?: string;
     text?: { body?: string };
     button?: { text?: string; payload?: string };
+    // O toque num botao de mensagem `interactive` NAO chega como `button`.
+    // Chega assim, e ler so o `button` fazia o toque cair no vazio.
+    interactive?: { type?: string; button_reply?: { id?: string; title?: string } };
     type?: string;
   }> = [];
   // OS RECIBOS VEM NO MESMO CORPO, num campo irmao de `messages`. A Meta manda
@@ -374,10 +377,28 @@ Deno.serve(async (request) => {
      * O `payload` vem antes do `text` porque e o que NAO muda quando alguem
      * traduz o rotulo do botao.
      */
+    /*
+     * TRES FORMAS DE DIZER SIM, e sao mesmo tres coisas diferentes na Meta.
+     *
+     * `text`        o dono escreveu "1"
+     * `button`      tocou no botao de um MODELO (fora da janela de 24h)
+     * `interactive` tocou no botao de uma mensagem interactiva (dentro dela)
+     *
+     * A terceira entrou em 05/09/2026, com o botao no rascunho enviado dentro
+     * da janela. Ela chega em `interactive.button_reply`, e NAO em `button` —
+     * ler so as duas primeiras faria o toque cair no vazio, que e o pior
+     * sintoma que existe: o dono carrega, nada acontece, e conclui que o
+     * produto o ignorou. Sem erro nenhum a mostrar.
+     *
+     * O `id` vem antes do titulo pela mesma razao de sempre: e o que NAO muda
+     * quando alguem traduz o rotulo.
+     */
     const dito = mensagem.type === 'button'
       ? (mensagem.button?.payload || mensagem.button?.text || '')
-      : (mensagem.text?.body || '');
-    if (!['text', 'button'].includes(mensagem.type || '') || !ehConfirmacao(dito)) continue;
+      : mensagem.type === 'interactive'
+        ? (mensagem.interactive?.button_reply?.id || mensagem.interactive?.button_reply?.title || '')
+        : (mensagem.text?.body || '');
+    if (!['text', 'button', 'interactive'].includes(mensagem.type || '') || !ehConfirmacao(dito)) continue;
 
     const { data: confirmada, error } = await admin
       .rpc('confirmar_resposta_do_dono', { p_user_id: dono.user_id });

@@ -107,9 +107,54 @@ Deno.serve(async (request) => {
     const { data: janelaAberta } = await admin
       .rpc('janela_de_texto_livre_aberta', { p_user_id: linha.user_id as string });
 
-    const mensagem = janelaAberta || !modelo
-      ? { type: 'text', text: { body: corpo, preview_url: false } }
-      : {
+    /*
+     * DENTRO DA JANELA, TEXTO LIVRE PERDIA O BOTAO — e o botao E a promessa.
+     *
+     * Marcelo apanhou-o em 05/09/2026: recebeu o rascunho completo e sem nada
+     * para tocar. A janela dele estava aberta por VINTE E QUATRO MINUTOS.
+     *
+     * O defeito era a escolha ser binaria. Fora da janela ia o modelo, curto e
+     * COM botao; dentro ia texto livre, completo e SEM. E o texto livre ganhava
+     * sempre que o dono tivesse escrito nas ultimas 24 horas — ou seja, o dono
+     * MAIS activo era o que perdia o clique. Ao contrario do que se quer.
+     *
+     * A Cloud API tem uma terceira forma que ninguem estava a usar: `interactive`
+     * com botoes de resposta, permitida dentro da janela, que leva o corpo
+     * inteiro E o botao. O limite dela e 1024 caracteres no corpo, contra 4096
+     * do texto simples — por isso o texto simples continua a existir, para o
+     * rascunho que nao couber. Perder o botao e mau; cortar a resposta do dono a
+     * meio e pior.
+     *
+     * SO PARA O RASCUNHO. Um aviso que nao pede aprovacao nenhuma nao pode
+     * ganhar um botao "Publicar no Google" — seria oferecer publicar uma coisa
+     * que nao existe. Por isso a condicao olha o modelo, que e o que distingue
+     * um rascunho a espera de um aviso qualquer.
+     */
+    const ehRascunho = modelo === 'binno_rascunho_de_resposta';
+    const cabeNoInteractivo = corpo.length <= 1024;
+
+    let mensagem: Record<string, unknown>;
+    if (janelaAberta && ehRascunho && cabeNoInteractivo) {
+      mensagem = {
+        type: 'interactive',
+        interactive: {
+          type: 'button',
+          body: { text: corpo },
+          action: {
+            buttons: [{
+              type: 'reply',
+              // O `id` e o que o webhook le primeiro, e esta na lista de
+              // confirmacoes; o titulo bate com o do modelo aprovado, para o
+              // dono ver sempre o mesmo rotulo venha por onde vier.
+              reply: { id: 'publicar', title: 'Publicar no Google' },
+            }],
+          },
+        },
+      };
+    } else if (janelaAberta || !modelo) {
+      mensagem = { type: 'text', text: { body: corpo, preview_url: false } };
+    } else {
+      mensagem = {
         type: 'template',
         template: {
           name: modelo,
@@ -119,6 +164,7 @@ Deno.serve(async (request) => {
             : [],
         },
       };
+    }
 
     try {
       const resposta = await fetch(`https://graph.facebook.com/${VERSAO_DA_API}/${phoneNumberId}/messages`, {

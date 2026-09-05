@@ -61,8 +61,29 @@ for (const nao of ['nao', 'depois', '2', 'muda o texto', 'quem e', '']) {
 //    a ser ignorado — a lista aceita o rotulo, mas o rotulo nunca la chega.
 exigir('o webhook nao le mensagens do tipo `button`',
   /mensagem\.type === 'button'/.test(fonte));
-exigir('o webhook nao aceita o tipo `button` na porta de entrada',
-  /\['text', 'button'\]\.includes/.test(fonte));
+// A LISTA CRESCEU EM 05/09/2026 e a assercao tinha o literal fixo. Passou a
+// exigir os membros, e nao a lista exacta: uma quarta forma de dizer sim nao
+// pode fazer este guarda dar vermelho por existir.
+exigir('o webhook aceita o toque em botao na porta de entrada',
+  /\.includes\(mensagem\.type/.test(fonte)
+  && /\['text', 'button', 'interactive'\]/.test(fonte));
+
+// A TERCEIRA FORMA. Dentro da janela de 24h o rascunho vai como mensagem
+// `interactive`, que leva o corpo inteiro E o botao — antes ia texto simples,
+// completo e SEM nada para tocar. Marcelo recebeu um assim com a janela aberta
+// por vinte e quatro minutos.
+//
+// O toque nela NAO chega como `button`: chega em `interactive.button_reply`.
+// Ler so as duas formas antigas fazia o toque cair no vazio — o dono carrega,
+// nada acontece, e conclui que o produto o ignorou.
+exigir('o webhook le o toque no botao interactivo',
+  /mensagem\.interactive\?\.button_reply\?\.id/.test(fonte));
+exigir('o tipo da mensagem declara o botao interactivo',
+  /interactive\?: \{[^}]*button_reply/.test(fonte));
+// E o `id` vem antes do titulo, pela mesma razao do payload: nao muda com a
+// traducao do rotulo.
+exigir('o webhook le o id do botao interactivo antes do titulo',
+  /button_reply\?\.id \|\| mensagem\.interactive\?\.button_reply\?\.title/.test(fonte));
 // O payload primeiro: e o que nao muda quando alguem traduz o rotulo.
 exigir('o webhook le o rotulo antes do payload; traduzir o botao partiria a confirmacao',
   /mensagem\.button\?\.payload \|\| mensagem\.button\?\.text/.test(fonte));
