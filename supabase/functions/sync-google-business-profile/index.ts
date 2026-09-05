@@ -224,6 +224,22 @@ serve(async (request) => {
   if (!await temAcesso(admin, user.id)) {
     return json({ code: 'SEM_ASSINATURA', error: 'Sua assinatura nao esta ativa.' }, 402);
   }
+  // DESLIGAR VEM ANTES DE RENOVAR O TOKEN, e a ordem e a coisa que importa
+  // aqui. Se o desligar ficasse depois, ele so funcionaria enquanto a ligacao
+  // estivesse SAUDAVEL — e o momento em que alguem mais precisa de desligar e
+  // exactamente aquele em que a autorizacao morreu. O dono ficaria preso a uma
+  // ligacao partida sem botao nenhum para a largar.
+  if (action === "disconnect") {
+    const { data: desligou, error: erroAoDesligar } = await admin
+      .rpc("desligar_do_google", { p_user_id: user.id });
+    if (erroAoDesligar) {
+      return json({ code: "DISCONNECT_FAILED", error: erroAoDesligar.message }, 500);
+    }
+    // `false` quer dizer que nao havia ligacao nenhuma — alguem carregou duas
+    // vezes. Nao e erro, e o estado desejado ja estava la.
+    return json({ desligou: Boolean(desligou) });
+  }
+
   const { data: refreshToken, error: tokenError } = await admin.rpc("read_google_business_refresh_token", { p_user_id: user.id });
   if (tokenError || !refreshToken) return json({ code: "GOOGLE_CONNECTION_REQUIRED", error: "Connect Google Business Profile first" }, 409);
 

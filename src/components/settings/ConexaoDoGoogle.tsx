@@ -1,4 +1,7 @@
-import { AlertTriangle, Building2, Check, Loader2, MapPin, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
+import { AlertTriangle, Building2, Check, Loader2, MapPin, ShieldCheck, Unplug } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
@@ -30,6 +33,26 @@ const Linha = ({ estado, texto }: { estado: 'a-fazer' | 'feito'; texto: string }
 const ConexaoDoGoogle = () => {
   const { t } = useOwnerTranslation();
   const { user } = useAuth();
+  const [aConfirmar, setAConfirmar] = useState(false);
+  const [aDesligar, setADesligar] = useState(false);
+
+  const desligar = async () => {
+    setADesligar(true);
+    const { error } = await supabase.functions.invoke('sync-google-business-profile', {
+      body: { action: 'disconnect' },
+    });
+    setADesligar(false);
+    if (error) {
+      toast.error(t('settings.googlePreparacao.desligarFalhou'));
+      return;
+    }
+    toast.success(t('settings.googlePreparacao.desligado'));
+    // RECARREGA A PAGINA em vez de mexer no estado a mao. Meia duzia de
+    // ganchos leem a ligacao — o radar, a fila, a preparacao — e sincroniza-los
+    // um a um seria inventar seis formas de esquecer um.
+    window.location.reload();
+  };
+
   const preparacao = usePreparacaoDoGoogle(user?.id);
 
   // Sem ligação, o cartão de convite manda — é ele que sabe pedir o
@@ -136,6 +159,60 @@ const ConexaoDoGoogle = () => {
                 {t('settings.googlePreparacao.nuncaPublica')}
               </p>
             )}
+
+            {/*
+              DESLIGAR EXISTE PORQUE LIGAR NAO PODE SER SO DE IDA.
+              Ate 05/09/2026 nao havia forma nenhuma: uma vez ligado, ligado
+              para sempre, e a unica saida era mexer no banco. Quem trocar de
+              conta Google, vender o negocio, ou simplesmente querer sair,
+              precisa de uma porta — e quem tem uma ligacao PARTIDA precisa
+              dela ainda mais.
+
+              PEDE CONFIRMACAO PORQUE APAGA A AUTORIZACAO. Voltar a ligar e
+              possivel, mas passa pelo Google outra vez, e um toque sem querer
+              no telemovel nao pode custar isso. Nao apaga avaliacoes nem
+              respostas ja publicadas: isso e historico do negocio, nao da
+              ligacao.
+            */}
+            <div className="mt-5 border-t border-slate-200 pt-4">
+              {aConfirmar ? (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <p className="text-sm text-slate-700">
+                    {t('settings.googlePreparacao.desligarPergunta')}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="destructive"
+                      className="min-h-11"
+                      disabled={aDesligar}
+                      onClick={() => void desligar()}
+                    >
+                      {aDesligar
+                        ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                        : null}
+                      {t('settings.googlePreparacao.desligarConfirmar')}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="min-h-11"
+                      disabled={aDesligar}
+                      onClick={() => setAConfirmar(false)}
+                    >
+                      {t('settings.googlePreparacao.desligarCancelar')}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAConfirmar(true)}
+                  className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-800"
+                >
+                  <Unplug className="h-4 w-4" aria-hidden="true" />
+                  {t('settings.googlePreparacao.desligar')}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>

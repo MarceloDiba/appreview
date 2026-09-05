@@ -971,7 +971,13 @@
       "nenhumNegocio": "The Google account you authorised does not manage any business. Connect with the account that manages your Business Profile.",
       "falhouTitulo": "Couldn't set up the connection",
       "falhouSemMotivo": "Google refused and did not say why.",
-      "tentarDeNovo": "Try again"
+      "tentarDeNovo": "Try again",
+      "desligar": "Disconnect Google",
+      "desligarPergunta": "Disconnect Google? You'll need to authorize again for Binno to read your reviews.",
+      "desligarConfirmar": "Yes, disconnect",
+      "desligarCancelar": "Cancel",
+      "desligado": "Google disconnected. Your reviews and published replies are still here.",
+      "desligarFalhou": "I couldn't disconnect right now. Try again in a moment."
     }
   },
   "profile": {

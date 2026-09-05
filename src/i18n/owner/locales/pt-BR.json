@@ -971,7 +971,13 @@
       "nenhumNegocio": "A conta do Google que você autorizou não administra nenhum negócio. Conecte com a conta que administra seu Perfil da Empresa.",
       "falhouTitulo": "Não consegui preparar a conexão",
       "falhouSemMotivo": "O Google recusou e não disse o motivo.",
-      "tentarDeNovo": "Tentar de novo"
+      "tentarDeNovo": "Tentar de novo",
+      "desligar": "Desligar o Google",
+      "desligarPergunta": "Desligar o Google? Você vai precisar autorizar de novo para o Binno voltar a ler suas avaliações.",
+      "desligarConfirmar": "Sim, desligar",
+      "desligarCancelar": "Cancelar",
+      "desligado": "Google desligado. Suas avaliações e respostas já publicadas continuam aqui.",
+      "desligarFalhou": "Não consegui desligar agora. Tente de novo em instantes."
     }
   },
   "profile": {
