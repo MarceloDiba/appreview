@@ -108,7 +108,27 @@ const Index = () => {
         <section className="relative overflow-hidden bg-gradient-to-br from-[#1E1238] via-[#2A1A55] to-[#3A2470] px-4 py-16 text-white sm:px-6 lg:py-24">
           <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#C9B6F5]">{copy.hero.eyebrow}</p>
+              {/*
+                ESTA LINHA DEIXOU DE SER UMA SOBRANCELHA em 05/09/2026.
+
+                Estava a `text-xs`, em MAIUSCULAS, com `tracking` largo — o
+                estilo de uma etiqueta, feito para ser SALTADO. Isso estava
+                certo enquanto ela dizia "Binno para negocios locais", que era
+                so rotulo de publico.
+
+                Passou a dizer o que o produto E, porque um amigo do Marcelo
+                leu a dobra e nao percebeu. E uma frase que precisa de ser LIDA
+                nao pode ter o estilo de uma que se salta: maiusculas atrasam a
+                leitura de uma frase, e 12px dizem "isto nao importa".
+
+                A caixa da-lhe corpo de objecto em vez de sussurro. Fica
+                translucida e nao solida de proposito: o botao branco de comprar
+                e o unico elemento cheio desta dobra, e um segundo bloco solido
+                competiria com ele exactamente onde nao se quer competir.
+              */}
+              <p className="inline-flex rounded-full border border-[#C9B6F5]/40 bg-[#C9B6F5]/10 px-4 py-1.5 text-sm font-semibold text-[#E4D9FB] sm:text-base">
+                {copy.hero.eyebrow}
+              </p>
               <h1 className="mt-4 text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">{copy.hero.title} <span className="text-[#C9B6F5]">{copy.hero.titleEmphasis}</span></h1>
               <p className="mt-6 max-w-xl text-lg leading-8 text-[#D9D2EA]">{copy.hero.body}</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
