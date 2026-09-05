@@ -125,8 +125,19 @@ const Index = () => {
                 translucida e nao solida de proposito: o botao branco de comprar
                 e o unico elemento cheio desta dobra, e um segundo bloco solido
                 competiria com ele exactamente onde nao se quer competir.
+
+                O AMARELO NAO E COR NOVA. Marcelo pediu "uma cor que quebre, um
+                texto em amarelo"; a dobra JA tem amarelo, no `#FFF5C4` da tarja
+                do aviso dentro do telemovel. O que aqui se faz e inverter esse
+                par: la e fundo claro com texto escuro, aqui e texto claro sobre
+                fundo escuro, no mesmo tom, com um passo mais de saturacao para
+                ler como amarelo e nao como creme.
+
+                E O AMARELO E O QUE QUEBRA porque a dobra inteira e roxa — o
+                contraste nao vem de gritar mais alto, vem de ser a unica coisa
+                fora da familia de cor da pagina.
               */}
-              <p className="inline-flex rounded-full border border-[#C9B6F5]/40 bg-[#C9B6F5]/10 px-4 py-1.5 text-sm font-semibold text-[#E4D9FB] sm:text-base">
+              <p className="inline-flex rounded-full border border-[#FFD166]/45 bg-[#FFF5C4]/10 px-4 py-1.5 text-sm font-semibold text-[#FFE9A6] sm:text-base">
                 {copy.hero.eyebrow}
               </p>
               <h1 className="mt-4 text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">{copy.hero.title} <span className="text-[#C9B6F5]">{copy.hero.titleEmphasis}</span></h1>
