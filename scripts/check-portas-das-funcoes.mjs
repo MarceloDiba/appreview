@@ -58,6 +58,7 @@ const PORTAS = {
   'publicar-respostas-confirmadas': 'trabalhador',
   'telegram-dispatch': 'trabalhador',
   'whatsapp-cloud-dispatch': 'trabalhador',
+  'estado-do-whatsapp': 'trabalhador',
   // Assinatura criptografica de quem envia.
   'stripe-billing-webhook': 'assinatura',
   'whatsapp-cloud-webhook': 'assinatura',

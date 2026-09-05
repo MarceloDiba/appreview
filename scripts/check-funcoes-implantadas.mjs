@@ -20,6 +20,9 @@ const IMPLANTADAS = {
   'comprar': '2026-09-04',
   // Liga um pagamento ja feito a conta que a pessoa cria a seguir.
   'reclamar-compra': '2026-09-04',
+  // Pergunta a Meta o estado do nosso numero, para ninguem ter de abrir o
+  // painel. Fechada pelo mesmo segredo de servidor que fecha o despacho.
+  'estado-do-whatsapp': '2026-09-05',
   'apify-auto-collect-on-signup': '2026-09-03',
   'billing-checkout': '2026-08-27',
   'email-dispatch': '2026-09-02',

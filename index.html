@@ -17,7 +17,43 @@
     />
     <meta property="og:type" content="website" />
 
+    <!--
+      A IMAGEM E O QUE FALTAVA, e era a unica coisa que faltava mesmo.
+      Ate 05/09/2026 nao havia `og:image`, e o Marcelo mandou o print: partilhar
+      binno.pro no WhatsApp mostrava uma caixa cinzenta com "binno.pro" tres
+      vezes e mais nada. O `twitter:card` ja dizia `summary_large_image` — estava
+      a prometer uma imagem grande que nao existia.
+
+      CAMINHO ABSOLUTO, e nao `/binno-preview.png`. O WhatsApp, o Facebook e o
+      LinkedIn buscam a imagem a partir do servidor deles, sem contexto da
+      pagina: um caminho relativo nao resolve e o preview volta a ficar vazio,
+      com o mesmo sintoma mudo.
+    -->
+    <meta property="og:image" content="https://binno.pro/binno-preview.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Uma avaliacao de cinco estrelas no WhatsApp, com a resposta ja escrita e o botao Publicar no Google." />
+    <meta property="og:url" content="https://binno.pro/" />
+    <meta property="og:site_name" content="Binno" />
+    <meta property="og:locale" content="pt_BR" />
+
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Binno — seu assessor de reputação no Google" />
+    <meta name="twitter:description" content="Sua avaliação no Google chega no WhatsApp. Você responde com um toque." />
+    <meta name="twitter:image" content="https://binno.pro/binno-preview.png" />
+
+    <!--
+      O ICONE ERA DE OUTRA PESSOA. O `favicon.ico` que estava aqui veio do
+      andaime do Lovable e nunca foi trocado; quem abria o binno.pro via o
+      icone de uma ferramenta que nao e a nossa. Os tres formatos existem por
+      razoes diferentes: o `.ico` e o que o navegador procura sozinho quando
+      nada e declarado, o PNG de 512 serve o atalho no ecra do telemovel, e o
+      `apple-touch-icon` e o unico que o iPhone le.
+    -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icone-512.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#6D43C0" />
   </head>
 
   <body>
