@@ -38,6 +38,22 @@ serve(async (request) => {
   if (insertedError?.code === '23505') return json({ received: true, duplicate: true });
   if (insertedError) return json({ error: 'Could not persist Stripe event.' }, 500);
 
+  /**
+   * MARCAR E DIZER O QUE FOI FEITO, no mesmo gesto.
+   *
+   * Antes de 06/09/2026 a marca era posta num sitio so, no fim, e havia um
+   * `return` que nunca lhe chegava — a compra de quem ainda nao tem conta. Essa
+   * ficava eternamente por processar, e as que nao faziam nada ficavam
+   * processadas. Passa a haver uma funcao, e todo o caminho de saida com exito
+   * passa por ela.
+   */
+  const concluir = async (decisao: string, corpo: Record<string, unknown> = {}) => {
+    await admin.from('billing_webhook_events')
+      .update({ processed_at: new Date().toISOString(), decisao })
+      .eq('merchant', merchant).eq('stripe_event_id', eventId);
+    return json({ received: true, ...corpo });
+  };
+
   try {
     const object = event.data?.object || {};
     const metadata = object.metadata as Record<string, unknown> | undefined;
@@ -80,7 +96,7 @@ serve(async (request) => {
         price_per_month: typeof object.amount_total === 'number' ? object.amount_total / 100 : null,
       }, { onConflict: 'stripe_session_id' });
       if (erroDaCompra) throw erroDaCompra;
-      return json({ received: true, sem_conta: true });
+      return await concluir('compra-sem-conta', { sem_conta: true });
     }
 
     /*
@@ -117,7 +133,17 @@ serve(async (request) => {
       donoDoEvento = string(assinatura?.user_id);
     }
 
-    if (donoDoEvento && subscriptionId && (eventType.startsWith('customer.subscription.') || eventType === 'checkout.session.completed')) {
+    // O EVENTO DE ASSINATURA SEM DONO E A UNICA AVARIA DESTE SERVICO.
+    //
+    // Ate 06/09/2026 ele caia pelo fim, marcado como processado, indistinguivel
+    // de um evento que fez o seu trabalho. Foi assim que um cancelamento nao
+    // tirou o acesso sem deixar rasto. Agora tem nome, e o nome aparece.
+    const eDeAssinatura = eventType.startsWith('customer.subscription.') || eventType === 'checkout.session.completed';
+    if (eDeAssinatura && subscriptionId && !donoDoEvento) {
+      return await concluir('sem-dono', { sem_dono: true });
+    }
+
+    if (donoDoEvento && subscriptionId && eDeAssinatura) {
       const { data: existing } = await admin.from('subscriptions').select('eligibility_status').eq('stripe_subscription_id', subscriptionId).maybeSingle();
       const status = eventType === 'checkout.session.completed' ? 'pending' : string(object.status);
       const price = ((object.items as Record<string, unknown> | undefined)?.data as Array<Record<string, unknown>> | undefined)?.[0]?.price as Record<string, unknown> | undefined;
@@ -210,9 +236,9 @@ serve(async (request) => {
           subscription_end_date: unixToIso(object.current_period_end),
         }).eq('id', donoDoEvento);
       }
+      return await concluir('assinatura-gravada');
     }
-    await admin.from('billing_webhook_events').update({ processed_at: new Date().toISOString() }).eq('merchant', merchant).eq('stripe_event_id', eventId);
-    return json({ received: true });
+    return await concluir('ignorado');
   } catch (error) {
     const detail = error instanceof Error ? error.message.slice(0, 500) : 'Unknown processing error';
     console.error('Stripe webhook processing error', detail);
