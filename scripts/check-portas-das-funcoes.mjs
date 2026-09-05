@@ -59,6 +59,7 @@ const PORTAS = {
   'telegram-dispatch': 'trabalhador',
   'whatsapp-cloud-dispatch': 'trabalhador',
   'estado-do-whatsapp': 'trabalhador',
+  'vigia-diario': 'trabalhador',
   // Assinatura criptografica de quem envia.
   'stripe-billing-webhook': 'assinatura',
   'whatsapp-cloud-webhook': 'assinatura',

@@ -23,6 +23,9 @@ const IMPLANTADAS = {
   // Pergunta a Meta o estado do nosso numero, para ninguem ter de abrir o
   // painel. Fechada pelo mesmo segredo de servidor que fecha o despacho.
   'estado-do-whatsapp': '2026-09-05',
+  // O vigia diario: as quatro medicoes de `docs/qa/vigia-diario.md`. Chamada
+  // pelo pg_cron as 10:30 UTC, fechada pelo segredo de servidor.
+  'vigia-diario': '2026-09-06',
   'apify-auto-collect-on-signup': '2026-09-03',
   'billing-checkout': '2026-08-27',
   'email-dispatch': '2026-09-02',

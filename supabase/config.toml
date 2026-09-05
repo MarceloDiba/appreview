@@ -121,6 +121,9 @@ verify_jwt = false
 [functions.oferecer-rascunhos]
 verify_jwt = false
 
+[functions.vigia-diario]
+verify_jwt = false
+
 [functions.whatsapp-cloud-dispatch]
 verify_jwt = false
 

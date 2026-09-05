@@ -35,6 +35,26 @@ export default defineConfig(({ mode }) => {
     react(),
     mode === 'development' &&
     componentTagger(),
+    /**
+     * O QUE ESTA NO AR PASSA A DIZER DE ONDE VEIO.
+     *
+     * A classe de erro que mais custou em 05/09/2026, quatro vezes no mesmo
+     * dia: merge sem deploy, build falhada em silencio, conserto pronto e nao
+     * publicado. Todas partilham a mesma cegueira — nao havia como perguntar a
+     * uma pagina servida qual o commit que a gerou.
+     *
+     * A Vercel poe `VERCEL_GIT_COMMIT_SHA` no ambiente da build. Aqui ele fica
+     * gravado na propria pagina, e o vigia diario compara-o com o `main` do
+     * GitHub. Fora da Vercel a etiqueta sai vazia, e o vigia trata isso como
+     * "nao consegui medir" — nunca como "esta tudo bem".
+     */
+    {
+      name: 'binno-commit-no-html',
+      transformIndexHtml: (html: string) => html.replace(
+        '</head>',
+        `  <meta name="binno-commit" content="${process.env.VERCEL_GIT_COMMIT_SHA || ''}" />\n  </head>`,
+      ),
+    },
   ].filter(Boolean),
   resolve: {
     alias: {
