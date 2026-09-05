@@ -103,16 +103,33 @@ exigir('a aba unica chama-se "google", e nao "external-links" nem "google-review
   /<TabsTrigger value="business">/.test(settings) && /<TabsTrigger value="google">/.test(settings)
   && /<TabsContent value="google">/.test(settings)
   && !/<TabsContent value="external-links">|<TabsContent value="google-reviews">/.test(settings));
-// O cartao chama-se `ConexaoDoGoogle` desde 03/09/2026: os quatro cartoes em
-// ordem viraram um so que conta o que esta a acontecer. A REGRA nao mudou — o
-// link continua a vir primeiro, porque e dele que tudo depende — mas o nome do
-// componente sim, e este guarda apanhou a renomeacao. Se ele procurasse so o
-// nome antigo, a ordem podia inverter-se em silencio.
+// A ORDEM INVERTEU-SE EM 05/09/2026, e a razao antiga expirou em vez de estar
+// errada. Ela dizia "o link vem primeiro porque tudo depende dele" — verdade em
+// 03/09, quando a ligacao oficial tinha acabado de ser aprovada e o link colado
+// a mao era o unico caminho que funcionava.
+//
+// Hoje a ligacao oficial devolve o `placeId` do proprio Google, e a primeira
+// coisa que o dono via ao abrir a aba era um PEDIDO — "cole aqui o seu link" —
+// antes de o produto lhe dizer que ja estava ligado e ja sabia o endereco.
+// Marcelo apanhou-o duas vezes, a segunda assim: "ele ainda pede link externos,
+// nao ja tinhamos falado para eliminar isso".
+//
+// O que NAO mudou, e continua protegido noutro guarda: o link colado, quando
+// existe, continua a mandar. `get_public_qr_business` prefere-o de proposito,
+// para nao trocar por baixo o destino de um QR que ja esta impresso numa mesa.
 const posicaoDoLink = settings.indexOf('<ExternalLinksSettings');
 const posicaoDaConexao = settings.indexOf('<ConexaoDoGoogle');
 exigir('o cartao da conexao existe na pagina', posicaoDaConexao > 0);
-exigir('o link do Google vem antes da conexao oficial, dentro da mesma aba',
-  posicaoDoLink > 0 && posicaoDaConexao > posicaoDoLink);
+exigir('a conexao oficial vem antes do link colado a mao, dentro da mesma aba',
+  posicaoDoLink > 0 && posicaoDaConexao > 0 && posicaoDaConexao < posicaoDoLink);
+
+// E O FORMULARIO DO LINK RECOLHE-SE PARA QUEM JA LIGOU. Nao desaparece — quem
+// colou um endereco curto pode te-lo impresso — mas deixa de interrogar quem
+// nao precisa dele. Mede-se o portao e o rotulo, e nao so a palavra `details`:
+// um `<details>` sempre aberto nao recolhe nada.
+exigir('o formulario do link recolhe-se quando ha ligacao oficial',
+  /negocioOficial \? \([\s\S]{0,400}<details/.test(settings)
+  && /colarProprio/.test(settings));
 
 if (falhas.length) {
   console.error('Conexao do Google sem interruptor: %d protecao(oes) falharam.\n', falhas.length);

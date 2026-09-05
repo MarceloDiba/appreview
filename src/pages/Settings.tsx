@@ -207,20 +207,6 @@ const Settings = () => {
             </TabsContent>
 
             <TabsContent value="google">
-              <ExternalLinksSettings
-                negocioOficial={negocioOficial}
-                externalLinks={externalLinks}
-                onExternalLinkChange={handleExternalLinkChange}
-                onExternalLinkCommit={handleExternalLinkCommit}
-                onDeleteExternalLink={handleDeleteExternalLink}
-                onAddExternalLink={handleAddExternalLink}
-                onSaveExternalLinks={saveExternalLinks}
-                onRefreshPlaceData={refreshGooglePlaceData}
-                isLoading={isLoading}
-                isValidating={isValidating}
-                error={error}
-                refreshLinks={refreshLinks}
-              />
               {/*
                 UM CARTAO, E NAO QUATRO (03/09/2026).
                 Conectar, buscar locais, escolher o negocio e buscar avaliacoes
@@ -228,8 +214,65 @@ const Settings = () => {
                 ordem. Marcelo: "nao e claro para o cliente, ele nao vai saber
                 que e preciso isso". Agora conectar faz o resto sozinho e o
                 cartao conta o que esta a acontecer.
+
+                E ELE VEM PRIMEIRO desde 05/09/2026. Estava depois do formulario
+                do link colado, entao a primeira coisa que o dono via era um
+                pedido — "cole aqui o seu link do Google" — antes de o produto
+                lhe dizer que ja estava ligado e ja sabia o endereco. Marcelo
+                apanhou-o duas vezes: "ele ainda pede link externos, nao ja
+                tinhamos falado para eliminar isso".
               */}
-              <div className="mt-6"><ConexaoDoGoogle /></div>
+              <ConexaoDoGoogle />
+
+              {/*
+                O LINK COLADO A MAO DEIXA DE SER PEDIDO A QUEM JA LIGOU, mas nao
+                desaparece. Quem colou um `g.page` curto escolheu aquele endereco
+                e pode te-lo IMPRESSO numa mesa; `get_public_qr_business` prefere
+                o colado, de proposito, para nao trocar por baixo o destino de um
+                QR que ja esta no mundo. Entao recolhe-se atras de um botao em vez
+                de se apagar: quem precisa continua a chegar la em um toque, e
+                quem nao precisa deixa de ser interrogado.
+              */}
+              {negocioOficial ? (
+                <details className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center text-sm font-medium text-slate-600 hover:text-slate-900">
+                    {t('settings.links.colarProprio')}
+                  </summary>
+                  <div className="mt-4">
+                    <ExternalLinksSettings
+                      negocioOficial={negocioOficial}
+                      externalLinks={externalLinks}
+                      onExternalLinkChange={handleExternalLinkChange}
+                      onExternalLinkCommit={handleExternalLinkCommit}
+                      onDeleteExternalLink={handleDeleteExternalLink}
+                      onAddExternalLink={handleAddExternalLink}
+                      onSaveExternalLinks={saveExternalLinks}
+                      onRefreshPlaceData={refreshGooglePlaceData}
+                      isLoading={isLoading}
+                      isValidating={isValidating}
+                      error={error}
+                      refreshLinks={refreshLinks}
+                    />
+                  </div>
+                </details>
+              ) : (
+                <div className="mt-6">
+                  <ExternalLinksSettings
+                    negocioOficial={negocioOficial}
+                    externalLinks={externalLinks}
+                    onExternalLinkChange={handleExternalLinkChange}
+                    onExternalLinkCommit={handleExternalLinkCommit}
+                    onDeleteExternalLink={handleDeleteExternalLink}
+                    onAddExternalLink={handleAddExternalLink}
+                    onSaveExternalLinks={saveExternalLinks}
+                    onRefreshPlaceData={refreshGooglePlaceData}
+                    isLoading={isLoading}
+                    isValidating={isValidating}
+                    error={error}
+                    refreshLinks={refreshLinks}
+                  />
+                </div>
+              )}
               {/*
                 A COLETA DO APIFY SO APARECE PARA QUEM NAO TEM A LIGACAO OFICIAL.
                 Dois botoes a prometer "trazer as suas avaliacoes" e a propria

@@ -955,7 +955,8 @@
       "saveError": "Não foi possível salvar os links externos. Tente de novo.",
       "noGooglePlaceId": "Não há um Place ID do Google vinculado para atualizar.",
       "vemDaLigacao": "Este link já vem da sua conta do Google conectada ({{negocio}}). O Binno sabe para onde mandar o cliente.",
-      "colarEOpcional": "Colar um endereço aqui é opcional, e só se você preferir um link curto."
+      "colarEOpcional": "Colar um endereço aqui é opcional, e só se você preferir um link curto.",
+      "colarProprio": "Prefiro colar meu próprio link do Google"
     },
     "googlePreparacao": {
       "aPrepararTitulo": "Preparando seu Google…",
