@@ -156,6 +156,42 @@ requisitos.push(
   ['sem nota e sem texto nao avisa ninguem', /if comentario is null then\s*\n\s*return new;/.test(gatilho)],
 );
 
+// A FRASE QUE CONVIDA A DAR NOTA. Avisar sem nota (acima) resolve o silencio,
+// mas paga com avisos que nao sabem dizer se sao queixa ou elogio. A frase
+// reduz o numero desses casos sem exigir nota nenhuma: o campo continua
+// opcional e quem escreve sem nota continua a ser enviado e a avisar.
+//
+// O QUE FARIA MUDAR DE IDEIA, escrito aqui porque a decisao foi tomada com
+// dados fracos. As 12 linhas que existiam quando se decidiu eram de quem
+// testava, nao de cliente pagante. Quando houver clientes reais:
+//
+//   select count(*) filter (where rating is null)     as sem_nota,
+//          count(*) filter (where rating is not null) as com_nota
+//     from public.internal_feedback
+//    where created_at > <data do primeiro cliente pagante>;
+//
+// Se `sem_nota` passar a dominar, o aviso neutro virou ruido e a decisao de
+// avisar sem nota deve ser revista. Se ficar em minoria, esta encerrada.
+const catalogos = readFileSync(resolve(raiz, 'src/i18n/index.ts'), 'utf8');
+requisitos.push(
+  // MEDE O PORTAO, e nao a existencia da frase. Uma dica que ficasse na tela
+  // depois de a pessoa dar nota mentiria — a nota ja foi dada.
+  ['a dica das estrelas so aparece enquanto nao ha nota',
+    /nota === null && \([\s\S]{0,200}t\('formStarsHint'\)/.test(formulario)],
+  // OS TRES CATALOGOS, porque uma chave em falta rende a propria chave na tela.
+  ['os tres idiomas tem a dica das estrelas',
+    (catalogos.match(/formStarsHint:/g) || []).length === 3],
+  // E CADA UMA DAS TRES TEM DE DIZER PARA QUE SERVE A NOTA. A primeira versao
+  // desta assercao varria o ficheiro inteiro a procura de UMA frase completa —
+  // e com tres catalogos no mesmo ficheiro, esvaziar a do portugues do Brasil
+  // (o idioma do mercado principal) deixava-a verde por causa da portuguesa.
+  // Apanhado por mutacao. Agora mede-se valor a valor.
+  ['as tres dicas dizem que a nota faz o dono ver o recado',
+    (catalogos.match(/formStarsHint: '([^']*)'/g) || []).length === 3 &&
+    [...catalogos.matchAll(/formStarsHint: '([^']*)'/g)]
+      .every(([, frase]) => /\b(nota|rating)\b/i.test(frase) && /\b(dono|owner)\b/i.test(frase))],
+);
+
 const falhas = requisitos.filter(([, ok]) => !ok).map(([rotulo]) => rotulo);
 if (falhas.length) {
   console.error(`Nota honesta com regra quebrada:\n- ${falhas.join('\n- ')}`);

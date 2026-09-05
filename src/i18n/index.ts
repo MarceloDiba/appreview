@@ -45,6 +45,7 @@ const DICTIONARY = {
 
     formTitle: 'Conte o que aconteceu',
     formSubtitle: '{business} recebe seu comentário na hora e pode entrar em contato.',
+    formStarsHint: 'Toque nas estrelas: a nota faz o dono ver seu recado mais rápido.',
     formSend: 'Enviar',
     formSending: 'Enviando...',
     formCommentLabel: 'Conte mais sobre sua experiência',
@@ -91,6 +92,7 @@ const DICTIONARY = {
 
     formTitle: 'Conte o que aconteceu',
     formSubtitle: '{business} recebe o seu relato na hora e pode entrar em contacto.',
+    formStarsHint: 'Toque nas estrelas: a nota faz o dono ver o seu recado mais depressa.',
     formSend: 'Enviar',
     formSending: 'A enviar...',
     formCommentLabel: 'Conte mais sobre a sua experiência',
@@ -137,6 +139,7 @@ const DICTIONARY = {
 
     formTitle: 'Tell us what happened',
     formSubtitle: '{business} gets your message straight away and may get in touch.',
+    formStarsHint: 'Tap the stars: a rating gets the owner to your message sooner.',
     formSend: 'Send',
     formSending: 'Sending...',
     formCommentLabel: 'Tell us more about your experience',

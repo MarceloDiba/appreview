@@ -188,6 +188,19 @@ const FeedbackForm = ({
           })}
         </div>
 
+        {/* A NOTA E O QUE AVISA O DONO DEPRESSA, e a frase existe para o dizer.
+            Sem nota o recado continua a chegar e continua a avisar, mas com a
+            especie neutra `feedback-sem-nota`, que nao diz se e queixa ou
+            elogio porque nao se sabe. Convidar a tocar nas estrelas reduz esse
+            caso sem nunca o exigir: o campo permanece opcional, e quem escreve
+            sem nota e enviado na mesma. Some assim que alguem toca, porque a
+            partir dai nao tem nada a dizer. */}
+        {nota === null && (
+          <p className="text-xs text-gray-500 text-center -mt-4 mb-6">
+            {t('formStarsHint')}
+          </p>
+        )}
+
         {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
