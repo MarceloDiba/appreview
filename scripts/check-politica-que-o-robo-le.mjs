@@ -106,6 +106,33 @@ exigir('a lista de subcontratantes nao inclui a Meta, que trata as mensagens',
 exigir('a lista de subcontratantes nao inclui a API do Google que PUBLICA a resposta',
   /Business Profile API/.test(legal));
 
+// 5. O ENDERECO QUE O ROBO ABRE TEM DE CHEGAR AO FICHEIRO GERADO.
+//
+// Esta assercao existe porque as outras dezanove ficaram VERDES enquanto
+// `binno.pro/privacidade` servia 1054 bytes sem uma palavra da politica. Elas
+// mediam `dist/privacidade.html`, que estava perfeito, e nunca o endereco que
+// os links do produto apontam — todos sem `.html`.
+//
+// O `vercel.json` tinha um coringa `/(.*) -> /index.html` que engolia tudo
+// antes de chegar aos ficheiros gerados. Consertou-se a geracao e nao o
+// caminho, que e a mesma metade do defeito que fez a Meta recusar o app.
+//
+// Mede-se a CONFIGURACAO, e nao a rede: um guarda que faz pedidos ao vivo fica
+// vermelho quando a Vercel espirra, e verde quando o computador esta offline —
+// os dois piores dias para se acreditar num guarda.
+const VERCEL = JSON.parse(readFileSync('vercel.json', 'utf8'));
+const regras = VERCEL.rewrites || [];
+const coringa = regras.findIndex((r) => r.source === '/(.*)');
+
+for (const [endereco, ficheiro] of [['/privacidade', '/privacidade.html'], ['/termos', '/termos.html']]) {
+  const posicao = regras.findIndex((r) => r.source === endereco && r.destination === ficheiro);
+  exigir(`'${endereco}' nao aponta para '${ficheiro}'; o robo abre a casca vazia da aplicacao`,
+    posicao !== -1);
+  // A ORDEM E A REGRA. Depois do coringa, a regra existe e nunca corre.
+  exigir(`'${endereco}' vem DEPOIS do coringa; o coringa engole-o antes`,
+    posicao !== -1 && (coringa === -1 || posicao < coringa));
+}
+
 if (falhas.length) {
   console.error('Paginas legais que o robo le: %d protecao(oes) falharam.\n', falhas.length);
   for (const f of falhas) console.error(' - %s', f);

@@ -1,8 +1,21 @@
 {
+  "_comentario": [
+    "A ORDEM IMPORTA. As duas primeiras regras vem ANTES do coringa, e e por isso",
+    "que existem. Ate 05/09/2026 havia so o coringa, e ele engolia tudo: os",
+    "enderecos /privacidade e /termos devolviam a casca vazia da aplicacao, 1054",
+    "bytes sem uma palavra do texto legal, enquanto os ficheiros gerados",
+    "/privacidade.html e /termos.html estavam certos e ninguem os alcancava.",
+    "",
+    "E o mesmo defeito que fez a Meta recusar o app do WhatsApp em 04/09: para um",
+    "humano a pagina existia, para o robo que decide nao existia. Consertou-se a",
+    "geracao do ficheiro e nao o endereco que o link do produto aponta.",
+    "",
+    "Todo link do produto aponta para o endereco SEM .html (Index, Signup,",
+    "FeedbackForm, LegalLayout), e e esse que Google e Meta vao ler."
+  ],
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/privacidade", "destination": "/privacidade.html" },
+    { "source": "/termos", "destination": "/termos.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

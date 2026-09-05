@@ -3,6 +3,8 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PublicMarketingNav from '@/components/marketing/PublicMarketingNav';
 import BinnoDemoCockpit from '@/components/marketing/BinnoDemoCockpit';
+import BotaoDeComprar from '@/components/marketing/BotaoDeComprar';
+import { comVagas } from '@/lib/precoBinno';
 import { getMarketingCopy } from '@/i18n/marketing';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -23,7 +25,12 @@ const Demo = () => {
           <BinnoDemoCockpit copy={copy} />
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button asChild variant="outline"><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" />Binno</Link></Button>
-            <Button asChild className="bg-[#2457D6] hover:bg-[#1d47b0]"><Link to="/signup">{copy.hero.primary}<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+            {/*
+              Era `<Link to="/signup">`: exatamente o formulário antes de
+              pagar que a home nova promete não ter. `BotaoDeComprar` é o
+              mesmo componente do resto da página de vendas.
+            */}
+            <BotaoDeComprar rotulo={comVagas(copy.hero.primary)} className="bg-[#2457D6] hover:bg-[#1d47b0]"><ArrowRight className="ml-2 h-4 w-4" /></BotaoDeComprar>
           </div>
         </div>
       </main>

@@ -13,6 +13,8 @@
 //
 // Um cliente que vê dois preços na mesma compra não pergunta qual é: desiste.
 import { readFileSync, globSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const falhas = [];
 let verificadas = 0;
@@ -27,10 +29,21 @@ exigir('nao achei o preco promocional', Boolean(promo));
 exigir(`o preco cheio (${regular}) nao e maior que o promocional (${promo}); o risco por cima ficaria absurdo`,
   Number(regular) > Number(promo));
 
-// A SUBSTITUICAO TEM DE EXISTIR. Sem `{regular}`, os textos voltam a escrever
-// o numero a mao e este guarda nao teria como os apanhar.
-exigir('`comVagas` deixou de substituir `{regular}`; a copy voltaria a escrever o preco a mao',
-  /\.replace\('\{regular\}', String\(PRECO_REGULAR_BRL\)\)/.test(PRECO));
+// A SUBSTITUICAO TEM DE EXISTIR, e tem de trocar TODAS as ocorrencias de cada
+// marcador, nao so a primeira. A copy da home nova (05/09/2026) repete
+// `{promo}` duas vezes na mesma frase da FAQ, e `{regular}` ao lado de
+// `{promo}` na mesma nota do banner de lote — um `String.replace` sem `/g`
+// deixaria a segunda ocorrencia literal na tela. Importar o modulo real e
+// executa-lo prova o COMPORTAMENTO; testar contra o texto da funcao so prova
+// que alguem escreveu uma chamada com essa aparencia, e essa versao ja
+// mentiu uma vez (media `.replace('{regular}', ...)` sem `/g` como se
+// bastasse). Mesma tecnica de `check-reply-locale-br.mjs`.
+const precoModulePath = resolve(process.cwd(), 'src/lib/precoBinno.ts');
+const { comVagas, PRECO_REGULAR_BRL, PRECO_PROMO_BRL, VAGAS_DO_LOTE } = await import(pathToFileURL(precoModulePath).href);
+const fraseComMarcadoresRepetidos = 'R$ {promo} e de novo R$ {promo}, para {vagas} vagas, antes de R$ {regular} e de novo R$ {regular}.';
+const esperado = `R$ ${PRECO_PROMO_BRL} e de novo R$ ${PRECO_PROMO_BRL}, para ${VAGAS_DO_LOTE} vagas, antes de R$ ${PRECO_REGULAR_BRL} e de novo R$ ${PRECO_REGULAR_BRL}.`;
+exigir('`comVagas` substitui TODAS as ocorrencias de `{promo}`, `{regular}` e `{vagas}` numa mesma frase',
+  comVagas(fraseComMarcadoresRepetidos) === esperado);
 
 // E NINGUEM MAIS ESCREVE UM PRECO EM REAIS A MAO, em nenhum idioma.
 const ondeProcurar = [
