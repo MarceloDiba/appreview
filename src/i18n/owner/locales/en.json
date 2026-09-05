@@ -224,7 +224,7 @@
       "todayQueue": "Today's queue",
       "queueHint": "The priority comes first; you can choose another pending review.",
       "completedTitle": "Today's review is complete",
-      "completedBody_one": "{{answered}} reviews answered and 1 left for later. No real action was sent to Google in this demo.",
+      "completedBody_one": "{{answered}} reviews answered and {{count}} left for later. No real action was sent to Google in this demo.",
       "completedBody_other": "{{answered}} reviews answered and {{count}} left for later. No real action was sent to Google in this demo.",
       "returnPanel": "Back to dashboard",
       "repeat": "Repeat demo",
@@ -374,7 +374,7 @@
         "action": "View reviews"
       },
       "priority": {
-        "title_one": "1 review is awaiting a reply",
+        "title_one": "{{count}} review is awaiting a reply",
         "title_other": "{{count}} reviews are awaiting replies",
         "body": "{{count}} have a rating of 3 or lower. Start there to take care of what customers have already said.",
         "action": "Review reviews"
@@ -812,7 +812,7 @@
         "qrClicked": "Clicked through to Google",
         "volumeEmpty": "There are no weeks to compare yet. This appears once your reviews span more than one week.",
         "distributionEmpty": "Each rating on its own line appears here once Binno fetches your reviews.",
-        "distributionTooFew_one": "With 1 review fetched, there is nothing yet for the chart to separate. From {{minimo}} on, each rating on its own line appears here.",
+        "distributionTooFew_one": "With {{count}} review fetched, there is nothing yet for the chart to separate. From {{minimo}} on, each rating on its own line appears here.",
         "distributionTooFew_other": "With {{count}} reviews fetched, a single review already shifts the chart a lot. From {{minimo}} on, each rating on its own line appears here.",
         "qrEmpty": "QR opens and clicks through to Google appear here as soon as your QR is on the table.",
         "reputationBreakdownEmpty": "The rating breakdown appears after the first review fetch.",
@@ -1033,7 +1033,7 @@
     "refreshedToast": "Reviews refreshed successfully!",
     "queue": {
       "title": "Reply queue",
-      "pending_one": "1 waiting for a reply",
+      "pending_one": "{{count}} waiting for a reply",
       "pending_other": "{{count}} waiting for a reply",
       "emptyTitle": "Nothing waiting for a reply",
       "emptyBody": "When someone leaves a comment on the table QR code or a review on your Google profile, it shows up here with a suggested reply ready for you to adjust. Keep the QR code in sight on the table and at the counter: that is what brings the first one.",

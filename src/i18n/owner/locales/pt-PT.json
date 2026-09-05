@@ -224,7 +224,7 @@
       "todayQueue": "Fila de hoje",
       "queueHint": "A prioridade vem primeiro; pode escolher outra pendente.",
       "completedTitle": "Revisão do dia concluída",
-      "completedBody_one": "{{answered}} avaliações respondidas e 1 deixada para depois. Nenhuma ação real foi enviada ao Google nesta demonstração.",
+      "completedBody_one": "{{answered}} avaliações respondidas e {{count}} deixada para depois. Nenhuma ação real foi enviada ao Google nesta demonstração.",
       "completedBody_other": "{{answered}} avaliações respondidas e {{count}} deixadas para depois. Nenhuma ação real foi enviada ao Google nesta demonstração.",
       "returnPanel": "Voltar ao painel",
       "repeat": "Repetir demonstração",
@@ -374,7 +374,7 @@
         "action": "Ver avaliações"
       },
       "priority": {
-        "title_one": "1 avaliação aguarda resposta",
+        "title_one": "{{count}} avaliação aguarda resposta",
         "title_other": "{{count}} avaliações aguardam resposta",
         "body": "{{count}} com nota até 3. Comece por elas para cuidar do que os seus clientes já disseram.",
         "action": "Rever avaliações"
@@ -812,7 +812,7 @@
         "qrClicked": "Carregou para o Google",
         "volumeEmpty": "Ainda não há semanas para comparar. Aparece aqui assim que houver avaliações espalhadas por mais de uma semana.",
         "distributionEmpty": "Aqui aparece cada nota separada, depois de o Binno procurar as suas avaliações.",
-        "distributionTooFew_one": "Com 1 avaliação procurada, o gráfico ainda não tem o que separar. A partir de {{minimo}}, cada nota separada aparece aqui.",
+        "distributionTooFew_one": "Com {{count}} avaliação procurada, o gráfico ainda não tem o que separar. A partir de {{minimo}}, cada nota separada aparece aqui.",
         "distributionTooFew_other": "Com {{count}} avaliações procuradas, uma única avaliação já muda muito o gráfico. A partir de {{minimo}}, cada nota separada aparece aqui.",
         "qrEmpty": "Aqui aparecem as aberturas do QR e os cliques para o Google, assim que o seu QR estiver na mesa.",
         "reputationBreakdownEmpty": "A distribuição por nota aparece depois da primeira procura de avaliações.",
@@ -1033,7 +1033,7 @@
     "refreshedToast": "Avaliações atualizadas com sucesso!",
     "queue": {
       "title": "Fila de respostas",
-      "pending_one": "1 à espera de resposta",
+      "pending_one": "{{count}} à espera de resposta",
       "pending_other": "{{count}} à espera de resposta",
       "emptyTitle": "Nada à espera de resposta agora",
       "emptyBody": "Quando alguém deixar um comentário no QR da mesa ou uma avaliação no seu perfil do Google, ela aparece aqui, com a resposta sugerida pronta a ajustar. Deixe o QR à vista na mesa e no balcão: é ele que traz o primeiro.",
