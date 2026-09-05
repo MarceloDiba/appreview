@@ -4,9 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <!--
-  Protótipo aprovado da nova home do binno.pro (05/09/2026, copy enxugada para celular).
+  Protótipo aprovado da nova home do binno.pro (05/09/2026).
   Referência de layout, ordem, copy e interação para a implementação em React.
   Especificação: docs/nova-home-binno.md
+  Plano de execução: docs/superpowers/plans/2026-09-05-home-nova-binno.md
   Não é código de produção: é um arquivo único, sem build, para abrir no navegador.
 -->
 </head>
@@ -156,6 +157,31 @@
   @media(min-width:900px){.pillars{grid-template-columns:repeat(3,1fr)}}
   .pillars h3{margin-top:1.1rem;font-size:1.2rem;font-weight:700}
   .pillars p{margin-top:.65rem;color:var(--ink-2);line-height:1.6}
+
+  /* avisos e temas */
+  .dois{margin-top:2.5rem;display:grid;grid-template-columns:minmax(0,1fr);gap:1.25rem}
+  @media(min-width:960px){.dois{grid-template-columns:1fr 1fr}}
+  .panel-avisos,.panel-temas{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:1.75rem}
+  .panel-avisos h3,.panel-temas h3{font-size:1.15rem;font-weight:700}
+  ul.avisos{list-style:none;margin:1.25rem 0 0;padding:0;display:grid;gap:.9rem}
+  ul.avisos li{display:flex;gap:.75rem;align-items:flex-start}
+  ul.avisos .ic{display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;border-radius:.6rem;flex-shrink:0}
+  ul.avisos .ic svg{width:1rem;height:1rem}
+  .ic.new{background:#FEF6E7;color:#8A6100}.ic.warn{background:var(--red-50);color:var(--red)}
+  .ic.priv{background:var(--green-50);color:var(--green)}.ic.wait{background:#EAF0FF;color:var(--blue)}
+  .ic.week{background:var(--lav);color:var(--violet)}
+  ul.avisos b{display:block;font-size:.95rem}
+  ul.avisos small{display:block;color:var(--ink-2);font-size:.85rem;line-height:1.45}
+  .micro-nota{margin-top:1.25rem;font-size:.78rem;color:var(--ink-3);line-height:1.45}
+  .sub-temas{margin-top:.75rem;color:var(--ink-2);font-size:.92rem;line-height:1.55}
+  .tema{margin-top:1rem;border-radius:.8rem;padding:1rem 1.1rem;border-left:3px solid}
+  .tema.down{background:var(--red-50);border-color:var(--red)}
+  .tema.up{background:var(--green-50);border-color:var(--green)}
+  .tag-tema{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+  .tema.down .tag-tema{color:var(--red)}.tema.up .tag-tema{color:var(--green)}
+  .tema b{display:block;margin-top:.35rem;font-family:"Inter Tight",sans-serif;font-size:1.05rem}
+  .tema p{margin-top:.25rem;font-size:.88rem;color:var(--ink-2)}
+  .tema q{display:block;margin-top:.5rem;font-size:.85rem;color:#3B3550;font-style:italic}
 
   /* demo cockpit */
   .demo-wrap{background:var(--soft);border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
@@ -319,8 +345,8 @@
   <div class="wrap">
     <div>
       <p class="eyebrow">Binno para negócios locais</p>
-      <h1>Responda o Google pelo WhatsApp. <em>Em um toque.</em></h1>
-      <p class="lead">Chega a avaliação, chega a resposta pronta. Você lê, toca, e está publicada no seu perfil.</p>
+      <h1>Sua avaliação no Google chega no WhatsApp. <em>Você responde com um toque.</em></h1>
+      <p class="lead">Você recebe a sugestão de resposta, lê e aprova com um toque. Pronto, já está no Google. Sem perder tempo.</p>
       <div class="ctas">
         <a class="btn btn-white" href="#plano">Garantir R$ 99/mês <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
         <a class="btn btn-ghost" href="#demo">Ver funcionando</a>
@@ -343,11 +369,6 @@
       <div class="timer"><span>Do toque ao Google:</span><b id="clock">00:00</b><button type="button" id="replay">Ver de novo</button></div>
     </div>
 
-    <div class="proof">
-      <div><b>21 s</b><span>do toque à publicação, medido em 04/09</span></div>
-      <div><b>0</b><span>painéis pra abrir</span></div>
-      <div><b>você</b><span>aprova cada resposta</span></div>
-    </div>
   </div>
 </section>
 
@@ -357,8 +378,8 @@
   <div class="wrap">
     <div class="st">
       <p class="eyebrow">O problema</p>
-      <h2>Ele olha a sua nota antes de te conhecer.</h2>
-      <p class="body">Cliente insatisfeito não reclama na hora. Vai embora calado e escreve depois, no Google, onde todo mundo vê.</p>
+      <h2>Quem escolhe onde comprar olha a sua nota antes de te visitar.</h2>
+      <p class="body">Se você não estiver preparado, você vai perder vendas todos os dias.</p>
     </div>
     <div class="nums">
       <div><p class="big">96<span>%</span></p><p>leem avaliações antes de escolher onde ir.</p></div>
@@ -385,6 +406,48 @@
   </div>
 </section>
 
+
+<!-- AVISOS -->
+<section class="soft" id="avisos">
+  <div class="wrap">
+    <div class="st c">
+      <p class="eyebrow">Você não precisa vigiar o Google</p>
+      <h2>O Binno olha por você e te chama quando importa.</h2>
+    </div>
+
+    <div class="dois">
+      <div class="panel-avisos">
+        <h3>O que chega no seu WhatsApp</h3>
+        <ul class="avisos">
+          <li><span class="ic new"><svg class="i" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg></span><div><b>Avaliação nova</b><small>Com a resposta já escrita, pronta pra você aprovar.</small></div></li>
+          <li><span class="ic warn"><svg class="i" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span><div><b>Notas baixas se concentrando num assunto</b><small>"Encontrei 3 notas baixas e 3 menções a tempo de espera."</small></div></li>
+          <li><span class="ic priv"><svg class="i" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-4.8A8.4 8.4 0 0 1 3 11.5a8.4 8.4 0 0 1 9-8.4 8.4 8.4 0 0 1 9 8.4z"/></svg></span><div><b>Reclamação pelo QR Code, na hora</b><small>Antes de virar avaliação pública. E o elogio também chega.</small></div></li>
+          <li><span class="ic wait"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span><div><b>Avaliação esperando resposta</b><small>Pra nenhuma ficar dias sem retorno.</small></div></li>
+          <li><span class="ic week"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></span><div><b>Resumo da semana</b><small>O que ajudou, o que atrapalhou, e uma coisa pra fazer.</small></div></li>
+        </ul>
+        <p class="micro-nota">Você escolhe quais avisos recebe, com que frequência e em qual número.</p>
+      </div>
+
+      <div class="panel-temas">
+        <h3>E o painel diz o porquê</h3>
+        <p class="sub-temas">O Binno lê o que os clientes escrevem e separa os assuntos que derrubam a sua nota dos que sustentam ela. Cada um com a frase do cliente que prova.</p>
+        <div class="tema down">
+          <span class="tag-tema">Está derrubando</span>
+          <b>Tempo de espera</b>
+          <p>3 pessoas citaram na mesma semana, todas com 1 ou 2 estrelas.</p>
+          <q>O atendimento demorou mais do que o esperado.</q>
+        </div>
+        <div class="tema up">
+          <span class="tag-tema">Está te ajudando</span>
+          <b>Prato executivo</b>
+          <p>Aparece em 7 elogios. É isso que merece foto e destaque.</p>
+          <q>Prato executivo excelente, voltarei com certeza.</q>
+        </div>
+        <p class="micro-nota">Assuntos que o Binno lê: atendimento, tempo de espera, comida, limpeza, preço, ambiente e entrega.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- PRINT REAL -->
 <section class="demo-wrap">

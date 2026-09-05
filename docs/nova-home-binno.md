@@ -1,6 +1,6 @@
 # Nova home do binno.pro, especificação para implementar
 
-*Atualizado em 05/09/2026, com a copy enxugada para celular. Substitui, para a página principal, o `62-copy-pagina-binno.md` e o
+*Atualizado em 05/09/2026, com a copy enxugada para celular e a seção de avisos e temas. Substitui, para a página principal, o `62-copy-pagina-binno.md` e o
 `submissao-copy-binno.md`. Onde este documento e aqueles discordarem, vale este.*
 
 **Protótipo aprovado, no próprio repo:** `docs/nova-home-binno.html`
@@ -41,6 +41,7 @@ fechamento.
 | 1 | Hero interativo | `hero` | Promessa mais a prova funcionando |
 | 2 | O problema | `maps` (renomear o conteúdo) | A cena do cliente calado mais os 3 números com fonte |
 | 3 | Como funciona | `alerts` mais os pilares | Os três pilares |
+| 3b | Você não precisa vigiar o Google | seção nova `avisos` | O que o Binno avisa, e os temas que derrubam ou sustentam a nota |
 | 4 | Isso não é mockup | seção nova `prova` | Print real do Google |
 | 5 | Para quem é | seção nova `segments` | Cinco segmentos, nesta ordem |
 | 6 | Demonstração | `demo` mais `BinnoDemoCockpit` | A tela interna, dentro da home |
@@ -65,19 +66,22 @@ de claim de ranking ou de nota, nada de prova social inventada.
 
 ### 1. Hero
 - eyebrow: `Binno para negócios locais`
-- title: `Responda o Google pelo WhatsApp.` mais, em destaque, `Em um toque.`
-- body: `Chega a avaliação, chega a resposta pronta. Você lê, toca, e está publicada no seu perfil.`
+- title: `Sua avaliação no Google chega no WhatsApp.` mais, em destaque, `Você responde com um toque.`
+- body: `Você recebe a sugestão de resposta, lê e aprova com um toque. Pronto, já está no Google. Sem perder tempo.`
 - primary: `Garantir R$ 99/mês` · secondary: `Ver funcionando`
 - micro: `Sem formulário antes de pagar · Cancele quando quiser`
-- três provas, **abaixo do celular**, não acima: `21 s` (do toque à publicação, medido em 04/09) · `0` (painéis pra abrir) · `você` (aprova cada resposta)
 
-No celular a ordem do hero é título, frase, botões, celular, provas. O celular precisa aparecer na
-segunda tela, não na quarta: ele é a prova, e é o que a pessoa entende sem ler.
+Sem bloco de números no hero. Os três contadores (21 s, 0 painéis, 100% revisadas) foram removidos
+por decisão do Marcelo em 05/09: no celular eles empurravam o celular da segunda para a quarta tela,
+e o "21 s" é uma medição de uma vez só, não um número que a página possa sustentar como padrão.
+
+No celular a ordem do hero é título, frase, botões, celular. O celular precisa aparecer na segunda
+tela: ele é a prova, e é o que a pessoa entende sem ler.
 
 ### 2. O problema
 - eyebrow: `O problema`
-- title: `Ele olha a sua nota antes de te conhecer.`
-- body: `Cliente insatisfeito não reclama na hora. Vai embora calado e escreve depois, no Google, onde todo mundo vê.`
+- title: `Quem escolhe onde comprar olha a sua nota antes de te visitar.`
+- body: `Se você não estiver preparado, você vai perder vendas todos os dias.`
 - números: `96%` leem avaliações antes de escolher onde ir · `93%` desistem da compra depois de ler avaliação ruim · `9 em 10` descartam quem tem menos de 4 estrelas
 - fonte (obrigatória, visível): `Pesquisa Decisão Local 2025, Harmo e Reclame Aqui, 1.591 entrevistados no Brasil. Noticiada em:` mais os quatro links: [Relatório Harmo](https://harmo.me/relatorios/decisao-local), [Mercado&Consumo](https://mercadoeconsumo.com.br/26/03/2025/noticias-varejo/reclame-aqui-96-dos-consumidores-leem-avaliacoes-no-google-antes-de-comprar/), [Novo Varejo](https://novovarejo.com.br/avaliacoes-no-google-impactam-a-escolha-de-96-dos-consumidores/), [Meio&Mensagem](https://www.meioemensagem.com.br/marketing/reputacao-digital-como-as-avaliacoes-afetam-a-jornada-do-consumidor)
 
@@ -90,6 +94,44 @@ Citar as matérias por nome com link, sem faixa de logotipos: elas falam da pesq
 - pilar 3, `Não seja pego de surpresa`: `Se a nota cai ou a mesma reclamação se repete, o Binno avisa e diz o que fazer. Uma coisa por vez.`
 
 O pilar 2 é o único que não pode ser reescrito: "antes de", nunca "em vez de". Ver seção 8.
+
+### 3b. Você não precisa vigiar o Google (seção nova)
+
+Entra entre "Como funciona" e "Isso não é mockup". Nasceu de uma falta apontada pelo Marcelo em
+05/09: a página dizia que o Binno avisa, mas nunca listava **o que** avisa, e não contava que o
+painel separa os assuntos que derrubam a nota dos que sustentam ela.
+
+- eyebrow: `Você não precisa vigiar o Google`
+- title: `O Binno olha por você e te chama quando importa.`
+
+**Coluna 1, `O que chega no seu WhatsApp`.** Cada linha é um tipo de aviso que existe de verdade na
+fila (`whatsapp_outbox.kind`), não uma promessa:
+
+| Linha na página | `kind` no banco |
+|---|---|
+| **Avaliação nova.** Com a resposta já escrita, pronta pra você aprovar. | o aviso de avaliação com rascunho |
+| **Notas baixas se concentrando num assunto.** "Encontrei 3 notas baixas e 3 menções a tempo de espera." | `alert` |
+| **Reclamação pelo QR Code, na hora.** Antes de virar avaliação pública. E o elogio também chega. | `feedback` e `feedback-praise` |
+| **Avaliação esperando resposta.** Pra nenhuma ficar dias sem retorno. | `reply-reminder` |
+| **Resumo da semana.** O que ajudou, o que atrapalhou, e uma coisa pra fazer. | `weekly` |
+
+- nota do fim: `Você escolhe quais avisos recebe, com que frequência e em qual número.`
+
+A frase entre aspas na segunda linha é o texto real do aviso, que hoje está em
+`supabase/functions/_shared/experimentalApifyCollection.ts`: *"A leitura recente encontrou N notas
+baixas e M menções a {tema}."* Se esse texto mudar no código, muda aqui também.
+
+**Coluna 2, `E o painel diz o porquê`.**
+
+- body: `O Binno lê o que os clientes escrevem e separa os assuntos que derrubam a sua nota dos que sustentam ela. Cada um com a frase do cliente que prova.`
+- cartão vermelho, `Está derrubando`: **Tempo de espera**, `3 pessoas citaram na mesma semana, todas com 1 ou 2 estrelas.`, com a frase `"O atendimento demorou mais do que o esperado."`
+- cartão verde, `Está te ajudando`: **Prato executivo**, `Aparece em 7 elogios. É isso que merece foto e destaque.`, com a frase `"Prato executivo excelente, voltarei com certeza."`
+- nota do fim: `Assuntos que o Binno lê: atendimento, tempo de espera, comida, limpeza, preço, ambiente e entrega.`
+
+Os sete assuntos são os que existem no código (`topicLabel` em `experimentalApifyCollection.ts`), e
+o "está te ajudando" usa a mesma régua do `advisorReading.ts`: tema positivo com três menções ou
+mais. Os números do exemplo (3 e 7) são ilustrativos, do mesmo cenário do Bistrô Horizonte, e a
+seção precisa deixar isso claro do mesmo jeito que a demonstração deixa.
 
 ### 4. Isso não é mockup
 - eyebrow: `Isso não é mockup`
@@ -261,7 +303,7 @@ Continua tudo valendo, sem exceção:
 ## 7. Como executar
 
 1. Reescrever `src/i18n/marketing.ts` nos três locales (pt-BR, pt-PT, en) com a copy acima.
-   Chaves novas: `prova`, `segments`, `compare`, `honest`, `faq`, `finalCta`. Deixar qualquer locale
+   Chaves novas: `avisos`, `prova`, `segments`, `compare`, `honest`, `faq`, `finalCta`. Deixar qualquer locale
    de fora provavelmente quebra o `check:i18n-owner`.
 2. Reordenar e reescrever os blocos em `src/pages/Index.tsx` conforme a tabela da seção 2.
 3. Criar o componente do hero interativo (seção 4).
