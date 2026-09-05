@@ -183,7 +183,7 @@ const Index = () => {
         <section className="scroll-mt-24 border-y border-slate-100 bg-[#F7F5FC] px-4 py-20 sm:px-6" id="prova">
           <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 md:grid-cols-[0.9fr_1.1fr]">
             <figure className="m-0">
-              <img src="/marketing/prova-avaliacao-google.jpg" width={772} height={842} loading="lazy" alt="" className="mx-auto block h-auto w-full max-w-md rounded-2xl border border-slate-200 shadow-[0_30px_50px_-30px_rgba(18,12,34,0.35)]" />
+              <img src="/marketing/prova-avaliacao-google.jpg" width={772} height={842} loading="lazy" alt={copy.prova.imageAlt} className="mx-auto block h-auto w-full max-w-md rounded-2xl border border-slate-200 shadow-[0_30px_50px_-30px_rgba(18,12,34,0.35)]" />
               <figcaption className="mt-3 text-center text-sm text-[#655F7C]">{copy.prova.imageCaption}</figcaption>
             </figure>
             <div className="max-w-xl">
