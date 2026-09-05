@@ -34,9 +34,9 @@ const PublicMarketingNav = ({ copy }: PublicMarketingNavProps) => {
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Navegação principal">
           {links.map((link) => (
-            <Link key={link.href} to={link.href} className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-[#2457D6]">
+            <a key={link.href} href={link.href} className="flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-[#2457D6]">
               {link.label}
-            </Link>
+            </a>
           ))}
         </nav>
 
@@ -56,9 +56,9 @@ const PublicMarketingNav = ({ copy }: PublicMarketingNavProps) => {
             <SheetTitle className="sr-only">Menu</SheetTitle>
             {links.map((link) => (
               <SheetClose asChild key={link.href}>
-                <Link to={link.href} className="flex min-h-11 items-center rounded-lg px-3 text-base font-medium text-slate-700 hover:bg-slate-50">
+                <a href={link.href} className="flex min-h-11 items-center rounded-lg px-3 text-base font-medium text-slate-700 hover:bg-slate-50">
                   {link.label}
-                </Link>
+                </a>
               </SheetClose>
             ))}
             <div className="mt-3 grid gap-2 border-t border-slate-100 pt-4">

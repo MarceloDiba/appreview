@@ -86,7 +86,7 @@ const Index = () => {
         </section>
 
         {/* 2. O problema (chave `maps`, conteúdo reescrito) */}
-        <section className="border-y border-slate-100 bg-[#F7F5FC] px-4 py-20 sm:px-6" id="problema">
+        <section className="scroll-mt-24 border-y border-slate-100 bg-[#F7F5FC] px-4 py-20 sm:px-6" id="problema">
           <div className="mx-auto max-w-7xl">
             <Kicker eyebrow={copy.maps.eyebrow} title={copy.maps.title} body={copy.maps.body} />
             <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -100,7 +100,7 @@ const Index = () => {
         </section>
 
         {/* 3. Como funciona (chave `alerts`, os três pilares) */}
-        <section className="px-4 py-20 sm:px-6" id="como">
+        <section className="scroll-mt-24 px-4 py-20 sm:px-6" id="como">
           <div className="mx-auto max-w-7xl">
             <Kicker centered eyebrow={copy.alerts.eyebrow} title={copy.alerts.title} />
             <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -110,7 +110,7 @@ const Index = () => {
         </section>
 
         {/* 4. Isso não é mockup */}
-        <section className="border-y border-slate-100 bg-[#F7F5FC] px-4 py-20 sm:px-6" id="prova">
+        <section className="scroll-mt-24 border-y border-slate-100 bg-[#F7F5FC] px-4 py-20 sm:px-6" id="prova">
           <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 md:grid-cols-[0.9fr_1.1fr]">
             <figure className="m-0">
               <img src="/marketing/prova-avaliacao-google.jpg" width={772} height={842} loading="lazy" alt="" className="mx-auto block h-auto w-full max-w-md rounded-2xl border border-slate-200 shadow-[0_30px_50px_-30px_rgba(18,12,34,0.35)]" />
@@ -128,7 +128,7 @@ const Index = () => {
         </section>
 
         {/* 5. Para quem é */}
-        <section className="px-4 py-20 sm:px-6" id="para-quem">
+        <section className="scroll-mt-24 px-4 py-20 sm:px-6" id="para-quem">
           <div className="mx-auto max-w-7xl">
             <Kicker centered eyebrow={copy.segments.eyebrow} title={copy.segments.title} />
             <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -138,7 +138,7 @@ const Index = () => {
         </section>
 
         {/* 6. Demonstração — sobe do /demo para dentro da home, mesmo componente aprovado */}
-        <section className="border-y border-slate-100 bg-[#F7F5FC] px-4 py-20 sm:px-6" id="demo">
+        <section className="scroll-mt-24 border-y border-slate-100 bg-[#F7F5FC] px-4 py-20 sm:px-6" id="demo">
           <div className="mx-auto max-w-7xl">
             <Kicker centered eyebrow={copy.demo.eyebrow} title={copy.demo.title} body={copy.demo.body} />
             <div className="mt-10"><BinnoDemoCockpit copy={copy} /></div>
@@ -179,7 +179,7 @@ const Index = () => {
         </section>
 
         {/* 9. Plano */}
-        <section className="px-4 py-20 sm:px-6" id="plano">
+        <section className="scroll-mt-24 px-4 py-20 sm:px-6" id="plano">
           <div className="mx-auto max-w-4xl">
             <div className="grid grid-cols-1 gap-10 rounded-[1.6rem] border border-[#E3DAF6] bg-gradient-to-br from-[#F5F0FF] to-white p-8 sm:p-11 md:grid-cols-2 md:items-center">
               <div>

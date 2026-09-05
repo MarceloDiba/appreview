@@ -1,6 +1,6 @@
 # Nova home do binno.pro, especificação para implementar
 
-*Atualizado em 05/09/2026. Substitui, para a página principal, o `62-copy-pagina-binno.md` e o
+*Atualizado em 05/09/2026, com a copy enxugada para celular. Substitui, para a página principal, o `62-copy-pagina-binno.md` e o
 `submissao-copy-binno.md`. Onde este documento e aqueles discordarem, vale este.*
 
 **Protótipo aprovado, no próprio repo:** `docs/nova-home-binno.html`
@@ -41,7 +41,7 @@ fechamento.
 | 1 | Hero interativo | `hero` | Promessa mais a prova funcionando |
 | 2 | O problema | `maps` (renomear o conteúdo) | A cena do cliente calado mais os 3 números com fonte |
 | 3 | Como funciona | `alerts` mais os pilares | Os três pilares |
-| 4 | Isso não é mockup | seção nova `prova` | Print real do Google mais a linha do tempo |
+| 4 | Isso não é mockup | seção nova `prova` | Print real do Google |
 | 5 | Para quem é | seção nova `segments` | Cinco segmentos, nesta ordem |
 | 6 | Demonstração | `demo` mais `BinnoDemoCockpit` | A tela interna, dentro da home |
 | 7 | Sem o Binno / Com o Binno | seção nova `compare` | A transformação em cinco linhas |
@@ -65,67 +65,74 @@ de claim de ranking ou de nota, nada de prova social inventada.
 
 ### 1. Hero
 - eyebrow: `Binno para negócios locais`
-- title: `Sua avaliação no Google chega no WhatsApp.` mais, em destaque, `Você responde com um toque.`
-- body: `O Binno te avisa a cada nova avaliação com a resposta já escrita. Você lê, aprova com um toque, e ela aparece no seu perfil do Google. Sem abrir painel, sem computador, sem deixar o cliente esperando.`
-- primary: `Garantir preço fundador: R$ 99/mês` · secondary: `Ver a demonstração`
-- micro: `Sem formulário antes de pagar · Cancele quando quiser · Sem fidelidade`
-- três provas: `21 s` (do toque à resposta publicada, medido em 04/09) · `0` (painéis pra abrir no dia a dia) · `100%` (das respostas revisadas por você)
+- title: `Responda o Google pelo WhatsApp.` mais, em destaque, `Em um toque.`
+- body: `Chega a avaliação, chega a resposta pronta. Você lê, toca, e está publicada no seu perfil.`
+- primary: `Garantir R$ 99/mês` · secondary: `Ver funcionando`
+- micro: `Sem formulário antes de pagar · Cancele quando quiser`
+- três provas, **abaixo do celular**, não acima: `21 s` (do toque à publicação, medido em 04/09) · `0` (painéis pra abrir) · `você` (aprova cada resposta)
+
+No celular a ordem do hero é título, frase, botões, celular, provas. O celular precisa aparecer na
+segunda tela, não na quarta: ele é a prova, e é o que a pessoa entende sem ler.
 
 ### 2. O problema
 - eyebrow: `O problema`
-- title: `Quem escolhe onde comprar olha a sua nota antes de te conhecer.`
-- body: `Cliente insatisfeito quase nunca reclama na hora. Vai embora calado e escreve depois, no Google, onde todo mundo vê. E quem lê decide em segundos: não é o produto, não é o preço na porta, é a nota que aparece antes de a pessoa entrar.`
-- números: `96%` leem avaliações no Google antes de escolher uma loja física · `93%` já desistiram de uma compra depois de ler avaliações negativas · `9 em 10` descartam empresas com nota abaixo de 4 estrelas. 40% só consideram acima de 4,5.
+- title: `Ele olha a sua nota antes de te conhecer.`
+- body: `Cliente insatisfeito não reclama na hora. Vai embora calado e escreve depois, no Google, onde todo mundo vê.`
+- números: `96%` leem avaliações antes de escolher onde ir · `93%` desistem da compra depois de ler avaliação ruim · `9 em 10` descartam quem tem menos de 4 estrelas
 - fonte (obrigatória, visível): `Pesquisa Decisão Local 2025, Harmo e Reclame Aqui, 1.591 entrevistados no Brasil. Noticiada em:` mais os quatro links: [Relatório Harmo](https://harmo.me/relatorios/decisao-local), [Mercado&Consumo](https://mercadoeconsumo.com.br/26/03/2025/noticias-varejo/reclame-aqui-96-dos-consumidores-leem-avaliacoes-no-google-antes-de-comprar/), [Novo Varejo](https://novovarejo.com.br/avaliacoes-no-google-impactam-a-escolha-de-96-dos-consumidores/), [Meio&Mensagem](https://www.meioemensagem.com.br/marketing/reputacao-digital-como-as-avaliacoes-afetam-a-jornada-do-consumidor)
 
 Citar as matérias por nome com link, sem faixa de logotipos: elas falam da pesquisa, não do Binno.
 
 ### 3. Como funciona
-- title: `Controle da sua reputação sem parar a operação.`
-- pilar 1, `Da avaliação à resposta publicada, em segundos`: `Chegou avaliação no Google? O Binno te avisa no WhatsApp com uma resposta pronta, escrita a partir do que aquele cliente escreveu. Você lê, aprova com um toque, e ela é publicada no seu perfil.`
-- pilar 2, `Escute antes do Google, não no lugar dele`: `O QR Code no balcão dá ao seu cliente um canal direto com a sua equipe. Quem teve um problema fala com você primeiro, e você resolve enquanto ainda dá tempo. O caminho para avaliar no Google continua sempre lá.`
-- pilar 3, `Não seja pego de surpresa`: `Quando o número de avaliações cai, as notas baixas ganham espaço ou três pessoas citam a mesma coisa, o Binno explica o que mudou e o que dá pra fazer agora. Uma coisa por vez.`
+- title: `Sem parar o que você está fazendo.`
+- pilar 1, `Resposta em segundos`: `O aviso chega no WhatsApp com a resposta escrita a partir do que o cliente disse. Você toca, e ela é publicada.`
+- pilar 2, `Escute antes do Google`: `O QR Code no balcão abre um canal direto com você. Quem teve problema fala antes, e você resolve. O caminho pro Google continua sempre lá.`
+- pilar 3, `Não seja pego de surpresa`: `Se a nota cai ou a mesma reclamação se repete, o Binno avisa e diz o que fazer. Uma coisa por vez.`
 
 O pilar 2 é o único que não pode ser reescrito: "antes de", nunca "em vez de". Ver seção 8.
 
 ### 4. Isso não é mockup
 - eyebrow: `Isso não é mockup`
-- title: `A resposta que aparece no seu Google depois de um toque no WhatsApp.`
-- body: `Sem aplicativo pra instalar e sem painel pra abrir. O Binno lê a avaliação, escreve um rascunho a partir do que o cliente disse e te entrega tudo numa mensagem só. Você toca, e a resposta vai pro seu perfil.`
+- title: `Um toque no WhatsApp, publicado no seu Google.`
+- body: `Sem aplicativo pra instalar, sem painel pra abrir.`
 - imagem: `public/marketing/prova-avaliacao-google.jpg` (já está no repo, 772x842)
-- legenda: `Print real do perfil da Noá Digital no Google, 04/09/2026. Resposta publicada pelo WhatsApp, com um toque.`
-- linha do tempo: `passo 1` A avaliação entra no Google (quatro estrelas, comentário curto, cliente real) · `passo 2` O Binno te avisa no WhatsApp (com o que o cliente escreveu e a resposta já pronta) · `1 toque` Você toca em "Publicar no Google" (se quiser mudar o texto antes, o painel está a um link de distância) · `21 s depois` Publicada no seu perfil do Google (quem publica é você, sempre. O Binno nunca publica sozinho)
+- legenda: `Print real do perfil da Noá Digital no Google, 04/09/2026.`
+
+A linha do tempo de quatro passos que existia aqui saiu: ela repetia o que o hero acabou de mostrar.
 
 ### 5. Para quem é
 - title: `Todo negócio que acredita que o Google pode ajudar a vender.`
 - ordem fixa, decidida por Marcelo:
-  1. `Negócio local`: Loja, comércio de bairro, quem atende no balcão do caixa. Um canal de escuta fácil e resposta rápida.
-  2. `Gastronomia`: Restaurantes, bares e cafés: resolva um pedido errado no privado antes que ele vire nota.
-  3. `Saúde e bem-estar`: Clínicas, consultórios, salões e estúdios: responda com agilidade e acolhimento.
-  4. `Hospedagens`: Pousadas, hotéis e aluguel por temporada: cada avaliação decide a próxima reserva.
-  5. `Serviços`: Oficinas, pet shops, assistências: perfil sempre ativo, sem tirar ninguém do serviço.
+  1. `Negócio local`: Loja e comércio de bairro, quem atende no balcão.
+  2. `Gastronomia`: Resolva o pedido errado antes que ele vire nota.
+  3. `Saúde e bem-estar`: Clínica, consultório, salão, estúdio.
+  4. `Hospedagens`: Cada avaliação decide a próxima reserva.
+  5. `Serviços`: Oficina, pet shop, assistência.
 
 ### 6. Demonstração
 - title: `Veja o Binno funcionando antes de criar conta.`
-- body: `Um exemplo completo, com dados ilustrativos: o aviso, a fila de respostas, a leitura da reputação e o que mudou na semana.`
+- body: `Dados ilustrativos. Navegue pelas avaliações.`
 - usa o `BinnoDemoCockpit` que já existe. Não recriar.
+- **no celular a demonstração fica dobrada** atrás de um botão (`Abrir a demonstração`), e abre a
+  pedido. Ela sozinha ocupava quase três telas de celular. No computador (a partir de 900px) abre
+  sempre.
 
 ### 7. Sem o Binno / Com o Binno
 - title: `Cuidar do Google do jeito tradicional custa cliente.`
 
 | Hoje, sem o Binno | Com o Binno |
 |---|---|
-| Você só sabe da avaliação se lembrar de abrir o Google | Aviso no WhatsApp, na hora, com a resposta pronta |
-| Dias ou semanas para responder um comentário | Resposta publicada em segundos, do seu WhatsApp |
+| Você só sabe se lembrar de abrir o Google | Aviso no WhatsApp, na hora, com a resposta pronta |
+| Dias ou semanas para responder | Resposta publicada em segundos, do seu WhatsApp |
 | Abrir o painel do Google no computador | Aviso e aprovação com um toque, no celular |
-| O cliente insatisfeito só tem o Google para falar | Canal direto com a sua equipe pelo QR Code, antes de virar avaliação |
-| Você nunca sabe se uma avaliação virou um padrão | O Binno aponta o que mudou, com a frase do cliente que prova |
+| O cliente insatisfeito só tem o Google para falar | Canal direto pelo QR Code, antes de virar avaliação |
+| Você não sabe se virou padrão | O Binno aponta o padrão, com a frase que prova |
 
 ### 8. A regra que não muda
 - eyebrow: `A regra que não muda`
 - title: `O Binno nunca esconde uma avaliação ruim.`
-- body: `Tem ferramenta que manda o cliente satisfeito pro Google e o insatisfeito pra um formulário privado. Isso se chama review gating, e a política do Google proíbe. Quem é pego pode ver avaliações apagadas, o perfil restrito e um aviso público na ficha dizendo que houve avaliação falsa.`
-- note: `No Binno o caminho pro Google aparece sempre, qualquer que seja a nota. Verificações automáticas no código impedem que isso mude.`
+- body: `Tem ferramenta que manda o cliente feliz pro Google e o insatisfeito pra um formulário privado. Chama review gating, e o Google proíbe.`
+- note: `No Binno o caminho pro Google aparece sempre, qualquer que seja a nota.`
 - link: política de avaliações do Google
 - as três linhas ao lado: `Cliente com 5 estrelas` vê o botão de avaliar no Google · `Cliente com 1 estrela` vê o mesmo botão de avaliar no Google, e pode, se quiser, também mandar um comentário privado pra você · `Perguntar "gostou?" antes de mostrar o Google` não existe no Binno, é isso que o Google chama de review gating.
 
@@ -145,11 +152,13 @@ falso; o gating já era proibido antes. Manter assim.
 "Alertas ilimitados" não entra: existe teto diário de avisos (`20260904160000_teto_diario_de_avisos_que_custam.sql`).
 
 ### 10. Perguntas frequentes
-1. **Como a mensagem direta evita comentários negativos no Google?** Ela não impede ninguém de avaliar, e o Binno nunca esconde o caminho do Google. O que ela faz é te dar a chance de saber primeiro. Ao escanear o QR Code, o cliente pode mandar uma mensagem privada para a sua equipe; se algo deu errado, você resolve enquanto ele ainda está por perto.
-2. **O Binno garante que minha nota no Google vai subir?** Não. A nota depende do que o seu cliente viveu, e ninguém honesto promete mudá-la. O que o Binno garante é velocidade de resposta e um canal direto para que insatisfações contornáveis cheguem a você antes de chegarem ao Google.
-3. **Preciso instalar algum aplicativo?** Não. Depois de conectar seu Perfil da Empresa do Google ao Binno (uma vez só, pelo celular ou computador), responder avaliações acontece inteiramente no WhatsApp: você recebe o aviso, lê a resposta pronta e aprova com um toque.
-4. **Preciso criar conta antes de assinar?** Não. Você paga primeiro e cria seu acesso depois, na tela seguinte. Sem formulário no meio do caminho.
-5. **O valor de R$ 99/mês muda depois?** Não para você. Assinando no lote fundador, os R$ 99 ficam travados na sua conta mesmo quando o preço voltar a R$ 129.
+1. **Como a mensagem direta evita comentários negativos no Google?** Ela não impede ninguém de avaliar. O que ela faz é te dar a chance de saber primeiro: pelo QR Code, o cliente manda uma mensagem privada, e você resolve enquanto ele ainda está por perto.
+2. **O Binno garante que minha nota no Google vai subir?** Não. A nota depende do que o seu cliente viveu, e ninguém honesto promete mudá-la. O que o Binno garante é velocidade de resposta e um canal direto pra você saber antes.
+3. **Preciso instalar algum aplicativo?** Não. Você conecta seu Perfil da Empresa do Google uma vez só. Daí em diante, responder acontece todo no WhatsApp.
+4. **Preciso criar conta antes de assinar?** Não. Você paga primeiro e cria o acesso na tela seguinte.
+5. **O valor de R$ 99/mês muda depois?** Não para você. No lote fundador, os R$ 99 ficam travados mesmo quando o preço voltar a R$ 129.
+
+Nenhuma pergunta abre por padrão. São 160 palavras que só aparecem para quem quiser.
 
 A FAQ 3 é a mais sensível da página. O pré-requisito (conectar o Perfil da Empresa) tem que estar
 escrito, porque sem ele nada do WhatsApp funciona, e quem comprar sem saber vira suporte no dia
@@ -158,7 +167,7 @@ seguinte. Não voltar para "100% dentro do WhatsApp".
 ### 11. Fechamento
 - eyebrow: `Sua próxima avaliação chega hoje`
 - title: `Você vai responder em segundos ou em semanas?`
-- body: `Aviso no WhatsApp, resposta pronta, publicação com um toque. E um canal direto para o cliente falar com você antes de falar com o Google.`
+- body: `Aviso no WhatsApp, resposta pronta, um toque.`
 - cta: `Quero o Binno por R$ 99/mês`
 
 ---
@@ -219,6 +228,22 @@ Foram encontradas em auditoria e já estão aplicadas na prévia. Não regredir:
    abaixo da dobra.
 
 ---
+
+## 5b. A régua de concisão
+
+O dono de negócio local lê isso no celular, correndo, entre um cliente e outro. Uma página que vende
+"você não precisa ter tempo" e exige oito minutos de leitura se contradiz.
+
+A versão de 04/09 tinha 1.586 palavras (quase 8 minutos). A de 05/09 tem cerca de 900 visíveis sem
+tocar em nada, e 13,7 telas de celular em vez de 16,6. As regras que produziram isso, e que valem
+para qualquer texto novo que entrar na página:
+
+1. Título de no máximo 8 palavras. No celular ele não pode passar de 3 linhas.
+2. Parágrafo de apoio de no máximo 2 linhas no celular (cerca de 18 palavras).
+3. Cada bloco defende uma ideia. Se a segunda frase repete a primeira com outras palavras, sai.
+4. Nada de repetir o que outro bloco já mostrou. A linha do tempo do print saiu por isso.
+5. O que é profundidade (demonstração, FAQ) fica dobrado no celular e abre a pedido.
+6. Número com fonte no lugar de adjetivo, sempre.
 
 ## 6. O que não pode entrar
 
