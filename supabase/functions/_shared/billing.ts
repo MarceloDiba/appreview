@@ -106,6 +106,17 @@ export const createSubscriptionCheckout = async (
     client_reference_id: input.userId,
     customer_email: input.email,
     billing_address_collection: 'required',
+    /**
+     * O CAMPO DE CUPOM. Sem isto o Stripe nao mostra onde digitar um codigo, e
+     * o padrao dele e nao mostrar.
+     *
+     * Achado pela sessao de QA em 05/09/2026, ao tentar a compra de teste que o
+     * Marcelo autorizou: a tela abria a R$99 e nao havia onde aplicar o cupom.
+     * O achado e maior do que o teste — uma home que anuncia lote fundador e um
+     * checkout sem campo de codigo significa que NAO HA COMO dar desconto a
+     * ninguem, nem a um cliente, nem a um parceiro.
+     */
+    allow_promotion_codes: 'true',
     'metadata[user_id]': input.userId,
     'metadata[market]': config.market,
     'metadata[declared_billing_country]': input.declaredCountry,
@@ -153,6 +164,17 @@ export const createCheckoutSemConta = async (
     success_url: `${input.appUrl}/bem-vindo?compra={CHECKOUT_SESSION_ID}`,
     cancel_url: `${input.appUrl}/#pricing`,
     billing_address_collection: 'required',
+    /**
+     * O CAMPO DE CUPOM. Sem isto o Stripe nao mostra onde digitar um codigo, e
+     * o padrao dele e nao mostrar.
+     *
+     * Achado pela sessao de QA em 05/09/2026, ao tentar a compra de teste que o
+     * Marcelo autorizou: a tela abria a R$99 e nao havia onde aplicar o cupom.
+     * O achado e maior do que o teste — uma home que anuncia lote fundador e um
+     * checkout sem campo de codigo significa que NAO HA COMO dar desconto a
+     * ninguem, nem a um cliente, nem a um parceiro.
+     */
+    allow_promotion_codes: 'true',
     'metadata[market]': config.market,
     'metadata[sem_conta]': '1',
     'subscription_data[metadata][market]': config.market,
