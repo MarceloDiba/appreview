@@ -47,6 +47,23 @@ if [ ! -s "$FICHEIRO_DO_TOKEN" ]; then
 fi
 TOKEN="$(tr -d '[:space:]' < "$FICHEIRO_DO_TOKEN")"
 
+# CONFERIR A FORMA ANTES DE PERGUNTAR A CLOUDFLARE. Na primeira tentativa o
+# `pbpaste` apanhou outra coisa qualquer que estava na area de transferencia —
+# 48 caracteres com espacos no meio — e a Cloudflare respondeu "Invalid format
+# for Authorization header", que nao diz a ninguem que o problema foi copiar a
+# coisa errada. Um token e 40 caracteres de [A-Za-z0-9_-] e mais nada.
+if ! printf '%s' "$TOKEN" | grep -Eq '^[A-Za-z0-9_-]{40}$'; then
+  echo "O conteudo de $FICHEIRO_DO_TOKEN nao tem forma de token da Cloudflare."
+  echo "  esperado: 40 caracteres, so letras, digitos, _ ou -"
+  echo "  recebido: ${#TOKEN} caracteres"
+  echo
+  echo 'A area de transferencia devia ter o token e tinha outra coisa. Na'
+  echo 'Cloudflare, abra o token, clique Roll para gerar um valor novo, copie-o'
+  echo 'no momento em que ele aparece (so aparece uma vez) e repita:'
+  echo '  ! pbpaste > ~/.cf-token && chmod 600 ~/.cf-token'
+  exit 2
+fi
+
 api() {
   curl -sS -X "$1" "https://api.cloudflare.com/client/v4/$2" \
     -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
