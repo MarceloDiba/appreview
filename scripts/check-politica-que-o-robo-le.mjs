@@ -122,6 +122,24 @@ exigir('a lista de subcontratantes nao inclui a API do Google que PUBLICA a resp
 // os dois piores dias para se acreditar num guarda.
 const VERCEL = JSON.parse(readFileSync('vercel.json', 'utf8'));
 const regras = VERCEL.rewrites || [];
+
+// A VERCEL RECUSA CAMPO QUE NAO CONHECE, e derruba a build inteira por causa
+// disso. Em 05/09/2026 escrevi um `_comentario` neste ficheiro para explicar
+// por que a ordem das regras importa; quatro deploys seguidos falharam com
+// "should NOT have additional property `_comentario`", e a home nova ficou
+// dezenas de minutos fora do ar enquanto eu dizia ao Marcelo que estava no ar.
+//
+// O `verify` ficou VERDE o tempo todo: ele lia o JSON e nunca perguntou se a
+// Vercel o aceitaria. A explicacao mudou-se para este guarda, que e onde ela
+// devia estar desde o inicio — aqui ninguem a executa.
+const CAMPOS_QUE_A_VERCEL_ACEITA = new Set([
+  'buildCommand', 'cleanUrls', 'crons', 'devCommand', 'framework', 'functions',
+  'headers', 'ignoreCommand', 'images', 'installCommand', 'outputDirectory',
+  'public', 'redirects', 'regions', 'rewrites', 'trailingSlash', '$schema',
+]);
+const desconhecidos = Object.keys(VERCEL).filter((k) => !CAMPOS_QUE_A_VERCEL_ACEITA.has(k));
+exigir(`o vercel.json tem campo(s) que a Vercel nao conhece e vao derrubar a build: ${desconhecidos.join(', ')}`,
+  desconhecidos.length === 0);
 const coringa = regras.findIndex((r) => r.source === '/(.*)');
 
 for (const [endereco, ficheiro] of [['/privacidade', '/privacidade.html'], ['/termos', '/termos.html']]) {
