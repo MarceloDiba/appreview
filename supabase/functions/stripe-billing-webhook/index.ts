@@ -83,7 +83,41 @@ serve(async (request) => {
       return json({ received: true, sem_conta: true });
     }
 
-    if (userId && subscriptionId && (eventType.startsWith('customer.subscription.') || eventType === 'checkout.session.completed')) {
+    /*
+     * O DONO PODE NAO ESTAR NO EVENTO, E ISSO E O NORMAL PARA UM CLIENTE NOVO.
+     *
+     * `userId` sai de `metadata.user_id` ou `client_reference_id`, e os dois so
+     * existem quando quem comprou JA TINHA CONTA. Quem compra sem conta — que e
+     * todo cliente novo — gera uma assinatura com `metadata` a dizer apenas
+     * `{ market, sem_conta: 1 }`. O dono aparece depois, quando `reclamar_compra`
+     * liga a compra a conta recem-criada.
+     *
+     * Sem esta procura, TODO evento seguinte dessa assinatura era descartado em
+     * silencio: o `if` abaixo nao entrava e a linha ficava congelada no estado
+     * em que nasceu.
+     *
+     * MEDIDO EM PRODUCAO, 05/09/2026: o Marcelo comprou deslogado, a conta
+     * nasceu, e ao cancelar no Stripe o `customer.subscription.deleted` chegou,
+     * foi marcado como processado — e a tabela continuou `active` com o acesso
+     * aberto. Cancelar nao tirava o acesso. Para um produto que so deixa usar
+     * quem paga, o inverso disto e o que custa dinheiro; este lado custa
+     * confianca, e vale igual.
+     *
+     * A LIGACAO DURAVEL E O `stripe_subscription_id`, que `reclamar_compra` ja
+     * gravou. E ela e mais fiavel do que os metadados: os metadados descrevem o
+     * momento da compra, a tabela descreve quem e o dono agora.
+     */
+    let donoDoEvento = userId;
+    if (!donoDoEvento && subscriptionId) {
+      const { data: assinatura } = await admin
+        .from('subscriptions')
+        .select('user_id')
+        .eq('stripe_subscription_id', subscriptionId)
+        .maybeSingle();
+      donoDoEvento = string(assinatura?.user_id);
+    }
+
+    if (donoDoEvento && subscriptionId && (eventType.startsWith('customer.subscription.') || eventType === 'checkout.session.completed')) {
       const { data: existing } = await admin.from('subscriptions').select('eligibility_status').eq('stripe_subscription_id', subscriptionId).maybeSingle();
       const status = eventType === 'checkout.session.completed' ? 'pending' : string(object.status);
       const price = ((object.items as Record<string, unknown> | undefined)?.data as Array<Record<string, unknown>> | undefined)?.[0]?.price as Record<string, unknown> | undefined;
@@ -94,7 +128,7 @@ serve(async (request) => {
       const billingAddress = customerDetails?.address as Record<string, unknown> | undefined;
       const billingCountry = countryFrom(billingAddress?.country);
       const config = billingConfig(merchant);
-      const { data: profile } = await admin.from('profiles').select('business_country').eq('id', userId).maybeSingle();
+      const { data: profile } = await admin.from('profiles').select('business_country').eq('id', donoDoEvento).maybeSingle();
       const businessCountry = countryFrom(profile?.business_country);
       const eligibilityStatus = eventType === 'checkout.session.completed'
         ? (config && countryIsEligible(config, billingCountry) && billingCountry === businessCountry ? 'verified' : 'mismatch')
@@ -117,7 +151,7 @@ serve(async (request) => {
       const fimDoPeriodo = object.current_period_end ?? primeiroItem?.current_period_end;
 
       const record: Record<string, unknown> = {
-        user_id: userId,
+        user_id: donoDoEvento,
         stripe_customer_id: customerId,
         stripe_subscription_id: subscriptionId,
         market: merchant,
@@ -174,7 +208,7 @@ serve(async (request) => {
           subscription_status: status,
           subscription_start_date: unixToIso(object.current_period_start),
           subscription_end_date: unixToIso(object.current_period_end),
-        }).eq('id', userId);
+        }).eq('id', donoDoEvento);
       }
     }
     await admin.from('billing_webhook_events').update({ processed_at: new Date().toISOString() }).eq('merchant', merchant).eq('stripe_event_id', eventId);
