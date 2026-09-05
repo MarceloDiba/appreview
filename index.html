@@ -50,6 +50,13 @@
       nada e declarado, o PNG de 512 serve o atalho no ecra do telemovel, e o
       `apple-touch-icon` e o unico que o iPhone le.
     -->
+    <!--
+      O SVG VEM PRIMEIRO, e a ordem tem uma razao pratica. O Chrome guarda o
+      favicon numa base de dados propria e nao o larga com um refresh: depois de
+      trocar o icone do andaime, o Marcelo continuava a ver o antigo na aba. Um
+      ficheiro com nome NOVO nao esta nessa cache, entao aparece de imediato.
+    -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="512x512" href="/icone-512.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

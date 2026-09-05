@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Binno">
+  <!--
+    O "B" DESENHADO A MAO, e nao escrito com uma fonte. Um `<text>` num favicon
+    depende da fonte que o navegador tiver a mao, e o mesmo ficheiro sai
+    diferente em cada maquina. Estas curvas saem iguais em todo o lado.
+  -->
+  <defs>
+    <linearGradient id="roxo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7B4FD0"/>
+      <stop offset="0.52" stop-color="#6D43C0"/>
+      <stop offset="1" stop-color="#4C2A94"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#roxo)"/>
+  <path fill="#fff" d="M20 14h15.2c6.9 0 11.3 3.4 11.3 8.9 0 3.4-1.8 6-4.8 7.2 3.9 1 6.3 3.9 6.3 8 0 6-4.7 9.9-12 9.9H20V14Zm7.6 5.9v8.4h6.6c3.2 0 5.1-1.6 5.1-4.2 0-2.7-1.9-4.2-5.1-4.2h-6.6Zm0 14v8.2h7.4c3.4 0 5.4-1.6 5.4-4.1 0-2.6-2-4.1-5.4-4.1h-7.4Z"/>
+</svg>

@@ -91,10 +91,18 @@ const requisitos = [
   // O ICONE. Os tres ficheiros declarados tem de existir — o `.ico` que o
   // navegador procura sozinho, o PNG grande do atalho no telemovel, e o
   // `apple-touch-icon`, que e o unico que o iPhone le.
-  ...['favicon.ico', 'icone-512.png', 'apple-touch-icon.png'].map((ficheiro) => [
+  ...['favicon.svg', 'favicon.ico', 'icone-512.png', 'apple-touch-icon.png'].map((ficheiro) => [
     `o icone ${ficheiro} existe e esta declarado`,
     existsSync(resolve(raiz, 'public', ficheiro)) && html.includes(`/${ficheiro}`),
   ]),
+
+  // O SVG VEM ANTES DO .ico. O Chrome guarda o favicon numa base de dados
+  // propria que um refresh nao limpa; um ficheiro com nome novo escapa a essa
+  // cache e aparece de imediato. Se alguem inverter a ordem, o icone volta a
+  // demorar dias a aparecer — e ninguem vai ligar a causa ao efeito.
+  ['o icone svg e declarado antes do ico',
+    html.indexOf('/favicon.svg') < html.indexOf('/favicon.ico')
+    && html.indexOf('/favicon.svg') !== -1],
 
   // E NAO PODE SER O DO ANDAIME. O favicon que veio do Lovable tinha 1150
   // bytes e um so tamanho de 16x16; o nosso leva 16 e 32. Medir o numero de
