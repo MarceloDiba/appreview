@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import BotaoDoGoogle from '@/components/auth/BotaoDoGoogle';
+import { linkDoWhatsAppDoBinno } from '@/lib/contactoDoBinno';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 
@@ -88,6 +89,56 @@ const BemVindo = () => {
     // Havendo sessao, o efeito acima assume: nao navega nada daqui, para nao
     // haver dois donos da mesma decisao.
   };
+
+  /*
+   * SEM BILHETE, ESTA PAGINA NAO PODE AFIRMAR QUE HOUVE PAGAMENTO.
+   *
+   * Ate 05/09/2026 o titulo "Pagamento confirmado" era desenhado sempre, antes
+   * de se saber se existia compra nenhuma. Quem abrisse `/bem-vindo` a mao — ou
+   * guardasse o endereco nos favoritos depois de comprar — via o produto
+   * afirmar um pagamento que nao aconteceu, e por baixo um formulario a
+   * convidar a criar conta. Duas coisas erradas de uma vez: mentia, e abria uma
+   * porta de cadastro que o "so usa quem paga" fechou.
+   *
+   * NAO REDIRECIONA EM SILENCIO. Quem chega aqui sem bilhete tanto pode ser
+   * alguem que nunca comprou como alguem que COMPROU e perdeu o link — e essa
+   * segunda pessoa e a que nao se pode mandar embora sem porta. Por isso a tela
+   * diz o que sabe (nao encontrei uma compra), oferece o caminho de comprar, e
+   * da um contacto directo a quem ja pagou.
+   */
+  if (!bilhete && !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+        <Card className="mx-auto w-full max-w-md p-6 shadow-lg">
+          <div className="flex items-center gap-3">
+            <HelpCircle className="h-8 w-8 text-slate-400" aria-hidden="true" />
+            <div>
+              <h1 className="text-xl font-bold text-slate-950">Não encontramos sua compra</h1>
+              <p className="text-sm text-slate-600">Esta página abre depois do pagamento.</p>
+            </div>
+          </div>
+          <p className="mt-6 text-sm text-slate-600">
+            Se você ainda não assinou, comece por aqui. Se você já pagou e caiu nesta tela,
+            seu pagamento está registrado — fale com a gente e a gente libera seu acesso.
+          </p>
+          <div className="mt-6 space-y-3">
+            <Button asChild className="min-h-11 w-full bg-[#2457D6] hover:bg-[#1d47b0]">
+              <a href="/#plano">Ver o plano e assinar</a>
+            </Button>
+            <Button asChild variant="outline" className="min-h-11 w-full">
+              <a
+                href={linkDoWhatsAppDoBinno('Olá! Paguei o Binno mas não consegui criar meu acesso.')}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Já paguei — falar no WhatsApp
+              </a>
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
